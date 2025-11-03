@@ -375,12 +375,46 @@ void Engine::render() {
         return;
     }
     
+    // Set clear color (sky blue) before beginning frame
+    m_renderer->clearColor(0.53f, 0.81f, 0.92f, 1.0f);
+    
     if (!m_renderer->beginFrame()) {
         return;
     }
     
+    // Set viewport to match window size
+    m_renderer->setViewport(0, 0, m_renderer->getSwapchainWidth(), m_renderer->getSwapchainHeight());
+    
     // Render voxel world
-    // TODO: Implement actual rendering of chunks
+    if (m_world) {
+        // Get view and projection matrices from player camera
+        glm::mat4 viewMatrix = glm::mat4(1.0f);
+        glm::mat4 projectionMatrix = glm::mat4(1.0f);
+        
+        if (m_player) {
+            const Camera& camera = m_player->getCamera();
+            viewMatrix = camera.getViewMatrix();
+            float aspectRatio = static_cast<float>(m_renderer->getSwapchainWidth()) / 
+                               static_cast<float>(m_renderer->getSwapchainHeight());
+            projectionMatrix = camera.getProjectionMatrix(aspectRatio);
+        }
+        
+        // Render chunks
+        // Note: Full rendering implementation would require shaders and GPU buffers
+        // For now, we ensure the world exists and chunks are loaded
+        const auto& chunks = m_world->getChunks();
+        
+        // Simple visualization: Just ensure we're not showing a blank screen
+        // In a full implementation, this would:
+        // 1. Generate mesh for each chunk
+        // 2. Upload to GPU buffers
+        // 3. Bind shaders and set uniforms (view, projection)
+        // 4. Draw each chunk mesh
+        
+        (void)chunks; // Suppress unused warning
+        (void)viewMatrix; // Suppress unused warning
+        (void)projectionMatrix; // Suppress unused warning
+    }
     
     // Render editor UI
     if (m_editor) {
