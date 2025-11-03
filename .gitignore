@@ -1,7 +1,12 @@
 # Build directories
 build/
+build_test/
 cmake-build-*/
 out/
+
+# Build scripts (temporary)
+build_minimal_tests.sh
+build_tests_only.sh
 
 # IDE files
 .vs/
