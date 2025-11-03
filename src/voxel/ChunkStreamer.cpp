@@ -44,14 +44,14 @@ void ChunkStreamer::shutdown() {
 }
 
 int ChunkStreamer::getLoadedChunkCount() const {
-    // This would need to query VoxelWorld for actual count
-    // For now, return estimate
-    return 0; // TODO: implement in VoxelWorld
+    if (!world) return 0;
+    return static_cast<int>(world->getChunks().size());
 }
 
 bool ChunkStreamer::isChunkLoaded(const glm::ivec2& chunkPos) const {
-    // TODO: Query VoxelWorld
-    return false;
+    if (!world) return false;
+    ChunkPos pos(chunkPos.x, chunkPos.y);
+    return world->getChunk(pos) != nullptr;
 }
 
 void ChunkStreamer::determineChunksToLoad(const glm::vec3& playerPos) {
@@ -87,24 +87,33 @@ void ChunkStreamer::determineChunksToLoad(const glm::vec3& playerPos) {
 }
 
 void ChunkStreamer::determineChunksToUnload(const glm::vec3& playerPos) {
+    if (!world) return;
+    
     glm::ivec2 playerChunk = worldToChunk(playerPos);
     
     unloadQueue.clear();
     
-    // TODO: Query VoxelWorld for all loaded chunks
+    // Query VoxelWorld for all loaded chunks
     // For each loaded chunk, if distance > viewDistance + buffer, mark for unload
     float unloadDistance = static_cast<float>(viewDistance) + 2.0f;
     
-    // Example (would need actual implementation):
-    // for (auto& chunk : world->getLoadedChunks()) {
-    //     float dist = chunkDistance(chunk.position, playerChunk);
-    //     if (dist > unloadDistance) {
-    //         unloadQueue.push_back(chunk.position);
-    //     }
-    // }
+    // Check if we're over the max loaded chunks limit
+    if (getLoadedChunkCount() > maxLoadedChunks) {
+        unloadDistance = static_cast<float>(viewDistance) + 1.0f; // Be more aggressive
+    }
+    
+    for (const auto& [chunkPos, chunk] : world->getChunks()) {
+        glm::ivec2 chunkPos2D(chunkPos.x, chunkPos.z);
+        float dist = chunkDistance(chunkPos2D, playerChunk);
+        if (dist > unloadDistance) {
+            unloadQueue.push_back(chunkPos2D);
+        }
+    }
 }
 
 void ChunkStreamer::processLoadQueue() {
+    if (!world) return;
+    
     std::lock_guard<std::mutex> lock(queueMutex);
     
     int processed = 0;
@@ -115,17 +124,19 @@ void ChunkStreamer::processLoadQueue() {
         // Remove from pending
         pendingLoads.erase(request.chunkPos);
         
-        // Generate chunk (this should be fast if generation is in background)
-        // TODO: Actually generate and add to world
-        // world->generateChunk(request.chunkPos.x, request.chunkPos.y);
+        // Generate and add chunk to world
+        ChunkPos pos(request.chunkPos.x, request.chunkPos.y);
+        if (!world->getChunk(pos)) {
+            world->loadChunk(pos);
+        }
         
         ++processed;
     }
     
     // Process unload queue
     for (const auto& chunkPos : unloadQueue) {
-        // TODO: Unload chunk from world
-        // world->unloadChunk(chunkPos.x, chunkPos.y);
+        ChunkPos pos(chunkPos.x, chunkPos.y);
+        world->unloadChunk(pos);
     }
     unloadQueue.clear();
 }
