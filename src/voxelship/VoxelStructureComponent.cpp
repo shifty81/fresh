@@ -100,12 +100,22 @@ bool VoxelStructureComponent::checkCollision(const VoxelStructureComponent& othe
                                             const glm::vec3& otherPos) const {
     glm::vec3 offset = otherPos - thisPos;
     
+    // TODO: Optimize with spatial indexing for large structures
     for (const auto& thisBlock : blocks) {
         for (const auto& otherBlock : other.blocks) {
-            VoxelBlock offsetBlock = otherBlock;
-            offsetBlock.setPosition(otherBlock.getPosition() + offset);
+            // Check collision with offset position (avoid copying VoxelBlock)
+            glm::vec3 offsetPos = otherBlock.getPosition() + offset;
+            glm::vec3 otherMin, otherMax;
+            otherMin = offsetPos - otherBlock.getSize() * 0.5f;
+            otherMax = offsetPos + otherBlock.getSize() * 0.5f;
             
-            if (thisBlock.intersects(offsetBlock)) {
+            glm::vec3 thisMin, thisMax;
+            thisBlock.getBounds(thisMin, thisMax);
+            
+            // AABB intersection test
+            if ((thisMin.x <= otherMax.x && thisMax.x >= otherMin.x) &&
+                (thisMin.y <= otherMax.y && thisMax.y >= otherMin.y) &&
+                (thisMin.z <= otherMax.z && thisMax.z >= otherMin.z)) {
                 return true;
             }
         }
@@ -146,6 +156,7 @@ void VoxelStructureComponent::getBounds(glm::vec3& min, glm::vec3& max) const {
 }
 
 void VoxelStructureComponent::updateCachedValues() {
+    // These methods update the cached values as side effects
     getTotalMass();
     getCenterOfMass();
     cacheValid = true;

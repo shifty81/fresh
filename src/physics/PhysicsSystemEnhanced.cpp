@@ -100,7 +100,8 @@ void PhysicsSystem::handleCollisions() {
     auto entities = entityManager->getEntitiesWithComponents<PhysicsComponent, 
                                                               voxelship::VoxelStructureComponent>();
     
-    // Simple O(n²) collision detection (could be optimized with spatial partitioning)
+    // Simple O(n²) collision detection
+    // TODO: Optimize with spatial partitioning (octree, grid, or sweep-and-prune) for better scalability
     for (size_t i = 0; i < entities.size(); ++i) {
         auto entityA = entities[i];
         auto* physicsA = entityManager->getComponent<PhysicsComponent>(entityA);
