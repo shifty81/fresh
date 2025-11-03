@@ -53,20 +53,23 @@ REM Step 2: Generate
 echo.
 echo [Step 2/3] Generating project files...
 echo [Step 2/3] Generating project files... >> "%LOG_FILE%"
+echo. >> "%LOG_FILE%"
 if not exist "build" mkdir build
 cd build
 
 REM Check for vcpkg
 if exist "%REPO_ROOT%\vcpkg\scripts\buildsystems\vcpkg.cmake" (
-    cmake -G "Visual Studio 17 2022" -A x64 -DCMAKE_TOOLCHAIN_FILE="%REPO_ROOT%\vcpkg\scripts\buildsystems\vcpkg.cmake" .. 2>> "%LOG_FILE%"
+    cmake -G "Visual Studio 17 2022" -A x64 -DCMAKE_TOOLCHAIN_FILE="%REPO_ROOT%\vcpkg\scripts\buildsystems\vcpkg.cmake" .. >> "%LOG_FILE%" 2>&1
 ) else (
-    cmake -G "Visual Studio 17 2022" -A x64 .. 2>> "%LOG_FILE%"
+    cmake -G "Visual Studio 17 2022" -A x64 .. >> "%LOG_FILE%" 2>&1
 )
 
 if %ERRORLEVEL% NEQ 0 (
     echo.
     echo ERROR: Project generation failed
-    echo ERROR: Project generation failed >> "%LOG_FILE%"
+    echo ERROR: Project generation failed with exit code %ERRORLEVEL% >> "%LOG_FILE%"
+    echo.
+    echo Full output has been saved to: %LOG_FILE%
     cd "%REPO_ROOT%"
     pause
     exit /b 1
@@ -80,12 +83,15 @@ REM Step 3: Build
 echo.
 echo [Step 3/3] Building...
 echo [Step 3/3] Building... >> "%LOG_FILE%"
-cmake --build build --config Release 2>> "%LOG_FILE%"
+echo. >> "%LOG_FILE%"
+cmake --build build --config Release >> "%LOG_FILE%" 2>&1
 
 if %ERRORLEVEL% NEQ 0 (
     echo.
     echo ERROR: Build failed
-    echo ERROR: Build failed >> "%LOG_FILE%"
+    echo ERROR: Build failed with exit code %ERRORLEVEL% >> "%LOG_FILE%"
+    echo.
+    echo Full build output has been saved to: %LOG_FILE%
     pause
     exit /b 1
 )
