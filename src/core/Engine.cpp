@@ -16,6 +16,7 @@
 #include "input/InputManager.h"
 #include <iostream>
 #include <chrono>
+#include <thread>
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
 
@@ -240,6 +241,9 @@ void Engine::run() {
     int frameCount = 0;
     float fpsTimer = 0.0f;
     
+    // Target frame time for 60 FPS (in seconds)
+    const float targetFrameTime = 1.0f / 60.0f;
+    
     while (m_running) {
         // If not in game yet, show menu
         if (!m_inGame) {
@@ -266,12 +270,16 @@ void Engine::run() {
         
         // Normal game loop
         if (m_window && m_window->shouldClose()) {
+            m_running = false;
             break;
         }
         
         auto currentTime = std::chrono::high_resolution_clock::now();
         float deltaTime = std::chrono::duration<float>(currentTime - lastTime).count();
         lastTime = currentTime;
+        
+        // Cap deltaTime to prevent huge jumps
+        deltaTime = std::min(deltaTime, 0.1f);
         
         // FPS counter
         frameCount++;
@@ -281,6 +289,11 @@ void Engine::run() {
             if (m_world) {
                 std::cout << " | Chunks: " << m_world->getChunks().size();
             }
+            if (m_player) {
+                glm::vec3 pos = m_player->getPosition();
+                std::cout << " | Pos: (" << static_cast<int>(pos.x) << ", " 
+                          << static_cast<int>(pos.y) << ", " << static_cast<int>(pos.z) << ")";
+            }
             std::cout << std::endl;
             frameCount = 0;
             fpsTimer = 0.0f;
@@ -289,6 +302,14 @@ void Engine::run() {
         processInput();
         update(deltaTime);
         render();
+        
+        // Frame rate limiting - sleep if frame completed too quickly
+        auto frameEndTime = std::chrono::high_resolution_clock::now();
+        float frameTime = std::chrono::duration<float>(frameEndTime - currentTime).count();
+        if (frameTime < targetFrameTime) {
+            float sleepTime = targetFrameTime - frameTime;
+            std::this_thread::sleep_for(std::chrono::duration<float>(sleepTime));
+        }
     }
 }
 
@@ -323,6 +344,11 @@ void Engine::processInput() {
     // Update input manager state
     if (m_inputManager) {
         m_inputManager->update();
+        
+        // Allow ESC to close the window
+        if (m_inputManager->isActionJustPressed(InputAction::OpenMenu)) {
+            m_running = false;
+        }
     }
 }
 
