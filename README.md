@@ -1,6 +1,35 @@
 # Fresh Voxel Engine
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![C++17](https://img.shields.io/badge/C++-17-blue.svg)](https://en.cppreference.com/w/cpp/17)
+[![CMake](https://img.shields.io/badge/CMake-3.20+-064F8C.svg)](https://cmake.org/)
+[![Vulkan](https://img.shields.io/badge/Vulkan-1.2+-red.svg)](https://www.vulkan.org/)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
+
 A modern voxel-based game engine built with C++ and Vulkan, featuring procedural terrain generation, AI systems, and an integrated world editor.
+
+---
+
+## 🚀 Quick Start
+
+```bash
+# Clone the repository
+git clone https://github.com/shifty81/fresh.git
+cd fresh
+
+# Install dependencies (Ubuntu/Debian)
+sudo apt-get install cmake g++ libvulkan-dev libglfw3-dev
+
+# Build
+mkdir build && cd build
+cmake ..
+make -j$(nproc)
+
+# Run
+./FreshVoxelEngine
+```
+
+See [GETTING_STARTED.md](GETTING_STARTED.md) for detailed setup instructions.
 
 ## Features
 
@@ -242,11 +271,30 @@ terraform->undo();
 
 ## Contributing
 
-This is a learning project implementing the roadmap from the initial design document. Contributions, suggestions, and feedback are welcome!
+We welcome contributions! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+
+### Ways to Contribute
+
+- 🐛 Report bugs via [Issues](https://github.com/shifty81/fresh/issues)
+- ✨ Suggest features via [Issues](https://github.com/shifty81/fresh/issues)
+- 📝 Improve documentation
+- 🔧 Submit pull requests
+- 💬 Help others in [Discussions](https://github.com/shifty81/fresh/discussions)
+
+Please read our [Code of Conduct](CODE_OF_CONDUCT.md) before contributing.
+
+## Documentation
+
+- 📖 [Getting Started Guide](GETTING_STARTED.md) - Setup and first steps
+- 🏗️ [Architecture Overview](ARCHITECTURE.md) - System design and patterns
+- 🗺️ [Development Roadmap](ROADMAP.md) - Future plans and progress
+- 📚 [Tutorials](docs/tutorials/) - Step-by-step guides
+- 🔨 [Examples](examples/) - Sample code and usage
+- 🌍 [Terraforming Guide](docs/TERRAFORMING.md) - World editing system
 
 ## License
 
-[To be determined]
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ## Acknowledgments
 
