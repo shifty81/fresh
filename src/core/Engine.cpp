@@ -1,5 +1,6 @@
 #include "core/Engine.h"
 #include "core/Window.h"
+#include "core/Logger.h"
 #include "renderer/RenderContext.h"
 #include "renderer/GraphicsAPI.h"
 #include "voxel/VoxelWorld.h"
@@ -28,14 +29,17 @@ Engine::~Engine() {
 
 bool Engine::initialize() {
     std::cout << "Initializing Fresh Voxel Engine..." << std::endl;
+    LOG_INFO_C("Initializing Fresh Voxel Engine...", "Engine");
     
     // Create main menu first
     m_mainMenu = std::make_unique<MainMenu>();
     if (!m_mainMenu->initialize()) {
         std::cerr << "Failed to initialize main menu" << std::endl;
+        LOG_ERROR_C("Failed to initialize main menu", "Engine");
         return false;
     }
     std::cout << "Main menu initialized" << std::endl;
+    LOG_INFO_C("Main menu initialized", "Engine");
     
     // Show main menu and wait for user choice
     m_mainMenu->render();
@@ -57,57 +61,70 @@ bool Engine::initialize() {
     m_window = std::make_unique<Window>(1280, 720, "Fresh Voxel Engine");
     if (!m_window->initialize()) {
         std::cerr << "Failed to initialize window" << std::endl;
+        LOG_ERROR_C("Failed to initialize window", "Engine");
         return false;
     }
     std::cout << "Window created" << std::endl;
+    LOG_INFO_C("Window created", "Engine");
     
     // Create renderer using the abstraction layer
     // Auto-select best graphics API for the platform
     m_renderer = RenderContextFactory::createBest();
     if (!m_renderer) {
         std::cerr << "Failed to create render context" << std::endl;
+        LOG_ERROR_C("Failed to create render context", "Engine");
         return false;
     }
     
     if (!m_renderer->initialize(m_window.get())) {
         std::cerr << "Failed to initialize renderer" << std::endl;
+        LOG_ERROR_C("Failed to initialize renderer", "Engine");
         return false;
     }
     std::cout << "Renderer initialized with " << getGraphicsAPIName(m_renderer->getAPI()) << std::endl;
+    LOG_INFO_C("Renderer initialized with " + std::string(getGraphicsAPIName(m_renderer->getAPI())), "Engine");
     
     // Create physics system
     m_physics = std::make_unique<PhysicsSystem>();
     if (!m_physics->initialize()) {
         std::cerr << "Failed to initialize physics system" << std::endl;
+        LOG_ERROR_C("Failed to initialize physics system", "Engine");
         return false;
     }
     std::cout << "Physics system initialized" << std::endl;
+    LOG_INFO_C("Physics system initialized", "Engine");
     
     // Create AI system
     m_aiSystem = std::make_unique<AISystem>();
     if (!m_aiSystem->initialize()) {
         std::cerr << "Failed to initialize AI system" << std::endl;
+        LOG_ERROR_C("Failed to initialize AI system", "Engine");
         return false;
     }
     std::cout << "AI system initialized" << std::endl;
+    LOG_INFO_C("AI system initialized", "Engine");
     
     // Create world editor
     m_worldEditor = std::make_unique<WorldEditor>();
     if (m_world && !m_worldEditor->initialize(m_world.get())) {
         std::cerr << "Failed to initialize world editor" << std::endl;
+        LOG_ERROR_C("Failed to initialize world editor", "Engine");
         return false;
     }
     m_worldEditor->setEnabled(true); // Enable editor by default
     std::cout << "World editor initialized" << std::endl;
+    LOG_INFO_C("World editor initialized", "Engine");
     
     // Create editor GUI
     m_editor = std::make_unique<EditorGUI>();
     if (!m_editor->initialize(m_worldEditor.get())) {
         std::cerr << "Failed to initialize editor GUI" << std::endl;
+        LOG_ERROR_C("Failed to initialize editor GUI", "Engine");
         return false;
     }
     m_editor->setVisible(true); // Show editor UI by default
     std::cout << "Editor GUI initialized" << std::endl;
+    LOG_INFO_C("Editor GUI initialized", "Engine");
     
     m_running = true;
     m_inGame = true;

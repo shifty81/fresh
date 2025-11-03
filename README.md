@@ -92,6 +92,7 @@ See [GETTING_STARTED.md](GETTING_STARTED.md) for detailed setup instructions.
 - ✅ Automatic graphics API selection
 - ✅ Window management with GLFW
 - ✅ Shader system with hot-reloading support
+- ✅ **Comprehensive Logging System** - File-based error tracking and debugging
 
 ### Voxel Engine (Phase 3)
 - ✅ Chunk-based world management (16x256x16 chunks)
@@ -235,7 +236,15 @@ fresh/
 │   ├── voxel.vert        # Vertex shader
 │   └── voxel.frag        # Fragment shader
 ├── docs/                  # Documentation
-│   └── TERRAFORMING.md   # Terraforming system guide
+│   ├── TERRAFORMING.md   # Terraforming system guide
+│   └── LOGGING.md        # Logging system documentation
+├── logs/                  # Application and error logs
+│   ├── application_errors_<timestamp>.txt
+│   └── Environment/       # Platform-specific error logs
+│       ├── Windows/
+│       ├── Linux/
+│       ├── macOS/
+│       └── Other/
 └── README.md             # This file
 ```
 
@@ -386,7 +395,43 @@ Please read our [Code of Conduct](CODE_OF_CONDUCT.md) before contributing.
 - 📚 [Tutorials](docs/tutorials/) - Step-by-step guides
 - 🔨 [Examples](examples/) - Sample code and usage
 - 🌍 [Terraforming Guide](docs/TERRAFORMING.md) - World editing system
+- 📝 [Logging System](docs/LOGGING.md) - Error tracking and debugging
 - ⚙️ [GitHub Workflows](WORKFLOWS.md) - CI/CD and automation
+
+## Logging and Debugging
+
+The engine includes a comprehensive logging system that captures all errors, warnings, and information to help with debugging and development:
+
+- **Application Logs**: Complete activity logs in `logs/application_errors_<timestamp>.txt`
+- **Environment Logs**: Platform-specific error logs in `logs/Environment/<Platform>/errors_<timestamp>.txt`
+- **Batch Script Logs**: Build errors automatically logged to `logs/`
+- **Thread-Safe**: Safe to use from multiple threads
+- **Timestamped**: Easy to correlate logs with specific runs
+
+### Quick Example
+
+```cpp
+#include "core/Logger.h"
+
+int main() {
+    // Initialize logger
+    fresh::Logger::getInstance().initialize();
+    
+    // Log messages
+    LOG_INFO("Application started");
+    LOG_ERROR("Failed to load texture");
+    
+    // With component names
+    LOG_INFO_C("Renderer initialized", "Renderer");
+    
+    // Shutdown logger
+    fresh::Logger::getInstance().shutdown();
+}
+```
+
+For complete documentation, see [docs/LOGGING.md](docs/LOGGING.md).
+
+The logs can be uploaded to issue trackers or shared with developers to help steer development and diagnose issues.
 
 ## License
 
