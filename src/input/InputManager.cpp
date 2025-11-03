@@ -1,4 +1,5 @@
 #include "input/InputManager.h"
+#include <cmath>
 
 namespace fresh {
 
@@ -14,6 +15,89 @@ void InputManager::update() {
     
     // Reset mouse delta
     mouseDelta = glm::vec2(0.0f);
+    
+    // Update gamepads
+    updateGamepads();
+}
+
+void InputManager::updateGamepads() {
+    // Poll all gamepads (GLFW supports up to 16)
+    for (int i = 0; i < MAX_GAMEPADS; ++i) {
+        int present = glfwJoystickPresent(GLFW_JOYSTICK_1 + i);
+        gamepads[i].connected = (present == GLFW_TRUE);
+        
+        if (!gamepads[i].connected) {
+            continue;
+        }
+        
+        // Get gamepad name
+        const char* name = glfwGetJoystickName(GLFW_JOYSTICK_1 + i);
+        if (name) {
+            gamepads[i].name = name;
+        }
+        
+        // Get axes (analog sticks and triggers)
+        int axisCount;
+        const float* axes = glfwGetJoystickAxes(GLFW_JOYSTICK_1 + i, &axisCount);
+        if (axes && axisCount >= 6) {
+            for (int j = 0; j < 6 && j < axisCount; ++j) {
+                gamepads[i].axes[j] = applyDeadzone(axes[j]);
+            }
+        }
+        
+        // Get buttons
+        int buttonCount;
+        const unsigned char* buttons = glfwGetJoystickButtons(GLFW_JOYSTICK_1 + i, &buttonCount);
+        if (buttons) {
+            for (int j = 0; j < 15 && j < buttonCount; ++j) {
+                gamepads[i].buttons[j] = (buttons[j] == GLFW_PRESS);
+            }
+        }
+    }
+}
+
+bool InputManager::isGamepadConnected(int gamepadID) const {
+    if (gamepadID < 0 || gamepadID >= MAX_GAMEPADS) return false;
+    return gamepads[gamepadID].connected;
+}
+
+float InputManager::getGamepadAxis(int gamepadID, int axis) const {
+    if (gamepadID < 0 || gamepadID >= MAX_GAMEPADS) return 0.0f;
+    if (!gamepads[gamepadID].connected) return 0.0f;
+    if (axis < 0 || axis >= 6) return 0.0f;
+    return gamepads[gamepadID].axes[axis];
+}
+
+bool InputManager::isGamepadButtonPressed(int gamepadID, int button) const {
+    if (gamepadID < 0 || gamepadID >= MAX_GAMEPADS) return false;
+    if (!gamepads[gamepadID].connected) return false;
+    if (button < 0 || button >= 15) return false;
+    return gamepads[gamepadID].buttons[button];
+}
+
+std::string InputManager::getGamepadName(int gamepadID) const {
+    if (gamepadID < 0 || gamepadID >= MAX_GAMEPADS) return "";
+    if (!gamepads[gamepadID].connected) return "";
+    return gamepads[gamepadID].name;
+}
+
+void InputManager::setGamepadVibration(int gamepadID, float leftMotor, float rightMotor) {
+    // Note: GLFW doesn't support force feedback/vibration directly
+    // This would require platform-specific implementations (XInput on Windows, etc.)
+    // For now, this is a placeholder
+    (void)gamepadID;
+    (void)leftMotor;
+    (void)rightMotor;
+}
+
+float InputManager::applyDeadzone(float value) const {
+    if (std::abs(value) < gamepadDeadzone) {
+        return 0.0f;
+    }
+    // Rescale from deadzone to 1.0
+    float sign = (value > 0.0f) ? 1.0f : -1.0f;
+    float scaled = (std::abs(value) - gamepadDeadzone) / (1.0f - gamepadDeadzone);
+    return sign * scaled;
 }
 
 void InputManager::processKeyEvent(int key, int action) {

@@ -112,8 +112,58 @@ public:
      */
     void setKeyBinding(InputAction action, int key);
     
+    // Gamepad support (up to 16 controllers)
+    /**
+     * @brief Update gamepad states (call once per frame)
+     */
+    void updateGamepads();
+    
+    /**
+     * @brief Check if gamepad is connected
+     * @param gamepadID Gamepad ID (0-15)
+     */
+    bool isGamepadConnected(int gamepadID) const;
+    
+    /**
+     * @brief Get gamepad axis value
+     * @param gamepadID Gamepad ID (0-15)
+     * @param axis Axis index (0=LeftX, 1=LeftY, 2=RightX, 3=RightY, 4=LeftTrigger, 5=RightTrigger)
+     * @return Axis value (-1.0 to 1.0)
+     */
+    float getGamepadAxis(int gamepadID, int axis) const;
+    
+    /**
+     * @brief Check if gamepad button is pressed
+     * @param gamepadID Gamepad ID (0-15)
+     * @param button Button index
+     * @return true if pressed
+     */
+    bool isGamepadButtonPressed(int gamepadID, int button) const;
+    
+    /**
+     * @brief Get gamepad name
+     * @param gamepadID Gamepad ID (0-15)
+     * @return Gamepad name or empty string
+     */
+    std::string getGamepadName(int gamepadID) const;
+    
+    /**
+     * @brief Set gamepad deadzone
+     */
+    void setGamepadDeadzone(float deadzone) { gamepadDeadzone = deadzone; }
+    float getGamepadDeadzone() const { return gamepadDeadzone; }
+    
+    /**
+     * @brief Enable/disable gamepad vibration
+     * @param gamepadID Gamepad ID
+     * @param leftMotor Left motor strength (0.0-1.0)
+     * @param rightMotor Right motor strength (0.0-1.0)
+     */
+    void setGamepadVibration(int gamepadID, float leftMotor, float rightMotor);
+    
 private:
     void initializeDefaultBindings();
+    float applyDeadzone(float value) const;
     
     GLFWwindow* window = nullptr;
     std::map<InputAction, int> keyBindings;
@@ -127,6 +177,17 @@ private:
     bool firstMouse = true;
     float sensitivity = 1.0f;
     bool cursorCaptured = false;
+    
+    // Gamepad state (up to 16 controllers)
+    static constexpr int MAX_GAMEPADS = 16;
+    struct GamepadState {
+        bool connected = false;
+        float axes[6] = {0.0f};  // LeftX, LeftY, RightX, RightY, LeftTrigger, RightTrigger
+        bool buttons[15] = {false};
+        std::string name;
+    };
+    GamepadState gamepads[MAX_GAMEPADS];
+    float gamepadDeadzone = 0.15f;
 };
 
 } // namespace fresh
