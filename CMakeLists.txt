@@ -58,10 +58,7 @@ set(ENGINE_SOURCES
     src/interaction/RaycastSystem.cpp
     src/ai/AISystem.cpp
     src/ai/BehaviorTree.cpp
-    src/ai/Pathfinding.cpp
     src/audio/AudioEngine.cpp
-    src/audio/SoundSource.cpp
-    src/scripting/ScriptEngine.cpp
     src/scripting/EventSystem.cpp
     src/editor/EditorGUI.cpp
     src/editor/WorldEditor.cpp
@@ -71,6 +68,7 @@ set(ENGINE_SOURCES
     src/input/InputManager.cpp
     src/gameplay/Camera.cpp
     src/gameplay/Player.cpp
+    src/assets/ModularAssetSystem.cpp
 )
 
 # Header files
@@ -96,10 +94,7 @@ set(ENGINE_HEADERS
     include/interaction/RaycastSystem.h
     include/ai/AISystem.h
     include/ai/BehaviorTree.h
-    include/ai/Pathfinding.h
     include/audio/AudioEngine.h
-    include/audio/SoundSource.h
-    include/scripting/ScriptEngine.h
     include/scripting/EventSystem.h
     include/editor/EditorGUI.h
     include/editor/WorldEditor.h
@@ -109,6 +104,7 @@ set(ENGINE_HEADERS
     include/input/InputManager.h
     include/gameplay/Camera.h
     include/gameplay/Player.h
+    include/assets/ModularAssetSystem.h
 )
 
 # Create executable
