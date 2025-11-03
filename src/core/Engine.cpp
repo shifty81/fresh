@@ -243,47 +243,15 @@ void Engine::run() {
                 createNewWorld(m_mainMenu->getNewWorldName(), m_mainMenu->getWorldSeed());
                 m_mainMenu->clearFlags();
                 
-                // Initialize graphics systems now that we have a world
-                m_window = std::make_unique<Window>(1280, 720, "Fresh Voxel Engine");
-                if (m_window->initialize()) {
-                    // Create input manager and set up callbacks
-                    m_inputManager = std::make_unique<InputManager>();
-                    m_inputManager->initialize(m_window->getHandle());
-                    setupInputCallbacks();
-                    
-                    m_renderer = RenderContextFactory::createBest();
-                    if (m_renderer) {
-                        m_renderer->initialize(m_window.get());
-                    }
-                    
-                    // Create player
-                    m_player = std::make_unique<Player>();
-                    m_player->setWorld(m_world.get());
-                    m_player->setPosition(glm::vec3(0.0f, 80.0f, 0.0f));
-                }
+                // Initialize all game systems (window, input, renderer, player)
+                initializeGameSystems();
                 m_inGame = true;
             } else if (m_mainMenu->shouldLoadWorld()) {
                 loadWorld(m_mainMenu->getLoadWorldName());
                 m_mainMenu->clearFlags();
                 
-                // Initialize graphics systems now that we have a world
-                m_window = std::make_unique<Window>(1280, 720, "Fresh Voxel Engine");
-                if (m_window->initialize()) {
-                    // Create input manager and set up callbacks
-                    m_inputManager = std::make_unique<InputManager>();
-                    m_inputManager->initialize(m_window->getHandle());
-                    setupInputCallbacks();
-                    
-                    m_renderer = RenderContextFactory::createBest();
-                    if (m_renderer) {
-                        m_renderer->initialize(m_window.get());
-                    }
-                    
-                    // Create player
-                    m_player = std::make_unique<Player>();
-                    m_player->setWorld(m_world.get());
-                    m_player->setPosition(glm::vec3(0.0f, 80.0f, 0.0f));
-                }
+                // Initialize all game systems (window, input, renderer, player)
+                initializeGameSystems();
                 m_inGame = true;
             }
             
@@ -321,6 +289,12 @@ void Engine::run() {
 void Engine::shutdown() {
     if (m_renderer) {
         m_renderer->waitIdle();
+    }
+    
+    // Clean up GLFW callback user data
+    if (m_callbackUserData) {
+        delete m_callbackUserData;
+        m_callbackUserData = nullptr;
     }
     
     m_player.reset();
@@ -416,6 +390,39 @@ void Engine::render() {
     m_renderer->endFrame();
 }
 
+void Engine::initializeGameSystems() {
+    // This helper is called after world creation to initialize all game systems
+    if (!m_window) {
+        m_window = std::make_unique<Window>(1280, 720, "Fresh Voxel Engine");
+        if (!m_window->initialize()) {
+            std::cerr << "Failed to initialize window in game systems" << std::endl;
+            return;
+        }
+    }
+    
+    // Create input manager and set up callbacks
+    if (!m_inputManager) {
+        m_inputManager = std::make_unique<InputManager>();
+        m_inputManager->initialize(m_window->getHandle());
+        setupInputCallbacks();
+    }
+    
+    // Create renderer
+    if (!m_renderer) {
+        m_renderer = RenderContextFactory::createBest();
+        if (m_renderer) {
+            m_renderer->initialize(m_window.get());
+        }
+    }
+    
+    // Create player
+    if (!m_player && m_world) {
+        m_player = std::make_unique<Player>();
+        m_player->setWorld(m_world.get());
+        m_player->setPosition(glm::vec3(0.0f, 80.0f, 0.0f));
+    }
+}
+
 void Engine::setupInputCallbacks() {
     if (!m_window || !m_inputManager) {
         return;
@@ -423,21 +430,20 @@ void Engine::setupInputCallbacks() {
     
     GLFWwindow* window = m_window->getHandle();
     
-    // Store InputManager pointer in window user pointer
-    // Note: We need to be careful here as Window also uses user pointer
-    // We'll use a struct to hold both
-    struct UserData {
-        InputManager* inputManager;
-        Window* window;
-    };
+    // Clean up old user data if it exists
+    if (m_callbackUserData) {
+        delete m_callbackUserData;
+    }
     
-    // Allocate user data (will be cleaned up in shutdown)
-    UserData* userData = new UserData{m_inputManager.get(), m_window.get()};
-    glfwSetWindowUserPointer(window, userData);
+    // Allocate user data for callbacks
+    m_callbackUserData = new CallbackUserData{m_inputManager.get(), m_window.get()};
+    glfwSetWindowUserPointer(window, m_callbackUserData);
     
     // Keyboard callback
     glfwSetKeyCallback(window, [](GLFWwindow* win, int key, int scancode, int action, int mods) {
-        UserData* data = static_cast<UserData*>(glfwGetWindowUserPointer(win));
+        (void)scancode; // Unused
+        (void)mods; // Unused
+        CallbackUserData* data = static_cast<CallbackUserData*>(glfwGetWindowUserPointer(win));
         if (data && data->inputManager) {
             data->inputManager->processKeyEvent(key, action);
         }
@@ -445,7 +451,7 @@ void Engine::setupInputCallbacks() {
     
     // Mouse movement callback
     glfwSetCursorPosCallback(window, [](GLFWwindow* win, double xpos, double ypos) {
-        UserData* data = static_cast<UserData*>(glfwGetWindowUserPointer(win));
+        CallbackUserData* data = static_cast<CallbackUserData*>(glfwGetWindowUserPointer(win));
         if (data && data->inputManager) {
             data->inputManager->processMouseMovement(xpos, ypos);
         }
@@ -453,18 +459,21 @@ void Engine::setupInputCallbacks() {
     
     // Mouse button callback
     glfwSetMouseButtonCallback(window, [](GLFWwindow* win, int button, int action, int mods) {
-        UserData* data = static_cast<UserData*>(glfwGetWindowUserPointer(win));
+        (void)mods; // Unused
+        CallbackUserData* data = static_cast<CallbackUserData*>(glfwGetWindowUserPointer(win));
         if (data && data->inputManager) {
             data->inputManager->processMouseButton(button, action);
         }
     });
     
-    // Also set up framebuffer resize callback for Window class
+    // Framebuffer resize callback
     glfwSetFramebufferSizeCallback(window, [](GLFWwindow* win, int width, int height) {
-        UserData* data = static_cast<UserData*>(glfwGetWindowUserPointer(win));
+        CallbackUserData* data = static_cast<CallbackUserData*>(glfwGetWindowUserPointer(win));
         if (data && data->window) {
-            // Call Window's resize handler
-            // This is a workaround - ideally Window should handle this itself
+            // Update window dimensions (Window class handles this internally via its own tracking)
+            // The renderer will need to handle the resize in its next frame
+            (void)width;
+            (void)height;
         }
     });
 }

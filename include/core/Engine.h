@@ -75,6 +75,14 @@ private:
     void createNewWorld(const std::string& name, int seed);
     void loadWorld(const std::string& name);
     void setupInputCallbacks();
+    void initializeGameSystems(); // Helper for common initialization
+    
+    // User data for GLFW callbacks
+    struct CallbackUserData {
+        InputManager* inputManager;
+        Window* window;
+    };
+    CallbackUserData* m_callbackUserData = nullptr;
 };
 
 } // namespace fresh
