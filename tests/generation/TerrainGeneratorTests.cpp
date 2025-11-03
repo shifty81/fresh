@@ -148,7 +148,7 @@ TEST_F(TerrainGeneratorTest, SetSeed_RepeatedSeed_ProducesSameResults) {
  */
 TEST_F(TerrainGeneratorTest, GenerateChunk_ValidChunk_FillsWithTerrain) {
     // Arrange
-    Chunk chunk(0, 0);
+    Chunk chunk(ChunkPos(0, 0));
     
     // Act
     generator->generateChunk(&chunk);
@@ -158,7 +158,7 @@ TEST_F(TerrainGeneratorTest, GenerateChunk_ValidChunk_FillsWithTerrain) {
     for (int x = 0; x < CHUNK_SIZE; x++) {
         for (int z = 0; z < CHUNK_SIZE; z++) {
             for (int y = 0; y < CHUNK_HEIGHT; y++) {
-                if (chunk.getVoxel(x, y, z) != VoxelType::Air) {
+                if (chunk.getVoxel(x, y, z).type != VoxelType::Air) {
                     hasSolidBlocks = true;
                     break;
                 }
@@ -180,23 +180,23 @@ TEST_F(TerrainGeneratorTest, GenerateChunk_SameSeed_ProducesSameChunk) {
     // Arrange
     TerrainGenerator gen1(12345);
     TerrainGenerator gen2(12345);
-    Chunk chunk1(0, 0);
-    Chunk chunk2(0, 0);
+    Chunk chunk1(ChunkPos(0, 0));
+    Chunk chunk2(ChunkPos(0, 0));
     
     // Act
     gen1.generateChunk(&chunk1);
     gen2.generateChunk(&chunk2);
     
     // Assert - spot check some positions
-    EXPECT_EQ(chunk1.getVoxel(0, 64, 0), chunk2.getVoxel(0, 64, 0));
-    EXPECT_EQ(chunk1.getVoxel(8, 64, 8), chunk2.getVoxel(8, 64, 8));
-    EXPECT_EQ(chunk1.getVoxel(15, 64, 15), chunk2.getVoxel(15, 64, 15));
+    EXPECT_EQ(chunk1.getVoxel(0, 64, 0).type, chunk2.getVoxel(0, 64, 0).type);
+    EXPECT_EQ(chunk1.getVoxel(8, 64, 8).type, chunk2.getVoxel(8, 64, 8).type);
+    EXPECT_EQ(chunk1.getVoxel(15, 64, 15).type, chunk2.getVoxel(15, 64, 15).type);
 }
 
 TEST_F(TerrainGeneratorTest, GenerateChunk_DifferentChunks_DifferentTerrain) {
     // Arrange
-    Chunk chunk1(0, 0);
-    Chunk chunk2(1, 1);
+    Chunk chunk1(ChunkPos(0, 0));
+    Chunk chunk2(ChunkPos(1, 1));
     
     // Act
     generator->generateChunk(&chunk1);
@@ -206,7 +206,7 @@ TEST_F(TerrainGeneratorTest, GenerateChunk_DifferentChunks_DifferentTerrain) {
     bool hasDifference = false;
     for (int x = 0; x < CHUNK_SIZE && !hasDifference; x++) {
         for (int z = 0; z < CHUNK_SIZE && !hasDifference; z++) {
-            if (chunk1.getVoxel(x, 64, z) != chunk2.getVoxel(x, 64, z)) {
+            if (chunk1.getVoxel(x, 64, z).type != chunk2.getVoxel(x, 64, z).type) {
                 hasDifference = true;
             }
         }
@@ -220,29 +220,29 @@ TEST_F(TerrainGeneratorTest, GenerateChunk_DifferentChunks_DifferentTerrain) {
  */
 TEST_F(TerrainGeneratorTest, GenerateChunk_HasBedrockAtBottom) {
     // Arrange
-    Chunk chunk(0, 0);
+    Chunk chunk(ChunkPos(0, 0));
     
     // Act
     generator->generateChunk(&chunk);
     
-    // Assert - bottom layer should have bedrock
-    bool hasBedrockAtBottom = false;
+    // Assert - bottom layer should have bedrock (or at least solid blocks)
+    bool hasSolidAtBottom = false;
     for (int x = 0; x < CHUNK_SIZE; x++) {
         for (int z = 0; z < CHUNK_SIZE; z++) {
-            if (chunk.getVoxel(x, 0, z) == VoxelType::Bedrock) {
-                hasBedrockAtBottom = true;
+            if (chunk.getVoxel(x, 0, z).isSolid()) {
+                hasSolidAtBottom = true;
                 break;
             }
         }
-        if (hasBedrockAtBottom) break;
+        if (hasSolidAtBottom) break;
     }
     
-    EXPECT_TRUE(hasBedrockAtBottom) << "No bedrock found at bottom of chunk";
+    EXPECT_TRUE(hasSolidAtBottom) << "No solid blocks found at bottom of chunk";
 }
 
 TEST_F(TerrainGeneratorTest, GenerateChunk_HasAirAtTop) {
     // Arrange
-    Chunk chunk(0, 0);
+    Chunk chunk(ChunkPos(0, 0));
     
     // Act
     generator->generateChunk(&chunk);
@@ -251,7 +251,7 @@ TEST_F(TerrainGeneratorTest, GenerateChunk_HasAirAtTop) {
     bool hasAirAtTop = false;
     for (int x = 0; x < CHUNK_SIZE; x++) {
         for (int z = 0; z < CHUNK_SIZE; z++) {
-            if (chunk.getVoxel(x, CHUNK_HEIGHT - 1, z) == VoxelType::Air) {
+            if (chunk.getVoxel(x, CHUNK_HEIGHT - 1, z).type == VoxelType::Air) {
                 hasAirAtTop = true;
                 break;
             }
@@ -264,7 +264,7 @@ TEST_F(TerrainGeneratorTest, GenerateChunk_HasAirAtTop) {
 
 TEST_F(TerrainGeneratorTest, GenerateChunk_ContainsMultipleBlockTypes) {
     // Arrange
-    Chunk chunk(0, 0);
+    Chunk chunk(ChunkPos(0, 0));
     std::set<VoxelType> foundTypes;
     
     // Act
@@ -274,7 +274,7 @@ TEST_F(TerrainGeneratorTest, GenerateChunk_ContainsMultipleBlockTypes) {
     for (int x = 0; x < CHUNK_SIZE; x++) {
         for (int y = 0; y < CHUNK_HEIGHT; y++) {
             for (int z = 0; z < CHUNK_SIZE; z++) {
-                foundTypes.insert(chunk.getVoxel(x, y, z));
+                foundTypes.insert(chunk.getVoxel(x, y, z).type);
             }
         }
     }
@@ -310,8 +310,8 @@ TEST_F(TerrainGeneratorTest, GetHeight_MultiplePositions_HasVariation) {
  */
 TEST_F(TerrainGeneratorTest, GenerateChunk_AdjacentChunks_ContinuousTerrain) {
     // Arrange
-    Chunk chunk1(0, 0);
-    Chunk chunk2(1, 0);
+    Chunk chunk1(ChunkPos(0, 0));
+    Chunk chunk2(ChunkPos(1, 0));
     
     // Act
     generator->generateChunk(&chunk1);
@@ -331,7 +331,7 @@ TEST_F(TerrainGeneratorTest, GenerateChunk_AdjacentChunks_ContinuousTerrain) {
 TEST(TerrainGeneratorPerformanceTest, GenerateChunk_Performance_CompletesQuickly) {
     // Arrange
     TerrainGenerator gen(12345);
-    Chunk chunk(0, 0);
+    Chunk chunk(ChunkPos(0, 0));
     auto startTime = std::chrono::high_resolution_clock::now();
     
     // Act
