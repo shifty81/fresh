@@ -86,7 +86,6 @@ if %ERRORLEVEL% NEQ 0 (
     echo ERROR: Build failed with exit code %ERRORLEVEL% >> "%LOG_FILE%"
     echo.
     echo Full build output has been saved to: %LOG_FILE%
-    echo Check log file for details: %LOG_FILE%
     echo.
     pause
     exit /b 1
