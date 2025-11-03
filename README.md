@@ -26,6 +26,29 @@ The engine **automatically selects the best API** for your platform, or you can 
 
 ### Windows (Visual Studio 2022)
 
+#### Option 1: Automated Installation (Recommended)
+
+```batch
+# Clone the repository
+git clone https://github.com/shifty81/fresh.git
+cd fresh
+
+# Run automated installer (handles everything!)
+tools\build_tools\install.bat
+```
+
+The automated installer will:
+- ✅ Check prerequisites (CMake, Visual Studio)
+- ✅ Install vcpkg package manager (optional)
+- ✅ Install dependencies (GLFW, GLM)
+- ✅ Generate Visual Studio solution
+- ✅ Build the project automatically
+- ✅ Create shortcuts for easy access
+
+See [tools/build_tools/README.md](tools/build_tools/README.md) for detailed installation options.
+
+#### Option 2: Manual Setup
+
 ```batch
 # Clone the repository
 git clone https://github.com/shifty81/fresh.git
@@ -132,6 +155,17 @@ See [docs/TERRAFORMING.md](docs/TERRAFORMING.md) for detailed documentation.
 - GLM (optional, header-only)
 
 ### Windows (Visual Studio 2022)
+
+#### Automated Installation (Easiest)
+
+```batch
+# Run the automated installer
+tools\build_tools\install.bat
+```
+
+This handles all setup automatically! See [tools/build_tools/README.md](tools/build_tools/README.md) for details.
+
+#### Manual Installation
 
 ```batch
 # Generate Visual Studio solution

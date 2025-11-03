@@ -8,6 +8,13 @@ out/
 build_minimal_tests.sh
 build_tests_only.sh
 
+# vcpkg package manager (downloaded by install.bat)
+vcpkg/
+
+# Generated shortcuts
+Open_Solution.bat
+Run_Engine.bat
+
 # IDE files
 .vs/
 .vscode/
