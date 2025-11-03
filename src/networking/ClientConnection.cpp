@@ -7,6 +7,8 @@
     #include <ws2tcpip.h>
     #pragma comment(lib, "ws2_32.lib")
     #define close closesocket
+    // Windows doesn't have ssize_t, define it
+    typedef int ssize_t;
 #else
     #include <unistd.h>
     #include <sys/socket.h>
@@ -103,7 +105,8 @@ bool ClientConnection::sendBytes(const uint8_t* data, size_t length) {
     size_t totalSent = 0;
     
     while (totalSent < length) {
-        ssize_t sent = send(socketFd, data + totalSent, length - totalSent, 0);
+        ssize_t sent = send(socketFd, reinterpret_cast<const char*>(data + totalSent), 
+                           static_cast<int>(length - totalSent), 0);
         if (sent <= 0) {
             connected = false;
             return false;
@@ -119,8 +122,8 @@ std::vector<uint8_t> ClientConnection::receiveBytes(size_t length) {
     size_t totalReceived = 0;
     
     while (totalReceived < length) {
-        ssize_t received = recv(socketFd, buffer.data() + totalReceived, 
-                               length - totalReceived, 0);
+        ssize_t received = recv(socketFd, reinterpret_cast<char*>(buffer.data() + totalReceived), 
+                               static_cast<int>(length - totalReceived), 0);
         if (received <= 0) {
             connected = false;
             return {};

@@ -220,7 +220,7 @@ bool GameServer::createSocket() {
     
     // Set socket options
     int opt = 1;
-    setsockopt(serverSocket, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt));
+    setsockopt(serverSocket, SOL_SOCKET, SO_REUSEADDR, reinterpret_cast<const char*>(&opt), sizeof(opt));
     
     // Bind socket
     struct sockaddr_in serverAddr;
