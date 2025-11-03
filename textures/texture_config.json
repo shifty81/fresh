@@ -1,0 +1,65 @@
+{
+  "version": "1.0.0",
+  "description": "Texture mapping configuration for Fresh Voxel Engine block types",
+  "default_resolution": "16x16",
+  "texture_base_path": "textures/blocks",
+  
+  "block_textures": {
+    "Air": {
+      "texture": null,
+      "description": "Air blocks are invisible"
+    },
+    "Stone": {
+      "all_faces": "stone",
+      "description": "Gray stone texture on all faces"
+    },
+    "Dirt": {
+      "all_faces": "dirt",
+      "description": "Brown dirt texture on all faces"
+    },
+    "Grass": {
+      "top": "grass_top",
+      "bottom": "dirt",
+      "sides": "grass_side",
+      "description": "Grass block with green top and dirt bottom"
+    },
+    "Sand": {
+      "all_faces": "sand",
+      "description": "Sandy yellow texture on all faces"
+    },
+    "Water": {
+      "all_faces": "water",
+      "transparent": true,
+      "description": "Blue water texture with transparency (animation support planned)"
+    },
+    "Wood": {
+      "top": "wood",
+      "bottom": "wood",
+      "sides": "wood",
+      "description": "Wood log texture"
+    },
+    "Leaves": {
+      "all_faces": "leaves",
+      "transparent": true,
+      "description": "Leafy green texture with transparency"
+    },
+    "Cobblestone": {
+      "all_faces": "cobblestone",
+      "description": "Cobblestone brick pattern"
+    },
+    "Planks": {
+      "all_faces": "planks",
+      "description": "Wooden planks"
+    }
+  },
+  
+  "resolution_options": ["16x16", "32x32", "64x64"],
+  
+  "notes": [
+    "Textures support multiple resolutions for different quality settings",
+    "Use 'all_faces' for uniform textures on all 6 faces of a cube",
+    "Use 'top', 'bottom', 'sides' for direction-specific textures",
+    "Transparent blocks use alpha channel for see-through effects",
+    "Texture files are named: <texture_name>_<resolution>.png"
+  ]
+}

@@ -43,6 +43,9 @@ if(NOT glm_FOUND)
     message(STATUS "GLM not found, will use header-only include if available")
 endif()
 
+# Enable GLM experimental features
+add_definitions(-DGLM_ENABLE_EXPERIMENTAL)
+
 # Source files
 set(ENGINE_SOURCES
     src/main.cpp
@@ -57,6 +60,7 @@ set(ENGINE_SOURCES
     src/renderer/Material.cpp
     src/renderer/Texture.cpp
     src/renderer/TextureManager.cpp
+    src/renderer/VoxelTextureLoader.cpp
     src/renderer/backends/OpenGLRenderContext.cpp
     src/voxel/Chunk.cpp
     src/voxel/VoxelWorld.cpp

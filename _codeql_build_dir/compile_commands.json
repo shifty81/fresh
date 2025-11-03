@@ -1,355 +1,361 @@
 [
 {
   "directory": "/home/runner/work/fresh/fresh/_codeql_build_dir",
-  "command": "/home/runner/work/fresh/.codeql-scratch/dbs/cpp/working/autobuild/bin/c++ -DFRESH_OPENGL_SUPPORT -I/home/runner/work/fresh/fresh/include -O3 -DNDEBUG -std=c++17 -Wall -Wextra -Wpedantic -o CMakeFiles/FreshVoxelEngine.dir/src/main.cpp.o -c /home/runner/work/fresh/fresh/src/main.cpp",
+  "command": "/home/runner/work/fresh/.codeql-scratch/dbs/cpp/working/autobuild/bin/c++ -DFRESH_OPENGL_SUPPORT -DGLM_ENABLE_EXPERIMENTAL -I/home/runner/work/fresh/fresh/include -O3 -DNDEBUG -std=c++17 -Wall -Wextra -Wpedantic -o CMakeFiles/FreshVoxelEngine.dir/src/main.cpp.o -c /home/runner/work/fresh/fresh/src/main.cpp",
   "file": "/home/runner/work/fresh/fresh/src/main.cpp",
   "output": "CMakeFiles/FreshVoxelEngine.dir/src/main.cpp.o"
 },
 {
   "directory": "/home/runner/work/fresh/fresh/_codeql_build_dir",
-  "command": "/home/runner/work/fresh/.codeql-scratch/dbs/cpp/working/autobuild/bin/c++ -DFRESH_OPENGL_SUPPORT -I/home/runner/work/fresh/fresh/include -O3 -DNDEBUG -std=c++17 -Wall -Wextra -Wpedantic -o CMakeFiles/FreshVoxelEngine.dir/src/core/Engine.cpp.o -c /home/runner/work/fresh/fresh/src/core/Engine.cpp",
+  "command": "/home/runner/work/fresh/.codeql-scratch/dbs/cpp/working/autobuild/bin/c++ -DFRESH_OPENGL_SUPPORT -DGLM_ENABLE_EXPERIMENTAL -I/home/runner/work/fresh/fresh/include -O3 -DNDEBUG -std=c++17 -Wall -Wextra -Wpedantic -o CMakeFiles/FreshVoxelEngine.dir/src/core/Engine.cpp.o -c /home/runner/work/fresh/fresh/src/core/Engine.cpp",
   "file": "/home/runner/work/fresh/fresh/src/core/Engine.cpp",
   "output": "CMakeFiles/FreshVoxelEngine.dir/src/core/Engine.cpp.o"
 },
 {
   "directory": "/home/runner/work/fresh/fresh/_codeql_build_dir",
-  "command": "/home/runner/work/fresh/.codeql-scratch/dbs/cpp/working/autobuild/bin/c++ -DFRESH_OPENGL_SUPPORT -I/home/runner/work/fresh/fresh/include -O3 -DNDEBUG -std=c++17 -Wall -Wextra -Wpedantic -o CMakeFiles/FreshVoxelEngine.dir/src/core/Window.cpp.o -c /home/runner/work/fresh/fresh/src/core/Window.cpp",
+  "command": "/home/runner/work/fresh/.codeql-scratch/dbs/cpp/working/autobuild/bin/c++ -DFRESH_OPENGL_SUPPORT -DGLM_ENABLE_EXPERIMENTAL -I/home/runner/work/fresh/fresh/include -O3 -DNDEBUG -std=c++17 -Wall -Wextra -Wpedantic -o CMakeFiles/FreshVoxelEngine.dir/src/core/Window.cpp.o -c /home/runner/work/fresh/fresh/src/core/Window.cpp",
   "file": "/home/runner/work/fresh/fresh/src/core/Window.cpp",
   "output": "CMakeFiles/FreshVoxelEngine.dir/src/core/Window.cpp.o"
 },
 {
   "directory": "/home/runner/work/fresh/fresh/_codeql_build_dir",
-  "command": "/home/runner/work/fresh/.codeql-scratch/dbs/cpp/working/autobuild/bin/c++ -DFRESH_OPENGL_SUPPORT -I/home/runner/work/fresh/fresh/include -O3 -DNDEBUG -std=c++17 -Wall -Wextra -Wpedantic -o CMakeFiles/FreshVoxelEngine.dir/src/core/Logger.cpp.o -c /home/runner/work/fresh/fresh/src/core/Logger.cpp",
+  "command": "/home/runner/work/fresh/.codeql-scratch/dbs/cpp/working/autobuild/bin/c++ -DFRESH_OPENGL_SUPPORT -DGLM_ENABLE_EXPERIMENTAL -I/home/runner/work/fresh/fresh/include -O3 -DNDEBUG -std=c++17 -Wall -Wextra -Wpedantic -o CMakeFiles/FreshVoxelEngine.dir/src/core/Logger.cpp.o -c /home/runner/work/fresh/fresh/src/core/Logger.cpp",
   "file": "/home/runner/work/fresh/fresh/src/core/Logger.cpp",
   "output": "CMakeFiles/FreshVoxelEngine.dir/src/core/Logger.cpp.o"
 },
 {
   "directory": "/home/runner/work/fresh/fresh/_codeql_build_dir",
-  "command": "/home/runner/work/fresh/.codeql-scratch/dbs/cpp/working/autobuild/bin/c++ -DFRESH_OPENGL_SUPPORT -I/home/runner/work/fresh/fresh/include -O3 -DNDEBUG -std=c++17 -Wall -Wextra -Wpedantic -o CMakeFiles/FreshVoxelEngine.dir/src/core/MemoryManager.cpp.o -c /home/runner/work/fresh/fresh/src/core/MemoryManager.cpp",
+  "command": "/home/runner/work/fresh/.codeql-scratch/dbs/cpp/working/autobuild/bin/c++ -DFRESH_OPENGL_SUPPORT -DGLM_ENABLE_EXPERIMENTAL -I/home/runner/work/fresh/fresh/include -O3 -DNDEBUG -std=c++17 -Wall -Wextra -Wpedantic -o CMakeFiles/FreshVoxelEngine.dir/src/core/MemoryManager.cpp.o -c /home/runner/work/fresh/fresh/src/core/MemoryManager.cpp",
   "file": "/home/runner/work/fresh/fresh/src/core/MemoryManager.cpp",
   "output": "CMakeFiles/FreshVoxelEngine.dir/src/core/MemoryManager.cpp.o"
 },
 {
   "directory": "/home/runner/work/fresh/fresh/_codeql_build_dir",
-  "command": "/home/runner/work/fresh/.codeql-scratch/dbs/cpp/working/autobuild/bin/c++ -DFRESH_OPENGL_SUPPORT -I/home/runner/work/fresh/fresh/include -O3 -DNDEBUG -std=c++17 -Wall -Wextra -Wpedantic -o CMakeFiles/FreshVoxelEngine.dir/src/core/ResourceManager.cpp.o -c /home/runner/work/fresh/fresh/src/core/ResourceManager.cpp",
+  "command": "/home/runner/work/fresh/.codeql-scratch/dbs/cpp/working/autobuild/bin/c++ -DFRESH_OPENGL_SUPPORT -DGLM_ENABLE_EXPERIMENTAL -I/home/runner/work/fresh/fresh/include -O3 -DNDEBUG -std=c++17 -Wall -Wextra -Wpedantic -o CMakeFiles/FreshVoxelEngine.dir/src/core/ResourceManager.cpp.o -c /home/runner/work/fresh/fresh/src/core/ResourceManager.cpp",
   "file": "/home/runner/work/fresh/fresh/src/core/ResourceManager.cpp",
   "output": "CMakeFiles/FreshVoxelEngine.dir/src/core/ResourceManager.cpp.o"
 },
 {
   "directory": "/home/runner/work/fresh/fresh/_codeql_build_dir",
-  "command": "/home/runner/work/fresh/.codeql-scratch/dbs/cpp/working/autobuild/bin/c++ -DFRESH_OPENGL_SUPPORT -I/home/runner/work/fresh/fresh/include -O3 -DNDEBUG -std=c++17 -Wall -Wextra -Wpedantic -o CMakeFiles/FreshVoxelEngine.dir/src/core/SceneManager.cpp.o -c /home/runner/work/fresh/fresh/src/core/SceneManager.cpp",
+  "command": "/home/runner/work/fresh/.codeql-scratch/dbs/cpp/working/autobuild/bin/c++ -DFRESH_OPENGL_SUPPORT -DGLM_ENABLE_EXPERIMENTAL -I/home/runner/work/fresh/fresh/include -O3 -DNDEBUG -std=c++17 -Wall -Wextra -Wpedantic -o CMakeFiles/FreshVoxelEngine.dir/src/core/SceneManager.cpp.o -c /home/runner/work/fresh/fresh/src/core/SceneManager.cpp",
   "file": "/home/runner/work/fresh/fresh/src/core/SceneManager.cpp",
   "output": "CMakeFiles/FreshVoxelEngine.dir/src/core/SceneManager.cpp.o"
 },
 {
   "directory": "/home/runner/work/fresh/fresh/_codeql_build_dir",
-  "command": "/home/runner/work/fresh/.codeql-scratch/dbs/cpp/working/autobuild/bin/c++ -DFRESH_OPENGL_SUPPORT -I/home/runner/work/fresh/fresh/include -O3 -DNDEBUG -std=c++17 -Wall -Wextra -Wpedantic -o CMakeFiles/FreshVoxelEngine.dir/src/renderer/ShaderManager.cpp.o -c /home/runner/work/fresh/fresh/src/renderer/ShaderManager.cpp",
+  "command": "/home/runner/work/fresh/.codeql-scratch/dbs/cpp/working/autobuild/bin/c++ -DFRESH_OPENGL_SUPPORT -DGLM_ENABLE_EXPERIMENTAL -I/home/runner/work/fresh/fresh/include -O3 -DNDEBUG -std=c++17 -Wall -Wextra -Wpedantic -o CMakeFiles/FreshVoxelEngine.dir/src/renderer/ShaderManager.cpp.o -c /home/runner/work/fresh/fresh/src/renderer/ShaderManager.cpp",
   "file": "/home/runner/work/fresh/fresh/src/renderer/ShaderManager.cpp",
   "output": "CMakeFiles/FreshVoxelEngine.dir/src/renderer/ShaderManager.cpp.o"
 },
 {
   "directory": "/home/runner/work/fresh/fresh/_codeql_build_dir",
-  "command": "/home/runner/work/fresh/.codeql-scratch/dbs/cpp/working/autobuild/bin/c++ -DFRESH_OPENGL_SUPPORT -I/home/runner/work/fresh/fresh/include -O3 -DNDEBUG -std=c++17 -Wall -Wextra -Wpedantic -o CMakeFiles/FreshVoxelEngine.dir/src/renderer/RenderContext.cpp.o -c /home/runner/work/fresh/fresh/src/renderer/RenderContext.cpp",
+  "command": "/home/runner/work/fresh/.codeql-scratch/dbs/cpp/working/autobuild/bin/c++ -DFRESH_OPENGL_SUPPORT -DGLM_ENABLE_EXPERIMENTAL -I/home/runner/work/fresh/fresh/include -O3 -DNDEBUG -std=c++17 -Wall -Wextra -Wpedantic -o CMakeFiles/FreshVoxelEngine.dir/src/renderer/RenderContext.cpp.o -c /home/runner/work/fresh/fresh/src/renderer/RenderContext.cpp",
   "file": "/home/runner/work/fresh/fresh/src/renderer/RenderContext.cpp",
   "output": "CMakeFiles/FreshVoxelEngine.dir/src/renderer/RenderContext.cpp.o"
 },
 {
   "directory": "/home/runner/work/fresh/fresh/_codeql_build_dir",
-  "command": "/home/runner/work/fresh/.codeql-scratch/dbs/cpp/working/autobuild/bin/c++ -DFRESH_OPENGL_SUPPORT -I/home/runner/work/fresh/fresh/include -O3 -DNDEBUG -std=c++17 -Wall -Wextra -Wpedantic -o CMakeFiles/FreshVoxelEngine.dir/src/renderer/Material.cpp.o -c /home/runner/work/fresh/fresh/src/renderer/Material.cpp",
+  "command": "/home/runner/work/fresh/.codeql-scratch/dbs/cpp/working/autobuild/bin/c++ -DFRESH_OPENGL_SUPPORT -DGLM_ENABLE_EXPERIMENTAL -I/home/runner/work/fresh/fresh/include -O3 -DNDEBUG -std=c++17 -Wall -Wextra -Wpedantic -o CMakeFiles/FreshVoxelEngine.dir/src/renderer/Material.cpp.o -c /home/runner/work/fresh/fresh/src/renderer/Material.cpp",
   "file": "/home/runner/work/fresh/fresh/src/renderer/Material.cpp",
   "output": "CMakeFiles/FreshVoxelEngine.dir/src/renderer/Material.cpp.o"
 },
 {
   "directory": "/home/runner/work/fresh/fresh/_codeql_build_dir",
-  "command": "/home/runner/work/fresh/.codeql-scratch/dbs/cpp/working/autobuild/bin/c++ -DFRESH_OPENGL_SUPPORT -I/home/runner/work/fresh/fresh/include -O3 -DNDEBUG -std=c++17 -Wall -Wextra -Wpedantic -o CMakeFiles/FreshVoxelEngine.dir/src/renderer/Texture.cpp.o -c /home/runner/work/fresh/fresh/src/renderer/Texture.cpp",
+  "command": "/home/runner/work/fresh/.codeql-scratch/dbs/cpp/working/autobuild/bin/c++ -DFRESH_OPENGL_SUPPORT -DGLM_ENABLE_EXPERIMENTAL -I/home/runner/work/fresh/fresh/include -O3 -DNDEBUG -std=c++17 -Wall -Wextra -Wpedantic -o CMakeFiles/FreshVoxelEngine.dir/src/renderer/Texture.cpp.o -c /home/runner/work/fresh/fresh/src/renderer/Texture.cpp",
   "file": "/home/runner/work/fresh/fresh/src/renderer/Texture.cpp",
   "output": "CMakeFiles/FreshVoxelEngine.dir/src/renderer/Texture.cpp.o"
 },
 {
   "directory": "/home/runner/work/fresh/fresh/_codeql_build_dir",
-  "command": "/home/runner/work/fresh/.codeql-scratch/dbs/cpp/working/autobuild/bin/c++ -DFRESH_OPENGL_SUPPORT -I/home/runner/work/fresh/fresh/include -O3 -DNDEBUG -std=c++17 -Wall -Wextra -Wpedantic -o CMakeFiles/FreshVoxelEngine.dir/src/renderer/TextureManager.cpp.o -c /home/runner/work/fresh/fresh/src/renderer/TextureManager.cpp",
+  "command": "/home/runner/work/fresh/.codeql-scratch/dbs/cpp/working/autobuild/bin/c++ -DFRESH_OPENGL_SUPPORT -DGLM_ENABLE_EXPERIMENTAL -I/home/runner/work/fresh/fresh/include -O3 -DNDEBUG -std=c++17 -Wall -Wextra -Wpedantic -o CMakeFiles/FreshVoxelEngine.dir/src/renderer/TextureManager.cpp.o -c /home/runner/work/fresh/fresh/src/renderer/TextureManager.cpp",
   "file": "/home/runner/work/fresh/fresh/src/renderer/TextureManager.cpp",
   "output": "CMakeFiles/FreshVoxelEngine.dir/src/renderer/TextureManager.cpp.o"
 },
 {
   "directory": "/home/runner/work/fresh/fresh/_codeql_build_dir",
-  "command": "/home/runner/work/fresh/.codeql-scratch/dbs/cpp/working/autobuild/bin/c++ -DFRESH_OPENGL_SUPPORT -I/home/runner/work/fresh/fresh/include -O3 -DNDEBUG -std=c++17 -Wall -Wextra -Wpedantic -o CMakeFiles/FreshVoxelEngine.dir/src/renderer/backends/OpenGLRenderContext.cpp.o -c /home/runner/work/fresh/fresh/src/renderer/backends/OpenGLRenderContext.cpp",
+  "command": "/home/runner/work/fresh/.codeql-scratch/dbs/cpp/working/autobuild/bin/c++ -DFRESH_OPENGL_SUPPORT -DGLM_ENABLE_EXPERIMENTAL -I/home/runner/work/fresh/fresh/include -O3 -DNDEBUG -std=c++17 -Wall -Wextra -Wpedantic -o CMakeFiles/FreshVoxelEngine.dir/src/renderer/VoxelTextureLoader.cpp.o -c /home/runner/work/fresh/fresh/src/renderer/VoxelTextureLoader.cpp",
+  "file": "/home/runner/work/fresh/fresh/src/renderer/VoxelTextureLoader.cpp",
+  "output": "CMakeFiles/FreshVoxelEngine.dir/src/renderer/VoxelTextureLoader.cpp.o"
+},
+{
+  "directory": "/home/runner/work/fresh/fresh/_codeql_build_dir",
+  "command": "/home/runner/work/fresh/.codeql-scratch/dbs/cpp/working/autobuild/bin/c++ -DFRESH_OPENGL_SUPPORT -DGLM_ENABLE_EXPERIMENTAL -I/home/runner/work/fresh/fresh/include -O3 -DNDEBUG -std=c++17 -Wall -Wextra -Wpedantic -o CMakeFiles/FreshVoxelEngine.dir/src/renderer/backends/OpenGLRenderContext.cpp.o -c /home/runner/work/fresh/fresh/src/renderer/backends/OpenGLRenderContext.cpp",
   "file": "/home/runner/work/fresh/fresh/src/renderer/backends/OpenGLRenderContext.cpp",
   "output": "CMakeFiles/FreshVoxelEngine.dir/src/renderer/backends/OpenGLRenderContext.cpp.o"
 },
 {
   "directory": "/home/runner/work/fresh/fresh/_codeql_build_dir",
-  "command": "/home/runner/work/fresh/.codeql-scratch/dbs/cpp/working/autobuild/bin/c++ -DFRESH_OPENGL_SUPPORT -I/home/runner/work/fresh/fresh/include -O3 -DNDEBUG -std=c++17 -Wall -Wextra -Wpedantic -o CMakeFiles/FreshVoxelEngine.dir/src/voxel/Chunk.cpp.o -c /home/runner/work/fresh/fresh/src/voxel/Chunk.cpp",
+  "command": "/home/runner/work/fresh/.codeql-scratch/dbs/cpp/working/autobuild/bin/c++ -DFRESH_OPENGL_SUPPORT -DGLM_ENABLE_EXPERIMENTAL -I/home/runner/work/fresh/fresh/include -O3 -DNDEBUG -std=c++17 -Wall -Wextra -Wpedantic -o CMakeFiles/FreshVoxelEngine.dir/src/voxel/Chunk.cpp.o -c /home/runner/work/fresh/fresh/src/voxel/Chunk.cpp",
   "file": "/home/runner/work/fresh/fresh/src/voxel/Chunk.cpp",
   "output": "CMakeFiles/FreshVoxelEngine.dir/src/voxel/Chunk.cpp.o"
 },
 {
   "directory": "/home/runner/work/fresh/fresh/_codeql_build_dir",
-  "command": "/home/runner/work/fresh/.codeql-scratch/dbs/cpp/working/autobuild/bin/c++ -DFRESH_OPENGL_SUPPORT -I/home/runner/work/fresh/fresh/include -O3 -DNDEBUG -std=c++17 -Wall -Wextra -Wpedantic -o CMakeFiles/FreshVoxelEngine.dir/src/voxel/VoxelWorld.cpp.o -c /home/runner/work/fresh/fresh/src/voxel/VoxelWorld.cpp",
+  "command": "/home/runner/work/fresh/.codeql-scratch/dbs/cpp/working/autobuild/bin/c++ -DFRESH_OPENGL_SUPPORT -DGLM_ENABLE_EXPERIMENTAL -I/home/runner/work/fresh/fresh/include -O3 -DNDEBUG -std=c++17 -Wall -Wextra -Wpedantic -o CMakeFiles/FreshVoxelEngine.dir/src/voxel/VoxelWorld.cpp.o -c /home/runner/work/fresh/fresh/src/voxel/VoxelWorld.cpp",
   "file": "/home/runner/work/fresh/fresh/src/voxel/VoxelWorld.cpp",
   "output": "CMakeFiles/FreshVoxelEngine.dir/src/voxel/VoxelWorld.cpp.o"
 },
 {
   "directory": "/home/runner/work/fresh/fresh/_codeql_build_dir",
-  "command": "/home/runner/work/fresh/.codeql-scratch/dbs/cpp/working/autobuild/bin/c++ -DFRESH_OPENGL_SUPPORT -I/home/runner/work/fresh/fresh/include -O3 -DNDEBUG -std=c++17 -Wall -Wextra -Wpedantic -o CMakeFiles/FreshVoxelEngine.dir/src/voxel/MeshGenerator.cpp.o -c /home/runner/work/fresh/fresh/src/voxel/MeshGenerator.cpp",
+  "command": "/home/runner/work/fresh/.codeql-scratch/dbs/cpp/working/autobuild/bin/c++ -DFRESH_OPENGL_SUPPORT -DGLM_ENABLE_EXPERIMENTAL -I/home/runner/work/fresh/fresh/include -O3 -DNDEBUG -std=c++17 -Wall -Wextra -Wpedantic -o CMakeFiles/FreshVoxelEngine.dir/src/voxel/MeshGenerator.cpp.o -c /home/runner/work/fresh/fresh/src/voxel/MeshGenerator.cpp",
   "file": "/home/runner/work/fresh/fresh/src/voxel/MeshGenerator.cpp",
   "output": "CMakeFiles/FreshVoxelEngine.dir/src/voxel/MeshGenerator.cpp.o"
 },
 {
   "directory": "/home/runner/work/fresh/fresh/_codeql_build_dir",
-  "command": "/home/runner/work/fresh/.codeql-scratch/dbs/cpp/working/autobuild/bin/c++ -DFRESH_OPENGL_SUPPORT -I/home/runner/work/fresh/fresh/include -O3 -DNDEBUG -std=c++17 -Wall -Wextra -Wpedantic -o CMakeFiles/FreshVoxelEngine.dir/src/voxel/ChunkStreamer.cpp.o -c /home/runner/work/fresh/fresh/src/voxel/ChunkStreamer.cpp",
+  "command": "/home/runner/work/fresh/.codeql-scratch/dbs/cpp/working/autobuild/bin/c++ -DFRESH_OPENGL_SUPPORT -DGLM_ENABLE_EXPERIMENTAL -I/home/runner/work/fresh/fresh/include -O3 -DNDEBUG -std=c++17 -Wall -Wextra -Wpedantic -o CMakeFiles/FreshVoxelEngine.dir/src/voxel/ChunkStreamer.cpp.o -c /home/runner/work/fresh/fresh/src/voxel/ChunkStreamer.cpp",
   "file": "/home/runner/work/fresh/fresh/src/voxel/ChunkStreamer.cpp",
   "output": "CMakeFiles/FreshVoxelEngine.dir/src/voxel/ChunkStreamer.cpp.o"
 },
 {
   "directory": "/home/runner/work/fresh/fresh/_codeql_build_dir",
-  "command": "/home/runner/work/fresh/.codeql-scratch/dbs/cpp/working/autobuild/bin/c++ -DFRESH_OPENGL_SUPPORT -I/home/runner/work/fresh/fresh/include -O3 -DNDEBUG -std=c++17 -Wall -Wextra -Wpedantic -o CMakeFiles/FreshVoxelEngine.dir/src/generation/NoiseGenerator.cpp.o -c /home/runner/work/fresh/fresh/src/generation/NoiseGenerator.cpp",
+  "command": "/home/runner/work/fresh/.codeql-scratch/dbs/cpp/working/autobuild/bin/c++ -DFRESH_OPENGL_SUPPORT -DGLM_ENABLE_EXPERIMENTAL -I/home/runner/work/fresh/fresh/include -O3 -DNDEBUG -std=c++17 -Wall -Wextra -Wpedantic -o CMakeFiles/FreshVoxelEngine.dir/src/generation/NoiseGenerator.cpp.o -c /home/runner/work/fresh/fresh/src/generation/NoiseGenerator.cpp",
   "file": "/home/runner/work/fresh/fresh/src/generation/NoiseGenerator.cpp",
   "output": "CMakeFiles/FreshVoxelEngine.dir/src/generation/NoiseGenerator.cpp.o"
 },
 {
   "directory": "/home/runner/work/fresh/fresh/_codeql_build_dir",
-  "command": "/home/runner/work/fresh/.codeql-scratch/dbs/cpp/working/autobuild/bin/c++ -DFRESH_OPENGL_SUPPORT -I/home/runner/work/fresh/fresh/include -O3 -DNDEBUG -std=c++17 -Wall -Wextra -Wpedantic -o CMakeFiles/FreshVoxelEngine.dir/src/generation/TerrainGenerator.cpp.o -c /home/runner/work/fresh/fresh/src/generation/TerrainGenerator.cpp",
+  "command": "/home/runner/work/fresh/.codeql-scratch/dbs/cpp/working/autobuild/bin/c++ -DFRESH_OPENGL_SUPPORT -DGLM_ENABLE_EXPERIMENTAL -I/home/runner/work/fresh/fresh/include -O3 -DNDEBUG -std=c++17 -Wall -Wextra -Wpedantic -o CMakeFiles/FreshVoxelEngine.dir/src/generation/TerrainGenerator.cpp.o -c /home/runner/work/fresh/fresh/src/generation/TerrainGenerator.cpp",
   "file": "/home/runner/work/fresh/fresh/src/generation/TerrainGenerator.cpp",
   "output": "CMakeFiles/FreshVoxelEngine.dir/src/generation/TerrainGenerator.cpp.o"
 },
 {
   "directory": "/home/runner/work/fresh/fresh/_codeql_build_dir",
-  "command": "/home/runner/work/fresh/.codeql-scratch/dbs/cpp/working/autobuild/bin/c++ -DFRESH_OPENGL_SUPPORT -I/home/runner/work/fresh/fresh/include -O3 -DNDEBUG -std=c++17 -Wall -Wextra -Wpedantic -o CMakeFiles/FreshVoxelEngine.dir/src/physics/PhysicsSystem.cpp.o -c /home/runner/work/fresh/fresh/src/physics/PhysicsSystem.cpp",
+  "command": "/home/runner/work/fresh/.codeql-scratch/dbs/cpp/working/autobuild/bin/c++ -DFRESH_OPENGL_SUPPORT -DGLM_ENABLE_EXPERIMENTAL -I/home/runner/work/fresh/fresh/include -O3 -DNDEBUG -std=c++17 -Wall -Wextra -Wpedantic -o CMakeFiles/FreshVoxelEngine.dir/src/physics/PhysicsSystem.cpp.o -c /home/runner/work/fresh/fresh/src/physics/PhysicsSystem.cpp",
   "file": "/home/runner/work/fresh/fresh/src/physics/PhysicsSystem.cpp",
   "output": "CMakeFiles/FreshVoxelEngine.dir/src/physics/PhysicsSystem.cpp.o"
 },
 {
   "directory": "/home/runner/work/fresh/fresh/_codeql_build_dir",
-  "command": "/home/runner/work/fresh/.codeql-scratch/dbs/cpp/working/autobuild/bin/c++ -DFRESH_OPENGL_SUPPORT -I/home/runner/work/fresh/fresh/include -O3 -DNDEBUG -std=c++17 -Wall -Wextra -Wpedantic -o CMakeFiles/FreshVoxelEngine.dir/src/physics/CollisionDetection.cpp.o -c /home/runner/work/fresh/fresh/src/physics/CollisionDetection.cpp",
+  "command": "/home/runner/work/fresh/.codeql-scratch/dbs/cpp/working/autobuild/bin/c++ -DFRESH_OPENGL_SUPPORT -DGLM_ENABLE_EXPERIMENTAL -I/home/runner/work/fresh/fresh/include -O3 -DNDEBUG -std=c++17 -Wall -Wextra -Wpedantic -o CMakeFiles/FreshVoxelEngine.dir/src/physics/CollisionDetection.cpp.o -c /home/runner/work/fresh/fresh/src/physics/CollisionDetection.cpp",
   "file": "/home/runner/work/fresh/fresh/src/physics/CollisionDetection.cpp",
   "output": "CMakeFiles/FreshVoxelEngine.dir/src/physics/CollisionDetection.cpp.o"
 },
 {
   "directory": "/home/runner/work/fresh/fresh/_codeql_build_dir",
-  "command": "/home/runner/work/fresh/.codeql-scratch/dbs/cpp/working/autobuild/bin/c++ -DFRESH_OPENGL_SUPPORT -I/home/runner/work/fresh/fresh/include -O3 -DNDEBUG -std=c++17 -Wall -Wextra -Wpedantic -o CMakeFiles/FreshVoxelEngine.dir/src/physics/PhysicsComponent.cpp.o -c /home/runner/work/fresh/fresh/src/physics/PhysicsComponent.cpp",
+  "command": "/home/runner/work/fresh/.codeql-scratch/dbs/cpp/working/autobuild/bin/c++ -DFRESH_OPENGL_SUPPORT -DGLM_ENABLE_EXPERIMENTAL -I/home/runner/work/fresh/fresh/include -O3 -DNDEBUG -std=c++17 -Wall -Wextra -Wpedantic -o CMakeFiles/FreshVoxelEngine.dir/src/physics/PhysicsComponent.cpp.o -c /home/runner/work/fresh/fresh/src/physics/PhysicsComponent.cpp",
   "file": "/home/runner/work/fresh/fresh/src/physics/PhysicsComponent.cpp",
   "output": "CMakeFiles/FreshVoxelEngine.dir/src/physics/PhysicsComponent.cpp.o"
 },
 {
   "directory": "/home/runner/work/fresh/fresh/_codeql_build_dir",
-  "command": "/home/runner/work/fresh/.codeql-scratch/dbs/cpp/working/autobuild/bin/c++ -DFRESH_OPENGL_SUPPORT -I/home/runner/work/fresh/fresh/include -O3 -DNDEBUG -std=c++17 -Wall -Wextra -Wpedantic -o CMakeFiles/FreshVoxelEngine.dir/src/physics/PhysicsSystemEnhanced.cpp.o -c /home/runner/work/fresh/fresh/src/physics/PhysicsSystemEnhanced.cpp",
+  "command": "/home/runner/work/fresh/.codeql-scratch/dbs/cpp/working/autobuild/bin/c++ -DFRESH_OPENGL_SUPPORT -DGLM_ENABLE_EXPERIMENTAL -I/home/runner/work/fresh/fresh/include -O3 -DNDEBUG -std=c++17 -Wall -Wextra -Wpedantic -o CMakeFiles/FreshVoxelEngine.dir/src/physics/PhysicsSystemEnhanced.cpp.o -c /home/runner/work/fresh/fresh/src/physics/PhysicsSystemEnhanced.cpp",
   "file": "/home/runner/work/fresh/fresh/src/physics/PhysicsSystemEnhanced.cpp",
   "output": "CMakeFiles/FreshVoxelEngine.dir/src/physics/PhysicsSystemEnhanced.cpp.o"
 },
 {
   "directory": "/home/runner/work/fresh/fresh/_codeql_build_dir",
-  "command": "/home/runner/work/fresh/.codeql-scratch/dbs/cpp/working/autobuild/bin/c++ -DFRESH_OPENGL_SUPPORT -I/home/runner/work/fresh/fresh/include -O3 -DNDEBUG -std=c++17 -Wall -Wextra -Wpedantic -o CMakeFiles/FreshVoxelEngine.dir/src/interaction/RaycastSystem.cpp.o -c /home/runner/work/fresh/fresh/src/interaction/RaycastSystem.cpp",
+  "command": "/home/runner/work/fresh/.codeql-scratch/dbs/cpp/working/autobuild/bin/c++ -DFRESH_OPENGL_SUPPORT -DGLM_ENABLE_EXPERIMENTAL -I/home/runner/work/fresh/fresh/include -O3 -DNDEBUG -std=c++17 -Wall -Wextra -Wpedantic -o CMakeFiles/FreshVoxelEngine.dir/src/interaction/RaycastSystem.cpp.o -c /home/runner/work/fresh/fresh/src/interaction/RaycastSystem.cpp",
   "file": "/home/runner/work/fresh/fresh/src/interaction/RaycastSystem.cpp",
   "output": "CMakeFiles/FreshVoxelEngine.dir/src/interaction/RaycastSystem.cpp.o"
 },
 {
   "directory": "/home/runner/work/fresh/fresh/_codeql_build_dir",
-  "command": "/home/runner/work/fresh/.codeql-scratch/dbs/cpp/working/autobuild/bin/c++ -DFRESH_OPENGL_SUPPORT -I/home/runner/work/fresh/fresh/include -O3 -DNDEBUG -std=c++17 -Wall -Wextra -Wpedantic -o CMakeFiles/FreshVoxelEngine.dir/src/ai/AISystem.cpp.o -c /home/runner/work/fresh/fresh/src/ai/AISystem.cpp",
+  "command": "/home/runner/work/fresh/.codeql-scratch/dbs/cpp/working/autobuild/bin/c++ -DFRESH_OPENGL_SUPPORT -DGLM_ENABLE_EXPERIMENTAL -I/home/runner/work/fresh/fresh/include -O3 -DNDEBUG -std=c++17 -Wall -Wextra -Wpedantic -o CMakeFiles/FreshVoxelEngine.dir/src/ai/AISystem.cpp.o -c /home/runner/work/fresh/fresh/src/ai/AISystem.cpp",
   "file": "/home/runner/work/fresh/fresh/src/ai/AISystem.cpp",
   "output": "CMakeFiles/FreshVoxelEngine.dir/src/ai/AISystem.cpp.o"
 },
 {
   "directory": "/home/runner/work/fresh/fresh/_codeql_build_dir",
-  "command": "/home/runner/work/fresh/.codeql-scratch/dbs/cpp/working/autobuild/bin/c++ -DFRESH_OPENGL_SUPPORT -I/home/runner/work/fresh/fresh/include -O3 -DNDEBUG -std=c++17 -Wall -Wextra -Wpedantic -o CMakeFiles/FreshVoxelEngine.dir/src/ai/BehaviorTree.cpp.o -c /home/runner/work/fresh/fresh/src/ai/BehaviorTree.cpp",
+  "command": "/home/runner/work/fresh/.codeql-scratch/dbs/cpp/working/autobuild/bin/c++ -DFRESH_OPENGL_SUPPORT -DGLM_ENABLE_EXPERIMENTAL -I/home/runner/work/fresh/fresh/include -O3 -DNDEBUG -std=c++17 -Wall -Wextra -Wpedantic -o CMakeFiles/FreshVoxelEngine.dir/src/ai/BehaviorTree.cpp.o -c /home/runner/work/fresh/fresh/src/ai/BehaviorTree.cpp",
   "file": "/home/runner/work/fresh/fresh/src/ai/BehaviorTree.cpp",
   "output": "CMakeFiles/FreshVoxelEngine.dir/src/ai/BehaviorTree.cpp.o"
 },
 {
   "directory": "/home/runner/work/fresh/fresh/_codeql_build_dir",
-  "command": "/home/runner/work/fresh/.codeql-scratch/dbs/cpp/working/autobuild/bin/c++ -DFRESH_OPENGL_SUPPORT -I/home/runner/work/fresh/fresh/include -O3 -DNDEBUG -std=c++17 -Wall -Wextra -Wpedantic -o CMakeFiles/FreshVoxelEngine.dir/src/audio/AudioEngine.cpp.o -c /home/runner/work/fresh/fresh/src/audio/AudioEngine.cpp",
+  "command": "/home/runner/work/fresh/.codeql-scratch/dbs/cpp/working/autobuild/bin/c++ -DFRESH_OPENGL_SUPPORT -DGLM_ENABLE_EXPERIMENTAL -I/home/runner/work/fresh/fresh/include -O3 -DNDEBUG -std=c++17 -Wall -Wextra -Wpedantic -o CMakeFiles/FreshVoxelEngine.dir/src/audio/AudioEngine.cpp.o -c /home/runner/work/fresh/fresh/src/audio/AudioEngine.cpp",
   "file": "/home/runner/work/fresh/fresh/src/audio/AudioEngine.cpp",
   "output": "CMakeFiles/FreshVoxelEngine.dir/src/audio/AudioEngine.cpp.o"
 },
 {
   "directory": "/home/runner/work/fresh/fresh/_codeql_build_dir",
-  "command": "/home/runner/work/fresh/.codeql-scratch/dbs/cpp/working/autobuild/bin/c++ -DFRESH_OPENGL_SUPPORT -I/home/runner/work/fresh/fresh/include -O3 -DNDEBUG -std=c++17 -Wall -Wextra -Wpedantic -o CMakeFiles/FreshVoxelEngine.dir/src/scripting/EventSystem.cpp.o -c /home/runner/work/fresh/fresh/src/scripting/EventSystem.cpp",
+  "command": "/home/runner/work/fresh/.codeql-scratch/dbs/cpp/working/autobuild/bin/c++ -DFRESH_OPENGL_SUPPORT -DGLM_ENABLE_EXPERIMENTAL -I/home/runner/work/fresh/fresh/include -O3 -DNDEBUG -std=c++17 -Wall -Wextra -Wpedantic -o CMakeFiles/FreshVoxelEngine.dir/src/scripting/EventSystem.cpp.o -c /home/runner/work/fresh/fresh/src/scripting/EventSystem.cpp",
   "file": "/home/runner/work/fresh/fresh/src/scripting/EventSystem.cpp",
   "output": "CMakeFiles/FreshVoxelEngine.dir/src/scripting/EventSystem.cpp.o"
 },
 {
   "directory": "/home/runner/work/fresh/fresh/_codeql_build_dir",
-  "command": "/home/runner/work/fresh/.codeql-scratch/dbs/cpp/working/autobuild/bin/c++ -DFRESH_OPENGL_SUPPORT -I/home/runner/work/fresh/fresh/include -O3 -DNDEBUG -std=c++17 -Wall -Wextra -Wpedantic -o CMakeFiles/FreshVoxelEngine.dir/src/editor/EditorGUI.cpp.o -c /home/runner/work/fresh/fresh/src/editor/EditorGUI.cpp",
+  "command": "/home/runner/work/fresh/.codeql-scratch/dbs/cpp/working/autobuild/bin/c++ -DFRESH_OPENGL_SUPPORT -DGLM_ENABLE_EXPERIMENTAL -I/home/runner/work/fresh/fresh/include -O3 -DNDEBUG -std=c++17 -Wall -Wextra -Wpedantic -o CMakeFiles/FreshVoxelEngine.dir/src/editor/EditorGUI.cpp.o -c /home/runner/work/fresh/fresh/src/editor/EditorGUI.cpp",
   "file": "/home/runner/work/fresh/fresh/src/editor/EditorGUI.cpp",
   "output": "CMakeFiles/FreshVoxelEngine.dir/src/editor/EditorGUI.cpp.o"
 },
 {
   "directory": "/home/runner/work/fresh/fresh/_codeql_build_dir",
-  "command": "/home/runner/work/fresh/.codeql-scratch/dbs/cpp/working/autobuild/bin/c++ -DFRESH_OPENGL_SUPPORT -I/home/runner/work/fresh/fresh/include -O3 -DNDEBUG -std=c++17 -Wall -Wextra -Wpedantic -o CMakeFiles/FreshVoxelEngine.dir/src/editor/WorldEditor.cpp.o -c /home/runner/work/fresh/fresh/src/editor/WorldEditor.cpp",
+  "command": "/home/runner/work/fresh/.codeql-scratch/dbs/cpp/working/autobuild/bin/c++ -DFRESH_OPENGL_SUPPORT -DGLM_ENABLE_EXPERIMENTAL -I/home/runner/work/fresh/fresh/include -O3 -DNDEBUG -std=c++17 -Wall -Wextra -Wpedantic -o CMakeFiles/FreshVoxelEngine.dir/src/editor/WorldEditor.cpp.o -c /home/runner/work/fresh/fresh/src/editor/WorldEditor.cpp",
   "file": "/home/runner/work/fresh/fresh/src/editor/WorldEditor.cpp",
   "output": "CMakeFiles/FreshVoxelEngine.dir/src/editor/WorldEditor.cpp.o"
 },
 {
   "directory": "/home/runner/work/fresh/fresh/_codeql_build_dir",
-  "command": "/home/runner/work/fresh/.codeql-scratch/dbs/cpp/working/autobuild/bin/c++ -DFRESH_OPENGL_SUPPORT -I/home/runner/work/fresh/fresh/include -O3 -DNDEBUG -std=c++17 -Wall -Wextra -Wpedantic -o CMakeFiles/FreshVoxelEngine.dir/src/editor/TerraformingSystem.cpp.o -c /home/runner/work/fresh/fresh/src/editor/TerraformingSystem.cpp",
+  "command": "/home/runner/work/fresh/.codeql-scratch/dbs/cpp/working/autobuild/bin/c++ -DFRESH_OPENGL_SUPPORT -DGLM_ENABLE_EXPERIMENTAL -I/home/runner/work/fresh/fresh/include -O3 -DNDEBUG -std=c++17 -Wall -Wextra -Wpedantic -o CMakeFiles/FreshVoxelEngine.dir/src/editor/TerraformingSystem.cpp.o -c /home/runner/work/fresh/fresh/src/editor/TerraformingSystem.cpp",
   "file": "/home/runner/work/fresh/fresh/src/editor/TerraformingSystem.cpp",
   "output": "CMakeFiles/FreshVoxelEngine.dir/src/editor/TerraformingSystem.cpp.o"
 },
 {
   "directory": "/home/runner/work/fresh/fresh/_codeql_build_dir",
-  "command": "/home/runner/work/fresh/.codeql-scratch/dbs/cpp/working/autobuild/bin/c++ -DFRESH_OPENGL_SUPPORT -I/home/runner/work/fresh/fresh/include -O3 -DNDEBUG -std=c++17 -Wall -Wextra -Wpedantic -o CMakeFiles/FreshVoxelEngine.dir/src/serialization/WorldSerializer.cpp.o -c /home/runner/work/fresh/fresh/src/serialization/WorldSerializer.cpp",
+  "command": "/home/runner/work/fresh/.codeql-scratch/dbs/cpp/working/autobuild/bin/c++ -DFRESH_OPENGL_SUPPORT -DGLM_ENABLE_EXPERIMENTAL -I/home/runner/work/fresh/fresh/include -O3 -DNDEBUG -std=c++17 -Wall -Wextra -Wpedantic -o CMakeFiles/FreshVoxelEngine.dir/src/serialization/WorldSerializer.cpp.o -c /home/runner/work/fresh/fresh/src/serialization/WorldSerializer.cpp",
   "file": "/home/runner/work/fresh/fresh/src/serialization/WorldSerializer.cpp",
   "output": "CMakeFiles/FreshVoxelEngine.dir/src/serialization/WorldSerializer.cpp.o"
 },
 {
   "directory": "/home/runner/work/fresh/fresh/_codeql_build_dir",
-  "command": "/home/runner/work/fresh/.codeql-scratch/dbs/cpp/working/autobuild/bin/c++ -DFRESH_OPENGL_SUPPORT -I/home/runner/work/fresh/fresh/include -O3 -DNDEBUG -std=c++17 -Wall -Wextra -Wpedantic -o CMakeFiles/FreshVoxelEngine.dir/src/ui/MainMenu.cpp.o -c /home/runner/work/fresh/fresh/src/ui/MainMenu.cpp",
+  "command": "/home/runner/work/fresh/.codeql-scratch/dbs/cpp/working/autobuild/bin/c++ -DFRESH_OPENGL_SUPPORT -DGLM_ENABLE_EXPERIMENTAL -I/home/runner/work/fresh/fresh/include -O3 -DNDEBUG -std=c++17 -Wall -Wextra -Wpedantic -o CMakeFiles/FreshVoxelEngine.dir/src/ui/MainMenu.cpp.o -c /home/runner/work/fresh/fresh/src/ui/MainMenu.cpp",
   "file": "/home/runner/work/fresh/fresh/src/ui/MainMenu.cpp",
   "output": "CMakeFiles/FreshVoxelEngine.dir/src/ui/MainMenu.cpp.o"
 },
 {
   "directory": "/home/runner/work/fresh/fresh/_codeql_build_dir",
-  "command": "/home/runner/work/fresh/.codeql-scratch/dbs/cpp/working/autobuild/bin/c++ -DFRESH_OPENGL_SUPPORT -I/home/runner/work/fresh/fresh/include -O3 -DNDEBUG -std=c++17 -Wall -Wextra -Wpedantic -o CMakeFiles/FreshVoxelEngine.dir/src/input/InputManager.cpp.o -c /home/runner/work/fresh/fresh/src/input/InputManager.cpp",
+  "command": "/home/runner/work/fresh/.codeql-scratch/dbs/cpp/working/autobuild/bin/c++ -DFRESH_OPENGL_SUPPORT -DGLM_ENABLE_EXPERIMENTAL -I/home/runner/work/fresh/fresh/include -O3 -DNDEBUG -std=c++17 -Wall -Wextra -Wpedantic -o CMakeFiles/FreshVoxelEngine.dir/src/input/InputManager.cpp.o -c /home/runner/work/fresh/fresh/src/input/InputManager.cpp",
   "file": "/home/runner/work/fresh/fresh/src/input/InputManager.cpp",
   "output": "CMakeFiles/FreshVoxelEngine.dir/src/input/InputManager.cpp.o"
 },
 {
   "directory": "/home/runner/work/fresh/fresh/_codeql_build_dir",
-  "command": "/home/runner/work/fresh/.codeql-scratch/dbs/cpp/working/autobuild/bin/c++ -DFRESH_OPENGL_SUPPORT -I/home/runner/work/fresh/fresh/include -O3 -DNDEBUG -std=c++17 -Wall -Wextra -Wpedantic -o CMakeFiles/FreshVoxelEngine.dir/src/gameplay/Camera.cpp.o -c /home/runner/work/fresh/fresh/src/gameplay/Camera.cpp",
+  "command": "/home/runner/work/fresh/.codeql-scratch/dbs/cpp/working/autobuild/bin/c++ -DFRESH_OPENGL_SUPPORT -DGLM_ENABLE_EXPERIMENTAL -I/home/runner/work/fresh/fresh/include -O3 -DNDEBUG -std=c++17 -Wall -Wextra -Wpedantic -o CMakeFiles/FreshVoxelEngine.dir/src/gameplay/Camera.cpp.o -c /home/runner/work/fresh/fresh/src/gameplay/Camera.cpp",
   "file": "/home/runner/work/fresh/fresh/src/gameplay/Camera.cpp",
   "output": "CMakeFiles/FreshVoxelEngine.dir/src/gameplay/Camera.cpp.o"
 },
 {
   "directory": "/home/runner/work/fresh/fresh/_codeql_build_dir",
-  "command": "/home/runner/work/fresh/.codeql-scratch/dbs/cpp/working/autobuild/bin/c++ -DFRESH_OPENGL_SUPPORT -I/home/runner/work/fresh/fresh/include -O3 -DNDEBUG -std=c++17 -Wall -Wextra -Wpedantic -o CMakeFiles/FreshVoxelEngine.dir/src/gameplay/Player.cpp.o -c /home/runner/work/fresh/fresh/src/gameplay/Player.cpp",
+  "command": "/home/runner/work/fresh/.codeql-scratch/dbs/cpp/working/autobuild/bin/c++ -DFRESH_OPENGL_SUPPORT -DGLM_ENABLE_EXPERIMENTAL -I/home/runner/work/fresh/fresh/include -O3 -DNDEBUG -std=c++17 -Wall -Wextra -Wpedantic -o CMakeFiles/FreshVoxelEngine.dir/src/gameplay/Player.cpp.o -c /home/runner/work/fresh/fresh/src/gameplay/Player.cpp",
   "file": "/home/runner/work/fresh/fresh/src/gameplay/Player.cpp",
   "output": "CMakeFiles/FreshVoxelEngine.dir/src/gameplay/Player.cpp.o"
 },
 {
   "directory": "/home/runner/work/fresh/fresh/_codeql_build_dir",
-  "command": "/home/runner/work/fresh/.codeql-scratch/dbs/cpp/working/autobuild/bin/c++ -DFRESH_OPENGL_SUPPORT -I/home/runner/work/fresh/fresh/include -O3 -DNDEBUG -std=c++17 -Wall -Wextra -Wpedantic -o CMakeFiles/FreshVoxelEngine.dir/src/assets/ModularAssetSystem.cpp.o -c /home/runner/work/fresh/fresh/src/assets/ModularAssetSystem.cpp",
+  "command": "/home/runner/work/fresh/.codeql-scratch/dbs/cpp/working/autobuild/bin/c++ -DFRESH_OPENGL_SUPPORT -DGLM_ENABLE_EXPERIMENTAL -I/home/runner/work/fresh/fresh/include -O3 -DNDEBUG -std=c++17 -Wall -Wextra -Wpedantic -o CMakeFiles/FreshVoxelEngine.dir/src/assets/ModularAssetSystem.cpp.o -c /home/runner/work/fresh/fresh/src/assets/ModularAssetSystem.cpp",
   "file": "/home/runner/work/fresh/fresh/src/assets/ModularAssetSystem.cpp",
   "output": "CMakeFiles/FreshVoxelEngine.dir/src/assets/ModularAssetSystem.cpp.o"
 },
 {
   "directory": "/home/runner/work/fresh/fresh/_codeql_build_dir",
-  "command": "/home/runner/work/fresh/.codeql-scratch/dbs/cpp/working/autobuild/bin/c++ -DFRESH_OPENGL_SUPPORT -I/home/runner/work/fresh/fresh/include -O3 -DNDEBUG -std=c++17 -Wall -Wextra -Wpedantic -o CMakeFiles/FreshVoxelEngine.dir/src/ecs/EntityManager.cpp.o -c /home/runner/work/fresh/fresh/src/ecs/EntityManager.cpp",
+  "command": "/home/runner/work/fresh/.codeql-scratch/dbs/cpp/working/autobuild/bin/c++ -DFRESH_OPENGL_SUPPORT -DGLM_ENABLE_EXPERIMENTAL -I/home/runner/work/fresh/fresh/include -O3 -DNDEBUG -std=c++17 -Wall -Wextra -Wpedantic -o CMakeFiles/FreshVoxelEngine.dir/src/ecs/EntityManager.cpp.o -c /home/runner/work/fresh/fresh/src/ecs/EntityManager.cpp",
   "file": "/home/runner/work/fresh/fresh/src/ecs/EntityManager.cpp",
   "output": "CMakeFiles/FreshVoxelEngine.dir/src/ecs/EntityManager.cpp.o"
 },
 {
   "directory": "/home/runner/work/fresh/fresh/_codeql_build_dir",
-  "command": "/home/runner/work/fresh/.codeql-scratch/dbs/cpp/working/autobuild/bin/c++ -DFRESH_OPENGL_SUPPORT -I/home/runner/work/fresh/fresh/include -O3 -DNDEBUG -std=c++17 -Wall -Wextra -Wpedantic -o CMakeFiles/FreshVoxelEngine.dir/src/voxelship/VoxelBlock.cpp.o -c /home/runner/work/fresh/fresh/src/voxelship/VoxelBlock.cpp",
+  "command": "/home/runner/work/fresh/.codeql-scratch/dbs/cpp/working/autobuild/bin/c++ -DFRESH_OPENGL_SUPPORT -DGLM_ENABLE_EXPERIMENTAL -I/home/runner/work/fresh/fresh/include -O3 -DNDEBUG -std=c++17 -Wall -Wextra -Wpedantic -o CMakeFiles/FreshVoxelEngine.dir/src/voxelship/VoxelBlock.cpp.o -c /home/runner/work/fresh/fresh/src/voxelship/VoxelBlock.cpp",
   "file": "/home/runner/work/fresh/fresh/src/voxelship/VoxelBlock.cpp",
   "output": "CMakeFiles/FreshVoxelEngine.dir/src/voxelship/VoxelBlock.cpp.o"
 },
 {
   "directory": "/home/runner/work/fresh/fresh/_codeql_build_dir",
-  "command": "/home/runner/work/fresh/.codeql-scratch/dbs/cpp/working/autobuild/bin/c++ -DFRESH_OPENGL_SUPPORT -I/home/runner/work/fresh/fresh/include -O3 -DNDEBUG -std=c++17 -Wall -Wextra -Wpedantic -o CMakeFiles/FreshVoxelEngine.dir/src/voxelship/VoxelStructureComponent.cpp.o -c /home/runner/work/fresh/fresh/src/voxelship/VoxelStructureComponent.cpp",
+  "command": "/home/runner/work/fresh/.codeql-scratch/dbs/cpp/working/autobuild/bin/c++ -DFRESH_OPENGL_SUPPORT -DGLM_ENABLE_EXPERIMENTAL -I/home/runner/work/fresh/fresh/include -O3 -DNDEBUG -std=c++17 -Wall -Wextra -Wpedantic -o CMakeFiles/FreshVoxelEngine.dir/src/voxelship/VoxelStructureComponent.cpp.o -c /home/runner/work/fresh/fresh/src/voxelship/VoxelStructureComponent.cpp",
   "file": "/home/runner/work/fresh/fresh/src/voxelship/VoxelStructureComponent.cpp",
   "output": "CMakeFiles/FreshVoxelEngine.dir/src/voxelship/VoxelStructureComponent.cpp.o"
 },
 {
   "directory": "/home/runner/work/fresh/fresh/_codeql_build_dir",
-  "command": "/home/runner/work/fresh/.codeql-scratch/dbs/cpp/working/autobuild/bin/c++ -DFRESH_OPENGL_SUPPORT -I/home/runner/work/fresh/fresh/include -O3 -DNDEBUG -std=c++17 -Wall -Wextra -Wpedantic -o CMakeFiles/FreshVoxelEngine.dir/src/galaxy/GalaxySector.cpp.o -c /home/runner/work/fresh/fresh/src/galaxy/GalaxySector.cpp",
+  "command": "/home/runner/work/fresh/.codeql-scratch/dbs/cpp/working/autobuild/bin/c++ -DFRESH_OPENGL_SUPPORT -DGLM_ENABLE_EXPERIMENTAL -I/home/runner/work/fresh/fresh/include -O3 -DNDEBUG -std=c++17 -Wall -Wextra -Wpedantic -o CMakeFiles/FreshVoxelEngine.dir/src/galaxy/GalaxySector.cpp.o -c /home/runner/work/fresh/fresh/src/galaxy/GalaxySector.cpp",
   "file": "/home/runner/work/fresh/fresh/src/galaxy/GalaxySector.cpp",
   "output": "CMakeFiles/FreshVoxelEngine.dir/src/galaxy/GalaxySector.cpp.o"
 },
 {
   "directory": "/home/runner/work/fresh/fresh/_codeql_build_dir",
-  "command": "/home/runner/work/fresh/.codeql-scratch/dbs/cpp/working/autobuild/bin/c++ -DFRESH_OPENGL_SUPPORT -I/home/runner/work/fresh/fresh/include -O3 -DNDEBUG -std=c++17 -Wall -Wextra -Wpedantic -o CMakeFiles/FreshVoxelEngine.dir/src/galaxy/GalaxyGenerator.cpp.o -c /home/runner/work/fresh/fresh/src/galaxy/GalaxyGenerator.cpp",
+  "command": "/home/runner/work/fresh/.codeql-scratch/dbs/cpp/working/autobuild/bin/c++ -DFRESH_OPENGL_SUPPORT -DGLM_ENABLE_EXPERIMENTAL -I/home/runner/work/fresh/fresh/include -O3 -DNDEBUG -std=c++17 -Wall -Wextra -Wpedantic -o CMakeFiles/FreshVoxelEngine.dir/src/galaxy/GalaxyGenerator.cpp.o -c /home/runner/work/fresh/fresh/src/galaxy/GalaxyGenerator.cpp",
   "file": "/home/runner/work/fresh/fresh/src/galaxy/GalaxyGenerator.cpp",
   "output": "CMakeFiles/FreshVoxelEngine.dir/src/galaxy/GalaxyGenerator.cpp.o"
 },
 {
   "directory": "/home/runner/work/fresh/fresh/_codeql_build_dir",
-  "command": "/home/runner/work/fresh/.codeql-scratch/dbs/cpp/working/autobuild/bin/c++ -DFRESH_OPENGL_SUPPORT -I/home/runner/work/fresh/fresh/include -O3 -DNDEBUG -std=c++17 -Wall -Wextra -Wpedantic -o CMakeFiles/FreshVoxelEngine.dir/src/rpg/Inventory.cpp.o -c /home/runner/work/fresh/fresh/src/rpg/Inventory.cpp",
+  "command": "/home/runner/work/fresh/.codeql-scratch/dbs/cpp/working/autobuild/bin/c++ -DFRESH_OPENGL_SUPPORT -DGLM_ENABLE_EXPERIMENTAL -I/home/runner/work/fresh/fresh/include -O3 -DNDEBUG -std=c++17 -Wall -Wextra -Wpedantic -o CMakeFiles/FreshVoxelEngine.dir/src/rpg/Inventory.cpp.o -c /home/runner/work/fresh/fresh/src/rpg/Inventory.cpp",
   "file": "/home/runner/work/fresh/fresh/src/rpg/Inventory.cpp",
   "output": "CMakeFiles/FreshVoxelEngine.dir/src/rpg/Inventory.cpp.o"
 },
 {
   "directory": "/home/runner/work/fresh/fresh/_codeql_build_dir",
-  "command": "/home/runner/work/fresh/.codeql-scratch/dbs/cpp/working/autobuild/bin/c++ -DFRESH_OPENGL_SUPPORT -I/home/runner/work/fresh/fresh/include -O3 -DNDEBUG -std=c++17 -Wall -Wextra -Wpedantic -o CMakeFiles/FreshVoxelEngine.dir/src/rpg/InventoryComponent.cpp.o -c /home/runner/work/fresh/fresh/src/rpg/InventoryComponent.cpp",
+  "command": "/home/runner/work/fresh/.codeql-scratch/dbs/cpp/working/autobuild/bin/c++ -DFRESH_OPENGL_SUPPORT -DGLM_ENABLE_EXPERIMENTAL -I/home/runner/work/fresh/fresh/include -O3 -DNDEBUG -std=c++17 -Wall -Wextra -Wpedantic -o CMakeFiles/FreshVoxelEngine.dir/src/rpg/InventoryComponent.cpp.o -c /home/runner/work/fresh/fresh/src/rpg/InventoryComponent.cpp",
   "file": "/home/runner/work/fresh/fresh/src/rpg/InventoryComponent.cpp",
   "output": "CMakeFiles/FreshVoxelEngine.dir/src/rpg/InventoryComponent.cpp.o"
 },
 {
   "directory": "/home/runner/work/fresh/fresh/_codeql_build_dir",
-  "command": "/home/runner/work/fresh/.codeql-scratch/dbs/cpp/working/autobuild/bin/c++ -DFRESH_OPENGL_SUPPORT -I/home/runner/work/fresh/fresh/include -O3 -DNDEBUG -std=c++17 -Wall -Wextra -Wpedantic -o CMakeFiles/FreshVoxelEngine.dir/src/rpg/CraftingSystem.cpp.o -c /home/runner/work/fresh/fresh/src/rpg/CraftingSystem.cpp",
+  "command": "/home/runner/work/fresh/.codeql-scratch/dbs/cpp/working/autobuild/bin/c++ -DFRESH_OPENGL_SUPPORT -DGLM_ENABLE_EXPERIMENTAL -I/home/runner/work/fresh/fresh/include -O3 -DNDEBUG -std=c++17 -Wall -Wextra -Wpedantic -o CMakeFiles/FreshVoxelEngine.dir/src/rpg/CraftingSystem.cpp.o -c /home/runner/work/fresh/fresh/src/rpg/CraftingSystem.cpp",
   "file": "/home/runner/work/fresh/fresh/src/rpg/CraftingSystem.cpp",
   "output": "CMakeFiles/FreshVoxelEngine.dir/src/rpg/CraftingSystem.cpp.o"
 },
 {
   "directory": "/home/runner/work/fresh/fresh/_codeql_build_dir",
-  "command": "/home/runner/work/fresh/.codeql-scratch/dbs/cpp/working/autobuild/bin/c++ -DFRESH_OPENGL_SUPPORT -I/home/runner/work/fresh/fresh/include -O3 -DNDEBUG -std=c++17 -Wall -Wextra -Wpedantic -o CMakeFiles/FreshVoxelEngine.dir/src/rpg/ProgressionComponent.cpp.o -c /home/runner/work/fresh/fresh/src/rpg/ProgressionComponent.cpp",
+  "command": "/home/runner/work/fresh/.codeql-scratch/dbs/cpp/working/autobuild/bin/c++ -DFRESH_OPENGL_SUPPORT -DGLM_ENABLE_EXPERIMENTAL -I/home/runner/work/fresh/fresh/include -O3 -DNDEBUG -std=c++17 -Wall -Wextra -Wpedantic -o CMakeFiles/FreshVoxelEngine.dir/src/rpg/ProgressionComponent.cpp.o -c /home/runner/work/fresh/fresh/src/rpg/ProgressionComponent.cpp",
   "file": "/home/runner/work/fresh/fresh/src/rpg/ProgressionComponent.cpp",
   "output": "CMakeFiles/FreshVoxelEngine.dir/src/rpg/ProgressionComponent.cpp.o"
 },
 {
   "directory": "/home/runner/work/fresh/fresh/_codeql_build_dir",
-  "command": "/home/runner/work/fresh/.codeql-scratch/dbs/cpp/working/autobuild/bin/c++ -DFRESH_OPENGL_SUPPORT -I/home/runner/work/fresh/fresh/include -O3 -DNDEBUG -std=c++17 -Wall -Wextra -Wpedantic -o CMakeFiles/FreshVoxelEngine.dir/src/rpg/FactionComponent.cpp.o -c /home/runner/work/fresh/fresh/src/rpg/FactionComponent.cpp",
+  "command": "/home/runner/work/fresh/.codeql-scratch/dbs/cpp/working/autobuild/bin/c++ -DFRESH_OPENGL_SUPPORT -DGLM_ENABLE_EXPERIMENTAL -I/home/runner/work/fresh/fresh/include -O3 -DNDEBUG -std=c++17 -Wall -Wextra -Wpedantic -o CMakeFiles/FreshVoxelEngine.dir/src/rpg/FactionComponent.cpp.o -c /home/runner/work/fresh/fresh/src/rpg/FactionComponent.cpp",
   "file": "/home/runner/work/fresh/fresh/src/rpg/FactionComponent.cpp",
   "output": "CMakeFiles/FreshVoxelEngine.dir/src/rpg/FactionComponent.cpp.o"
 },
 {
   "directory": "/home/runner/work/fresh/fresh/_codeql_build_dir",
-  "command": "/home/runner/work/fresh/.codeql-scratch/dbs/cpp/working/autobuild/bin/c++ -DFRESH_OPENGL_SUPPORT -I/home/runner/work/fresh/fresh/include -O3 -DNDEBUG -std=c++17 -Wall -Wextra -Wpedantic -o CMakeFiles/FreshVoxelEngine.dir/src/rpg/LootSystem.cpp.o -c /home/runner/work/fresh/fresh/src/rpg/LootSystem.cpp",
+  "command": "/home/runner/work/fresh/.codeql-scratch/dbs/cpp/working/autobuild/bin/c++ -DFRESH_OPENGL_SUPPORT -DGLM_ENABLE_EXPERIMENTAL -I/home/runner/work/fresh/fresh/include -O3 -DNDEBUG -std=c++17 -Wall -Wextra -Wpedantic -o CMakeFiles/FreshVoxelEngine.dir/src/rpg/LootSystem.cpp.o -c /home/runner/work/fresh/fresh/src/rpg/LootSystem.cpp",
   "file": "/home/runner/work/fresh/fresh/src/rpg/LootSystem.cpp",
   "output": "CMakeFiles/FreshVoxelEngine.dir/src/rpg/LootSystem.cpp.o"
 },
 {
   "directory": "/home/runner/work/fresh/fresh/_codeql_build_dir",
-  "command": "/home/runner/work/fresh/.codeql-scratch/dbs/cpp/working/autobuild/bin/c++ -DFRESH_OPENGL_SUPPORT -I/home/runner/work/fresh/fresh/include -O3 -DNDEBUG -std=c++17 -Wall -Wextra -Wpedantic -o CMakeFiles/FreshVoxelEngine.dir/src/rpg/TradingSystem.cpp.o -c /home/runner/work/fresh/fresh/src/rpg/TradingSystem.cpp",
+  "command": "/home/runner/work/fresh/.codeql-scratch/dbs/cpp/working/autobuild/bin/c++ -DFRESH_OPENGL_SUPPORT -DGLM_ENABLE_EXPERIMENTAL -I/home/runner/work/fresh/fresh/include -O3 -DNDEBUG -std=c++17 -Wall -Wextra -Wpedantic -o CMakeFiles/FreshVoxelEngine.dir/src/rpg/TradingSystem.cpp.o -c /home/runner/work/fresh/fresh/src/rpg/TradingSystem.cpp",
   "file": "/home/runner/work/fresh/fresh/src/rpg/TradingSystem.cpp",
   "output": "CMakeFiles/FreshVoxelEngine.dir/src/rpg/TradingSystem.cpp.o"
 },
 {
   "directory": "/home/runner/work/fresh/fresh/_codeql_build_dir",
-  "command": "/home/runner/work/fresh/.codeql-scratch/dbs/cpp/working/autobuild/bin/c++ -DFRESH_OPENGL_SUPPORT -I/home/runner/work/fresh/fresh/include -O3 -DNDEBUG -std=c++17 -Wall -Wextra -Wpedantic -o CMakeFiles/FreshVoxelEngine.dir/src/networking/NetworkMessage.cpp.o -c /home/runner/work/fresh/fresh/src/networking/NetworkMessage.cpp",
+  "command": "/home/runner/work/fresh/.codeql-scratch/dbs/cpp/working/autobuild/bin/c++ -DFRESH_OPENGL_SUPPORT -DGLM_ENABLE_EXPERIMENTAL -I/home/runner/work/fresh/fresh/include -O3 -DNDEBUG -std=c++17 -Wall -Wextra -Wpedantic -o CMakeFiles/FreshVoxelEngine.dir/src/networking/NetworkMessage.cpp.o -c /home/runner/work/fresh/fresh/src/networking/NetworkMessage.cpp",
   "file": "/home/runner/work/fresh/fresh/src/networking/NetworkMessage.cpp",
   "output": "CMakeFiles/FreshVoxelEngine.dir/src/networking/NetworkMessage.cpp.o"
 },
 {
   "directory": "/home/runner/work/fresh/fresh/_codeql_build_dir",
-  "command": "/home/runner/work/fresh/.codeql-scratch/dbs/cpp/working/autobuild/bin/c++ -DFRESH_OPENGL_SUPPORT -I/home/runner/work/fresh/fresh/include -O3 -DNDEBUG -std=c++17 -Wall -Wextra -Wpedantic -o CMakeFiles/FreshVoxelEngine.dir/src/networking/ClientConnection.cpp.o -c /home/runner/work/fresh/fresh/src/networking/ClientConnection.cpp",
+  "command": "/home/runner/work/fresh/.codeql-scratch/dbs/cpp/working/autobuild/bin/c++ -DFRESH_OPENGL_SUPPORT -DGLM_ENABLE_EXPERIMENTAL -I/home/runner/work/fresh/fresh/include -O3 -DNDEBUG -std=c++17 -Wall -Wextra -Wpedantic -o CMakeFiles/FreshVoxelEngine.dir/src/networking/ClientConnection.cpp.o -c /home/runner/work/fresh/fresh/src/networking/ClientConnection.cpp",
   "file": "/home/runner/work/fresh/fresh/src/networking/ClientConnection.cpp",
   "output": "CMakeFiles/FreshVoxelEngine.dir/src/networking/ClientConnection.cpp.o"
 },
 {
   "directory": "/home/runner/work/fresh/fresh/_codeql_build_dir",
-  "command": "/home/runner/work/fresh/.codeql-scratch/dbs/cpp/working/autobuild/bin/c++ -DFRESH_OPENGL_SUPPORT -I/home/runner/work/fresh/fresh/include -O3 -DNDEBUG -std=c++17 -Wall -Wextra -Wpedantic -o CMakeFiles/FreshVoxelEngine.dir/src/networking/GameServer.cpp.o -c /home/runner/work/fresh/fresh/src/networking/GameServer.cpp",
+  "command": "/home/runner/work/fresh/.codeql-scratch/dbs/cpp/working/autobuild/bin/c++ -DFRESH_OPENGL_SUPPORT -DGLM_ENABLE_EXPERIMENTAL -I/home/runner/work/fresh/fresh/include -O3 -DNDEBUG -std=c++17 -Wall -Wextra -Wpedantic -o CMakeFiles/FreshVoxelEngine.dir/src/networking/GameServer.cpp.o -c /home/runner/work/fresh/fresh/src/networking/GameServer.cpp",
   "file": "/home/runner/work/fresh/fresh/src/networking/GameServer.cpp",
   "output": "CMakeFiles/FreshVoxelEngine.dir/src/networking/GameServer.cpp.o"
 },
 {
   "directory": "/home/runner/work/fresh/fresh/_codeql_build_dir",
-  "command": "/home/runner/work/fresh/.codeql-scratch/dbs/cpp/working/autobuild/bin/c++ -DFRESH_OPENGL_SUPPORT -I/home/runner/work/fresh/fresh/include -O3 -DNDEBUG -std=c++17 -Wall -Wextra -Wpedantic -o CMakeFiles/FreshVoxelEngine.dir/src/networking/SectorServer.cpp.o -c /home/runner/work/fresh/fresh/src/networking/SectorServer.cpp",
+  "command": "/home/runner/work/fresh/.codeql-scratch/dbs/cpp/working/autobuild/bin/c++ -DFRESH_OPENGL_SUPPORT -DGLM_ENABLE_EXPERIMENTAL -I/home/runner/work/fresh/fresh/include -O3 -DNDEBUG -std=c++17 -Wall -Wextra -Wpedantic -o CMakeFiles/FreshVoxelEngine.dir/src/networking/SectorServer.cpp.o -c /home/runner/work/fresh/fresh/src/networking/SectorServer.cpp",
   "file": "/home/runner/work/fresh/fresh/src/networking/SectorServer.cpp",
   "output": "CMakeFiles/FreshVoxelEngine.dir/src/networking/SectorServer.cpp.o"
 },
 {
   "directory": "/home/runner/work/fresh/fresh/_codeql_build_dir",
-  "command": "/home/runner/work/fresh/.codeql-scratch/dbs/cpp/working/autobuild/bin/c++ -DFRESH_OPENGL_SUPPORT -I/home/runner/work/fresh/fresh/include -O3 -DNDEBUG -std=c++17 -Wall -Wextra -Wpedantic -o CMakeFiles/FreshVoxelEngine.dir/src/devtools/DebugRenderer.cpp.o -c /home/runner/work/fresh/fresh/src/devtools/DebugRenderer.cpp",
+  "command": "/home/runner/work/fresh/.codeql-scratch/dbs/cpp/working/autobuild/bin/c++ -DFRESH_OPENGL_SUPPORT -DGLM_ENABLE_EXPERIMENTAL -I/home/runner/work/fresh/fresh/include -O3 -DNDEBUG -std=c++17 -Wall -Wextra -Wpedantic -o CMakeFiles/FreshVoxelEngine.dir/src/devtools/DebugRenderer.cpp.o -c /home/runner/work/fresh/fresh/src/devtools/DebugRenderer.cpp",
   "file": "/home/runner/work/fresh/fresh/src/devtools/DebugRenderer.cpp",
   "output": "CMakeFiles/FreshVoxelEngine.dir/src/devtools/DebugRenderer.cpp.o"
 },
 {
   "directory": "/home/runner/work/fresh/fresh/_codeql_build_dir",
-  "command": "/home/runner/work/fresh/.codeql-scratch/dbs/cpp/working/autobuild/bin/c++ -DFRESH_OPENGL_SUPPORT -I/home/runner/work/fresh/fresh/include -O3 -DNDEBUG -std=c++17 -Wall -Wextra -Wpedantic -o CMakeFiles/FreshVoxelEngine.dir/src/devtools/PerformanceProfiler.cpp.o -c /home/runner/work/fresh/fresh/src/devtools/PerformanceProfiler.cpp",
+  "command": "/home/runner/work/fresh/.codeql-scratch/dbs/cpp/working/autobuild/bin/c++ -DFRESH_OPENGL_SUPPORT -DGLM_ENABLE_EXPERIMENTAL -I/home/runner/work/fresh/fresh/include -O3 -DNDEBUG -std=c++17 -Wall -Wextra -Wpedantic -o CMakeFiles/FreshVoxelEngine.dir/src/devtools/PerformanceProfiler.cpp.o -c /home/runner/work/fresh/fresh/src/devtools/PerformanceProfiler.cpp",
   "file": "/home/runner/work/fresh/fresh/src/devtools/PerformanceProfiler.cpp",
   "output": "CMakeFiles/FreshVoxelEngine.dir/src/devtools/PerformanceProfiler.cpp.o"
 },
 {
   "directory": "/home/runner/work/fresh/fresh/_codeql_build_dir",
-  "command": "/home/runner/work/fresh/.codeql-scratch/dbs/cpp/working/autobuild/bin/c++ -DFRESH_OPENGL_SUPPORT -I/home/runner/work/fresh/fresh/include -O3 -DNDEBUG -std=c++17 -Wall -Wextra -Wpedantic -o CMakeFiles/FreshVoxelEngine.dir/src/devtools/MemoryTracker.cpp.o -c /home/runner/work/fresh/fresh/src/devtools/MemoryTracker.cpp",
+  "command": "/home/runner/work/fresh/.codeql-scratch/dbs/cpp/working/autobuild/bin/c++ -DFRESH_OPENGL_SUPPORT -DGLM_ENABLE_EXPERIMENTAL -I/home/runner/work/fresh/fresh/include -O3 -DNDEBUG -std=c++17 -Wall -Wextra -Wpedantic -o CMakeFiles/FreshVoxelEngine.dir/src/devtools/MemoryTracker.cpp.o -c /home/runner/work/fresh/fresh/src/devtools/MemoryTracker.cpp",
   "file": "/home/runner/work/fresh/fresh/src/devtools/MemoryTracker.cpp",
   "output": "CMakeFiles/FreshVoxelEngine.dir/src/devtools/MemoryTracker.cpp.o"
 },
 {
   "directory": "/home/runner/work/fresh/fresh/_codeql_build_dir",
-  "command": "/home/runner/work/fresh/.codeql-scratch/dbs/cpp/working/autobuild/bin/c++ -DFRESH_OPENGL_SUPPORT -I/home/runner/work/fresh/fresh/include -O3 -DNDEBUG -std=c++17 -Wall -Wextra -Wpedantic -o CMakeFiles/FreshVoxelEngine.dir/src/devtools/DebugConsole.cpp.o -c /home/runner/work/fresh/fresh/src/devtools/DebugConsole.cpp",
+  "command": "/home/runner/work/fresh/.codeql-scratch/dbs/cpp/working/autobuild/bin/c++ -DFRESH_OPENGL_SUPPORT -DGLM_ENABLE_EXPERIMENTAL -I/home/runner/work/fresh/fresh/include -O3 -DNDEBUG -std=c++17 -Wall -Wextra -Wpedantic -o CMakeFiles/FreshVoxelEngine.dir/src/devtools/DebugConsole.cpp.o -c /home/runner/work/fresh/fresh/src/devtools/DebugConsole.cpp",
   "file": "/home/runner/work/fresh/fresh/src/devtools/DebugConsole.cpp",
   "output": "CMakeFiles/FreshVoxelEngine.dir/src/devtools/DebugConsole.cpp.o"
 },
 {
   "directory": "/home/runner/work/fresh/fresh/_codeql_build_dir",
-  "command": "/home/runner/work/fresh/.codeql-scratch/dbs/cpp/working/autobuild/bin/c++ -DFRESH_OPENGL_SUPPORT -I/home/runner/work/fresh/fresh/include -O3 -DNDEBUG -std=c++17 -Wall -Wextra -Wpedantic -o CMakeFiles/FreshVoxelEngine.dir/src/devtools/DevToolsManager.cpp.o -c /home/runner/work/fresh/fresh/src/devtools/DevToolsManager.cpp",
+  "command": "/home/runner/work/fresh/.codeql-scratch/dbs/cpp/working/autobuild/bin/c++ -DFRESH_OPENGL_SUPPORT -DGLM_ENABLE_EXPERIMENTAL -I/home/runner/work/fresh/fresh/include -O3 -DNDEBUG -std=c++17 -Wall -Wextra -Wpedantic -o CMakeFiles/FreshVoxelEngine.dir/src/devtools/DevToolsManager.cpp.o -c /home/runner/work/fresh/fresh/src/devtools/DevToolsManager.cpp",
   "file": "/home/runner/work/fresh/fresh/src/devtools/DevToolsManager.cpp",
   "output": "CMakeFiles/FreshVoxelEngine.dir/src/devtools/DevToolsManager.cpp.o"
 },
 {
   "directory": "/home/runner/work/fresh/fresh/_codeql_build_dir",
-  "command": "/home/runner/work/fresh/.codeql-scratch/dbs/cpp/working/autobuild/bin/c++ -DFRESH_OPENGL_SUPPORT -I/home/runner/work/fresh/fresh/include -O3 -DNDEBUG -std=c++17 -Wall -Wextra -Wpedantic -o CMakeFiles/FreshVoxelEngine.dir/src/scripting/lua/ScriptingEngine.cpp.o -c /home/runner/work/fresh/fresh/src/scripting/lua/ScriptingEngine.cpp",
+  "command": "/home/runner/work/fresh/.codeql-scratch/dbs/cpp/working/autobuild/bin/c++ -DFRESH_OPENGL_SUPPORT -DGLM_ENABLE_EXPERIMENTAL -I/home/runner/work/fresh/fresh/include -O3 -DNDEBUG -std=c++17 -Wall -Wextra -Wpedantic -o CMakeFiles/FreshVoxelEngine.dir/src/scripting/lua/ScriptingEngine.cpp.o -c /home/runner/work/fresh/fresh/src/scripting/lua/ScriptingEngine.cpp",
   "file": "/home/runner/work/fresh/fresh/src/scripting/lua/ScriptingEngine.cpp",
   "output": "CMakeFiles/FreshVoxelEngine.dir/src/scripting/lua/ScriptingEngine.cpp.o"
 }
