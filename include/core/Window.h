@@ -23,9 +23,10 @@ public:
 
     /**
      * @brief Initialize the window
+     * @param useOpenGL If true, creates an OpenGL context. If false, uses no API (for Vulkan/DirectX)
      * @return true if initialization was successful, false otherwise
      */
-    bool initialize();
+    bool initialize(bool useOpenGL = false);
 
     /**
      * @brief Poll window events
@@ -61,6 +62,11 @@ public:
      * @return window title string
      */
     const std::string& getTitle() const { return m_title; }
+    
+    /**
+     * @brief Swap front and back buffers (for OpenGL)
+     */
+    void swapBuffers();
 
 private:
     static void framebufferResizeCallback(GLFWwindow* window, int width, int height);

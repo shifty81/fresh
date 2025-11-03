@@ -61,9 +61,23 @@ bool Engine::initialize() {
     
     m_mainMenu->clearFlags();
     
+    // Create renderer using the abstraction layer first to determine API
+    // Auto-select best graphics API for the platform
+    m_renderer = RenderContextFactory::createBest();
+    if (!m_renderer) {
+        std::cerr << "Failed to create render context" << std::endl;
+        LOG_ERROR_C("Failed to create render context", "Engine");
+        return false;
+    }
+    std::cout << "Render context created: " << getGraphicsAPIName(m_renderer->getAPI()) << std::endl;
+    LOG_INFO_C("Render context created: " + std::string(getGraphicsAPIName(m_renderer->getAPI())), "Engine");
+    
+    // Determine if we need OpenGL context for the window
+    bool useOpenGL = (m_renderer->getAPI() == GraphicsAPI::OpenGL);
+    
     // Create window
     m_window = std::make_unique<Window>(1280, 720, "Fresh Voxel Engine");
-    if (!m_window->initialize()) {
+    if (!m_window->initialize(useOpenGL)) {
         std::cerr << "Failed to initialize window" << std::endl;
         LOG_ERROR_C("Failed to initialize window", "Engine");
         return false;
@@ -78,15 +92,7 @@ bool Engine::initialize() {
     std::cout << "Input manager initialized" << std::endl;
     LOG_INFO_C("Input manager initialized", "Engine");
     
-    // Create renderer using the abstraction layer
-    // Auto-select best graphics API for the platform
-    m_renderer = RenderContextFactory::createBest();
-    if (!m_renderer) {
-        std::cerr << "Failed to create render context" << std::endl;
-        LOG_ERROR_C("Failed to create render context", "Engine");
-        return false;
-    }
-    
+    // Initialize renderer with the window
     if (!m_renderer->initialize(m_window.get())) {
         std::cerr << "Failed to initialize renderer" << std::endl;
         LOG_ERROR_C("Failed to initialize renderer", "Engine");
@@ -375,12 +381,46 @@ void Engine::render() {
         return;
     }
     
+    // Set clear color (sky blue) before beginning frame
+    m_renderer->clearColor(0.53f, 0.81f, 0.92f, 1.0f);
+    
     if (!m_renderer->beginFrame()) {
         return;
     }
     
+    // Set viewport to match window size
+    m_renderer->setViewport(0, 0, m_renderer->getSwapchainWidth(), m_renderer->getSwapchainHeight());
+    
     // Render voxel world
-    // TODO: Implement actual rendering of chunks
+    if (m_world) {
+        // Get view and projection matrices from player camera
+        glm::mat4 viewMatrix = glm::mat4(1.0f);
+        glm::mat4 projectionMatrix = glm::mat4(1.0f);
+        
+        if (m_player) {
+            const Camera& camera = m_player->getCamera();
+            viewMatrix = camera.getViewMatrix();
+            float aspectRatio = static_cast<float>(m_renderer->getSwapchainWidth()) / 
+                               static_cast<float>(m_renderer->getSwapchainHeight());
+            projectionMatrix = camera.getProjectionMatrix(aspectRatio);
+        }
+        
+        // Render chunks
+        // Note: Full rendering implementation would require shaders and GPU buffers
+        // For now, we ensure the world exists and chunks are loaded
+        const auto& chunks = m_world->getChunks();
+        
+        // Simple visualization: Just ensure we're not showing a blank screen
+        // In a full implementation, this would:
+        // 1. Generate mesh for each chunk
+        // 2. Upload to GPU buffers
+        // 3. Bind shaders and set uniforms (view, projection)
+        // 4. Draw each chunk mesh
+        
+        (void)chunks; // Suppress unused warning
+        (void)viewMatrix; // Suppress unused warning
+        (void)projectionMatrix; // Suppress unused warning
+    }
     
     // Render editor UI
     if (m_editor) {
@@ -388,13 +428,27 @@ void Engine::render() {
     }
     
     m_renderer->endFrame();
+    
+    // Swap buffers if using OpenGL
+    if (m_window && m_renderer->getAPI() == GraphicsAPI::OpenGL) {
+        m_window->swapBuffers();
+    }
 }
 
 void Engine::initializeGameSystems() {
     // This helper is called after world creation to initialize all game systems
+    
+    // Create renderer first to determine API
+    if (!m_renderer) {
+        m_renderer = RenderContextFactory::createBest();
+        std::cout << "Render context created: " << getGraphicsAPIName(m_renderer->getAPI()) << std::endl;
+    }
+    
+    bool useOpenGL = (m_renderer && m_renderer->getAPI() == GraphicsAPI::OpenGL);
+    
     if (!m_window) {
         m_window = std::make_unique<Window>(1280, 720, "Fresh Voxel Engine");
-        if (!m_window->initialize()) {
+        if (!m_window->initialize(useOpenGL)) {
             std::cerr << "Failed to initialize window in game systems" << std::endl;
             return;
         }
@@ -407,12 +461,9 @@ void Engine::initializeGameSystems() {
         setupInputCallbacks();
     }
     
-    // Create renderer
-    if (!m_renderer) {
-        m_renderer = RenderContextFactory::createBest();
-        if (m_renderer) {
-            m_renderer->initialize(m_window.get());
-        }
+    // Initialize renderer with window
+    if (m_renderer && m_window) {
+        m_renderer->initialize(m_window.get());
     }
     
     // Create player
