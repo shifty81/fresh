@@ -60,6 +60,14 @@ Thumbs.db
 # Logs
 *.log
 
+# Log files
+logs/*.txt
+logs/Environment/**/*.txt
+# Keep directory structure
+!logs/.gitkeep
+!logs/Environment/.gitkeep
+!logs/Environment/*/.gitkeep
+
 # Temporary files
 tmp/
 temp/

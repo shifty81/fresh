@@ -48,6 +48,7 @@ set(ENGINE_SOURCES
     src/main.cpp
     src/core/Engine.cpp
     src/core/Window.cpp
+    src/core/Logger.cpp
     src/core/MemoryManager.cpp
     src/core/ResourceManager.cpp
     src/core/SceneManager.cpp
@@ -117,6 +118,7 @@ endif()
 set(ENGINE_HEADERS
     include/core/Engine.h
     include/core/Window.h
+    include/core/Logger.h
     include/core/MemoryManager.h
     include/core/ResourceManager.h
     include/core/SceneManager.h
@@ -278,6 +280,7 @@ if(BUILD_TESTS)
         src/generation/NoiseGenerator.cpp
         src/generation/TerrainGenerator.cpp
         src/core/MemoryManager.cpp
+        src/core/Logger.cpp
         src/scripting/EventSystem.cpp
     )
     

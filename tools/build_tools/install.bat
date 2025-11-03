@@ -29,10 +29,25 @@ REM Navigate to repository root (2 levels up from tools/build_tools)
 cd /d "%~dp0..\.."
 set "REPO_ROOT=%CD%"
 
+REM Setup logging
+set "LOG_DIR=%REPO_ROOT%\logs"
+if not exist "%LOG_DIR%" mkdir "%LOG_DIR%"
+set "TIMESTAMP=%date:~-4,4%-%date:~-10,2%-%date:~-7,2%_%time:~0,2%-%time:~3,2%-%time:~6,2%"
+set "TIMESTAMP=%TIMESTAMP: =0%"
+set "LOG_FILE=%LOG_DIR%\install_errors_%TIMESTAMP%.txt"
+
+echo ============================================================================ > "%LOG_FILE%"
+echo Fresh Voxel Engine - Installation Log >> "%LOG_FILE%"
+echo Started: %date% %time% >> "%LOG_FILE%"
+echo ============================================================================ >> "%LOG_FILE%"
+echo. >> "%LOG_FILE%"
+
 echo.
 echo %BLUE%============================================================================%RESET%
 echo %BLUE%       Fresh Voxel Engine - Automated Installation%RESET%
 echo %BLUE%============================================================================%RESET%
+echo.
+echo Log file: %LOG_FILE%
 echo.
 echo This script will:
 echo   1. Check for prerequisites (CMake, Visual Studio)
@@ -56,9 +71,12 @@ echo Checking for CMake...
 where cmake >nul 2>nul
 if %ERRORLEVEL% NEQ 0 (
     echo %RED%ERROR: CMake is not installed or not in PATH%RESET%
+    echo ERROR: CMake is not installed or not in PATH >> "%LOG_FILE%"
     echo.
     echo Please install CMake from: https://cmake.org/download/
     echo Make sure to add CMake to system PATH during installation
+    echo. >> "%LOG_FILE%"
+    echo Please install CMake from: https://cmake.org/download/ >> "%LOG_FILE%"
     echo.
     pause
     exit /b 1
