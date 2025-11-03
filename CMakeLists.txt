@@ -239,11 +239,22 @@ if(BUILD_TESTS)
     set(TEST_SOURCES
         tests/voxel/ChunkTests.cpp
         tests/generation/NoiseTests.cpp
+        tests/generation/TerrainGeneratorTests.cpp
         tests/core/MemoryManagerTests.cpp
+        tests/scripting/EventSystemTests.cpp
+    )
+    
+    # Engine source files needed for tests (exclude main.cpp)
+    set(TEST_ENGINE_SOURCES
+        src/voxel/Chunk.cpp
+        src/generation/NoiseGenerator.cpp
+        src/generation/TerrainGenerator.cpp
+        src/core/MemoryManager.cpp
+        src/scripting/EventSystem.cpp
     )
     
     # Create test executable
-    add_executable(${PROJECT_NAME}Tests ${TEST_SOURCES})
+    add_executable(${PROJECT_NAME}Tests ${TEST_SOURCES} ${TEST_ENGINE_SOURCES})
     
     # Include directories for tests
     target_include_directories(${PROJECT_NAME}Tests PRIVATE
