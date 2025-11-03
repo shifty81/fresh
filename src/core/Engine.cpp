@@ -1,6 +1,7 @@
 #include "core/Engine.h"
 #include "core/Window.h"
-#include "renderer/VulkanRenderer.h"
+#include "renderer/RenderContext.h"
+#include "renderer/GraphicsAPI.h"
 #include "voxel/VoxelWorld.h"
 #include "voxel/Chunk.h"
 #include "physics/PhysicsSystem.h"
@@ -60,13 +61,19 @@ bool Engine::initialize() {
     }
     std::cout << "Window created" << std::endl;
     
-    // Create renderer
-    m_renderer = std::make_unique<VulkanRenderer>(m_window.get());
-    if (!m_renderer->initialize()) {
-        std::cerr << "Failed to initialize Vulkan renderer" << std::endl;
+    // Create renderer using the abstraction layer
+    // Auto-select best graphics API for the platform
+    m_renderer = RenderContextFactory::createBest();
+    if (!m_renderer) {
+        std::cerr << "Failed to create render context" << std::endl;
         return false;
     }
-    std::cout << "Vulkan renderer initialized" << std::endl;
+    
+    if (!m_renderer->initialize(m_window.get())) {
+        std::cerr << "Failed to initialize renderer" << std::endl;
+        return false;
+    }
+    std::cout << "Renderer initialized with " << getGraphicsAPIName(m_renderer->getAPI()) << std::endl;
     
     // Create physics system
     m_physics = std::make_unique<PhysicsSystem>();
@@ -203,8 +210,10 @@ void Engine::run() {
                 // Initialize graphics systems now that we have a world
                 m_window = std::make_unique<Window>(1280, 720, "Fresh Voxel Engine");
                 if (m_window->initialize()) {
-                    m_renderer = std::make_unique<VulkanRenderer>(m_window.get());
-                    m_renderer->initialize();
+                    m_renderer = RenderContextFactory::createBest();
+                    if (m_renderer) {
+                        m_renderer->initialize(m_window.get());
+                    }
                 }
                 m_inGame = true;
             } else if (m_mainMenu->shouldLoadWorld()) {
@@ -214,8 +223,10 @@ void Engine::run() {
                 // Initialize graphics systems now that we have a world
                 m_window = std::make_unique<Window>(1280, 720, "Fresh Voxel Engine");
                 if (m_window->initialize()) {
-                    m_renderer = std::make_unique<VulkanRenderer>(m_window.get());
-                    m_renderer->initialize();
+                    m_renderer = RenderContextFactory::createBest();
+                    if (m_renderer) {
+                        m_renderer->initialize(m_window.get());
+                    }
                 }
                 m_inGame = true;
             }

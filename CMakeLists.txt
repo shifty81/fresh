@@ -47,6 +47,10 @@ set(ENGINE_SOURCES
     src/renderer/VulkanDevice.cpp
     src/renderer/VulkanPipeline.cpp
     src/renderer/ShaderManager.cpp
+    src/renderer/RenderContext.cpp
+    src/renderer/Material.cpp
+    src/renderer/backends/VulkanRenderContext.cpp
+    src/renderer/backends/OpenGLRenderContext.cpp
     src/voxel/Chunk.cpp
     src/voxel/VoxelWorld.cpp
     src/voxel/MeshGenerator.cpp
@@ -94,6 +98,14 @@ set(ENGINE_SOURCES
     src/devtools/DevToolsManager.cpp
     src/scripting/lua/ScriptingEngine.cpp
 )
+
+# Add DirectX backends on Windows
+if(WIN32)
+    list(APPEND ENGINE_SOURCES
+        src/renderer/backends/DirectX11RenderContext.cpp
+        src/renderer/backends/DirectX12RenderContext.cpp
+    )
+endif()
 
 # Header files
 set(ENGINE_HEADERS

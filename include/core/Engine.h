@@ -6,7 +6,7 @@
 namespace fresh {
 
 class Window;
-class VulkanRenderer;
+class IRenderContext;
 class VoxelWorld;
 class PhysicsSystem;
 class AISystem;
@@ -60,7 +60,7 @@ private:
     bool m_running;
     bool m_inGame;
     std::unique_ptr<Window> m_window;
-    std::unique_ptr<VulkanRenderer> m_renderer;
+    std::unique_ptr<IRenderContext> m_renderer;
     std::unique_ptr<VoxelWorld> m_world;
     std::unique_ptr<PhysicsSystem> m_physics;
     std::unique_ptr<AISystem> m_aiSystem;
