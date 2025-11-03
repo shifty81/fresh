@@ -12,7 +12,7 @@
 
 ## Overview
 
-Fresh Voxel Engine is a modern, high-performance voxel game engine built with C++17 and Vulkan. The architecture is designed to be modular, extensible, and optimized for real-time rendering of massive voxel worlds.
+Fresh Voxel Engine is a modern, high-performance voxel game engine built with C++17 supporting multiple graphics APIs (OpenGL, DirectX 11/12). The architecture is designed to be modular, extensible, and optimized for real-time rendering of massive voxel worlds.
 
 ### Key Design Goals
 
@@ -67,8 +67,8 @@ Fresh Voxel Engine is a modern, high-performance voxel game engine built with C+
 ┌─────────────────────────────────────────────────────────────┐
 │                    Platform Layer                           │
 │  ┌────────────┐  ┌──────────┐  ┌──────────┐  ┌───────────┐ │
-│  │Vulkan      │  │Input     │  │Audio     │  │Scripting  │ │
-│  │Renderer    │  │Manager   │  │Engine    │  │Engine     │ │
+│  │Graphics    │  │Input     │  │Audio     │  │Scripting  │ │
+│  │APIs        │  │Manager   │  │Engine    │  │Engine     │ │
 │  └────────────┘  └──────────┘  └──────────┘  └───────────┘ │
 └─────────────────────────────────────────────────────────────┘
 ```
@@ -78,21 +78,23 @@ Fresh Voxel Engine is a modern, high-performance voxel game engine built with C+
 ### 1. Rendering System
 
 **Components:**
-- `VulkanRenderer`: Main rendering interface
-- `VulkanDevice`: Device and queue management
-- `VulkanPipeline`: Graphics pipeline configuration
+- `IRenderContext`: Abstract rendering interface
+- `OpenGLRenderContext`: OpenGL implementation
+- `DirectX11RenderContext`: DirectX 11 implementation (Windows)
+- `DirectX12RenderContext`: DirectX 12 implementation (Windows)
 - `ShaderManager`: Shader compilation and management
 
 **Responsibilities:**
-- Initialize Vulkan context
+- Initialize graphics context for selected API
 - Manage swapchain and framebuffers
 - Execute render passes
 - Handle shader compilation
 - Manage GPU resources
 
 **Key Features:**
-- Modern Vulkan API
-- Efficient command buffer management
+- Multi-API support (OpenGL, DirectX 11/12)
+- Automatic API selection based on platform
+- Efficient command buffer/context management
 - Shader hot-reloading support
 - Multi-threaded rendering ready
 

@@ -45,7 +45,7 @@ make
 ## Running Examples
 
 Most examples require:
-1. Vulkan-capable GPU and drivers
+1. OpenGL/DirectX-capable GPU and drivers
 2. GLFW for window management
 3. Shader files in the `shaders/` directory
 

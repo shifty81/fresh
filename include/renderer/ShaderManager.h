@@ -6,17 +6,16 @@
 
 namespace fresh {
 
-class VulkanDevice;
-
 /**
  * @brief Manages shader loading, compilation, and hot-reloading
  * 
  * Provides shader management functionality including loading from files,
- * compilation to SPIR-V, and optional hot-reloading during development.
+ * compilation, and optional hot-reloading during development.
+ * API-agnostic - works with all rendering backends.
  */
 class ShaderManager {
 public:
-    explicit ShaderManager(VulkanDevice* device);
+    ShaderManager();
     ~ShaderManager();
 
     // Prevent copying
@@ -25,18 +24,18 @@ public:
 
     /**
      * @brief Load a shader from file
-     * @param path Path to shader file (GLSL or SPIR-V)
+     * @param path Path to shader file (GLSL or HLSL)
      * @return Shader code as string, empty on failure
      */
     std::string loadShader(const std::string& path);
 
     /**
-     * @brief Compile GLSL to SPIR-V
-     * @param glslCode GLSL shader code
+     * @brief Compile shader code
+     * @param shaderCode Shader source code
      * @param shaderType Shader type (vertex, fragment, etc.)
-     * @return SPIR-V binary code
+     * @return Compiled shader code
      */
-    std::string compileGLSL(const std::string& glslCode, const std::string& shaderType);
+    std::string compileShader(const std::string& shaderCode, const std::string& shaderType);
 
     /**
      * @brief Enable hot-reloading for development
@@ -56,7 +55,6 @@ public:
     void reloadModified();
 
 private:
-    VulkanDevice* m_device;
     bool m_hotReloadEnabled;
     std::unordered_map<std::string, time_t> m_shaderTimestamps;
 };

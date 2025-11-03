@@ -42,7 +42,7 @@ int main() {
             return 1;
         }
         std::cout << "    ✓ Engine initialized" << std::endl;
-        std::cout << "    ✓ Vulkan renderer ready" << std::endl;
+        std::cout << "    ✓ Renderer ready" << std::endl;
         std::cout << "    ✓ Core systems loaded" << std::endl;
         
         // Step 3: Main game loop
@@ -106,7 +106,7 @@ int main() {
  * 
  * 2. Engine Initialization
  *    - Engine class is the main interface to all systems
- *    - Initializes Vulkan renderer, resource manager, etc.
+ *    - Initializes renderer, resource manager, etc.
  *    - Returns false if initialization fails
  * 
  * 3. Main Game Loop
@@ -117,7 +117,7 @@ int main() {
  * 
  * 4. Resource Cleanup
  *    - ALWAYS call shutdown() before exit
- *    - Ensures Vulkan resources are properly released
+ *    - Ensures graphics resources are properly released
  *    - Window cleanup happens automatically (RAII)
  * 
  * COMMON MISTAKES:

@@ -590,7 +590,7 @@ console.executeCommand("spawn 0 0 0");
 - CMake 3.20+
 - C++17 compiler
 - GLM (for math)
-- Vulkan SDK (optional, for rendering)
+- Graphics drivers (OpenGL 4.5+ or DirectX 11+)
 
 ### Build Instructions
 ```bash
@@ -668,7 +668,7 @@ All systems are designed to work together while remaining loosely coupled and in
 1. Complete Lua scripting integration (requires NLua library)
 2. Integrate rendering with debug renderer
 3. Connect network messages to entity synchronization
-4. Implement OpenGL/Vulkan debugger for graphics error detection
+4. Implement OpenGL/DirectX debugger for graphics error detection
 5. Add script compiler for hot-reloading
 
 ### Testing

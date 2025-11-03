@@ -19,7 +19,7 @@ This guide will help you set up a development environment for Fresh Voxel Engine
 - **OS**: Ubuntu 20.04+, Windows 10+, macOS 11+
 - **CPU**: 4-core processor (2.5 GHz+)
 - **RAM**: 8 GB
-- **GPU**: Vulkan 1.2 capable GPU
+- **GPU**: OpenGL 4.5+ capable (or DirectX 11+ on Windows)
 - **Storage**: 2 GB free space
 
 ### Recommended Requirements
@@ -47,9 +47,6 @@ sudo apt-get install -y \
 
 # Install graphics dependencies
 sudo apt-get install -y \
-    libvulkan-dev \
-    vulkan-tools \
-    vulkan-validationlayers \
     libglfw3-dev \
     libglm-dev
 
@@ -62,17 +59,6 @@ sudo apt-get install -y \
     gdb
 ```
 
-### Vulkan SDK (Latest Version)
-
-```bash
-# Download and install from LunarG
-wget -qO - https://packages.lunarg.com/lunarg-signing-key-pub.asc | sudo apt-key add -
-sudo wget -qO /etc/apt/sources.list.d/lunarg-vulkan-jammy.list \
-    https://packages.lunarg.com/vulkan/lunarg-vulkan-jammy.list
-sudo apt update
-sudo apt install vulkan-sdk
-```
-
 ### Fedora/RHEL
 
 ```bash
@@ -81,9 +67,6 @@ sudo dnf install -y \
     gcc-c++ \
     ninja-build \
     git \
-    vulkan-devel \
-    vulkan-tools \
-    vulkan-validation-layers \
     glfw-devel \
     glm-devel
 ```
@@ -95,7 +78,7 @@ sudo dnf install -y \
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 
 # Install dependencies
-brew install cmake ninja git glfw vulkan-headers vulkan-loader molten-vk glm
+brew install cmake ninja git glfw glm
 ```
 
 ### Windows
@@ -107,11 +90,7 @@ brew install cmake ninja git glfw vulkan-headers vulkan-loader molten-vk glm
    - Download from: https://cmake.org/download/
    - Add to PATH during installation
 
-3. **Install Vulkan SDK**
-   - Download from: https://vulkan.lunarg.com/
-   - Install with validation layers
-
-4. **Install vcpkg** (for libraries)
+3. **Install vcpkg** (for libraries)
    ```powershell
    git clone https://github.com/Microsoft/vcpkg.git
    cd vcpkg
@@ -319,43 +298,10 @@ lldb ./FreshVoxelEngine
 2. Press `F5` to start debugging
 3. Use debugging windows: Locals, Watch, Call Stack
 
-### Vulkan Debugging
-
-Enable validation layers:
-
-```cpp
-// In your code
-#define ENABLE_VALIDATION_LAYERS
-
-// Or via CMake
-cmake .. -DENABLE_VALIDATION_LAYERS=ON
-```
-
-View Vulkan errors:
-
-```bash
-# Set environment variable
-export VK_LAYER_PATH=/usr/share/vulkan/explicit_layer.d
-
-# Run with validation
-./FreshVoxelEngine
-```
 
 ## Troubleshooting
 
 ### Build Errors
-
-#### "Vulkan not found"
-
-**Solution:**
-```bash
-# Find Vulkan
-find /usr -name "vulkan.h" 2>/dev/null
-
-# Set Vulkan SDK path
-export VULKAN_SDK=/path/to/vulkan/sdk
-cmake .. -DVULKAN_SDK=$VULKAN_SDK
-```
 
 #### "GLFW not found"
 
@@ -377,33 +323,6 @@ cmake .. -DCMAKE_CXX_STANDARD=17 -DCMAKE_CXX_STANDARD_REQUIRED=ON
 ```
 
 ### Runtime Errors
-
-#### "Failed to create Vulkan instance"
-
-**Causes:**
-- Vulkan not installed
-- Outdated GPU drivers
-- Missing validation layers
-
-**Solution:**
-```bash
-# Check Vulkan installation
-vulkaninfo
-
-# Update GPU drivers
-sudo ubuntu-drivers autoinstall  # Ubuntu
-```
-
-#### "Failed to find suitable GPU"
-
-**Causes:**
-- No Vulkan-capable GPU
-- Drivers not supporting Vulkan 1.2
-
-**Solution:**
-- Update GPU drivers
-- Check GPU specifications
-- Use integrated graphics if available
 
 #### Black screen / nothing renders
 

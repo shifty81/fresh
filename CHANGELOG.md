@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- **Removed Vulkan Support** - Simplified graphics stack
+  - Removed Vulkan-specific renderer, device, and pipeline classes
+  - Updated engine to use OpenGL and DirectX backends only
+  - Updated all documentation to reflect OpenGL/DirectX support
+  - Simplified build dependencies (no longer requires Vulkan SDK)
+
 ### Added
 - Comprehensive project documentation
   - CONTRIBUTING.md guide
@@ -63,11 +70,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Engine initialization and main loop
   - Window management with GLFW
   
-- **Vulkan Rendering System**
-  - VulkanRenderer implementation
-  - VulkanDevice management
-  - VulkanPipeline setup
-  - ShaderManager with GLSL support
+- **Multi-API Rendering System**
+  - OpenGL 4.5+ renderer implementation
+  - DirectX 11 renderer (Windows)
+  - DirectX 12 renderer (Windows)
+  - ShaderManager with API-agnostic support
   - Basic vertex and fragment shaders
 
 - **Voxel World System**
@@ -138,7 +145,7 @@ See [ROADMAP.md](ROADMAP.md) for detailed future plans.
 
 ### Next Release (0.3.0) - Planned
 - ImGui integration for UI
-- Complete Vulkan rendering pipeline
+- Complete rendering pipeline for all backends
 - Inventory system implementation
 - Resource gathering mechanics
 - Day/night cycle

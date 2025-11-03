@@ -1,5 +1,4 @@
 #include "renderer/RenderContext.h"
-#include "renderer/backends/VulkanRenderContext.h"
 #include "renderer/backends/OpenGLRenderContext.h"
 
 #ifdef _WIN32
@@ -21,10 +20,6 @@ std::unique_ptr<IRenderContext> RenderContextFactory::create(GraphicsAPI api) {
     }
     
     switch (api) {
-        case GraphicsAPI::Vulkan:
-            std::cout << "Creating Vulkan render context" << std::endl;
-            return std::make_unique<VulkanRenderContext>();
-            
         case GraphicsAPI::OpenGL:
             std::cout << "Creating OpenGL render context" << std::endl;
             return std::make_unique<OpenGLRenderContext>();
