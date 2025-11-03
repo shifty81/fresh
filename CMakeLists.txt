@@ -55,6 +55,8 @@ set(ENGINE_SOURCES
     src/generation/TerrainGenerator.cpp
     src/physics/PhysicsSystem.cpp
     src/physics/CollisionDetection.cpp
+    src/physics/PhysicsComponent.cpp
+    src/physics/PhysicsSystemEnhanced.cpp
     src/interaction/RaycastSystem.cpp
     src/ai/AISystem.cpp
     src/ai/BehaviorTree.cpp
@@ -69,6 +71,28 @@ set(ENGINE_SOURCES
     src/gameplay/Camera.cpp
     src/gameplay/Player.cpp
     src/assets/ModularAssetSystem.cpp
+    src/ecs/EntityManager.cpp
+    src/voxelship/VoxelBlock.cpp
+    src/voxelship/VoxelStructureComponent.cpp
+    src/galaxy/GalaxySector.cpp
+    src/galaxy/GalaxyGenerator.cpp
+    src/rpg/Inventory.cpp
+    src/rpg/InventoryComponent.cpp
+    src/rpg/CraftingSystem.cpp
+    src/rpg/ProgressionComponent.cpp
+    src/rpg/FactionComponent.cpp
+    src/rpg/LootSystem.cpp
+    src/rpg/TradingSystem.cpp
+    src/networking/NetworkMessage.cpp
+    src/networking/ClientConnection.cpp
+    src/networking/GameServer.cpp
+    src/networking/SectorServer.cpp
+    src/devtools/DebugRenderer.cpp
+    src/devtools/PerformanceProfiler.cpp
+    src/devtools/MemoryTracker.cpp
+    src/devtools/DebugConsole.cpp
+    src/devtools/DevToolsManager.cpp
+    src/scripting/lua/ScriptingEngine.cpp
 )
 
 # Header files
@@ -91,6 +115,8 @@ set(ENGINE_HEADERS
     include/generation/TerrainGenerator.h
     include/physics/PhysicsSystem.h
     include/physics/CollisionDetection.h
+    include/physics/PhysicsComponent.h
+    include/physics/PhysicsSystemEnhanced.h
     include/interaction/RaycastSystem.h
     include/ai/AISystem.h
     include/ai/BehaviorTree.h
@@ -105,6 +131,31 @@ set(ENGINE_HEADERS
     include/gameplay/Camera.h
     include/gameplay/Player.h
     include/assets/ModularAssetSystem.h
+    include/ecs/Entity.h
+    include/ecs/IComponent.h
+    include/ecs/EntityManager.h
+    include/ecs/SystemBase.h
+    include/voxelship/VoxelBlock.h
+    include/voxelship/VoxelStructureComponent.h
+    include/galaxy/GalaxySector.h
+    include/galaxy/GalaxyGenerator.h
+    include/rpg/Inventory.h
+    include/rpg/InventoryComponent.h
+    include/rpg/CraftingSystem.h
+    include/rpg/ProgressionComponent.h
+    include/rpg/FactionComponent.h
+    include/rpg/LootSystem.h
+    include/rpg/TradingSystem.h
+    include/networking/NetworkMessage.h
+    include/networking/ClientConnection.h
+    include/networking/GameServer.h
+    include/networking/SectorServer.h
+    include/devtools/DebugRenderer.h
+    include/devtools/PerformanceProfiler.h
+    include/devtools/MemoryTracker.h
+    include/devtools/DebugConsole.h
+    include/devtools/DevToolsManager.h
+    include/scripting/lua/ScriptingEngine.h
 )
 
 # Create executable
