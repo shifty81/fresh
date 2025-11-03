@@ -77,7 +77,7 @@ void Scene::initialize() {
 
 void Scene::shutdown() {
     std::cout << "Shutting down scene: " << name << std::endl;
-    root->children.clear();
+    root->clearChildren();
     loaded = false;
 }
 

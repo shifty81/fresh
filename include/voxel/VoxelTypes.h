@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstdint>
+#include <functional>
 
 namespace fresh {
 
@@ -91,8 +92,11 @@ struct ChunkPos {
 namespace std {
     template<>
     struct hash<fresh::ChunkPos> {
-        size_t operator()(const fresh::ChunkPos& pos) const {
-            return hash<int>()(pos.x) ^ (hash<int>()(pos.z) << 1);
+        std::size_t operator()(const fresh::ChunkPos& pos) const {
+            // Use FNV-1a hash
+            std::size_t h1 = std::hash<int>{}(pos.x);
+            std::size_t h2 = std::hash<int>{}(pos.z);
+            return h1 ^ (h2 << 1);
         }
     };
 }
