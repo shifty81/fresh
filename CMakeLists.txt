@@ -197,11 +197,13 @@ target_include_directories(${PROJECT_NAME}
 
 # Link libraries
 # Link OpenGL (required for OpenGL backend)
-if(NOT WIN32)
-    # On Linux/macOS, link OpenGL
-    find_package(OpenGL QUIET)
-    if(OpenGL_FOUND)
-        target_link_libraries(${PROJECT_NAME} PRIVATE OpenGL::GL)
+find_package(OpenGL QUIET)
+if(OpenGL_FOUND)
+    target_link_libraries(${PROJECT_NAME} PRIVATE OpenGL::GL)
+else()
+    # Fallback for Windows if CMake can't find OpenGL package
+    if(WIN32)
+        target_link_libraries(${PROJECT_NAME} PRIVATE opengl32)
     endif()
 endif()
 
