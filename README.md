@@ -115,6 +115,47 @@ See [GETTING_STARTED.md](GETTING_STARTED.md) for detailed setup instructions.
 - ✅ World serialization system (Binary format with compression)
 - ✅ **Main Menu System** - Create new worlds or load existing ones
 - ✅ **Terraforming System** - Comprehensive world editing tools
+- ✅ **Placeholder Textures & Assets** - Ready-to-use voxel and UI textures
+
+## Texture Assets
+
+The engine includes procedurally generated placeholder textures for rapid prototyping:
+
+### Block Textures (42 textures)
+- **Basic Blocks**: Stone, Dirt, Sand
+- **Natural Materials**: Grass (top/side), Wood, Leaves, Water
+- **Crafted Blocks**: Cobblestone, Planks
+- **Multiple Resolutions**: 16x16 (low), 32x32 (medium), 64x64 (high)
+- **Transparency Support**: Water and leaves with alpha channel
+- **Face-Specific Textures**: Grass blocks have different textures per face
+
+### UI Assets (11 textures)
+- **Gameplay UI**: Crosshair (2 sizes), cursor
+- **Inventory**: Hotbar slots (normal/selected)
+- **Menu Elements**: Button backgrounds (normal/hover), panels
+- **HUD**: Health indicators (full/empty hearts)
+- **Branding**: Logo placeholder
+
+### Using Textures
+
+```cpp
+// Load all voxel textures
+fresh::VoxelTextureLoader textureLoader(
+    fresh::VoxelTextureLoader::TextureResolution::Low
+);
+textureLoader.loadAllTextures();
+
+// Get texture for a block type
+auto stoneTexture = textureLoader.getTexture(fresh::VoxelType::Stone);
+
+// Face-specific textures (for grass)
+auto grassTop = textureLoader.getTexture(
+    fresh::VoxelType::Grass, 
+    fresh::VoxelTextureLoader::BlockFace::Top
+);
+```
+
+See [textures/USAGE.md](textures/USAGE.md) for complete documentation.
 
 ## Terraforming Features
 
@@ -235,6 +276,28 @@ fresh/
 ├── shaders/               # GLSL shaders
 │   ├── voxel.vert        # Vertex shader
 │   └── voxel.frag        # Fragment shader
+├── textures/              # Placeholder textures (NEW!)
+│   ├── blocks/           # Block/voxel textures
+│   │   ├── stone_*.png   # Stone textures (16x16, 32x32, 64x64)
+│   │   ├── dirt_*.png    # Dirt textures
+│   │   ├── grass_*.png   # Grass textures (top/side)
+│   │   ├── sand_*.png    # Sand textures
+│   │   ├── water_*.png   # Water textures (transparent)
+│   │   ├── wood_*.png    # Wood textures
+│   │   ├── leaves_*.png  # Leaves textures (transparent)
+│   │   ├── cobblestone_*.png  # Cobblestone textures
+│   │   └── planks_*.png  # Wooden planks textures
+│   ├── ui/               # UI element textures
+│   │   ├── crosshair.png       # Aiming crosshair
+│   │   ├── hotbar_*.png        # Inventory slots
+│   │   ├── button_*.png        # Menu buttons
+│   │   ├── health_*.png        # Health indicators
+│   │   └── logo.png            # Engine logo
+│   ├── README.md         # Texture documentation
+│   ├── USAGE.md          # Usage guide with examples
+│   └── texture_config.json  # Texture mapping configuration
+├── examples/              # Example code
+│   └── texture_loading_example.cpp  # Texture system demo
 ├── docs/                  # Documentation
 │   ├── TERRAFORMING.md   # Terraforming system guide
 │   └── LOGGING.md        # Logging system documentation
@@ -396,6 +459,7 @@ Please read our [Code of Conduct](CODE_OF_CONDUCT.md) before contributing.
 - 🔨 [Examples](examples/) - Sample code and usage
 - 🌍 [Terraforming Guide](docs/TERRAFORMING.md) - World editing system
 - 📝 [Logging System](docs/LOGGING.md) - Error tracking and debugging
+- 🎨 [Texture System](textures/USAGE.md) - Using placeholder textures and assets
 - ⚙️ [GitHub Workflows](WORKFLOWS.md) - CI/CD and automation
 
 ## Logging and Debugging
