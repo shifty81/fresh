@@ -16,8 +16,8 @@ This guide will help you build and run the Fresh Voxel Engine using Visual Studi
    - Download from: https://cmake.org/download/
    - Make sure to add CMake to system PATH during installation
 
-3. **Vulkan SDK** (for Vulkan backend)
-   - Download from: https://vulkan.lunarg.com/
+3. **OpenGL/DirectX SDK** (for OpenGL/DirectX backend)
+   - Download from: https://graphics.lunarg.com/
    - Version 1.2 or higher
    - Includes validation layers and debugging tools
 
@@ -70,7 +70,7 @@ Solution 'FreshVoxelEngine'
 │   ├── Source Files
 │   │   ├── core/
 │   │   ├── renderer/
-│   │   │   └── backends/  (OpenGL, DirectX11, DirectX12, Vulkan)
+│   │   │   └── backends/  (OpenGL, DirectX11, DirectX12, OpenGL/DirectX)
 │   │   ├── voxel/
 │   │   ├── generation/
 │   │   ├── physics/
@@ -88,7 +88,7 @@ The engine automatically selects the best available graphics API for your platfo
 1. **DirectX 12** (default, Windows 10+)
 2. **DirectX 11** (fallback)
 3. **OpenGL 4.5+**
-4. **Vulkan**
+4. **OpenGL/DirectX**
 
 To manually select a graphics API, modify `src/renderer/GraphicsAPI.h`:
 
@@ -96,9 +96,9 @@ To manually select a graphics API, modify `src/renderer/GraphicsAPI.h`:
 // Change the selectBestGraphicsAPI() function
 inline GraphicsAPI selectBestGraphicsAPI() {
 #ifdef _WIN32
-    return GraphicsAPI::DirectX11;  // or DirectX12, OpenGL, Vulkan
+    return GraphicsAPI::DirectX11;  // or DirectX12, OpenGL, OpenGL/DirectX
 #else
-    return GraphicsAPI::Vulkan;
+    return GraphicsAPI::OpenGL/DirectX;
 #endif
 }
 ```
@@ -175,16 +175,16 @@ build\Release\FreshVoxelEngine.exe
 2. In Visual Studio: `Debug > Graphics > Start Graphics Debugging`
 3. Capture frames to analyze GPU state
 
-#### Vulkan Debugging
+#### OpenGL/DirectX Debugging
 1. Enable validation layers in Debug builds (automatic)
-2. Check Output window for Vulkan validation messages
+2. Check Output window for OpenGL/DirectX validation messages
 3. Use RenderDoc for detailed GPU debugging
 
 ## Common Build Issues
 
-### Issue: "Cannot find Vulkan SDK"
+### Issue: "Cannot find OpenGL/DirectX SDK"
 **Solution**: 
-- Install Vulkan SDK from https://vulkan.lunarg.com/
+- Install OpenGL/DirectX SDK from https://graphics.lunarg.com/
 - Set `VULKAN_SDK` environment variable
 - Restart Visual Studio
 
@@ -246,8 +246,8 @@ cmake -DBUILD_TESTS=ON ..
 # Set custom install prefix
 cmake -DCMAKE_INSTALL_PREFIX="C:/FreshEngine" ..
 
-# Specify Vulkan SDK path
-cmake -DVulkan_ROOT="C:/VulkanSDK/1.3.xxx.x" ..
+# Specify OpenGL/DirectX SDK path
+cmake -DOpenGL/DirectX_ROOT="C:/OpenGL/DirectXSDK/1.3.xxx.x" ..
 ```
 
 ### Multi-Configuration Build
@@ -274,14 +274,14 @@ cmake --build . --config Release
 ### Runtime Crashes
 1. Run with debugger (F5) to catch exceptions
 2. Check Output window for error messages
-3. Enable DirectX/Vulkan validation layers (Debug build)
+3. Enable DirectX/OpenGL/DirectX validation layers (Debug build)
 4. Verify all DLLs are in the executable directory
 
 ## Additional Resources
 
 - [CMake Documentation](https://cmake.org/documentation/)
 - [Visual Studio C++ Documentation](https://docs.microsoft.com/en-us/cpp/)
-- [Vulkan Tutorial](https://vulkan-tutorial.com/)
+- [OpenGL/DirectX Tutorial](https://graphics-tutorial.com/)
 - [DirectX 11 Programming Guide](https://docs.microsoft.com/en-us/windows/win32/direct3d11/dx-graphics-overviews)
 - [DirectX 12 Programming Guide](https://docs.microsoft.com/en-us/windows/win32/direct3d12/directx-12-programming-guide)
 - [Learn OpenGL](https://learnopengl.com/)

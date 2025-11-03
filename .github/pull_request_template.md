@@ -26,7 +26,7 @@ Please describe the tests that you ran to verify your changes. Provide instructi
 **Test Configuration**:
 * OS:
 * Compiler:
-* Vulkan Version:
+* Graphics API (OpenGL/DirectX):
 * GPU:
 
 ## Checklist

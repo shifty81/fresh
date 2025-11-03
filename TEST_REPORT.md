@@ -199,7 +199,7 @@ build_tests_only.sh
 
 ## Running the Tests
 
-### Build Tests Only (Without Vulkan)
+### Build Tests Only (Without OpenGL/DirectX)
 ```bash
 mkdir -p build_test && cd build_test
 cmake -DBUILD_TESTS=ON ..

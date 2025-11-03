@@ -26,7 +26,7 @@ If applicable, add screenshots to help explain your problem.
  - OS: [e.g., Ubuntu 22.04, Windows 11, macOS 13]
  - Compiler: [e.g., GCC 13.2, Clang 15, MSVC 2022]
  - CMake Version: [e.g., 3.27]
- - Vulkan Version: [e.g., 1.3.250]
+ - Graphics API: [e.g., OpenGL 4.5, DirectX 12]
  - GPU: [e.g., NVIDIA RTX 3060, AMD RX 6800]
  - GPU Driver Version: [e.g., 535.129.03]
 

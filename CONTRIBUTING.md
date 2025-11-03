@@ -24,7 +24,7 @@ Before you begin, ensure you have the following installed:
 
 - CMake 3.20 or higher
 - C++17 compatible compiler (GCC 7+, Clang 5+, MSVC 2017+)
-- Vulkan SDK 1.2 or higher
+- OpenGL 4.5+ drivers (or DirectX 11+ on Windows)
 - GLFW 3.3 or higher
 - Git
 
@@ -271,7 +271,7 @@ If applicable, add screenshots.
 **Environment:**
  - OS: [e.g., Ubuntu 22.04]
  - Compiler: [e.g., GCC 13.2]
- - Vulkan Version: [e.g., 1.3.250]
+ - Graphics API: [OpenGL/DirectX version]
  - GPU: [e.g., NVIDIA RTX 3060]
 
 **Additional context**
@@ -312,7 +312,7 @@ If you have ideas about how to implement this feature.
 
 ### Engine Systems
 
-- **Rendering**: Vulkan rendering, shaders, graphics pipeline
+- **Rendering**: OpenGL/DirectX rendering, shaders, graphics pipeline
 - **Voxel World**: Chunk management, meshing, world generation
 - **Physics**: Collision detection, physics simulation
 - **AI**: Behavior trees, pathfinding, NPC systems

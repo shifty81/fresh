@@ -73,7 +73,7 @@ API References:      In Progress
 
 ### ✅ Version 0.1.0 - Foundation (Released: Oct 2025)
 - Core engine architecture
-- Basic Vulkan rendering
+- Basic OpenGL/DirectX rendering
 - Voxel world system
 - Procedural generation
 - World editing & serialization
