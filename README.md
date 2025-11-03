@@ -359,6 +359,7 @@ Please read our [Code of Conduct](CODE_OF_CONDUCT.md) before contributing.
 - 📚 [Tutorials](docs/tutorials/) - Step-by-step guides
 - 🔨 [Examples](examples/) - Sample code and usage
 - 🌍 [Terraforming Guide](docs/TERRAFORMING.md) - World editing system
+- ⚙️ [GitHub Workflows](WORKFLOWS.md) - CI/CD and automation
 
 ## License
 
