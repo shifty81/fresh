@@ -15,6 +15,7 @@ A comprehensive, one-click installation script that automates the entire setup p
 - ✅ **Dependency Installation** - Automatically installs GLFW and GLM
 - ✅ **Project Generation** - Creates Visual Studio 2022 solution files
 - ✅ **Automated Build** - Compiles the engine in Release mode
+- ✅ **Comprehensive Logging** - Captures all build output to timestamped log files in `logs/` directory
 - ✅ **Shortcut Creation** - Creates convenient shortcuts for running the engine
 - ✅ **Interactive** - Provides clear prompts and feedback throughout the process
 
@@ -109,11 +110,15 @@ Most time is spent downloading and compiling dependencies.
 **Error**: "Build failed"
 
 **Solution**:
-1. Check the error messages for specific issues
-2. Ensure all prerequisites are properly installed
-3. Try opening `build\FreshVoxelEngine.sln` in Visual Studio
-4. Build manually to see detailed error messages
-5. Check [DEVELOPER_SETUP.md](../../DEVELOPER_SETUP.md) for manual build instructions
+1. Check the timestamped log file in the `logs/` directory (path shown in error message)
+2. The log file contains the complete build output including all error details
+3. Look for specific compilation errors or missing dependencies
+4. Ensure all prerequisites are properly installed
+5. Try opening `build\FreshVoxelEngine.sln` in Visual Studio
+6. Build manually to see detailed error messages in the IDE
+7. Check [DEVELOPER_SETUP.md](../../DEVELOPER_SETUP.md) for manual build instructions
+
+**Note**: All build scripts now capture complete stdout and stderr output to log files with timestamps like `install_errors_YYYY-MM-DD_HH-MM-SS.txt` in the `logs/` directory.
 
 ##### Network Issues
 **Error**: Cannot download vcpkg or dependencies
@@ -158,9 +163,25 @@ After successful installation, you'll have:
 - `build/` - Build directory with Visual Studio solution
 - `build/FreshVoxelEngine.sln` - Visual Studio solution file
 - `build/Release/FreshVoxelEngine.exe` - Compiled engine executable
+- `logs/` - Log directory with timestamped installation and build logs
 - `vcpkg/` - vcpkg package manager (if installed)
 - `Open_Solution.bat` - Shortcut to open VS solution (if created)
 - `Run_Engine.bat` - Shortcut to run engine (if created)
+
+#### Logging
+
+All build scripts create timestamped log files in the `logs/` directory:
+- `install_errors_YYYY-MM-DD_HH-MM-SS.txt` - Complete output from install.bat
+- `build_errors_YYYY-MM-DD_HH-MM-SS.txt` - Complete output from build.bat
+- `rebuild_errors_YYYY-MM-DD_HH-MM-SS.txt` - Complete output from rebuild.bat
+
+These logs capture:
+- Both stdout and stderr from all cmake commands
+- Build progress and status messages
+- Complete error details when builds fail
+- Timestamps for tracking issues
+
+When a build fails, the error message will display the exact log file path for detailed troubleshooting.
 
 #### Script Maintenance
 
@@ -179,6 +200,82 @@ Improvements to the installation script are welcome! Please submit pull requests
 - Testing on different Windows configurations
 
 ## Additional Tools
+
+### `build.bat` - Quick Build Script
+
+A fast build script for incremental builds during development.
+
+#### Features
+- ✅ Quick builds without regenerating project files
+- ✅ Choice of build configuration (Debug, Release, RelWithDebInfo)
+- ✅ Complete build logging to timestamped files
+- ✅ Option to run the engine after building
+
+#### Usage
+1. Double-click `build.bat`
+2. Select your desired build configuration (1-3)
+3. Wait for the build to complete
+4. Optionally run the engine
+
+**Note**: Requires that `install.bat` or Visual Studio project generation has been run at least once.
+
+### `rebuild.bat` - Clean Rebuild Script
+
+Performs a complete clean rebuild of the project.
+
+#### Features
+- ✅ Cleans all build artifacts
+- ✅ Regenerates Visual Studio project files
+- ✅ Builds from scratch in Release mode
+- ✅ Complete logging of all steps
+
+#### Usage
+1. Double-click `rebuild.bat`
+2. Wait for the clean, regenerate, and build steps to complete
+
+**Use when**: 
+- Build cache issues occur
+- CMake configuration changes
+- Complete rebuild is needed
+
+### `clean.bat` - Clean Build Artifacts
+
+Removes all build artifacts and generated files.
+
+#### Features
+- ✅ Removes build directory
+- ✅ Preserves source code and dependencies
+
+#### Usage
+1. Double-click `clean.bat`
+2. Build artifacts will be removed
+
+## Logging System
+
+All build tools use a comprehensive logging system:
+
+- **Log Location**: `logs/` directory in repository root
+- **File Format**: `<script>_errors_YYYY-MM-DD_HH-MM-SS.txt`
+- **Content**: Complete stdout and stderr from all operations
+- **Retention**: Manual cleanup (not auto-deleted)
+
+### Log Files
+- `install_errors_*.txt` - Full installation process output
+- `build_errors_*.txt` - Complete build output
+- `rebuild_errors_*.txt` - Clean rebuild process output
+
+### When Errors Occur
+All scripts will:
+1. Display a user-friendly error message
+2. Show the exact log file path
+3. Include the exit code in the log file
+4. Preserve complete output for debugging
+
+Example error message:
+```
+ERROR: Build failed
+Full build output has been saved to: logs\build_errors_2025-11-03_14-30-45.txt
+```
 
 Future tools planned for this directory:
 - `package.bat` - Create distribution package
