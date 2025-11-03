@@ -9,8 +9,26 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 # Export compile commands for IDE support
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-# Find Vulkan
-find_package(Vulkan REQUIRED)
+# Graphics API Dependencies (at least one should be available)
+# Find Vulkan (optional, but recommended for cross-platform support)
+find_package(Vulkan QUIET)
+if(Vulkan_FOUND)
+    message(STATUS "Vulkan SDK found: ${Vulkan_VERSION}")
+    add_definitions(-DFRESH_VULKAN_SUPPORT)
+else()
+    message(STATUS "Vulkan SDK not found. Vulkan backend will not be available.")
+    message(STATUS "To enable Vulkan, install the Vulkan SDK from https://vulkan.lunarg.com/")
+endif()
+
+# OpenGL is available on most systems
+message(STATUS "OpenGL backend will be available (system OpenGL)")
+add_definitions(-DFRESH_OPENGL_SUPPORT)
+
+# DirectX is only available on Windows
+if(WIN32)
+    message(STATUS "DirectX 11/12 backends will be available (Windows)")
+    add_definitions(-DFRESH_DIRECTX_SUPPORT)
+endif()
 
 # Try to find GLFW
 find_package(glfw3 QUIET)
@@ -177,14 +195,27 @@ add_executable(${PROJECT_NAME} ${ENGINE_SOURCES} ${ENGINE_HEADERS})
 target_include_directories(${PROJECT_NAME} 
     PRIVATE 
         ${CMAKE_CURRENT_SOURCE_DIR}/include
-        ${Vulkan_INCLUDE_DIRS}
 )
 
+# Add Vulkan include directory if available
+if(Vulkan_FOUND)
+    target_include_directories(${PROJECT_NAME} PRIVATE ${Vulkan_INCLUDE_DIRS})
+endif()
+
 # Link libraries
-target_link_libraries(${PROJECT_NAME} 
-    PRIVATE 
-        Vulkan::Vulkan
-)
+# Link Vulkan if available
+if(Vulkan_FOUND)
+    target_link_libraries(${PROJECT_NAME} PRIVATE Vulkan::Vulkan)
+endif()
+
+# Link OpenGL (required for OpenGL backend)
+if(NOT WIN32)
+    # On Linux/macOS, link OpenGL
+    find_package(OpenGL QUIET)
+    if(OpenGL_FOUND)
+        target_link_libraries(${PROJECT_NAME} PRIVATE OpenGL::GL)
+    endif()
+endif()
 
 # Link GLFW
 if(glfw3_FOUND)
@@ -197,6 +228,16 @@ endif()
 # Link GLM if found
 if(glm_FOUND)
     target_link_libraries(${PROJECT_NAME} PRIVATE glm::glm)
+endif()
+
+# Link DirectX on Windows (system libraries)
+if(WIN32)
+    target_link_libraries(${PROJECT_NAME} PRIVATE 
+        d3d11.lib 
+        d3d12.lib 
+        dxgi.lib 
+        d3dcompiler.lib
+    )
 endif()
 
 # Compiler warnings

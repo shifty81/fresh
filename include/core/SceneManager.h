@@ -4,6 +4,9 @@
 #include <vector>
 #include <memory>
 #include <functional>
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/quaternion.hpp>
 
 namespace fresh {
 
@@ -18,6 +21,7 @@ public:
     // Hierarchy management
     void addChild(std::shared_ptr<SceneNode> child);
     void removeChild(std::shared_ptr<SceneNode> child);
+    void clearChildren() { children.clear(); }
     SceneNode* getParent() const { return parent; }
     const std::vector<std::shared_ptr<SceneNode>>& getChildren() const { return children; }
     
