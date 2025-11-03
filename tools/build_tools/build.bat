@@ -73,18 +73,19 @@ echo. >> "%LOG_FILE%"
 
 echo.
 echo Building %BUILD_CONFIG% configuration...
+echo Building %BUILD_CONFIG% configuration... >> "%LOG_FILE%"
 echo.
+echo. >> "%LOG_FILE%"
 
 REM Build the project
-cmake --build build --config %BUILD_CONFIG% 2>> "%LOG_FILE%"
+cmake --build build --config %BUILD_CONFIG% >> "%LOG_FILE%" 2>&1
 
 if %ERRORLEVEL% NEQ 0 (
     echo.
     echo ERROR: Build failed
     echo ERROR: Build failed with exit code %ERRORLEVEL% >> "%LOG_FILE%"
-    echo Check log file for details: %LOG_FILE% >> "%LOG_FILE%"
     echo.
-    echo Check log file for details: %LOG_FILE%
+    echo Full build output has been saved to: %LOG_FILE%
     echo.
     pause
     exit /b 1

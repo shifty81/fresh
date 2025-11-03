@@ -289,12 +289,17 @@ echo.
 
 REM Build in Release mode
 echo Building Release configuration...
-cmake --build build --config Release
+echo Building Release configuration... >> "%LOG_FILE%"
+echo. >> "%LOG_FILE%"
+cmake --build build --config Release >> "%LOG_FILE%" 2>&1
 
 if %ERRORLEVEL% NEQ 0 (
     echo.
     echo %RED%ERROR: Build failed%RESET%
+    echo ERROR: Build failed with exit code %ERRORLEVEL% >> "%LOG_FILE%"
     echo Please check the error messages above
+    echo.
+    echo Full build output has been saved to: %LOG_FILE%
     echo.
     echo You can try building manually by opening:
     echo   %REPO_ROOT%\build\FreshVoxelEngine.sln
