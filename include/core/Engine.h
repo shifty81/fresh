@@ -13,6 +13,8 @@ class AISystem;
 class EditorGUI;
 class MainMenu;
 class WorldEditor;
+class Player;
+class InputManager;
 
 /**
  * @brief Main engine class that orchestrates all subsystems
@@ -67,9 +69,12 @@ private:
     std::unique_ptr<EditorGUI> m_editor;
     std::unique_ptr<MainMenu> m_mainMenu;
     std::unique_ptr<WorldEditor> m_worldEditor;
+    std::unique_ptr<Player> m_player;
+    std::unique_ptr<InputManager> m_inputManager;
     
     void createNewWorld(const std::string& name, int seed);
     void loadWorld(const std::string& name);
+    void setupInputCallbacks();
 };
 
 } // namespace fresh

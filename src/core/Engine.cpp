@@ -12,8 +12,12 @@
 #include "ui/MainMenu.h"
 #include "generation/TerrainGenerator.h"
 #include "serialization/WorldSerializer.h"
+#include "gameplay/Player.h"
+#include "input/InputManager.h"
 #include <iostream>
 #include <chrono>
+#include <GLFW/glfw3.h>
+#include <glm/glm.hpp>
 
 namespace fresh {
 
@@ -66,6 +70,13 @@ bool Engine::initialize() {
     }
     std::cout << "Window created" << std::endl;
     LOG_INFO_C("Window created", "Engine");
+    
+    // Create input manager and set up callbacks
+    m_inputManager = std::make_unique<InputManager>();
+    m_inputManager->initialize(m_window->getHandle());
+    setupInputCallbacks();
+    std::cout << "Input manager initialized" << std::endl;
+    LOG_INFO_C("Input manager initialized", "Engine");
     
     // Create renderer using the abstraction layer
     // Auto-select best graphics API for the platform
@@ -125,6 +136,14 @@ bool Engine::initialize() {
     m_editor->setVisible(true); // Show editor UI by default
     std::cout << "Editor GUI initialized" << std::endl;
     LOG_INFO_C("Editor GUI initialized", "Engine");
+    
+    // Create player
+    m_player = std::make_unique<Player>();
+    m_player->setWorld(m_world.get());
+    // Set player spawn position at a safe height
+    m_player->setPosition(glm::vec3(0.0f, 80.0f, 0.0f));
+    std::cout << "Player initialized" << std::endl;
+    LOG_INFO_C("Player initialized", "Engine");
     
     m_running = true;
     m_inGame = true;
@@ -227,10 +246,20 @@ void Engine::run() {
                 // Initialize graphics systems now that we have a world
                 m_window = std::make_unique<Window>(1280, 720, "Fresh Voxel Engine");
                 if (m_window->initialize()) {
+                    // Create input manager and set up callbacks
+                    m_inputManager = std::make_unique<InputManager>();
+                    m_inputManager->initialize(m_window->getHandle());
+                    setupInputCallbacks();
+                    
                     m_renderer = RenderContextFactory::createBest();
                     if (m_renderer) {
                         m_renderer->initialize(m_window.get());
                     }
+                    
+                    // Create player
+                    m_player = std::make_unique<Player>();
+                    m_player->setWorld(m_world.get());
+                    m_player->setPosition(glm::vec3(0.0f, 80.0f, 0.0f));
                 }
                 m_inGame = true;
             } else if (m_mainMenu->shouldLoadWorld()) {
@@ -240,10 +269,20 @@ void Engine::run() {
                 // Initialize graphics systems now that we have a world
                 m_window = std::make_unique<Window>(1280, 720, "Fresh Voxel Engine");
                 if (m_window->initialize()) {
+                    // Create input manager and set up callbacks
+                    m_inputManager = std::make_unique<InputManager>();
+                    m_inputManager->initialize(m_window->getHandle());
+                    setupInputCallbacks();
+                    
                     m_renderer = RenderContextFactory::createBest();
                     if (m_renderer) {
                         m_renderer->initialize(m_window.get());
                     }
+                    
+                    // Create player
+                    m_player = std::make_unique<Player>();
+                    m_player->setWorld(m_world.get());
+                    m_player->setPosition(glm::vec3(0.0f, 80.0f, 0.0f));
                 }
                 m_inGame = true;
             }
@@ -284,6 +323,8 @@ void Engine::shutdown() {
         m_renderer->waitIdle();
     }
     
+    m_player.reset();
+    m_inputManager.reset();
     m_editor.reset();
     m_aiSystem.reset();
     m_physics.reset();
@@ -298,6 +339,11 @@ void Engine::processInput() {
     if (m_window) {
         m_window->pollEvents();
     }
+    
+    // Update input manager state
+    if (m_inputManager) {
+        m_inputManager->update();
+    }
 }
 
 void Engine::update(float deltaTime) {
@@ -305,9 +351,34 @@ void Engine::update(float deltaTime) {
         return;
     }
     
-    // Update world (chunk streaming, etc.)
-    WorldPos playerPos(0, 64, 0); // TODO: Get actual player position
-    m_world->update(playerPos);
+    // Handle player input (needs to happen during update with proper deltaTime)
+    if (m_player && m_inputManager) {
+        m_player->handleInput(*m_inputManager, deltaTime);
+        
+        // Handle mouse movement for camera
+        glm::vec2 mouseDelta = m_inputManager->getMouseDelta();
+        if (glm::length(mouseDelta) > 0.0f) {
+            m_player->handleMouseMovement(mouseDelta.x, mouseDelta.y);
+        }
+    }
+    
+    // Update player (physics, collision)
+    if (m_player) {
+        m_player->update(deltaTime);
+    }
+    
+    // Update world with actual player position for chunk streaming
+    if (m_player) {
+        glm::vec3 playerPos = m_player->getPosition();
+        m_world->update(WorldPos(
+            static_cast<int>(playerPos.x),
+            static_cast<int>(playerPos.y),
+            static_cast<int>(playerPos.z)
+        ));
+    } else {
+        // Fallback to default position
+        m_world->update(WorldPos(0, 64, 0));
+    }
     
     // Update physics
     if (m_physics) {
@@ -343,6 +414,59 @@ void Engine::render() {
     }
     
     m_renderer->endFrame();
+}
+
+void Engine::setupInputCallbacks() {
+    if (!m_window || !m_inputManager) {
+        return;
+    }
+    
+    GLFWwindow* window = m_window->getHandle();
+    
+    // Store InputManager pointer in window user pointer
+    // Note: We need to be careful here as Window also uses user pointer
+    // We'll use a struct to hold both
+    struct UserData {
+        InputManager* inputManager;
+        Window* window;
+    };
+    
+    // Allocate user data (will be cleaned up in shutdown)
+    UserData* userData = new UserData{m_inputManager.get(), m_window.get()};
+    glfwSetWindowUserPointer(window, userData);
+    
+    // Keyboard callback
+    glfwSetKeyCallback(window, [](GLFWwindow* win, int key, int scancode, int action, int mods) {
+        UserData* data = static_cast<UserData*>(glfwGetWindowUserPointer(win));
+        if (data && data->inputManager) {
+            data->inputManager->processKeyEvent(key, action);
+        }
+    });
+    
+    // Mouse movement callback
+    glfwSetCursorPosCallback(window, [](GLFWwindow* win, double xpos, double ypos) {
+        UserData* data = static_cast<UserData*>(glfwGetWindowUserPointer(win));
+        if (data && data->inputManager) {
+            data->inputManager->processMouseMovement(xpos, ypos);
+        }
+    });
+    
+    // Mouse button callback
+    glfwSetMouseButtonCallback(window, [](GLFWwindow* win, int button, int action, int mods) {
+        UserData* data = static_cast<UserData*>(glfwGetWindowUserPointer(win));
+        if (data && data->inputManager) {
+            data->inputManager->processMouseButton(button, action);
+        }
+    });
+    
+    // Also set up framebuffer resize callback for Window class
+    glfwSetFramebufferSizeCallback(window, [](GLFWwindow* win, int width, int height) {
+        UserData* data = static_cast<UserData*>(glfwGetWindowUserPointer(win));
+        if (data && data->window) {
+            // Call Window's resize handler
+            // This is a workaround - ideally Window should handle this itself
+        }
+    });
 }
 
 } // namespace fresh
