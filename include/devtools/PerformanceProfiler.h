@@ -1,6 +1,8 @@
 #pragma once
 #include <vector>
 #include <chrono>
+#include <string>
+#include <map>
 
 namespace fresh {
 namespace devtools {

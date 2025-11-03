@@ -52,11 +52,11 @@ private:
     
     // Client management
     std::map<uint32_t, std::unique_ptr<ClientConnection>> clients;
-    std::mutex clientsMutex;
+    mutable std::mutex clientsMutex;
     
     // Sector servers (multi-threaded)
     std::map<std::pair<int, int>, std::unique_ptr<SectorServer>> sectorServers;
-    std::mutex sectorsMutex;
+    mutable std::mutex sectorsMutex;
     
     // Threading
     std::thread acceptThread;

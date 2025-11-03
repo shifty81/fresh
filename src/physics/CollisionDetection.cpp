@@ -3,6 +3,7 @@
 #include "voxel/VoxelTypes.h"
 #include <algorithm>
 #include <cmath>
+#include <set>
 
 namespace fresh {
 
@@ -138,7 +139,8 @@ RayHit CollisionDetection::raycastVoxel(const Ray& ray, VoxelWorld* world, float
     const int maxSteps = static_cast<int>(maxDistance * 2);
     for (int i = 0; i < maxSteps; ++i) {
         // Check current voxel
-        VoxelType voxel = world->getVoxel(mapPos.x, mapPos.y, mapPos.z);
+        Voxel* voxelPtr = world->getVoxel(WorldPos(mapPos.x, mapPos.y, mapPos.z));
+        VoxelType voxel = voxelPtr ? voxelPtr->type : VoxelType::Air;
         if (voxel != VoxelType::Air && voxel != VoxelType::Water) {
             hit.hit = true;
             hit.distance = distance;
@@ -197,8 +199,8 @@ bool CollisionDetection::testAABBVoxelWorld(const AABB& aabb, VoxelWorld* world)
     for (int x = minX; x <= maxX; ++x) {
         for (int y = minY; y <= maxY; ++y) {
             for (int z = minZ; z <= maxZ; ++z) {
-                VoxelType voxel = world->getVoxel(x, y, z);
-                if (voxel != VoxelType::Air && voxel != VoxelType::Water) {
+                Voxel* voxel = world->getVoxel(WorldPos(x, y, z));
+                if (voxel && voxel->type != VoxelType::Air && voxel->type != VoxelType::Water) {
                     return true;
                 }
             }

@@ -54,6 +54,8 @@ set(ENGINE_SOURCES
     src/renderer/ShaderManager.cpp
     src/renderer/RenderContext.cpp
     src/renderer/Material.cpp
+    src/renderer/Texture.cpp
+    src/renderer/TextureManager.cpp
     src/renderer/backends/OpenGLRenderContext.cpp
     src/voxel/Chunk.cpp
     src/voxel/VoxelWorld.cpp

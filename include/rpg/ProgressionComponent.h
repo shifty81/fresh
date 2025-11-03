@@ -1,6 +1,7 @@
 #pragma once
 #include "ecs/IComponent.h"
 #include <string>
+#include <map>
 
 namespace fresh {
 namespace rpg {
