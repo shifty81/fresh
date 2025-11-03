@@ -142,7 +142,8 @@ bool Player::checkCollision(const glm::vec3& newPos) {
             int blockY = static_cast<int>(std::floor(y));
             int blockZ = static_cast<int>(std::floor(z));
             
-            VoxelType voxel = world->getVoxel(blockX, blockY, blockZ);
+            Voxel* voxelPtr = world->getVoxel(WorldPos(blockX, blockY, blockZ));
+            VoxelType voxel = voxelPtr ? voxelPtr->type : VoxelType::Air;
             if (voxel != VoxelType::Air && voxel != VoxelType::Water) {
                 return true; // Collision detected
             }
@@ -169,7 +170,8 @@ bool Player::checkGrounded() {
         int blockY = static_cast<int>(std::floor(checkY));
         int blockZ = static_cast<int>(std::floor(z));
         
-        VoxelType voxel = world->getVoxel(blockX, blockY, blockZ);
+        Voxel* voxelPtr = world->getVoxel(WorldPos(blockX, blockY, blockZ));
+        VoxelType voxel = voxelPtr ? voxelPtr->type : VoxelType::Air;
         if (voxel != VoxelType::Air && voxel != VoxelType::Water) {
             return true; // Ground detected
         }

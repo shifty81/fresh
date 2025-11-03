@@ -48,7 +48,7 @@ private:
     
     // Players in this sector
     std::vector<uint32_t> playerIds;
-    std::mutex playersMutex;
+    mutable std::mutex playersMutex;
     
     // Sector state
     double lastUpdateTime;

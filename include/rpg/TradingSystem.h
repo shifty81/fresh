@@ -1,6 +1,7 @@
 #pragma once
 #include "Inventory.h"
 #include <map>
+#include <vector>
 
 namespace fresh {
 namespace rpg {
