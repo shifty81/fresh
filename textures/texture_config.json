@@ -30,8 +30,7 @@
     "Water": {
       "all_faces": "water",
       "transparent": true,
-      "animated": false,
-      "description": "Blue water texture with transparency"
+      "description": "Blue water texture with transparency (animation support planned)"
     },
     "Wood": {
       "top": "wood",

@@ -1,7 +1,6 @@
 #include "physics/PhysicsSystemEnhanced.h"
 #include "physics/PhysicsComponent.h"
 #include "voxelship/VoxelStructureComponent.h"
-#define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/quaternion.hpp>
 
 namespace fresh {

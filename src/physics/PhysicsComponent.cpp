@@ -1,5 +1,4 @@
 #include "physics/PhysicsComponent.h"
-#define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/quaternion.hpp>
 
 namespace fresh {
