@@ -83,6 +83,15 @@ set(ENGINE_SOURCES
     src/rpg/FactionComponent.cpp
     src/rpg/LootSystem.cpp
     src/rpg/TradingSystem.cpp
+    src/networking/NetworkMessage.cpp
+    src/networking/ClientConnection.cpp
+    src/networking/GameServer.cpp
+    src/networking/SectorServer.cpp
+    src/devtools/DebugRenderer.cpp
+    src/devtools/PerformanceProfiler.cpp
+    src/devtools/MemoryTracker.cpp
+    src/devtools/DebugConsole.cpp
+    src/devtools/DevToolsManager.cpp
 )
 
 # Header files
@@ -136,6 +145,15 @@ set(ENGINE_HEADERS
     include/rpg/FactionComponent.h
     include/rpg/LootSystem.h
     include/rpg/TradingSystem.h
+    include/networking/NetworkMessage.h
+    include/networking/ClientConnection.h
+    include/networking/GameServer.h
+    include/networking/SectorServer.h
+    include/devtools/DebugRenderer.h
+    include/devtools/PerformanceProfiler.h
+    include/devtools/MemoryTracker.h
+    include/devtools/DebugConsole.h
+    include/devtools/DevToolsManager.h
 )
 
 # Create executable
