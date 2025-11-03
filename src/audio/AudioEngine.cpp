@@ -1,5 +1,6 @@
 #include "audio/AudioEngine.h"
 #include "core/ResourceManager.h"
+#include <algorithm>
 #include <iostream>
 
 namespace fresh {
