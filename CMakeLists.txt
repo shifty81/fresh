@@ -92,6 +92,7 @@ set(ENGINE_SOURCES
     src/devtools/MemoryTracker.cpp
     src/devtools/DebugConsole.cpp
     src/devtools/DevToolsManager.cpp
+    src/scripting/lua/ScriptingEngine.cpp
 )
 
 # Header files
@@ -154,6 +155,7 @@ set(ENGINE_HEADERS
     include/devtools/MemoryTracker.h
     include/devtools/DebugConsole.h
     include/devtools/DevToolsManager.h
+    include/scripting/lua/ScriptingEngine.h
 )
 
 # Create executable
