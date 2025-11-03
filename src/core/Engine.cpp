@@ -61,9 +61,23 @@ bool Engine::initialize() {
     
     m_mainMenu->clearFlags();
     
+    // Create renderer using the abstraction layer first to determine API
+    // Auto-select best graphics API for the platform
+    m_renderer = RenderContextFactory::createBest();
+    if (!m_renderer) {
+        std::cerr << "Failed to create render context" << std::endl;
+        LOG_ERROR_C("Failed to create render context", "Engine");
+        return false;
+    }
+    std::cout << "Render context created: " << getGraphicsAPIName(m_renderer->getAPI()) << std::endl;
+    LOG_INFO_C("Render context created: " + std::string(getGraphicsAPIName(m_renderer->getAPI())), "Engine");
+    
+    // Determine if we need OpenGL context for the window
+    bool useOpenGL = (m_renderer->getAPI() == GraphicsAPI::OpenGL);
+    
     // Create window
     m_window = std::make_unique<Window>(1280, 720, "Fresh Voxel Engine");
-    if (!m_window->initialize()) {
+    if (!m_window->initialize(useOpenGL)) {
         std::cerr << "Failed to initialize window" << std::endl;
         LOG_ERROR_C("Failed to initialize window", "Engine");
         return false;
@@ -78,15 +92,7 @@ bool Engine::initialize() {
     std::cout << "Input manager initialized" << std::endl;
     LOG_INFO_C("Input manager initialized", "Engine");
     
-    // Create renderer using the abstraction layer
-    // Auto-select best graphics API for the platform
-    m_renderer = RenderContextFactory::createBest();
-    if (!m_renderer) {
-        std::cerr << "Failed to create render context" << std::endl;
-        LOG_ERROR_C("Failed to create render context", "Engine");
-        return false;
-    }
-    
+    // Initialize renderer with the window
     if (!m_renderer->initialize(m_window.get())) {
         std::cerr << "Failed to initialize renderer" << std::endl;
         LOG_ERROR_C("Failed to initialize renderer", "Engine");
@@ -422,13 +428,27 @@ void Engine::render() {
     }
     
     m_renderer->endFrame();
+    
+    // Swap buffers if using OpenGL
+    if (m_window && m_renderer->getAPI() == GraphicsAPI::OpenGL) {
+        m_window->swapBuffers();
+    }
 }
 
 void Engine::initializeGameSystems() {
     // This helper is called after world creation to initialize all game systems
+    
+    // Create renderer first to determine API
+    if (!m_renderer) {
+        m_renderer = RenderContextFactory::createBest();
+        std::cout << "Render context created: " << getGraphicsAPIName(m_renderer->getAPI()) << std::endl;
+    }
+    
+    bool useOpenGL = (m_renderer && m_renderer->getAPI() == GraphicsAPI::OpenGL);
+    
     if (!m_window) {
         m_window = std::make_unique<Window>(1280, 720, "Fresh Voxel Engine");
-        if (!m_window->initialize()) {
+        if (!m_window->initialize(useOpenGL)) {
             std::cerr << "Failed to initialize window in game systems" << std::endl;
             return;
         }
@@ -441,12 +461,9 @@ void Engine::initializeGameSystems() {
         setupInputCallbacks();
     }
     
-    // Create renderer
-    if (!m_renderer) {
-        m_renderer = RenderContextFactory::createBest();
-        if (m_renderer) {
-            m_renderer->initialize(m_window.get());
-        }
+    // Initialize renderer with window
+    if (m_renderer && m_window) {
+        m_renderer->initialize(m_window.get());
     }
     
     // Create player

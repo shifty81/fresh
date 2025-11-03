@@ -156,8 +156,8 @@ bool OpenGLRenderContext::initialize(Window* win) {
     }
     
     // Set up default OpenGL state
-    // glEnable(GL_DEPTH_TEST);
-    // glEnable(GL_CULL_FACE);
+    glEnable(GL_DEPTH_TEST);
+    glEnable(GL_CULL_FACE);
     
     std::cout << "[OpenGL] OpenGL context initialized successfully" << std::endl;
     return true;
@@ -174,7 +174,7 @@ void OpenGLRenderContext::shutdown() {
 
 bool OpenGLRenderContext::beginFrame() {
     // Clear buffers
-    // glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     return true;
 }
 
@@ -183,25 +183,25 @@ void OpenGLRenderContext::endFrame() {
 }
 
 void OpenGLRenderContext::waitIdle() {
-    // glFinish();
+    glFinish();
 }
 
 void OpenGLRenderContext::setViewport(int x, int y, int w, int h) {
-    // glViewport(x, y, w, h);
+    glViewport(x, y, w, h);
     width = w;
     height = h;
 }
 
 void OpenGLRenderContext::setScissor(int x, int y, int w, int h) {
-    // glScissor(x, y, w, h);
+    glScissor(x, y, w, h);
 }
 
 void OpenGLRenderContext::clearColor(float r, float g, float b, float a) {
-    // glClearColor(r, g, b, a);
+    glClearColor(r, g, b, a);
 }
 
 void OpenGLRenderContext::clearDepth(float depth) {
-    // glClearDepth(depth);
+    glClearDepth(depth);
 }
 
 std::shared_ptr<RenderBuffer> OpenGLRenderContext::createVertexBuffer(const void* data, size_t size) {
