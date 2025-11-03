@@ -178,6 +178,13 @@ set(ENGINE_HEADERS
 # Create executable
 add_executable(${PROJECT_NAME} ${ENGINE_SOURCES} ${ENGINE_HEADERS})
 
+# Windows-specific: Make it a proper Windows GUI application (no console in Release)
+if(WIN32)
+    if(CMAKE_BUILD_TYPE STREQUAL "Release")
+        set_target_properties(${PROJECT_NAME} PROPERTIES WIN32_EXECUTABLE TRUE)
+    endif()
+endif()
+
 # Include directories
 target_include_directories(${PROJECT_NAME} 
     PRIVATE 
