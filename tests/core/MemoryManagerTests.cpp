@@ -4,6 +4,8 @@
  */
 
 #include <gtest/gtest.h>
+#include <thread>
+#include <vector>
 #include "core/MemoryManager.h"
 
 /**
