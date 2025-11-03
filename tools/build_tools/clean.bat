@@ -20,7 +20,6 @@ echo This will delete:
 echo   - build/ directory (Visual Studio project files and binaries)
 echo   - Generated shortcuts (Open_Solution.bat, Run_Engine.bat)
 echo.
-echo %~dp0
 set /p CONFIRM="Are you sure you want to continue? (Y/N): "
 
 if /i "%CONFIRM%" NEQ "Y" (

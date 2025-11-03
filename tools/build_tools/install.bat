@@ -216,7 +216,7 @@ if exist "%VCPKG_ROOT%\vcpkg.exe" (
     echo %YELLOW%vcpkg not available. Skipping automatic dependency installation.%RESET%
     echo Please ensure GLFW and GLM are installed manually.
     echo.
-    echo See DEVELOPER_SETUP.md for manual installation instructions.
+    echo See %REPO_ROOT%\DEVELOPER_SETUP.md for manual installation instructions.
 )
 
 echo.

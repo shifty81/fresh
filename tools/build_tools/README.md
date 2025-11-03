@@ -181,8 +181,6 @@ Improvements to the installation script are welcome! Please submit pull requests
 ## Additional Tools
 
 Future tools planned for this directory:
-- `clean.bat` - Clean build artifacts
-- `rebuild.bat` - Full rebuild from scratch
 - `package.bat` - Create distribution package
 - `update_deps.bat` - Update dependencies
 
