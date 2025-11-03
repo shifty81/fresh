@@ -236,7 +236,7 @@ int main() {
     std::cout << "  • Relative coordinates for positioning" << std::endl;
     std::cout << "  • Hollow structures for performance" << std::endl;
     std::cout << "\nNext steps:" << std::endl;
-    std::cout << "  • Add rotation and mirroring to blueprints" << std:endl;
+    std::cout << "  • Add rotation and mirroring to blueprints" << std::endl;
     std::cout << "  • Create structure loading/saving" << std::endl;
     std::cout << "  • Try terraforming_tools.cpp for interactive building" << std::endl;
     
