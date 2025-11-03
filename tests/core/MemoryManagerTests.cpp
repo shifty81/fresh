@@ -8,6 +8,8 @@
 #include <vector>
 #include "core/MemoryManager.h"
 
+using namespace fresh;
+
 /**
  * Test fixture for MemoryManager tests
  */

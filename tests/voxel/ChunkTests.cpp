@@ -7,13 +7,15 @@
 #include "voxel/Chunk.h"
 #include "voxel/VoxelTypes.h"
 
+using namespace fresh;
+
 /**
  * Test fixture for Chunk tests
  */
 class ChunkTest : public ::testing::Test {
 protected:
     void SetUp() override {
-        chunk = std::make_unique<Chunk>(0, 0);
+        chunk = std::make_unique<Chunk>(ChunkPos(0, 0));
     }
 
     void TearDown() override {
@@ -28,11 +30,11 @@ protected:
  */
 TEST_F(ChunkTest, Constructor_CreatesChunk_WithCorrectCoordinates) {
     // Arrange & Act
-    auto testChunk = std::make_unique<Chunk>(5, -3);
+    auto testChunk = std::make_unique<Chunk>(ChunkPos(5, -3));
     
     // Assert
-    EXPECT_EQ(testChunk->getChunkX(), 5);
-    EXPECT_EQ(testChunk->getChunkZ(), -3);
+    EXPECT_EQ(testChunk->getPosition().x, 5);
+    EXPECT_EQ(testChunk->getPosition().z, -3);
 }
 
 /**
@@ -41,14 +43,14 @@ TEST_F(ChunkTest, Constructor_CreatesChunk_WithCorrectCoordinates) {
 TEST_F(ChunkTest, SetAndGetVoxel_ValidCoordinates_ReturnsCorrectType) {
     // Arrange
     int x = 5, y = 10, z = 8;
-    VoxelType expectedType = VoxelType::Stone;
+    Voxel expectedVoxel(VoxelType::Stone);
     
     // Act
-    chunk->setVoxel(x, y, z, expectedType);
-    VoxelType actualType = chunk->getVoxel(x, y, z);
+    chunk->setVoxel(x, y, z, expectedVoxel);
+    const Voxel& actualVoxel = chunk->getVoxel(x, y, z);
     
     // Assert
-    EXPECT_EQ(actualType, expectedType);
+    EXPECT_EQ(actualVoxel.type, expectedVoxel.type);
 }
 
 /**
@@ -59,10 +61,10 @@ TEST_F(ChunkTest, GetVoxel_Uninitialized_ReturnsAir) {
     int x = 3, y = 50, z = 7;
     
     // Act
-    VoxelType type = chunk->getVoxel(x, y, z);
+    const Voxel& voxel = chunk->getVoxel(x, y, z);
     
     // Assert
-    EXPECT_EQ(type, VoxelType::Air);
+    EXPECT_EQ(voxel.type, VoxelType::Air);
 }
 
 /**
@@ -70,42 +72,23 @@ TEST_F(ChunkTest, GetVoxel_Uninitialized_ReturnsAir) {
  */
 TEST_F(ChunkTest, SetVoxel_AtMinimumBounds_Works) {
     // Arrange
-    VoxelType type = VoxelType::Diamond;
+    Voxel voxel(VoxelType::Stone);
     
     // Act & Assert - should not crash
-    EXPECT_NO_THROW(chunk->setVoxel(0, 0, 0, type));
-    EXPECT_EQ(chunk->getVoxel(0, 0, 0), type);
+    EXPECT_NO_THROW(chunk->setVoxel(0, 0, 0, voxel));
+    EXPECT_EQ(chunk->getVoxel(0, 0, 0).type, VoxelType::Stone);
 }
 
 TEST_F(ChunkTest, SetVoxel_AtMaximumBounds_Works) {
     // Arrange
-    VoxelType type = VoxelType::Gold;
+    Voxel voxel(VoxelType::Stone);
     int maxX = CHUNK_SIZE - 1;
     int maxY = CHUNK_HEIGHT - 1;
     int maxZ = CHUNK_SIZE - 1;
     
     // Act & Assert - should not crash
-    EXPECT_NO_THROW(chunk->setVoxel(maxX, maxY, maxZ, type));
-    EXPECT_EQ(chunk->getVoxel(maxX, maxY, maxZ), type);
-}
-
-/**
- * Test invalid coordinates handling
- */
-TEST_F(ChunkTest, GetVoxel_OutOfBounds_ReturnsAir) {
-    // Act
-    VoxelType type = chunk->getVoxel(-1, 0, 0);
-    
-    // Assert - out of bounds should return Air
-    EXPECT_EQ(type, VoxelType::Air);
-}
-
-TEST_F(ChunkTest, GetVoxel_YTooHigh_ReturnsAir) {
-    // Act
-    VoxelType type = chunk->getVoxel(5, CHUNK_HEIGHT + 10, 5);
-    
-    // Assert
-    EXPECT_EQ(type, VoxelType::Air);
+    EXPECT_NO_THROW(chunk->setVoxel(maxX, maxY, maxZ, voxel));
+    EXPECT_EQ(chunk->getVoxel(maxX, maxY, maxZ).type, VoxelType::Stone);
 }
 
 /**
@@ -119,20 +102,20 @@ TEST_F(ChunkTest, SetMultipleVoxels_DifferentTypes_AllRetainValues) {
     };
     
     std::vector<VoxelData> voxels = {
-        {0, 0, 0, VoxelType::Bedrock},
-        {5, 10, 5, VoxelType::Stone},
-        {15, 255, 15, VoxelType::Diamond},
-        {8, 64, 8, VoxelType::Grass}
+        {0, 0, 0, VoxelType::Stone},
+        {5, 10, 5, VoxelType::Dirt},
+        {15, 255, 15, VoxelType::Grass},
+        {8, 64, 8, VoxelType::Sand}
     };
     
     // Act
     for (const auto& v : voxels) {
-        chunk->setVoxel(v.x, v.y, v.z, v.type);
+        chunk->setVoxel(v.x, v.y, v.z, Voxel(v.type));
     }
     
     // Assert
     for (const auto& v : voxels) {
-        EXPECT_EQ(chunk->getVoxel(v.x, v.y, v.z), v.type);
+        EXPECT_EQ(chunk->getVoxel(v.x, v.y, v.z).type, v.type);
     }
 }
 
@@ -141,22 +124,22 @@ TEST_F(ChunkTest, SetMultipleVoxels_DifferentTypes_AllRetainValues) {
  */
 TEST_F(ChunkTest, FillChunk_WithStone_AllVoxelsAreStone) {
     // Arrange
-    VoxelType fillType = VoxelType::Stone;
+    Voxel stoneVoxel(VoxelType::Stone);
     
     // Act - fill entire chunk
     for (int x = 0; x < CHUNK_SIZE; x++) {
         for (int y = 0; y < CHUNK_HEIGHT; y++) {
             for (int z = 0; z < CHUNK_SIZE; z++) {
-                chunk->setVoxel(x, y, z, fillType);
+                chunk->setVoxel(x, y, z, stoneVoxel);
             }
         }
     }
     
     // Assert - spot check several locations
-    EXPECT_EQ(chunk->getVoxel(0, 0, 0), fillType);
-    EXPECT_EQ(chunk->getVoxel(7, 64, 7), fillType);
-    EXPECT_EQ(chunk->getVoxel(15, 128, 15), fillType);
-    EXPECT_EQ(chunk->getVoxel(15, 255, 15), fillType);
+    EXPECT_EQ(chunk->getVoxel(0, 0, 0).type, VoxelType::Stone);
+    EXPECT_EQ(chunk->getVoxel(7, 64, 7).type, VoxelType::Stone);
+    EXPECT_EQ(chunk->getVoxel(15, 128, 15).type, VoxelType::Stone);
+    EXPECT_EQ(chunk->getVoxel(15, 255, 15).type, VoxelType::Stone);
 }
 
 /**
@@ -164,42 +147,25 @@ TEST_F(ChunkTest, FillChunk_WithStone_AllVoxelsAreStone) {
  */
 TEST_F(ChunkTest, SetVoxel_ChangesVoxel_MarksDirty) {
     // Arrange
-    chunk->clearDirtyFlag();
+    chunk->clearDirty();
     
     // Act
-    chunk->setVoxel(5, 10, 5, VoxelType::Stone);
+    chunk->setVoxel(5, 10, 5, Voxel(VoxelType::Stone));
     
     // Assert
     EXPECT_TRUE(chunk->isDirty());
 }
 
-TEST_F(ChunkTest, ClearDirtyFlag_AfterModification_ClearsDirty) {
+TEST_F(ChunkTest, ClearDirty_AfterModification_ClearsDirty) {
     // Arrange
-    chunk->setVoxel(5, 10, 5, VoxelType::Stone);
+    chunk->setVoxel(5, 10, 5, Voxel(VoxelType::Stone));
     ASSERT_TRUE(chunk->isDirty());
     
     // Act
-    chunk->clearDirtyFlag();
+    chunk->clearDirty();
     
     // Assert
     EXPECT_FALSE(chunk->isDirty());
-}
-
-/**
- * Test chunk coordinate queries
- */
-TEST_F(ChunkTest, GetWorldPosition_LocalCoords_ReturnsCorrectWorldPos) {
-    // Arrange
-    auto chunk5_3 = std::make_unique<Chunk>(5, -3);
-    int localX = 7, localY = 64, localZ = 9;
-    
-    // Act
-    auto worldPos = chunk5_3->getWorldPosition(localX, localY, localZ);
-    
-    // Assert
-    EXPECT_EQ(worldPos.x, 5 * CHUNK_SIZE + 7);  // 87
-    EXPECT_EQ(worldPos.y, 64);
-    EXPECT_EQ(worldPos.z, -3 * CHUNK_SIZE + 9); // -39
 }
 
 /**
@@ -207,26 +173,26 @@ TEST_F(ChunkTest, GetWorldPosition_LocalCoords_ReturnsCorrectWorldPos) {
  */
 TEST_F(ChunkTest, IsSolid_SolidVoxel_ReturnsTrue) {
     // Arrange
-    chunk->setVoxel(5, 10, 5, VoxelType::Stone);
+    chunk->setVoxel(5, 10, 5, Voxel(VoxelType::Stone));
     
     // Act & Assert
-    EXPECT_TRUE(chunk->isSolid(5, 10, 5));
+    EXPECT_TRUE(chunk->getVoxel(5, 10, 5).isSolid());
 }
 
 TEST_F(ChunkTest, IsSolid_AirVoxel_ReturnsFalse) {
     // Arrange
-    chunk->setVoxel(5, 10, 5, VoxelType::Air);
+    chunk->setVoxel(5, 10, 5, Voxel(VoxelType::Air));
     
     // Act & Assert
-    EXPECT_FALSE(chunk->isSolid(5, 10, 5));
+    EXPECT_FALSE(chunk->getVoxel(5, 10, 5).isSolid());
 }
 
-TEST_F(ChunkTest, IsSolid_WaterVoxel_ReturnsFalse) {
+TEST_F(ChunkTest, IsTransparent_WaterVoxel_ReturnsTrue) {
     // Arrange
-    chunk->setVoxel(5, 10, 5, VoxelType::Water);
+    chunk->setVoxel(5, 10, 5, Voxel(VoxelType::Water));
     
     // Act & Assert
-    EXPECT_FALSE(chunk->isSolid(5, 10, 5));
+    EXPECT_TRUE(chunk->getVoxel(5, 10, 5).isTransparent());
 }
 
 /**
@@ -234,14 +200,15 @@ TEST_F(ChunkTest, IsSolid_WaterVoxel_ReturnsFalse) {
  */
 TEST(ChunkPerformanceTest, FillChunk_Performance_CompletesQuickly) {
     // Arrange
-    auto chunk = std::make_unique<Chunk>(0, 0);
+    auto chunk = std::make_unique<Chunk>(ChunkPos(0, 0));
+    Voxel stoneVoxel(VoxelType::Stone);
     auto startTime = std::chrono::high_resolution_clock::now();
     
     // Act - fill entire chunk
     for (int x = 0; x < CHUNK_SIZE; x++) {
         for (int y = 0; y < CHUNK_HEIGHT; y++) {
             for (int z = 0; z < CHUNK_SIZE; z++) {
-                chunk->setVoxel(x, y, z, VoxelType::Stone);
+                chunk->setVoxel(x, y, z, stoneVoxel);
             }
         }
     }

@@ -7,6 +7,8 @@
 #include "generation/NoiseGenerator.h"
 #include <cmath>
 
+using namespace fresh;
+
 /**
  * Test fixture for NoiseGenerator tests
  */
