@@ -6,6 +6,8 @@ This document describes the GitHub Actions workflows used in the Fresh Voxel Eng
 
 The repository uses GitHub Actions for continuous integration (CI) and quality assurance. All workflows are defined in the `.github/workflows/` directory.
 
+**Note:** The CI workflow is currently disabled (renamed to `ci.yml.disabled`). To re-enable it, rename the file back to `ci.yml`.
+
 ## CI Workflow (`ci.yml`)
 
 The main CI workflow runs on every push to `main` and `develop` branches, as well as on all pull requests targeting these branches.
@@ -141,6 +143,33 @@ You can add status badges to your README.md to show the current state of the CI 
 ## Running Workflows Manually
 
 Workflows can be triggered manually from the GitHub Actions tab in the repository, though the current configuration only includes automatic triggers.
+
+## Enabling/Disabling Workflows
+
+### To Re-enable the CI Workflow
+
+The CI workflow is currently disabled. To re-enable it:
+
+```bash
+cd .github/workflows/
+mv ci.yml.disabled ci.yml
+git add ci.yml
+git commit -m "Re-enable CI workflow"
+git push
+```
+
+### To Disable the CI Workflow
+
+To disable the workflow again:
+
+```bash
+cd .github/workflows/
+mv ci.yml ci.yml.disabled
+git add ci.yml.disabled
+git rm ci.yml
+git commit -m "Disable CI workflow"
+git push
+```
 
 ## Extending the Workflows
 
