@@ -79,7 +79,12 @@ bool Logger::initialize(const std::string& logDir) {
     
     m_initialized = true;
     
-    info("Logger initialized successfully", "Logger");
+    // Log initialization success (without locking since we already have the lock)
+    std::string initMsg = "[" + getTimestamp() + "][INFO][Logger] Logger initialized successfully\n";
+    writeToFile(m_applicationLog, initMsg);
+    if (m_consoleOutput) {
+        std::cout << initMsg;
+    }
     
     return true;
 }
@@ -173,7 +178,14 @@ std::string Logger::getTimestamp() const {
         now.time_since_epoch()) % 1000;
     
     std::stringstream ss;
-    ss << std::put_time(std::localtime(&time), "%Y-%m-%d_%H-%M-%S");
+    // Use thread-safe version or gmtime
+    std::tm tm_info;
+#ifdef _WIN32
+    localtime_s(&tm_info, &time);
+#else
+    localtime_r(&time, &tm_info);
+#endif
+    ss << std::put_time(&tm_info, "%Y-%m-%d_%H-%M-%S");
     ss << "." << std::setfill('0') << std::setw(3) << ms.count();
     
     return ss.str();
