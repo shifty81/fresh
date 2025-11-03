@@ -1,0 +1,197 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  build-linux:
+    runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        build_type: [Debug, Release]
+        compiler:
+          - { cc: gcc-11, cxx: g++-11 }
+          - { cc: gcc-12, cxx: g++-12 }
+          - { cc: clang-14, cxx: clang++-14 }
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Install Dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y \
+          cmake \
+          ninja-build \
+          libvulkan-dev \
+          libglfw3-dev \
+          libglm-dev \
+          vulkan-tools \
+          ${{ matrix.compiler.cc }} \
+          ${{ matrix.compiler.cxx }}
+    
+    - name: Configure CMake
+      env:
+        CC: ${{ matrix.compiler.cc }}
+        CXX: ${{ matrix.compiler.cxx }}
+      run: |
+        cmake -B build \
+          -G Ninja \
+          -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} \
+          -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
+    
+    - name: Build
+      run: cmake --build build --config ${{ matrix.build_type }}
+    
+    - name: Upload Build Artifacts
+      if: matrix.build_type == 'Release' && matrix.compiler.cc == 'gcc-12'
+      uses: actions/upload-artifact@v3
+      with:
+        name: fresh-linux-x64
+        path: |
+          build/FreshVoxelEngine
+          build/shaders/
+        retention-days: 7
+
+  build-windows:
+    runs-on: windows-latest
+    
+    strategy:
+      matrix:
+        build_type: [Debug, Release]
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Setup Vulkan SDK
+      uses: humbletim/setup-vulkan-sdk@v1.2.0
+      with:
+        vulkan-query-version: latest
+        vulkan-components: Vulkan-Headers, Vulkan-Loader
+        vulkan-use-cache: true
+    
+    - name: Install GLFW
+      run: |
+        vcpkg install glfw3:x64-windows
+        vcpkg integrate install
+    
+    - name: Configure CMake
+      run: |
+        cmake -B build `
+          -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} `
+          -DCMAKE_TOOLCHAIN_FILE=$env:VCPKG_INSTALLATION_ROOT\scripts\buildsystems\vcpkg.cmake
+    
+    - name: Build
+      run: cmake --build build --config ${{ matrix.build_type }}
+    
+    - name: Upload Build Artifacts
+      if: matrix.build_type == 'Release'
+      uses: actions/upload-artifact@v3
+      with:
+        name: fresh-windows-x64
+        path: |
+          build/${{ matrix.build_type }}/FreshVoxelEngine.exe
+          build/shaders/
+        retention-days: 7
+
+  build-macos:
+    runs-on: macos-latest
+    
+    strategy:
+      matrix:
+        build_type: [Debug, Release]
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Install Dependencies
+      run: |
+        brew install cmake ninja glfw vulkan-headers vulkan-loader molten-vk glm
+    
+    - name: Configure CMake
+      run: |
+        cmake -B build \
+          -G Ninja \
+          -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
+    
+    - name: Build
+      run: cmake --build build --config ${{ matrix.build_type }}
+    
+    - name: Upload Build Artifacts
+      if: matrix.build_type == 'Release'
+      uses: actions/upload-artifact@v3
+      with:
+        name: fresh-macos-arm64
+        path: |
+          build/FreshVoxelEngine
+          build/shaders/
+        retention-days: 7
+
+  code-quality:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Install Dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y \
+          clang-format \
+          clang-tidy \
+          cppcheck
+    
+    - name: Run clang-format
+      run: |
+        find include src -name "*.h" -o -name "*.cpp" | \
+        xargs clang-format --dry-run --Werror
+      continue-on-error: true
+    
+    - name: Run cppcheck
+      run: |
+        cppcheck --enable=all --std=c++17 --suppress=missingInclude \
+          --error-exitcode=1 src/ include/
+      continue-on-error: true
+
+  documentation:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Check for broken links
+      run: |
+        # Simple markdown link checker
+        for file in $(find . -name "*.md"); do
+          echo "Checking $file"
+          # Check for broken relative links
+          grep -o '\[.*\](\..*\.md)' "$file" | cut -d'(' -f2 | cut -d')' -f1 | while read link; do
+            if [ ! -f "$link" ]; then
+              echo "Broken link in $file: $link"
+              exit 1
+            fi
+          done
+        done
+      continue-on-error: true
+    
+    - name: Validate documentation structure
+      run: |
+        required_docs=(
+          "README.md"
+          "CONTRIBUTING.md"
+          "CODE_OF_CONDUCT.md"
+          "LICENSE"
+          "CHANGELOG.md"
+          "ARCHITECTURE.md"
+        )
+        
+        for doc in "${required_docs[@]}"; do
+          if [ ! -f "$doc" ]; then
+            echo "Missing required documentation: $doc"
+            exit 1
+          fi
+        done
