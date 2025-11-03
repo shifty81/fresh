@@ -13,6 +13,16 @@ class VoxelWorld;
 class Chunk;
 
 /**
+ * @brief Comparator for glm::ivec2 in STL containers
+ */
+struct IVec2Comparator {
+    bool operator()(const glm::ivec2& a, const glm::ivec2& b) const {
+        if (a.x != b.x) return a.x < b.x;
+        return a.y < b.y;
+    }
+};
+
+/**
  * @brief Request to load a chunk
  */
 struct ChunkLoadRequest {
@@ -93,7 +103,7 @@ private:
     int chunksPerFrame = 2;      // Max chunks to process per frame
     
     std::priority_queue<ChunkLoadRequest> loadQueue;
-    std::set<glm::ivec2> pendingLoads;
+    std::set<glm::ivec2, IVec2Comparator> pendingLoads;
     std::vector<glm::ivec2> unloadQueue;
     
     // Threading
@@ -104,11 +114,5 @@ private:
     
     glm::ivec2 lastPlayerChunk{0, 0};
 };
-
-// Helper for glm::ivec2 comparison in set
-inline bool operator<(const glm::ivec2& a, const glm::ivec2& b) {
-    if (a.x != b.x) return a.x < b.x;
-    return a.y < b.y;
-}
 
 } // namespace fresh
