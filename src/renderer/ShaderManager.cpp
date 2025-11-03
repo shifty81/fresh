@@ -1,13 +1,11 @@
 #include "renderer/ShaderManager.h"
-#include "renderer/VulkanDevice.h"
 #include <fstream>
 #include <iostream>
 
 namespace fresh {
 
-ShaderManager::ShaderManager(VulkanDevice* device)
-    : m_device(device)
-    , m_hotReloadEnabled(false)
+ShaderManager::ShaderManager()
+    : m_hotReloadEnabled(false)
 {
 }
 
@@ -32,10 +30,10 @@ std::string ShaderManager::loadShader(const std::string& path) {
     return buffer;
 }
 
-std::string ShaderManager::compileGLSL(const std::string& glslCode, const std::string& shaderType) {
-    // Stub - would use glslang or shaderc in real implementation
-    std::cout << "ShaderManager::compileGLSL stub called" << std::endl;
-    return "";
+std::string ShaderManager::compileShader(const std::string& shaderCode, const std::string& shaderType) {
+    // Stub - compilation would be handled by specific render context backend
+    std::cout << "ShaderManager::compileShader stub called for " << shaderType << std::endl;
+    return shaderCode; // Return source as-is for now
 }
 
 bool ShaderManager::checkForChanges() {

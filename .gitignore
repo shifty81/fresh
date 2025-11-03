@@ -41,8 +41,10 @@ Makefile
 *.cmake
 !CMakeLists.txt
 
-# Vulkan compiled shaders
+# Compiled shaders
 *.spv
+*.dxo
+*.dxc
 
 # System files
 .DS_Store

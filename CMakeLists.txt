@@ -9,17 +9,7 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 # Export compile commands for IDE support
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-# Graphics API Dependencies (at least one should be available)
-# Find Vulkan (optional, but recommended for cross-platform support)
-find_package(Vulkan QUIET)
-if(Vulkan_FOUND)
-    message(STATUS "Vulkan SDK found: ${Vulkan_VERSION}")
-    add_definitions(-DFRESH_VULKAN_SUPPORT)
-else()
-    message(STATUS "Vulkan SDK not found. Vulkan backend will not be available.")
-    message(STATUS "To enable Vulkan, install the Vulkan SDK from https://vulkan.lunarg.com/")
-endif()
-
+# Graphics API Dependencies
 # OpenGL is available on most systems
 message(STATUS "OpenGL backend will be available (system OpenGL)")
 add_definitions(-DFRESH_OPENGL_SUPPORT)
@@ -61,13 +51,9 @@ set(ENGINE_SOURCES
     src/core/MemoryManager.cpp
     src/core/ResourceManager.cpp
     src/core/SceneManager.cpp
-    src/renderer/VulkanRenderer.cpp
-    src/renderer/VulkanDevice.cpp
-    src/renderer/VulkanPipeline.cpp
     src/renderer/ShaderManager.cpp
     src/renderer/RenderContext.cpp
     src/renderer/Material.cpp
-    src/renderer/backends/VulkanRenderContext.cpp
     src/renderer/backends/OpenGLRenderContext.cpp
     src/voxel/Chunk.cpp
     src/voxel/VoxelWorld.cpp
@@ -132,9 +118,6 @@ set(ENGINE_HEADERS
     include/core/MemoryManager.h
     include/core/ResourceManager.h
     include/core/SceneManager.h
-    include/renderer/VulkanRenderer.h
-    include/renderer/VulkanDevice.h
-    include/renderer/VulkanPipeline.h
     include/renderer/ShaderManager.h
     include/voxel/Chunk.h
     include/voxel/VoxelWorld.h
@@ -197,17 +180,7 @@ target_include_directories(${PROJECT_NAME}
         ${CMAKE_CURRENT_SOURCE_DIR}/include
 )
 
-# Add Vulkan include directory if available
-if(Vulkan_FOUND)
-    target_include_directories(${PROJECT_NAME} PRIVATE ${Vulkan_INCLUDE_DIRS})
-endif()
-
 # Link libraries
-# Link Vulkan if available
-if(Vulkan_FOUND)
-    target_link_libraries(${PROJECT_NAME} PRIVATE Vulkan::Vulkan)
-endif()
-
 # Link OpenGL (required for OpenGL backend)
 if(NOT WIN32)
     # On Linux/macOS, link OpenGL
@@ -319,11 +292,6 @@ if(BUILD_TESTS)
         GTest::gtest
         GTest::gtest_main
     )
-    
-    # Link Vulkan if needed for tests
-    if(Vulkan_FOUND)
-        target_link_libraries(${PROJECT_NAME}Tests PRIVATE Vulkan::Vulkan)
-    endif()
     
     # Link GLFW if needed for tests
     if(glfw3_FOUND)

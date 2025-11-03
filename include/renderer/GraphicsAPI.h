@@ -8,8 +8,7 @@ namespace fresh {
  * Defines which graphics API backend to use for rendering.
  */
 enum class GraphicsAPI {
-    Vulkan,       // Vulkan API (cross-platform, modern)
-    OpenGL,       // OpenGL 4.5+ (cross-platform, legacy support)
+    OpenGL,       // OpenGL 4.5+ (cross-platform)
     DirectX11,    // DirectX 11 (Windows only)
     DirectX12,    // DirectX 12 (Windows only, modern)
     Auto          // Automatically select best available API
@@ -20,7 +19,6 @@ enum class GraphicsAPI {
  */
 inline const char* getGraphicsAPIName(GraphicsAPI api) {
     switch (api) {
-        case GraphicsAPI::Vulkan: return "Vulkan";
         case GraphicsAPI::OpenGL: return "OpenGL";
         case GraphicsAPI::DirectX11: return "DirectX 11";
         case GraphicsAPI::DirectX12: return "DirectX 12";
@@ -34,14 +32,11 @@ inline const char* getGraphicsAPIName(GraphicsAPI api) {
  */
 inline bool isGraphicsAPIAvailable(GraphicsAPI api) {
 #ifdef _WIN32
-    // Windows supports all APIs
-    return true;
-#elif defined(__APPLE__)
-    // macOS supports Vulkan (via MoltenVK) and OpenGL
-    return api == GraphicsAPI::Vulkan || api == GraphicsAPI::OpenGL;
+    // Windows supports DirectX and OpenGL
+    return api == GraphicsAPI::DirectX11 || api == GraphicsAPI::DirectX12 || api == GraphicsAPI::OpenGL;
 #else
-    // Linux supports Vulkan and OpenGL
-    return api == GraphicsAPI::Vulkan || api == GraphicsAPI::OpenGL;
+    // Linux and macOS support OpenGL
+    return api == GraphicsAPI::OpenGL;
 #endif
 }
 
@@ -52,12 +47,9 @@ inline GraphicsAPI selectBestGraphicsAPI() {
 #ifdef _WIN32
     // Prefer DirectX 12 on Windows 10+, fallback to DirectX 11
     return GraphicsAPI::DirectX12;
-#elif defined(__APPLE__)
-    // Prefer Vulkan (MoltenVK) on macOS
-    return GraphicsAPI::Vulkan;
 #else
-    // Prefer Vulkan on Linux
-    return GraphicsAPI::Vulkan;
+    // Prefer OpenGL on Linux and macOS
+    return GraphicsAPI::OpenGL;
 #endif
 }
 
