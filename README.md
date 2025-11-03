@@ -3,10 +3,10 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![C++17](https://img.shields.io/badge/C++-17-blue.svg)](https://en.cppreference.com/w/cpp/17)
 [![CMake](https://img.shields.io/badge/CMake-3.20+-064F8C.svg)](https://cmake.org/)
-[![Graphics](https://img.shields.io/badge/Graphics-Vulkan%20|%20OpenGL%20|%20DirectX-blue.svg)](https://github.com/shifty81/fresh)
+[![Graphics](https://img.shields.io/badge/Graphics-OpenGL%20|%20DirectX-blue.svg)](https://github.com/shifty81/fresh)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 
-A modern voxel-based game engine built with C++17, featuring **multiple graphics API support** (Vulkan, OpenGL, DirectX 11/12), procedural terrain generation, AI systems, and an integrated world editor.
+A modern voxel-based game engine built with C++17, featuring **multiple graphics API support** (OpenGL, DirectX 11/12), procedural terrain generation, AI systems, and an integrated world editor.
 
 ---
 
@@ -14,7 +14,6 @@ A modern voxel-based game engine built with C++17, featuring **multiple graphics
 
 Fresh Voxel Engine now supports multiple graphics APIs:
 
-- **Vulkan** - Modern, cross-platform, high-performance
 - **OpenGL 4.5+** - Cross-platform, mature ecosystem
 - **DirectX 11** - Windows, excellent compatibility
 - **DirectX 12** - Windows 10+, cutting-edge performance
@@ -49,7 +48,7 @@ git clone https://github.com/shifty81/fresh.git
 cd fresh
 
 # Install dependencies (Ubuntu/Debian)
-sudo apt-get install cmake g++ libvulkan-dev libglfw3-dev
+sudo apt-get install cmake g++ libglfw3-dev
 
 # Build
 mkdir build && cd build
@@ -66,7 +65,7 @@ See [GETTING_STARTED.md](GETTING_STARTED.md) for detailed setup instructions.
 
 ### Core Systems (Phase 1-2)
 - ✅ CMake-based build system with Visual Studio 2022 support
-- ✅ **Multi-API rendering**: Vulkan, OpenGL, DirectX 11/12
+- ✅ **Multi-API rendering**: OpenGL, DirectX 11/12
 - ✅ Automatic graphics API selection
 - ✅ Window management with GLFW
 - ✅ Shader system with hot-reloading support
@@ -127,7 +126,6 @@ See [docs/TERRAFORMING.md](docs/TERRAFORMING.md) for detailed documentation.
 - CMake 3.20 or higher
 - C++17 compatible compiler (GCC 7+, Clang 5+, MSVC 2017+)
 - **Graphics API Dependencies** (at least one):
-  - **Vulkan SDK 1.2+** (cross-platform) - https://vulkan.lunarg.com/
   - **OpenGL 4.5+** drivers (usually pre-installed)
   - **DirectX 11/12** (Windows only, included with Windows SDK)
 - GLFW 3.3 or higher (will be downloaded if not found)
@@ -152,10 +150,7 @@ cmake --build build --config Release
 
 ```bash
 # Install dependencies (Ubuntu/Debian)
-sudo apt-get install cmake g++ libvulkan-dev libglfw3-dev
-
-# Install Vulkan SDK if not available via package manager
-# Download from https://vulkan.lunarg.com/
+sudo apt-get install cmake g++ libglfw3-dev
 
 # Build
 mkdir build && cd build
@@ -169,9 +164,9 @@ make -j$(nproc)
 ## Graphics API Selection
 
 The engine automatically selects the best graphics API for your platform:
-- **Windows**: DirectX 12 → DirectX 11 → OpenGL → Vulkan
-- **Linux**: Vulkan → OpenGL
-- **macOS**: Vulkan (MoltenVK) → OpenGL
+- **Windows**: DirectX 12 → DirectX 11 → OpenGL
+- **Linux**: OpenGL
+- **macOS**: OpenGL
 
 To manually select a specific API, edit `src/renderer/GraphicsAPI.h` or use environment variables (feature coming soon).
 
@@ -187,7 +182,6 @@ fresh/
 │   ├── core/                  # Engine core (Engine, Window)
 │   ├── renderer/              # Multi-API rendering system
 │   │   ├── backends/          # Graphics API implementations
-│   │   │   ├── VulkanRenderContext.h
 │   │   │   ├── OpenGLRenderContext.h
 │   │   │   ├── DirectX11RenderContext.h
 │   │   │   └── DirectX12RenderContext.h
@@ -215,7 +209,7 @@ fresh/
 
 ### Completed (Phase 1-4)
 - [x] Project structure and build system
-- [x] **Multi-API rendering system** (Vulkan, OpenGL, DirectX 11/12)
+- [x] **Multi-API rendering system** (OpenGL, DirectX 11/12)
 - [x] **Visual Studio 2022 support**
 - [x] Voxel chunk system
 - [x] Procedural terrain generation
@@ -245,7 +239,6 @@ fresh/
 The engine uses an abstraction layer supporting multiple graphics APIs:
 
 **Supported APIs:**
-- **Vulkan** - Modern, explicit API with fine-grained control
 - **OpenGL 4.5+** - Mature, widely supported cross-platform API
 - **DirectX 11** - High-level API with excellent Windows compatibility
 - **DirectX 12** - Low-level API for maximum performance on Windows
@@ -258,9 +251,9 @@ The engine uses an abstraction layer supporting multiple graphics APIs:
 - Synchronization and frame pacing
 
 **API Priority:**
-- Windows: DirectX 12 → DirectX 11 → OpenGL → Vulkan
-- Linux: Vulkan → OpenGL
-- macOS: Vulkan (MoltenVK) → OpenGL
+- Windows: DirectX 12 → DirectX 11 → OpenGL
+- Linux: OpenGL
+- macOS: OpenGL
 
 ### Voxel World
 The world is divided into chunks for efficient rendering and streaming:
@@ -367,7 +360,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## Acknowledgments
 
-- Vulkan Tutorial (https://vulkan-tutorial.com/)
 - Learn OpenGL (https://learnopengl.com/)
 - Minecraft for voxel inspiration
 - Open-source voxel engine projects

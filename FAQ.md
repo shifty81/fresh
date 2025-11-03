@@ -4,7 +4,7 @@
 
 ### What is Fresh Voxel Engine?
 
-Fresh Voxel Engine is a modern, open-source voxel game engine built with C++17 and Vulkan. It features procedural terrain generation, a powerful world editor, and supports creating voxel-based games and applications.
+Fresh Voxel Engine is a modern, open-source voxel game engine built with C++17 supporting multiple graphics APIs (OpenGL, DirectX 11/12). It features procedural terrain generation, a powerful world editor, and supports creating voxel-based games and applications.
 
 ### What can I build with it?
 
@@ -32,7 +32,7 @@ Yes! Fresh Voxel Engine is released under the MIT License, which means:
 ### What are the system requirements?
 
 **Minimum:**
-- Vulkan 1.2 capable GPU
+- OpenGL 4.5+ capable GPU (or DirectX 11+ on Windows)
 - 4-core CPU
 - 8 GB RAM
 - 2 GB storage
@@ -61,11 +61,10 @@ make
 ### I'm getting build errors. What should I do?
 
 1. Check [DEVELOPER_SETUP.md](DEVELOPER_SETUP.md) for prerequisites
-2. Ensure Vulkan SDK is installed
-3. Check that GLFW is available
-4. See [Troubleshooting](#troubleshooting) section below
-5. Search existing [GitHub Issues](https://github.com/shifty81/fresh/issues)
-6. Create a new issue if not found
+2. Check that GLFW is available
+3. See [Troubleshooting](#troubleshooting) section below
+4. Search existing [GitHub Issues](https://github.com/shifty81/fresh/issues)
+5. Create a new issue if not found
 
 ### How do I create my first world?
 
@@ -190,14 +189,14 @@ Just keep the license notice in your project.
 
 ## Technical Questions
 
-### Why Vulkan instead of OpenGL?
+### Which graphics APIs are supported?
 
-Vulkan provides:
-- Better performance and lower overhead
-- Multi-threaded rendering
-- Modern GPU features
-- Better control over GPU
-- Future-proof API
+Fresh Voxel Engine supports multiple graphics APIs:
+- **OpenGL 4.5+** - Cross-platform support
+- **DirectX 11** - Windows (excellent compatibility)
+- **DirectX 12** - Windows 10+ (modern, high performance)
+
+The engine automatically selects the best API for your platform.
 
 ### How is performance?
 
@@ -240,12 +239,12 @@ See [ChunkStreamer](include/voxel/ChunkStreamer.h) for implementation.
 
 ### Can I use a different renderer?
 
-The architecture is designed to be modular. You could:
-- Create a new renderer class
-- Implement the Renderer interface
-- Swap in your implementation
+The architecture is designed to be modular with a unified `IRenderContext` interface. The engine currently supports:
+- OpenGL 4.5+
+- DirectX 11
+- DirectX 12
 
-Though Vulkan is the primary target.
+You can extend support by implementing the `IRenderContext` interface for other graphics APIs.
 
 ## Troubleshooting
 
@@ -253,29 +252,21 @@ Though Vulkan is the primary target.
 
 **Common causes:**
 - Shaders not found
-- Vulkan validation errors
-- GPU not Vulkan-capable
+- Graphics API initialization errors
 - Camera position issues
 
 **Solutions:**
 1. Check console for errors
 2. Ensure shaders are in `build/shaders/`
-3. Run with validation layers:
-   ```bash
-   export VK_INSTANCE_LAYERS=VK_LAYER_KHRONOS_validation
-   ./FreshVoxelEngine
-   ```
+3. Check that your GPU supports OpenGL 4.5+ (or DirectX 11+ on Windows)
 4. Check camera position (should be above ground)
 
-### "Failed to create Vulkan instance"
+### "Failed to initialize renderer"
 
 **Solutions:**
-1. Install Vulkan SDK
-2. Update GPU drivers
-3. Check GPU supports Vulkan 1.2:
-   ```bash
-   vulkaninfo | grep apiVersion
-   ```
+1. Update GPU drivers
+2. Verify GPU supports OpenGL 4.5+ (or DirectX 11+ on Windows)
+3. Check console output for specific error messages
 
 ### Low FPS
 
@@ -411,11 +402,11 @@ See full roadmap in [ROADMAP.md](ROADMAP.md).
 
 ### Will you support VR?
 
-VR support is being considered for post-1.0. Vulkan makes this feasible.
+VR support is being considered for post-1.0 release.
 
 ### Mobile support?
 
-Not currently planned. The engine targets desktop platforms due to Vulkan requirements.
+Not currently planned. The engine targets desktop platforms with OpenGL 4.5+ or DirectX 11+ support.
 
 ## Additional Resources
 
