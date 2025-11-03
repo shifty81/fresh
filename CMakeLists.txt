@@ -40,6 +40,9 @@ set(ENGINE_SOURCES
     src/main.cpp
     src/core/Engine.cpp
     src/core/Window.cpp
+    src/core/MemoryManager.cpp
+    src/core/ResourceManager.cpp
+    src/core/SceneManager.cpp
     src/renderer/VulkanRenderer.cpp
     src/renderer/VulkanDevice.cpp
     src/renderer/VulkanPipeline.cpp
@@ -47,23 +50,34 @@ set(ENGINE_SOURCES
     src/voxel/Chunk.cpp
     src/voxel/VoxelWorld.cpp
     src/voxel/MeshGenerator.cpp
+    src/voxel/ChunkStreamer.cpp
     src/generation/NoiseGenerator.cpp
     src/generation/TerrainGenerator.cpp
     src/physics/PhysicsSystem.cpp
+    src/physics/CollisionDetection.cpp
     src/interaction/RaycastSystem.cpp
     src/ai/AISystem.cpp
     src/ai/BehaviorTree.cpp
+    src/audio/AudioEngine.cpp
+    src/scripting/EventSystem.cpp
     src/editor/EditorGUI.cpp
     src/editor/WorldEditor.cpp
     src/editor/TerraformingSystem.cpp
     src/serialization/WorldSerializer.cpp
     src/ui/MainMenu.cpp
+    src/input/InputManager.cpp
+    src/gameplay/Camera.cpp
+    src/gameplay/Player.cpp
+    src/assets/ModularAssetSystem.cpp
 )
 
 # Header files
 set(ENGINE_HEADERS
     include/core/Engine.h
     include/core/Window.h
+    include/core/MemoryManager.h
+    include/core/ResourceManager.h
+    include/core/SceneManager.h
     include/renderer/VulkanRenderer.h
     include/renderer/VulkanDevice.h
     include/renderer/VulkanPipeline.h
@@ -72,17 +86,25 @@ set(ENGINE_HEADERS
     include/voxel/VoxelWorld.h
     include/voxel/VoxelTypes.h
     include/voxel/MeshGenerator.h
+    include/voxel/ChunkStreamer.h
     include/generation/NoiseGenerator.h
     include/generation/TerrainGenerator.h
     include/physics/PhysicsSystem.h
+    include/physics/CollisionDetection.h
     include/interaction/RaycastSystem.h
     include/ai/AISystem.h
     include/ai/BehaviorTree.h
+    include/audio/AudioEngine.h
+    include/scripting/EventSystem.h
     include/editor/EditorGUI.h
     include/editor/WorldEditor.h
     include/editor/TerraformingSystem.h
     include/serialization/WorldSerializer.h
     include/ui/MainMenu.h
+    include/input/InputManager.h
+    include/gameplay/Camera.h
+    include/gameplay/Player.h
+    include/assets/ModularAssetSystem.h
 )
 
 # Create executable
