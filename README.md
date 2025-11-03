@@ -3,14 +3,45 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![C++17](https://img.shields.io/badge/C++-17-blue.svg)](https://en.cppreference.com/w/cpp/17)
 [![CMake](https://img.shields.io/badge/CMake-3.20+-064F8C.svg)](https://cmake.org/)
-[![Vulkan](https://img.shields.io/badge/Vulkan-1.2+-red.svg)](https://www.vulkan.org/)
+[![Graphics](https://img.shields.io/badge/Graphics-Vulkan%20|%20OpenGL%20|%20DirectX-blue.svg)](https://github.com/shifty81/fresh)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 
-A modern voxel-based game engine built with C++ and Vulkan, featuring procedural terrain generation, AI systems, and an integrated world editor.
+A modern voxel-based game engine built with C++17, featuring **multiple graphics API support** (Vulkan, OpenGL, DirectX 11/12), procedural terrain generation, AI systems, and an integrated world editor.
+
+---
+
+## 🎨 Graphics API Support
+
+Fresh Voxel Engine now supports multiple graphics APIs:
+
+- **Vulkan** - Modern, cross-platform, high-performance
+- **OpenGL 4.5+** - Cross-platform, mature ecosystem
+- **DirectX 11** - Windows, excellent compatibility
+- **DirectX 12** - Windows 10+, cutting-edge performance
+
+The engine **automatically selects the best API** for your platform, or you can manually choose your preferred API.
 
 ---
 
 ## 🚀 Quick Start
+
+### Windows (Visual Studio 2022)
+
+```batch
+# Clone the repository
+git clone https://github.com/shifty81/fresh.git
+cd fresh
+
+# Generate Visual Studio solution
+generate_vs2022.bat
+
+# Open in Visual Studio
+start build\FreshVoxelEngine.sln
+```
+
+See [VISUAL_STUDIO_SETUP.md](VISUAL_STUDIO_SETUP.md) for detailed Visual Studio instructions.
+
+### Linux/macOS
 
 ```bash
 # Clone the repository
@@ -34,8 +65,9 @@ See [GETTING_STARTED.md](GETTING_STARTED.md) for detailed setup instructions.
 ## Features
 
 ### Core Systems (Phase 1-2)
-- ✅ CMake-based build system
-- ✅ Vulkan rendering pipeline with modern graphics
+- ✅ CMake-based build system with Visual Studio 2022 support
+- ✅ **Multi-API rendering**: Vulkan, OpenGL, DirectX 11/12
+- ✅ Automatic graphics API selection
 - ✅ Window management with GLFW
 - ✅ Shader system with hot-reloading support
 
@@ -94,9 +126,27 @@ See [docs/TERRAFORMING.md](docs/TERRAFORMING.md) for detailed documentation.
 
 - CMake 3.20 or higher
 - C++17 compatible compiler (GCC 7+, Clang 5+, MSVC 2017+)
-- Vulkan SDK 1.2 or higher
+- **Graphics API Dependencies** (at least one):
+  - **Vulkan SDK 1.2+** (cross-platform) - https://vulkan.lunarg.com/
+  - **OpenGL 4.5+** drivers (usually pre-installed)
+  - **DirectX 11/12** (Windows only, included with Windows SDK)
 - GLFW 3.3 or higher (will be downloaded if not found)
 - GLM (optional, header-only)
+
+### Windows (Visual Studio 2022)
+
+```batch
+# Generate Visual Studio solution
+generate_vs2022.bat
+
+# Open solution in Visual Studio
+start build\FreshVoxelEngine.sln
+
+# Or build from command line
+cmake --build build --config Release
+```
+
+**Detailed instructions**: See [VISUAL_STUDIO_SETUP.md](VISUAL_STUDIO_SETUP.md)
 
 ### Linux/macOS
 
@@ -116,33 +166,36 @@ make -j$(nproc)
 ./FreshVoxelEngine
 ```
 
-### Windows
+## Graphics API Selection
 
-```bash
-# Install Vulkan SDK from https://vulkan.lunarg.com/
-# Install CMake from https://cmake.org/
+The engine automatically selects the best graphics API for your platform:
+- **Windows**: DirectX 12 → DirectX 11 → OpenGL → Vulkan
+- **Linux**: Vulkan → OpenGL
+- **macOS**: Vulkan (MoltenVK) → OpenGL
 
-# Build with Visual Studio
-mkdir build
-cd build
-cmake ..
-cmake --build . --config Release
-
-# Run
-Release\FreshVoxelEngine.exe
-```
+To manually select a specific API, edit `src/renderer/GraphicsAPI.h` or use environment variables (feature coming soon).
 
 ## Project Structure
 
 ```
 fresh/
-├── CMakeLists.txt          # Build configuration
-├── include/                # Header files
-│   ├── core/              # Engine core (Engine, Window)
-│   ├── renderer/          # Vulkan rendering system
-│   ├── voxel/             # Voxel data structures and world
-│   ├── generation/        # Procedural generation (noise, terrain)
-│   ├── physics/           # Physics simulation
+├── CMakeLists.txt              # Build configuration
+├── CMakePresets.json           # CMake presets for Visual Studio
+├── generate_vs2022.bat         # Visual Studio project generator
+├── VISUAL_STUDIO_SETUP.md      # Visual Studio setup guide
+├── include/                    # Header files
+│   ├── core/                  # Engine core (Engine, Window)
+│   ├── renderer/              # Multi-API rendering system
+│   │   ├── backends/          # Graphics API implementations
+│   │   │   ├── VulkanRenderContext.h
+│   │   │   ├── OpenGLRenderContext.h
+│   │   │   ├── DirectX11RenderContext.h
+│   │   │   └── DirectX12RenderContext.h
+│   │   ├── GraphicsAPI.h      # API enumeration and selection
+│   │   └── RenderContext.h    # Abstract rendering interface
+│   ├── voxel/                 # Voxel data structures and world
+│   ├── generation/            # Procedural generation (noise, terrain)
+│   ├── physics/               # Physics simulation
 │   ├── interaction/       # Player interaction (raycasting)
 │   ├── ai/                # AI system (behavior trees)
 │   ├── editor/            # World editor GUI & Terraforming
@@ -162,14 +215,15 @@ fresh/
 
 ### Completed (Phase 1-4)
 - [x] Project structure and build system
-- [x] Vulkan renderer foundation
+- [x] **Multi-API rendering system** (Vulkan, OpenGL, DirectX 11/12)
+- [x] **Visual Studio 2022 support**
 - [x] Voxel chunk system
 - [x] Procedural terrain generation
 - [x] Noise functions (Perlin, fractal)
 - [x] Basic mesh generation
 
 ### In Progress (Phase 5-6)
-- [ ] Complete Vulkan rendering pipeline
+- [ ] Complete rendering pipeline for all APIs
 - [ ] Camera and player controller
 - [ ] Physics collision detection
 - [ ] Block placement/destruction
@@ -187,12 +241,26 @@ fresh/
 
 ## Architecture
 
-### Vulkan Renderer
-The engine uses Vulkan for high-performance graphics rendering. The renderer supports:
-- Swapchain management
-- Command buffer recording
-- Synchronization primitives
-- Flexible shader pipeline
+### Multi-API Rendering System
+The engine uses an abstraction layer supporting multiple graphics APIs:
+
+**Supported APIs:**
+- **Vulkan** - Modern, explicit API with fine-grained control
+- **OpenGL 4.5+** - Mature, widely supported cross-platform API
+- **DirectX 11** - High-level API with excellent Windows compatibility
+- **DirectX 12** - Low-level API for maximum performance on Windows
+
+**Features:**
+- Automatic API selection based on platform
+- Unified interface for all backends (`IRenderContext`)
+- Swapchain and framebuffer management
+- Resource creation (buffers, textures, shaders)
+- Synchronization and frame pacing
+
+**API Priority:**
+- Windows: DirectX 12 → DirectX 11 → OpenGL → Vulkan
+- Linux: Vulkan → OpenGL
+- macOS: Vulkan (MoltenVK) → OpenGL
 
 ### Voxel World
 The world is divided into chunks for efficient rendering and streaming:
