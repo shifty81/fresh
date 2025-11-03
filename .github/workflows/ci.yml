@@ -30,6 +30,7 @@ jobs:
           libvulkan-dev \
           libglfw3-dev \
           libglm-dev \
+          libgtest-dev \
           vulkan-tools \
           ${{ matrix.compiler.cc }} \
           ${{ matrix.compiler.cxx }}
@@ -42,10 +43,15 @@ jobs:
         cmake -B build \
           -G Ninja \
           -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} \
-          -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
+          -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
+          -DBUILD_TESTS=ON
     
     - name: Build
       run: cmake --build build --config ${{ matrix.build_type }}
+    
+    - name: Run Tests
+      working-directory: build
+      run: ctest --output-on-failure --verbose
     
     - name: Upload Build Artifacts
       if: matrix.build_type == 'Release' && matrix.compiler.cc == 'gcc-12'
@@ -83,10 +89,15 @@ jobs:
       run: |
         cmake -B build `
           -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} `
-          -DCMAKE_TOOLCHAIN_FILE=$env:VCPKG_INSTALLATION_ROOT\scripts\buildsystems\vcpkg.cmake
+          -DCMAKE_TOOLCHAIN_FILE=$env:VCPKG_INSTALLATION_ROOT\scripts\buildsystems\vcpkg.cmake `
+          -DBUILD_TESTS=ON
     
     - name: Build
       run: cmake --build build --config ${{ matrix.build_type }}
+    
+    - name: Run Tests
+      working-directory: build
+      run: ctest -C ${{ matrix.build_type }} --output-on-failure --verbose
     
     - name: Upload Build Artifacts
       if: matrix.build_type == 'Release'
@@ -110,16 +121,21 @@ jobs:
     
     - name: Install Dependencies
       run: |
-        brew install cmake ninja glfw vulkan-headers vulkan-loader molten-vk glm
+        brew install cmake ninja glfw vulkan-headers vulkan-loader molten-vk glm googletest
     
     - name: Configure CMake
       run: |
         cmake -B build \
           -G Ninja \
-          -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
+          -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} \
+          -DBUILD_TESTS=ON
     
     - name: Build
       run: cmake --build build --config ${{ matrix.build_type }}
+    
+    - name: Run Tests
+      working-directory: build
+      run: ctest --output-on-failure --verbose
     
     - name: Upload Build Artifacts
       if: matrix.build_type == 'Release'

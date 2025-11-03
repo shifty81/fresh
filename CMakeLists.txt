@@ -205,3 +205,88 @@ endforeach()
 # Install target
 install(TARGETS ${PROJECT_NAME} DESTINATION bin)
 install(DIRECTORY shaders/ DESTINATION bin/shaders)
+
+# ==============================================================================
+# Testing Support
+# ==============================================================================
+
+# Option to enable/disable tests
+option(BUILD_TESTS "Build unit tests" OFF)
+
+if(BUILD_TESTS)
+    message(STATUS "Building tests enabled")
+    
+    # Enable testing
+    enable_testing()
+    
+    # Find Google Test
+    find_package(GTest QUIET)
+    
+    if(NOT GTest_FOUND)
+        message(STATUS "Google Test not found, fetching from GitHub...")
+        include(FetchContent)
+        FetchContent_Declare(
+            googletest
+            GIT_REPOSITORY https://github.com/google/googletest.git
+            GIT_TAG release-1.12.1
+        )
+        # For Windows: Prevent overriding the parent project's compiler/linker settings
+        set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+        FetchContent_MakeAvailable(googletest)
+    endif()
+    
+    # Test source files
+    set(TEST_SOURCES
+        tests/voxel/ChunkTests.cpp
+        tests/generation/NoiseTests.cpp
+        tests/core/MemoryManagerTests.cpp
+    )
+    
+    # Create test executable
+    add_executable(${PROJECT_NAME}Tests ${TEST_SOURCES})
+    
+    # Include directories for tests
+    target_include_directories(${PROJECT_NAME}Tests PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR}/include
+    )
+    
+    # Link test executable with Google Test and engine libraries
+    target_link_libraries(${PROJECT_NAME}Tests PRIVATE
+        GTest::gtest
+        GTest::gtest_main
+    )
+    
+    # Link Vulkan if needed for tests
+    if(Vulkan_FOUND)
+        target_link_libraries(${PROJECT_NAME}Tests PRIVATE Vulkan::Vulkan)
+    endif()
+    
+    # Link GLFW if needed for tests
+    if(glfw3_FOUND)
+        target_link_libraries(${PROJECT_NAME}Tests PRIVATE glfw)
+    elseif(GLFW_FOUND)
+        target_include_directories(${PROJECT_NAME}Tests PRIVATE ${GLFW_INCLUDE_DIRS})
+        target_link_libraries(${PROJECT_NAME}Tests PRIVATE ${GLFW_LIBRARIES})
+    endif()
+    
+    # Link GLM if found
+    if(glm_FOUND)
+        target_link_libraries(${PROJECT_NAME}Tests PRIVATE glm::glm)
+    endif()
+    
+    # Compiler settings for tests
+    target_compile_features(${PROJECT_NAME}Tests PRIVATE cxx_std_17)
+    
+    if(MSVC)
+        target_compile_options(${PROJECT_NAME}Tests PRIVATE /W4)
+    else()
+        target_compile_options(${PROJECT_NAME}Tests PRIVATE -Wall -Wextra -Wpedantic)
+    endif()
+    
+    # Register tests with CTest
+    include(GoogleTest)
+    gtest_discover_tests(${PROJECT_NAME}Tests)
+    
+    message(STATUS "Tests configured successfully")
+    message(STATUS "Run tests with: ctest or ./FreshVoxelEngineTests")
+endif()
