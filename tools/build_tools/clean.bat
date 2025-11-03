@@ -14,6 +14,7 @@ set "REPO_ROOT=%CD%"
 REM Setup logging
 set "LOG_DIR=%REPO_ROOT%\logs"
 if not exist "%LOG_DIR%" mkdir "%LOG_DIR%"
+REM Note: Timestamp format may vary with locale settings - this works for US/EN locales
 set "TIMESTAMP=%date:~-4,4%-%date:~-10,2%-%date:~-7,2%_%time:~0,2%-%time:~3,2%-%time:~6,2%"
 set "TIMESTAMP=%TIMESTAMP: =0%"
 set "LOG_FILE=%LOG_DIR%\clean_errors_%TIMESTAMP%.txt"

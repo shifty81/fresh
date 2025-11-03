@@ -178,7 +178,7 @@ std::string Logger::getTimestamp() const {
         now.time_since_epoch()) % 1000;
     
     std::stringstream ss;
-    // Use thread-safe version or gmtime
+    // Use thread-safe version of localtime
     std::tm tm_info;
 #ifdef _WIN32
     localtime_s(&tm_info, &time);
