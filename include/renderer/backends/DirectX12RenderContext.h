@@ -41,7 +41,7 @@ public:
     ID3D12DescriptorHeap* getSRVDescriptorHeap() const { return srvHeap.Get(); }
     ID3D12GraphicsCommandList* getCommandList() const { return commandList.Get(); }
     UINT getCurrentFrameIndex() const { return currentFrame; }
-    DXGI_FORMAT getRTVFormat() const { return DXGI_FORMAT_R8G8B8A8_UNORM; }
+    DXGI_FORMAT getRTVFormat() const { return rtvFormat; }
     
     // Frame count constant
     static constexpr int FRAME_COUNT = 2;
@@ -67,6 +67,8 @@ private:
     void waitForGPU();
     void moveToNextFrame();
     
+    static constexpr UINT SRV_HEAP_SIZE = 256;  // Size of SRV descriptor heap for ImGui and other resources
+    
     ComPtr<ID3D12Device> device;
     ComPtr<ID3D12CommandQueue> commandQueue;
     ComPtr<IDXGISwapChain3> swapchain;
@@ -85,6 +87,7 @@ private:
     
     UINT rtvDescriptorSize = 0;
     UINT currentFrame = 0;
+    DXGI_FORMAT rtvFormat = DXGI_FORMAT_R8G8B8A8_UNORM;  // Store actual format
     
     Window* window = nullptr;
     int width = 0;

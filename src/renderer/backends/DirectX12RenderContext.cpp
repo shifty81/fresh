@@ -460,7 +460,7 @@ bool DirectX12RenderContext::createDescriptorHeaps() {
     
     // Create SRV descriptor heap for ImGui and other shader resources
     D3D12_DESCRIPTOR_HEAP_DESC srvHeapDesc = {};
-    srvHeapDesc.NumDescriptors = 256;  // Enough for ImGui and other resources
+    srvHeapDesc.NumDescriptors = SRV_HEAP_SIZE;
     srvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
     srvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
     

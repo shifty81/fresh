@@ -28,6 +28,7 @@ ImGuiContext::ImGuiContext()
     : m_initialized(false)
     , m_window(nullptr)
     , m_renderContext(nullptr)
+    , m_backendRenderContext(nullptr)
 {
 }
 
@@ -103,6 +104,7 @@ bool ImGuiContext::initialize(Window* window, IRenderContext* renderContext) {
                 // Get DirectX 11 device and context from render context
                 DirectX11RenderContext* dx11Context = dynamic_cast<DirectX11RenderContext*>(renderContext);
                 if (dx11Context) {
+                    m_backendRenderContext = dx11Context;  // Cache for later use
                     ID3D11Device* device = dx11Context->getD3D11Device();
                     ID3D11DeviceContext* deviceContext = dx11Context->getD3D11DeviceContext();
                     
@@ -131,6 +133,7 @@ bool ImGuiContext::initialize(Window* window, IRenderContext* renderContext) {
                 // Get DirectX 12 device and context from render context
                 DirectX12RenderContext* dx12Context = dynamic_cast<DirectX12RenderContext*>(renderContext);
                 if (dx12Context) {
+                    m_backendRenderContext = dx12Context;  // Cache for later use
                     ID3D12Device* device = dx12Context->getD3D12Device();
                     ID3D12DescriptorHeap* srvHeap = dx12Context->getSRVDescriptorHeap();
                     
@@ -248,8 +251,8 @@ void ImGuiContext::render() {
             break;
 
         case GraphicsAPI::DirectX12: {
-            // Get the command list from the render context
-            DirectX12RenderContext* dx12Context = dynamic_cast<DirectX12RenderContext*>(m_renderContext);
+            // Use cached DirectX12RenderContext pointer
+            DirectX12RenderContext* dx12Context = static_cast<DirectX12RenderContext*>(m_backendRenderContext);
             if (dx12Context) {
                 ID3D12GraphicsCommandList* commandList = dx12Context->getCommandList();
                 if (commandList) {
@@ -310,6 +313,7 @@ void ImGuiContext::shutdown() {
     ::ImGui::DestroyContext();
 
     m_initialized = false;
+    m_backendRenderContext = nullptr;
     LOG_INFO_C("ImGui context shutdown", "ImGuiContext");
 }
 

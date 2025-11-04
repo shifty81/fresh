@@ -71,6 +71,9 @@ private:
     bool m_initialized;
     Window* m_window;
     IRenderContext* m_renderContext;
+    
+    // Cached pointers to avoid repeated dynamic_cast
+    void* m_backendRenderContext;  // Points to DirectX11/12RenderContext or nullptr for OpenGL
 };
 
 } // namespace fresh
