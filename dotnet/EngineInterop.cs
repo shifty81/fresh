@@ -42,6 +42,10 @@ public class Engine : IDisposable
     private IntPtr _nativeHandle;
     private bool _disposed;
 
+    /// <summary>
+    /// Initializes a new instance of the Engine class
+    /// </summary>
+    /// <exception cref="InvalidOperationException">Thrown when the native engine instance cannot be created</exception>
     public Engine()
     {
         _nativeHandle = NativeMethods.Engine_Create();
@@ -51,24 +55,37 @@ public class Engine : IDisposable
         }
     }
 
+    /// <summary>
+    /// Initializes the engine and its subsystems
+    /// </summary>
+    /// <returns>True if initialization succeeded, false otherwise</returns>
     public bool Initialize()
     {
         ThrowIfDisposed();
         return NativeMethods.Engine_Initialize(_nativeHandle);
     }
 
+    /// <summary>
+    /// Runs the main engine loop
+    /// </summary>
     public void Run()
     {
         ThrowIfDisposed();
         NativeMethods.Engine_Run(_nativeHandle);
     }
 
+    /// <summary>
+    /// Shuts down the engine and releases resources
+    /// </summary>
     public void Shutdown()
     {
         ThrowIfDisposed();
         NativeMethods.Engine_Shutdown(_nativeHandle);
     }
 
+    /// <summary>
+    /// Sets the window title
+    /// </summary>
     public string WindowTitle
     {
         set
@@ -78,6 +95,11 @@ public class Engine : IDisposable
         }
     }
 
+    /// <summary>
+    /// Sets the window size
+    /// </summary>
+    /// <param name="width">Window width in pixels</param>
+    /// <param name="height">Window height in pixels</param>
     public void SetWindowSize(int width, int height)
     {
         ThrowIfDisposed();
@@ -92,12 +114,19 @@ public class Engine : IDisposable
         }
     }
 
+    /// <summary>
+    /// Releases all resources used by the Engine
+    /// </summary>
     public void Dispose()
     {
         Dispose(true);
         GC.SuppressFinalize(this);
     }
 
+    /// <summary>
+    /// Releases the unmanaged resources used by the Engine and optionally releases the managed resources
+    /// </summary>
+    /// <param name="disposing">True to release both managed and unmanaged resources; false to release only unmanaged resources</param>
     protected virtual void Dispose(bool disposing)
     {
         if (!_disposed)
@@ -111,6 +140,9 @@ public class Engine : IDisposable
         }
     }
 
+    /// <summary>
+    /// Finalizer for the Engine class
+    /// </summary>
     ~Engine()
     {
         Dispose(false);
