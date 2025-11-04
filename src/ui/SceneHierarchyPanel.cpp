@@ -2,6 +2,7 @@
 #include "voxel/VoxelWorld.h"
 #include "core/Logger.h"
 #include <imgui.h>
+#include <cstring>
 
 namespace fresh {
 

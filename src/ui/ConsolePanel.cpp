@@ -5,6 +5,7 @@
 #include <iomanip>
 #include <sstream>
 #include <algorithm>
+#include <ctime>
 
 namespace fresh {
 
@@ -295,7 +296,15 @@ void ConsolePanel::registerDefaultCommands() {
         addMessage(ConsoleMessageType::Info, "Engine: Fresh Voxel Engine");
         addMessage(ConsoleMessageType::Info, "Version: 0.1.0");
         addMessage(ConsoleMessageType::Info, "Graphics: OpenGL");
+#ifdef _WIN32
+        addMessage(ConsoleMessageType::Info, "Platform: Windows");
+#elif __linux__
         addMessage(ConsoleMessageType::Info, "Platform: Linux");
+#elif __APPLE__
+        addMessage(ConsoleMessageType::Info, "Platform: macOS");
+#else
+        addMessage(ConsoleMessageType::Info, "Platform: Unknown");
+#endif
     }, "Display engine information");
 }
 

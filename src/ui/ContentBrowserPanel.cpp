@@ -2,6 +2,7 @@
 #include "core/Logger.h"
 #include <imgui.h>
 #include <filesystem>
+#include <cstring>
 
 namespace fresh {
 namespace fs = std::filesystem;
