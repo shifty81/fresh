@@ -1,4 +1,5 @@
 @echo off
+setlocal enabledelayedexpansion
 REM ============================================================================
 REM Fresh Voxel Engine - Installation Launcher
 REM ============================================================================
