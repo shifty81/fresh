@@ -137,7 +137,8 @@ bool Engine::initialize() {
     std::cout << "World editor initialized" << std::endl;
     LOG_INFO_C("World editor initialized", "Engine");
     
-    // Create comprehensive editor manager
+#ifdef FRESH_IMGUI_AVAILABLE
+    // Create comprehensive editor manager (requires ImGui)
     m_editorManager = std::make_unique<EditorManager>();
     if (!m_editorManager->initialize(m_window.get(), m_renderer.get(), m_world.get(), m_worldEditor.get())) {
         std::cerr << "Failed to initialize editor manager" << std::endl;
@@ -147,6 +148,10 @@ bool Engine::initialize() {
         std::cout << "Editor manager initialized" << std::endl;
         LOG_INFO_C("Editor manager initialized", "Engine");
     }
+#else
+    std::cout << "Editor manager skipped (ImGui not available)" << std::endl;
+    LOG_INFO_C("Editor manager skipped (ImGui not available)", "Engine");
+#endif
     
     // Create legacy editor GUI (for backward compatibility)
     m_editor = std::make_unique<EditorGUI>();
@@ -374,15 +379,24 @@ void Engine::processInput() {
         m_inputManager->update();
         
         // Check if GUI wants input (only process world input if GUI doesn't need it)
+#ifdef FRESH_IMGUI_AVAILABLE
         bool guiCapturesMouse = m_editorManager && m_editorManager->wantCaptureMouse();
         bool guiCapturesKeyboard = m_editorManager && m_editorManager->wantCaptureKeyboard();
+#else
+        bool guiCapturesMouse = false;
+        bool guiCapturesKeyboard = false;
+#endif
         
         // Toggle editor with 'T' key (only if GUI doesn't want keyboard)
         if (!guiCapturesKeyboard && m_inputManager->isActionJustPressed(InputAction::ToggleEditor)) {
+#ifdef FRESH_IMGUI_AVAILABLE
             if (m_editorManager) {
                 m_editorManager->toggle();
                 LOG_INFO_C("Editor toggled", "Engine");
             }
+#else
+            LOG_INFO_C("Editor not available (ImGui required)", "Engine");
+#endif
         }
         
         // Allow ESC to close the window (only if GUI doesn't want keyboard)
@@ -398,8 +412,13 @@ void Engine::update(float deltaTime) {
     }
     
     // Check if GUI wants input before processing player updates
+#ifdef FRESH_IMGUI_AVAILABLE
     bool guiCapturesMouse = m_editorManager && m_editorManager->wantCaptureMouse();
     bool guiCapturesKeyboard = m_editorManager && m_editorManager->wantCaptureKeyboard();
+#else
+    bool guiCapturesMouse = false;
+    bool guiCapturesKeyboard = false;
+#endif
     
     // Handle player input (only if GUI doesn't capture input)
     if (m_player && m_inputManager && !guiCapturesMouse && !guiCapturesKeyboard) {
@@ -468,6 +487,7 @@ void Engine::render() {
         // This needs to be replaced with proper DirectX draw calls
     }
     
+#ifdef FRESH_IMGUI_AVAILABLE
     // Begin editor frame (ImGui) before rendering editor UI
     if (m_editorManager) {
         m_editorManager->beginFrame();
@@ -482,6 +502,7 @@ void Engine::render() {
     if (m_editorManager) {
         m_editorManager->endFrame();
     }
+#endif // FRESH_IMGUI_AVAILABLE
     
     m_renderer->endFrame();
     

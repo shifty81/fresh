@@ -246,17 +246,8 @@ set(ENGINE_SOURCES
     src/editor/EditorGUI.cpp
     src/editor/WorldEditor.cpp
     src/editor/TerraformingSystem.cpp
-    src/editor/EditorManager.cpp
     src/serialization/WorldSerializer.cpp
     src/ui/MainMenu.cpp
-    src/ui/ImGuiContext.cpp
-    src/ui/SceneHierarchyPanel.cpp
-    src/ui/InspectorPanel.cpp
-    src/ui/EditorMenuBar.cpp
-    src/ui/EditorToolbar.cpp
-    src/ui/ContentBrowserPanel.cpp
-    src/ui/ConsolePanel.cpp
-    src/ui/VoxelToolPalette.cpp
     src/input/InputManager.cpp
     src/gameplay/Camera.cpp
     src/gameplay/Player.cpp
@@ -296,6 +287,21 @@ endif()
 if(ENABLE_OPENGL)
     list(APPEND ENGINE_SOURCES
         src/renderer/backends/OpenGLRenderContext.cpp
+    )
+endif()
+
+# Add ImGui-dependent UI sources only if ImGui is available
+if(imgui_FOUND)
+    list(APPEND ENGINE_SOURCES
+        src/editor/EditorManager.cpp
+        src/ui/ImGuiContext.cpp
+        src/ui/SceneHierarchyPanel.cpp
+        src/ui/InspectorPanel.cpp
+        src/ui/EditorMenuBar.cpp
+        src/ui/EditorToolbar.cpp
+        src/ui/ContentBrowserPanel.cpp
+        src/ui/ConsolePanel.cpp
+        src/ui/VoxelToolPalette.cpp
     )
 endif()
 
