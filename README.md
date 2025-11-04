@@ -39,6 +39,11 @@ The engine **automatically detects and selects** the best available graphics API
 
 ## 🚀 Quick Start
 
+### 📖 New User? Start Here!
+
+**For Visual Studio 2022 users with step-by-step visual instructions:**
+- 👉 **[QUICKSTART_VISUAL.md](QUICKSTART_VISUAL.md)** - Complete visual guide with screenshots and troubleshooting
+
 ### Windows
 
 **New to the project?** Check out [VS2022_MIGRATION_GUIDE.md](VS2022_MIGRATION_GUIDE.md) for a complete overview!

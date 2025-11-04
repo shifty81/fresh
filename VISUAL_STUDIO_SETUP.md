@@ -285,12 +285,95 @@ cmake --build . --config Release
 3. Check Output window for detailed error messages
 4. Verify all dependencies are installed
 
+### Common Compilation Errors
+
+#### Error: "'OpenGLRenderContext': undeclared identifier"
+**Cause**: OpenGL backend is being compiled without proper includes or definitions.
+
+**Solution**:
+1. Make sure `FRESH_OPENGL_SUPPORT` and `FRESH_GLEW_AVAILABLE` are defined when OpenGL is enabled
+2. Verify GLEW is installed: `vcpkg install glew:x64-windows`
+3. Regenerate the solution with vcpkg toolchain
+
+#### Error: "'std::make_unique': no matching overloaded function found"
+**Cause**: Missing `<memory>` header include.
+
+**Solution**: This has been fixed in the latest version. Update to the latest code or add `#include <memory>` to files using `std::make_unique`.
+
+#### Error: "'ImGuiConfigFlags_DockingEnable': undeclared identifier"
+**Cause**: ImGui was not built with docking support, or the feature flags are not properly defined.
+
+**Solution**:
+1. Make sure ImGui is installed with docking support: 
+   ```batch
+   vcpkg install imgui[docking-experimental,glfw-binding,dx11-binding,dx12-binding]:x64-windows
+   ```
+2. Regenerate the solution after updating vcpkg packages
+3. The engine now automatically guards these features with `#ifdef IMGUI_HAS_DOCK`
+
+#### Error: "'UpdatePlatformWindows': is not a member of 'ImGui'"
+**Cause**: Multi-viewport feature is not available in the ImGui build.
+
+**Solution**: 
+1. This feature requires ImGui's docking branch
+2. Install with: `vcpkg install imgui[docking-experimental]:x64-windows`
+3. The engine now guards this with `#ifdef IMGUI_HAS_VIEWPORT` so it will gracefully degrade if not available
+
+### Runtime Issues
+
+#### Error: "Unable to start program ... ALL_BUILD access is denied"
+**Cause**: `ALL_BUILD` is a CMake meta-target that builds all projects but is not an executable. Visual Studio is trying to run it as the startup project.
+
+**Solution**:
+1. In Solution Explorer, right-click on `FreshVoxelEngine` project
+2. Select `Set as Startup Project`
+3. The project name should now be **bold**
+4. Press F5 or Ctrl+F5 to run
+
+**Visual Guide**:
+```
+Solution Explorer
+└── Solution 'FreshVoxelEngine'
+    ├── ALL_BUILD          <- Don't run this (meta-target)
+    ├── FreshVoxelEngine   <- Set THIS as startup project (bold = active)
+    ├── INSTALL
+    └── ZERO_CHECK
+```
+
+**Alternative**: Use the toolbar dropdown:
+1. Find the "Select Startup Item" dropdown in the toolbar (shows current startup project)
+2. Click the dropdown arrow
+3. Select `FreshVoxelEngine.exe`
+
+#### Error: "The system cannot find the file specified" when running
+**Cause**: Missing DLLs or the executable is not in the expected location.
+
+**Solution**:
+1. Make sure you've built the solution first (F7)
+2. Check that the executable exists in `build/Debug/` or `build/Release/`
+3. If using vcpkg dependencies, make sure DLLs are copied to the output directory
+4. Try running from command line to see full error: `build\Debug\FreshVoxelEngine.exe`
+
 ### Runtime Crashes
 1. Run with debugger (F5) to catch exceptions
 2. Check Output window for error messages
 3. Enable DirectX validation layers (Debug build)
 4. Verify all DLLs are in the executable directory
 5. Check that DirectX runtime is up to date
+
+### Dependency Installation Issues
+
+#### vcpkg packages fail to install
+**Solution**:
+1. Make sure vcpkg is up to date: `cd vcpkg && git pull`
+2. Bootstrap vcpkg again: `.\vcpkg\bootstrap-vcpkg.bat`
+3. Clear vcpkg cache: `.\vcpkg\vcpkg remove --outdated`
+4. Try installing packages one at a time to identify the problem:
+   ```batch
+   vcpkg install glfw3:x64-windows
+   vcpkg install glm:x64-windows
+   vcpkg install imgui[docking-experimental,glfw-binding,dx11-binding,dx12-binding]:x64-windows
+   ```
 
 ## Additional Resources
 
