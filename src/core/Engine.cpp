@@ -461,7 +461,7 @@ void Engine::render() {
         const auto& chunks = m_world->getChunks();
         
         for (const auto& chunkPair : chunks) {
-            const auto& chunk = chunkPair.second;
+            Chunk* chunk = chunkPair.second.get();  // Get raw pointer for non-const access
             
             // Generate mesh if dirty
             if (chunk->isDirty()) {
