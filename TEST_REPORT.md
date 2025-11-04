@@ -235,4 +235,4 @@ The project now has a solid foundation for continuous testing and quality assura
 **Date**: 2025-11-03
 **Test Framework**: Google Test 1.12.1
 **Build System**: CMake 3.20+
-**Language Standard**: C++17
+**Language Standard**: C++20

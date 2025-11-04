@@ -588,7 +588,7 @@ console.executeCommand("spawn 0 0 0");
 
 ### Prerequisites
 - CMake 3.20+
-- C++17 compiler
+- C++20 compiler
 - GLM (for math)
 - Graphics drivers (OpenGL 4.5+ or DirectX 11+)
 

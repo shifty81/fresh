@@ -132,7 +132,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - AISystem framework with behavior trees
 
 ### Technical Details
-- C++17 standard
+- C++20 standard
 - Modern CMake configuration
 - Windows-native with DirectX 12 support
 - Modular architecture

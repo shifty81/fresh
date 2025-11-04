@@ -263,7 +263,7 @@ Warnings: Minor (unused parameters only)
 - Namespaces: lowercase
 
 ### ✅ Code Standards
-- C++17 standard compliant
+- C++20 standard compliant
 - RAII principles followed
 - Smart pointers used consistently
 - No raw `new`/`delete` in modern code
