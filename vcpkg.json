@@ -13,6 +13,11 @@
     {
       "name": "glm",
       "platform": "windows"
+    },
+    {
+      "name": "imgui",
+      "features": ["glfw-binding", "opengl3-binding", "dx11-binding", "dx12-binding"],
+      "platform": "windows"
     }
   ],
   "builtin-baseline": "c8696863d371ab7f46545af1d618ff2c59dcc7d1"
