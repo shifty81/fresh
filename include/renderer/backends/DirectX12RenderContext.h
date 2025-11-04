@@ -36,6 +36,16 @@ public:
     int getSwapchainWidth() const override { return width; }
     int getSwapchainHeight() const override { return height; }
     
+    // DirectX 12 specific getters for ImGui integration
+    ID3D12Device* getD3D12Device() const { return device.Get(); }
+    ID3D12DescriptorHeap* getSRVDescriptorHeap() const { return srvHeap.Get(); }
+    ID3D12GraphicsCommandList* getCommandList() const { return commandList.Get(); }
+    UINT getCurrentFrameIndex() const { return currentFrame; }
+    DXGI_FORMAT getRTVFormat() const { return DXGI_FORMAT_R8G8B8A8_UNORM; }
+    
+    // Frame count constant
+    static constexpr int FRAME_COUNT = 2;
+    
     std::shared_ptr<RenderBuffer> createVertexBuffer(const void* data, size_t size) override;
     std::shared_ptr<RenderBuffer> createIndexBuffer(const void* data, size_t size) override;
     std::shared_ptr<RenderBuffer> createUniformBuffer(size_t size) override;
@@ -57,13 +67,12 @@ private:
     void waitForGPU();
     void moveToNextFrame();
     
-    static constexpr int FRAME_COUNT = 2;
-    
     ComPtr<ID3D12Device> device;
     ComPtr<ID3D12CommandQueue> commandQueue;
     ComPtr<IDXGISwapChain3> swapchain;
     ComPtr<ID3D12DescriptorHeap> rtvHeap;
     ComPtr<ID3D12DescriptorHeap> dsvHeap;
+    ComPtr<ID3D12DescriptorHeap> srvHeap;  // For ImGui and other shader resources
     ComPtr<ID3D12Resource> renderTargets[FRAME_COUNT];
     ComPtr<ID3D12Resource> depthStencil;
     ComPtr<ID3D12CommandAllocator> commandAllocators[FRAME_COUNT];

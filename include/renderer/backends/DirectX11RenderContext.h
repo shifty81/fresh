@@ -35,6 +35,10 @@ public:
     int getSwapchainWidth() const override { return width; }
     int getSwapchainHeight() const override { return height; }
     
+    // DirectX 11 specific getters for ImGui integration
+    ID3D11Device* getD3D11Device() const { return device.Get(); }
+    ID3D11DeviceContext* getD3D11DeviceContext() const { return deviceContext.Get(); }
+    
     std::shared_ptr<RenderBuffer> createVertexBuffer(const void* data, size_t size) override;
     std::shared_ptr<RenderBuffer> createIndexBuffer(const void* data, size_t size) override;
     std::shared_ptr<RenderBuffer> createUniformBuffer(size_t size) override;
