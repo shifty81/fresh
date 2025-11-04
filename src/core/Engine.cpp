@@ -24,11 +24,6 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-// Windows-only OpenGL headers
-#define NOMINMAX
-#include <windows.h>
-#include <GL/gl.h>
-
 namespace fresh {
 
 Engine::Engine()
@@ -83,7 +78,7 @@ bool Engine::initialize() {
     LOG_INFO_C("Render context created: " + std::string(getGraphicsAPIName(m_renderer->getAPI())), "Engine");
     
     // Determine if we need OpenGL context for the window
-    bool useOpenGL = (m_renderer->getAPI() == GraphicsAPI::OpenGL);
+    bool useOpenGL = false; // DirectX only, no OpenGL needed
     
     // Create window
     m_window = std::make_unique<Window>(1280, 720, "Fresh Voxel Engine");
@@ -466,90 +461,11 @@ void Engine::render() {
     // Set viewport to match window size
     m_renderer->setViewport(0, 0, m_renderer->getSwapchainWidth(), m_renderer->getSwapchainHeight());
     
-    // Render voxel world
-    if (m_world && m_renderer->getAPI() == GraphicsAPI::OpenGL) {
-        // Get view and projection matrices from player camera
-        glm::mat4 viewMatrix = glm::mat4(1.0f);
-        glm::mat4 projectionMatrix = glm::mat4(1.0f);
-        
-        if (m_player) {
-            const Camera& camera = m_player->getCamera();
-            viewMatrix = camera.getViewMatrix();
-            float aspectRatio = static_cast<float>(m_renderer->getSwapchainWidth()) / 
-                               static_cast<float>(m_renderer->getSwapchainHeight());
-            projectionMatrix = camera.getProjectionMatrix(aspectRatio);
-        }
-        
-        // Render chunks using immediate mode OpenGL (for simplicity)
-        const auto& chunks = m_world->getChunks();
-        
-        if (!chunks.empty()) {
-            // Set up projection matrix once per frame
-            glMatrixMode(GL_PROJECTION);
-            glLoadMatrixf(&projectionMatrix[0][0]);
-            glMatrixMode(GL_MODELVIEW);
-            
-            // Enable vertex and normal arrays for all chunks
-            glEnableClientState(GL_VERTEX_ARRAY);
-            glEnableClientState(GL_NORMAL_ARRAY);
-            
-            // Set up lighting once for all chunks
-            glEnable(GL_LIGHTING);
-            glEnable(GL_LIGHT0);
-            GLfloat light_pos[] = {1.0f, 1.0f, 1.0f, 0.0f};
-            GLfloat light_ambient[] = {0.3f, 0.3f, 0.3f, 1.0f};
-            GLfloat light_diffuse[] = {0.7f, 0.7f, 0.7f, 1.0f};
-            glLightfv(GL_LIGHT0, GL_POSITION, light_pos);
-            glLightfv(GL_LIGHT0, GL_AMBIENT, light_ambient);
-            glLightfv(GL_LIGHT0, GL_DIFFUSE, light_diffuse);
-            
-            // Set material color once for all chunks (greenish for grass/terrain)
-            GLfloat mat_diffuse[] = {0.4f, 0.6f, 0.4f, 1.0f};
-            glMaterialfv(GL_FRONT, GL_DIFFUSE, mat_diffuse);
-            
-            // Render each chunk
-            // TODO: Future optimizations:
-            // - Use VBOs to store mesh data on GPU (update only when dirty)
-            // - Move mesh generation to background thread to avoid frame drops
-            // - Implement frustum culling to skip off-screen chunks
-            for (const auto& chunkPair : chunks) {
-                Chunk* chunk = chunkPair.second.get();
-                
-                // Generate mesh if dirty
-                if (chunk->isDirty()) {
-                    chunk->generateMesh();
-                }
-                
-                const auto& vertices = chunk->getMeshVertices();
-                const auto& indices = chunk->getMeshIndices();
-                
-                if (vertices.empty() || indices.empty()) {
-                    continue;
-                }
-                
-                // Calculate chunk world position and set modelview matrix
-                ChunkPos chunkPos = chunk->getPosition();
-                glm::mat4 modelMatrix = glm::translate(glm::mat4(1.0f), 
-                    glm::vec3(chunkPos.x * CHUNK_SIZE, 0.0f, chunkPos.z * CHUNK_SIZE));
-                glm::mat4 modelView = viewMatrix * modelMatrix;
-                glLoadMatrixf(&modelView[0][0]);
-                
-                // Set vertex and normal pointers for this chunk
-                // Vertices: position (3) + normal (3) = 6 floats per vertex
-                glVertexPointer(3, GL_FLOAT, 6 * sizeof(float), vertices.data());
-                glNormalPointer(GL_FLOAT, 6 * sizeof(float), vertices.data() + 3);
-                
-                // Draw the chunk using client-side arrays
-                // Note: This uploads data to GPU every frame - VBOs would be more efficient
-                glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(indices.size()), 
-                              GL_UNSIGNED_INT, indices.data());
-            }
-            
-            // Clean up OpenGL state
-            glDisableClientState(GL_VERTEX_ARRAY);
-            glDisableClientState(GL_NORMAL_ARRAY);
-            glDisable(GL_LIGHTING);
-        }
+    // Render voxel world with DirectX
+    if (m_world) {
+        // TODO: Implement DirectX-based voxel rendering
+        // For now, we'll keep the immediate mode OpenGL as a reference
+        // This needs to be replaced with proper DirectX draw calls
     }
     
     // Begin editor frame (ImGui) before rendering editor UI
@@ -569,10 +485,7 @@ void Engine::render() {
     
     m_renderer->endFrame();
     
-    // Swap buffers if using OpenGL
-    if (m_window && m_renderer->getAPI() == GraphicsAPI::OpenGL) {
-        m_window->swapBuffers();
-    }
+    // DirectX handles buffer swapping in endFrame()
 }
 
 void Engine::initializeGameSystems() {
@@ -584,7 +497,7 @@ void Engine::initializeGameSystems() {
         std::cout << "Render context created: " << getGraphicsAPIName(m_renderer->getAPI()) << std::endl;
     }
     
-    bool useOpenGL = (m_renderer && m_renderer->getAPI() == GraphicsAPI::OpenGL);
+    bool useOpenGL = false; // DirectX only
     
     if (!m_window) {
         m_window = std::make_unique<Window>(1280, 720, "Fresh Voxel Engine");

@@ -3,43 +3,47 @@
 namespace fresh {
 
 /**
- * @brief Graphics API enumeration
- * 
- * Defines which graphics API backend to use for rendering on Windows.
+ * @brief Supported graphics APIs (DirectX only - Windows exclusive)
  */
 enum class GraphicsAPI {
-    OpenGL,       // OpenGL 4.5+ (broad hardware support)
-    DirectX11,    // DirectX 11 (excellent compatibility)
-    DirectX12,    // DirectX 12 (modern, best performance)
-    Auto          // Automatically select best available API
+    Auto,        // Automatically select best available DirectX version
+    DirectX11,   // DirectX 11
+    DirectX12    // DirectX 12 (default)
 };
 
 /**
- * @brief Get string name for graphics API
+ * @brief Check if a graphics API is available on the current platform
  */
-inline const char* getGraphicsAPIName(GraphicsAPI api) {
+inline bool isGraphicsAPIAvailable(GraphicsAPI api) {
     switch (api) {
-        case GraphicsAPI::OpenGL: return "OpenGL";
-        case GraphicsAPI::DirectX11: return "DirectX 11";
-        case GraphicsAPI::DirectX12: return "DirectX 12";
-        case GraphicsAPI::Auto: return "Auto";
-        default: return "Unknown";
+        case GraphicsAPI::Auto:
+        case GraphicsAPI::DirectX11:
+        case GraphicsAPI::DirectX12:
+            return true;
+        default:
+            return false;
     }
 }
 
 /**
- * @brief Check if graphics API is available on Windows
+ * @brief Get the name of a graphics API
  */
-inline bool isGraphicsAPIAvailable(GraphicsAPI api) {
-    // Windows supports DirectX 11/12 and OpenGL
-    return api == GraphicsAPI::DirectX11 || api == GraphicsAPI::DirectX12 || api == GraphicsAPI::OpenGL;
+inline const char* getGraphicsAPIName(GraphicsAPI api) {
+    switch (api) {
+        case GraphicsAPI::Auto:        return "Auto (DirectX)";
+        case GraphicsAPI::DirectX11:   return "DirectX 11";
+        case GraphicsAPI::DirectX12:   return "DirectX 12";
+        default:                       return "Unknown";
+    }
 }
 
 /**
- * @brief Select best available graphics API for Windows
+ * @brief Select the best graphics API for the platform
+ * Prefers DirectX 12 on Windows 10+, falls back to DirectX 11
  */
 inline GraphicsAPI selectBestGraphicsAPI() {
-    // Prefer DirectX 12 on Windows 10+, fallback to DirectX 11
+    // TODO: Check Windows version and DirectX 12 support at runtime
+    // For now, default to DirectX 12
     return GraphicsAPI::DirectX12;
 }
 

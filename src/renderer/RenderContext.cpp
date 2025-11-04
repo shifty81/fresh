@@ -1,10 +1,6 @@
 #include "renderer/RenderContext.h"
-#include "renderer/backends/OpenGLRenderContext.h"
-
-#ifdef _WIN32
 #include "renderer/backends/DirectX11RenderContext.h"
 #include "renderer/backends/DirectX12RenderContext.h"
-#endif
 
 #include <iostream>
 #include <stdexcept>
@@ -20,11 +16,6 @@ std::unique_ptr<IRenderContext> RenderContextFactory::create(GraphicsAPI api) {
     }
     
     switch (api) {
-        case GraphicsAPI::OpenGL:
-            std::cout << "Creating OpenGL render context" << std::endl;
-            return std::make_unique<OpenGLRenderContext>();
-            
-#ifdef _WIN32
         case GraphicsAPI::DirectX11:
             std::cout << "Creating DirectX 11 render context" << std::endl;
             return std::make_unique<DirectX11RenderContext>();
@@ -32,7 +23,6 @@ std::unique_ptr<IRenderContext> RenderContextFactory::create(GraphicsAPI api) {
         case GraphicsAPI::DirectX12:
             std::cout << "Creating DirectX 12 render context" << std::endl;
             return std::make_unique<DirectX12RenderContext>();
-#endif
             
         case GraphicsAPI::Auto:
             return createBest();

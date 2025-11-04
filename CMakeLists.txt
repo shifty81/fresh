@@ -15,13 +15,9 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 # Graphics API Dependencies
-# DirectX is available on Windows
-message(STATUS "DirectX 11/12 backends will be available (Windows)")
+# DirectX only - this is a Windows-exclusive engine
+message(STATUS "DirectX 11/12 backends enabled (Windows-only engine)")
 add_definitions(-DFRESH_DIRECTX_SUPPORT)
-
-# OpenGL is also available on Windows
-message(STATUS "OpenGL backend will be available (Windows)")
-add_definitions(-DFRESH_OPENGL_SUPPORT)
 
 # Try to find GLFW
 find_package(glfw3 QUIET)
@@ -69,7 +65,6 @@ set(ENGINE_SOURCES
     src/renderer/Texture.cpp
     src/renderer/TextureManager.cpp
     src/renderer/VoxelTextureLoader.cpp
-    src/renderer/backends/OpenGLRenderContext.cpp
     src/voxel/Chunk.cpp
     src/voxel/VoxelWorld.cpp
     src/voxel/MeshGenerator.cpp
@@ -81,6 +76,7 @@ set(ENGINE_SOURCES
     src/physics/PhysicsComponent.cpp
     src/physics/PhysicsSystemEnhanced.cpp
     src/interaction/RaycastSystem.cpp
+    src/interaction/VoxelInteraction.cpp
     src/ai/AISystem.cpp
     src/ai/BehaviorTree.cpp
     src/audio/AudioEngine.cpp
@@ -154,6 +150,7 @@ set(ENGINE_HEADERS
     include/physics/PhysicsComponent.h
     include/physics/PhysicsSystemEnhanced.h
     include/interaction/RaycastSystem.h
+    include/interaction/VoxelInteraction.h
     include/ai/AISystem.h
     include/ai/BehaviorTree.h
     include/audio/AudioEngine.h
@@ -218,14 +215,6 @@ target_include_directories(${PROJECT_NAME}
 )
 
 # Link libraries
-# Link OpenGL (required for OpenGL backend)
-find_package(OpenGL QUIET)
-if(OpenGL_FOUND)
-    target_link_libraries(${PROJECT_NAME} PRIVATE OpenGL::GL)
-else()
-    # Fallback for Windows if CMake can't find OpenGL package
-    target_link_libraries(${PROJECT_NAME} PRIVATE opengl32)
-endif()
 
 # Link GLFW
 if(glfw3_FOUND)
