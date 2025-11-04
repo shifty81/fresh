@@ -8,19 +8,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **Cross-Platform Support** - Engine now builds on Windows, Linux, and macOS
+  - Platform detection and conditional compilation
+  - OpenGL 4.5+ rendering backend for cross-platform support
+  - Automatic graphics API selection based on platform
+  - GLEW integration for OpenGL extension loading
+  - Full OpenGL resource management (buffers, textures, shaders)
+  
 - **ImGui DirectX Rendering Backends** - Complete DirectX 11/12 support for ImGui
   - Implemented DirectX 11 ImGui rendering backend
   - Implemented DirectX 12 ImGui rendering backend
   - Added SRV descriptor heap to DirectX12RenderContext for ImGui
   - Added public getters to access DirectX device/context for ImGui integration
   - Full support for ImGui initialization, frame rendering, and cleanup
+  - OpenGL ImGui backend already functional
 
 ### Changed
-- **Removed Vulkan Support** - Simplified graphics stack
-  - Removed Vulkan-specific renderer, device, and pipeline classes
-  - Updated engine to use OpenGL and DirectX backends only
-  - Updated all documentation to reflect OpenGL/DirectX support
-  - Simplified build dependencies (no longer requires Vulkan SDK)
+- **Removed Windows-Only Restriction** - Engine is now truly cross-platform
+  - Updated CMakeLists.txt to support multiple platforms
+  - DirectX backends available on Windows
+  - OpenGL backend available on all platforms
+  - Conditional compilation for platform-specific features
+  - Smart dependency detection and linking
 
 ### Added
 - Comprehensive project documentation
