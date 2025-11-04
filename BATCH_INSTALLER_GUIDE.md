@@ -72,6 +72,27 @@ fresh/
 
 ---
 
+## Recent Improvements (v2.1)
+
+### vcpkg Installation Robustness (November 2025)
+The installer now includes enhanced error checking for vcpkg installation:
+
+1. **Post-Bootstrap Verification**: After bootstrapping vcpkg, the script explicitly verifies that `vcpkg.exe` was created. If not, it displays a clear error message explaining possible causes (antivirus, permissions, disk space).
+
+2. **Integration Error Handling**: The `vcpkg integrate install` command now uses the full path to vcpkg.exe and checks for errors. If integration fails, it displays a warning but continues (since integration is not critical for building).
+
+3. **Enhanced Logging**: User responses to prompts are now logged to the installation log file, making it easier to debug issues by reviewing exactly what choices were made.
+
+4. **Full Path Usage**: All vcpkg commands now use full paths (e.g., `"%VCPKG_ROOT%\vcpkg.exe"`) instead of relying on PATH, preventing issues where vcpkg might not be found.
+
+5. **generate_vs2022.bat vcpkg Support**: The standalone Visual Studio generation script now detects and uses vcpkg toolchain when available. Previously, running `generate_vs2022.bat` would always generate without vcpkg, causing CMake warnings about missing dependencies even when vcpkg was properly installed.
+
+These improvements address issues where:
+- The installer could appear to succeed but actually fail silently when vcpkg.exe wasn't properly created
+- Manual project generation via `generate_vs2022.bat` wouldn't use vcpkg dependencies
+
+---
+
 ## Enhancements Over PowerShell Version
 
 ### Better Error Handling
@@ -123,6 +144,32 @@ Each step explicitly logs:
 ---
 
 ## Troubleshooting
+
+### Issue: "vcpkg.exe not found after bootstrapping"
+**Cause**: This error indicates that vcpkg bootstrap completed without errors, but the vcpkg.exe file was not created.
+
+**Solution**:
+1. Check `logs/install_log_*.txt` for detailed error messages
+2. **Antivirus software** may be blocking or quarantining vcpkg.exe:
+   - Temporarily disable antivirus or add an exception for the `vcpkg/` folder
+   - Re-run the installer
+3. **File permissions** may be preventing file creation:
+   - Ensure you have write permissions to the repository folder
+   - Try running from a folder outside of Program Files
+4. **Disk space** may be insufficient:
+   - Check you have at least 5GB of free space
+   - vcpkg needs space to download and build packages
+5. If issue persists, try manual vcpkg installation (see Manual Build section)
+
+### Issue: "vcpkg integrate install returned error code"
+**Cause**: The vcpkg integration with Visual Studio failed, but this is not critical for building.
+
+**Note**: This is a **warning, not an error**. The build can still proceed.
+
+**Solution**:
+- The installer will continue - this is not critical
+- You can manually integrate later by running: `vcpkg\vcpkg.exe integrate install`
+- Or you can build without integration by using the CMake toolchain file (automatic)
 
 ### Issue: "vcpkg not available"
 **Solution**: The installer will offer to install vcpkg. Choose 'Y' to install automatically.
@@ -220,6 +267,9 @@ The log contains:
 ### Run Specific Steps Only
 
 ```batch
+REM Just generate VS solution (skip full installation)
+generate_vs2022.bat
+
 REM Just build (skip CMake generation)
 tools\build_tools\build.bat
 
@@ -229,6 +279,8 @@ tools\build_tools\clean.bat
 REM Clean and rebuild everything
 tools\build_tools\rebuild.bat
 ```
+
+**Note**: `generate_vs2022.bat` will automatically use vcpkg if it's installed in the `vcpkg/` directory. If you see CMake warnings about missing GLFW, GLM, or ImGui, it means vcpkg wasn't found - run `install.bat` first to set up vcpkg and dependencies.
 
 ### Custom vcpkg Location
 
