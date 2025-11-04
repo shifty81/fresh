@@ -99,7 +99,7 @@ void Scene::addNode(std::shared_ptr<SceneNode> node) {
     }
 }
 
-SceneNode* Scene::findNode(const std::string& name) {
+SceneNode* Scene::findNode(const std::string& nodeName) {
     // Simple recursive search (could be optimized with a map)
     std::function<SceneNode*(SceneNode*, const std::string&)> search;
     search = [&](SceneNode* node, const std::string& targetName) -> SceneNode* {
@@ -113,7 +113,7 @@ SceneNode* Scene::findNode(const std::string& name) {
         return nullptr;
     };
     
-    return search(root.get(), name);
+    return search(root.get(), nodeName);
 }
 
 // SceneManager implementation

@@ -77,7 +77,7 @@ void ConsolePanel::render() {
 
 void ConsolePanel::renderMessages() {
     ImGuiListClipper clipper;
-    clipper.Begin(m_messages.size());
+    clipper.Begin(static_cast<int>(m_messages.size()));
     
     while (clipper.Step()) {
         for (int i = clipper.DisplayStart; i < clipper.DisplayEnd; i++) {

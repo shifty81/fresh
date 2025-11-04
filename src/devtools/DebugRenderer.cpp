@@ -81,6 +81,7 @@ void DebugRenderer::render() {
     // Render all debug commands
     // This would integrate with the actual rendering system
     for (const auto& cmd : commands) {
+        (void)cmd; // Suppress unused warning - implementation pending
         // Render based on cmd.type
         // Implementation would depend on the graphics API
     }

@@ -24,6 +24,7 @@ public:
     }
     
     void updateData(const void* data, size_t dataSize, size_t offset) override {
+        (void)data; (void)dataSize; (void)offset; // Unused - stub implementation
         // Would use upload heap and copy commands
     }
     
@@ -41,6 +42,7 @@ public:
         : resource(res), width(w), height(h) {}
     
     void bind(int unit) override {
+        (void)unit; // Unused - binding done via descriptor tables
         // Binding in D3D12 is done via descriptor tables
     }
     
@@ -296,10 +298,12 @@ void DirectX12RenderContext::setScissor(int x, int y, int w, int h) {
 }
 
 void DirectX12RenderContext::clearColor(float r, float g, float b, float a) {
+    (void)r; (void)g; (void)b; (void)a; // Unused - stub implementation
     // Would use ClearRenderTargetView on command list
 }
 
 void DirectX12RenderContext::clearDepth(float depth) {
+    (void)depth; // Unused - stub implementation
     // Would use ClearDepthStencilView on command list
 }
 
@@ -360,6 +364,7 @@ std::shared_ptr<RenderBuffer> DirectX12RenderContext::createUniformBuffer(size_t
 }
 
 std::shared_ptr<RenderTexture> DirectX12RenderContext::createTexture(int w, int h, const void* data) {
+    (void)data; // Unused - stub implementation
     if (!device) return nullptr;
     
     // Create texture resource (stub implementation)
@@ -370,6 +375,7 @@ std::shared_ptr<RenderTexture> DirectX12RenderContext::createTexture(int w, int 
 }
 
 std::shared_ptr<RenderShader> DirectX12RenderContext::createShader(const std::string& vertexCode, const std::string& fragmentCode) {
+    (void)vertexCode; (void)fragmentCode; // Unused - stub implementation
     // Would compile HLSL shaders to bytecode and create pipeline state object
     std::cout << "[DirectX 12] Creating shader (stub)" << std::endl;
     return std::make_shared<D3D12Shader>();

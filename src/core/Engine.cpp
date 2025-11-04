@@ -381,9 +381,11 @@ void Engine::processInput() {
         // Check if GUI wants input (only process world input if GUI doesn't need it)
 #ifdef FRESH_IMGUI_AVAILABLE
         bool guiCapturesMouse = m_editorManager && m_editorManager->wantCaptureMouse();
+        (void)guiCapturesMouse; // May be unused in this scope
         bool guiCapturesKeyboard = m_editorManager && m_editorManager->wantCaptureKeyboard();
 #else
         bool guiCapturesMouse = false;
+        (void)guiCapturesMouse; // Suppress unused warning
         bool guiCapturesKeyboard = false;
 #endif
         

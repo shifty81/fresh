@@ -1,6 +1,6 @@
 #include "renderer/backends/OpenGLRenderContext.h"
 
-#ifdef FRESH_OPENGL_SUPPORT
+#if defined(FRESH_OPENGL_SUPPORT) && defined(FRESH_GLEW_AVAILABLE)
 
 #include "core/Window.h"
 #include "core/Logger.h"
@@ -405,4 +405,4 @@ void OpenGLRenderContext::checkGLErrors(const char* context) {
 
 } // namespace fresh
 
-#endif // FRESH_OPENGL_SUPPORT
+#endif // FRESH_OPENGL_SUPPORT && FRESH_GLEW_AVAILABLE

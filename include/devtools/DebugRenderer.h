@@ -63,7 +63,7 @@ public:
     void clear();
     
     // Enable/disable
-    void setEnabled(bool enabled) { this->enabled = enabled; }
+    void setEnabled(bool isEnabled) { this->enabled = isEnabled; }
     bool isEnabled() const { return enabled; }
 
 private:

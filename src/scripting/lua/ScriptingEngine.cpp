@@ -153,6 +153,7 @@ std::string ScriptingEngine::getGlobalString(const std::string& name) {
 }
 
 bool ScriptingEngine::loadMod(const std::string& modDirectory) {
+    (void)modDirectory; // Unused - placeholder for future implementation
     // TODO: Implement mod loading
     // 1. Scan modDirectory for mod.lua or init.lua
     // 2. Load manifest (mod.json or similar)

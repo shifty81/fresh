@@ -13,6 +13,7 @@ bool PhysicsSystem::initialize() {
 }
 
 void PhysicsSystem::update(float deltaTime) {
+    (void)deltaTime; // Unused - stub implementation
     // Stub implementation
 }
 

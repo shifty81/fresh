@@ -56,7 +56,7 @@ void EditorGUI::renderTerraformingPanel() {
     std::cout << "Current Tool: ";
     
     switch (terraform->getTool()) {
-        case TerraformTool::Single:
+        case TerraformTool::SingleBlock:
             std::cout << "Single Block\n";
             break;
         case TerraformTool::Brush:

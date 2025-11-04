@@ -26,6 +26,7 @@ void DebugConsole::shutdown() {
 }
 
 void DebugConsole::update(float deltaTime) {
+    (void)deltaTime; // Unused - placeholder for future implementation
     // Console update logic (handle input, etc.)
 }
 
@@ -90,6 +91,7 @@ void DebugConsole::printWarning(const std::string& message) {
 void DebugConsole::registerDefaultCommands() {
     // Help command
     registerCommand("help", [this](const std::vector<std::string>& args) {
+        (void)args; // Unused
         print("Available commands:");
         for (const auto& pair : commands) {
             std::string desc = pair.second.description.empty() 
@@ -101,11 +103,13 @@ void DebugConsole::registerDefaultCommands() {
     
     // Clear command
     registerCommand("clear", [this](const std::vector<std::string>& args) {
+        (void)args; // Unused
         outputLog.clear();
     }, "Clear console output");
     
     // Quit command
     registerCommand("quit", [this](const std::vector<std::string>& args) {
+        (void)args; // Unused
         print("Closing console...");
         hide();
     }, "Close the console");
