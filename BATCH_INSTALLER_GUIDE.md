@@ -85,7 +85,11 @@ The installer now includes enhanced error checking for vcpkg installation:
 
 4. **Full Path Usage**: All vcpkg commands now use full paths (e.g., `"%VCPKG_ROOT%\vcpkg.exe"`) instead of relying on PATH, preventing issues where vcpkg might not be found.
 
-These improvements address the issue where the installer could appear to succeed but actually fail silently when vcpkg.exe wasn't properly created.
+5. **generate_vs2022.bat vcpkg Support**: The standalone Visual Studio generation script now detects and uses vcpkg toolchain when available. Previously, running `generate_vs2022.bat` would always generate without vcpkg, causing CMake warnings about missing dependencies even when vcpkg was properly installed.
+
+These improvements address issues where:
+- The installer could appear to succeed but actually fail silently when vcpkg.exe wasn't properly created
+- Manual project generation via `generate_vs2022.bat` wouldn't use vcpkg dependencies
 
 ---
 
@@ -263,6 +267,9 @@ The log contains:
 ### Run Specific Steps Only
 
 ```batch
+REM Just generate VS solution (skip full installation)
+generate_vs2022.bat
+
 REM Just build (skip CMake generation)
 tools\build_tools\build.bat
 
@@ -272,6 +279,8 @@ tools\build_tools\clean.bat
 REM Clean and rebuild everything
 tools\build_tools\rebuild.bat
 ```
+
+**Note**: `generate_vs2022.bat` will automatically use vcpkg if it's installed in the `vcpkg/` directory. If you see CMake warnings about missing GLFW, GLM, or ImGui, it means vcpkg wasn't found - run `install.bat` first to set up vcpkg and dependencies.
 
 ### Custom vcpkg Location
 
