@@ -1,9 +1,17 @@
 #pragma once
 
+#include <memory>
+
 namespace fresh {
 
+class Entity;
+class BehaviorTree;
+
+// Forward declare implementation
+class AISystemImpl;
+
 /**
- * @brief AI system for NPC behavior
+ * @brief AI system for NPC behavior management
  */
 class AISystem {
 public:
@@ -17,10 +25,31 @@ public:
     bool initialize();
 
     /**
-     * @brief Update AI
+     * @brief Update AI (tick all behavior trees)
      * @param deltaTime Time since last update
      */
     void update(float deltaTime);
+    
+    /**
+     * @brief Add an NPC with behavior tree
+     * @param entity Entity to control
+     * @param behavior Behavior tree for decision making
+     */
+    void addNPC(std::unique_ptr<Entity> entity, std::unique_ptr<BehaviorTree> behavior);
+    
+    /**
+     * @brief Remove an NPC from the system
+     * @param entity Entity to remove
+     */
+    void removeNPC(Entity* entity);
+    
+    /**
+     * @brief Get number of active NPCs
+     */
+    size_t getNPCCount() const;
+    
+private:
+    AISystemImpl* pImpl;
 };
 
 } // namespace fresh
