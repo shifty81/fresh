@@ -71,41 +71,49 @@ bool ImGuiContext::initialize(Window* window, IRenderContext* renderContext) {
     style.WindowBorderSize = 1.0f;
     style.FrameBorderSize = 1.0f;
     
-    // Setup Platform/Renderer backends
-    if (!ImGui_ImplGlfw_InitForOpenGL(window->getHandle(), true)) {
-        LOG_ERROR_C("Failed to initialize ImGui GLFW backend", "ImGuiContext");
-        ::ImGui::DestroyContext();
-        return false;
-    }
-
-    // Initialize appropriate graphics API backend
+    // Initialize appropriate graphics API backend first to determine GLFW init mode
     GraphicsAPI api = renderContext->getAPI();
     bool backendInitialized = false;
 
+    // Setup Platform/Renderer backends - use appropriate GLFW init for the graphics API
+    bool glfwInitialized = false;
+    
     switch (api) {
 #ifdef FRESH_OPENGL_SUPPORT
         case GraphicsAPI::OpenGL:
-            // ImGui expects GLSL version string
-            backendInitialized = ImGui_ImplOpenGL3_Init("#version 450");
-            if (backendInitialized) {
-                LOG_INFO_C("ImGui OpenGL backend initialized", "ImGuiContext");
+            // Initialize GLFW for OpenGL
+            glfwInitialized = ImGui_ImplGlfw_InitForOpenGL(window->getHandle(), true);
+            if (glfwInitialized) {
+                // ImGui expects GLSL version string
+                backendInitialized = ImGui_ImplOpenGL3_Init("#version 450");
+                if (backendInitialized) {
+                    LOG_INFO_C("ImGui OpenGL backend initialized", "ImGuiContext");
+                }
             }
             break;
 #endif
 
 #ifdef FRESH_DIRECTX_SUPPORT
         case GraphicsAPI::DirectX11:
-            // DirectX 11 backend requires device and context
-            // TODO: Get these from the render context when available
-            LOG_WARNING_C("DirectX 11 ImGui backend not yet implemented", "ImGuiContext");
-            backendInitialized = false;
+            // Initialize GLFW for DirectX (uses "Other" mode)
+            glfwInitialized = ImGui_ImplGlfw_InitForOther(window->getHandle(), true);
+            if (glfwInitialized) {
+                // DirectX 11 backend requires device and context
+                // TODO: Get these from the render context when available
+                LOG_WARNING_C("DirectX 11 ImGui backend not yet implemented", "ImGuiContext");
+                backendInitialized = false;
+            }
             break;
 
         case GraphicsAPI::DirectX12:
-            // DirectX 12 backend requires multiple parameters
-            // TODO: Get these from the render context when available
-            LOG_WARNING_C("DirectX 12 ImGui backend not yet implemented", "ImGuiContext");
-            backendInitialized = false;
+            // Initialize GLFW for DirectX (uses "Other" mode)
+            glfwInitialized = ImGui_ImplGlfw_InitForOther(window->getHandle(), true);
+            if (glfwInitialized) {
+                // DirectX 12 backend requires multiple parameters
+                // TODO: Get these from the render context when available
+                LOG_WARNING_C("DirectX 12 ImGui backend not yet implemented", "ImGuiContext");
+                backendInitialized = false;
+            }
             break;
 #endif
 
@@ -113,6 +121,12 @@ bool ImGuiContext::initialize(Window* window, IRenderContext* renderContext) {
             LOG_ERROR_C("Unsupported graphics API for ImGui", "ImGuiContext");
             backendInitialized = false;
             break;
+    }
+    
+    if (!glfwInitialized) {
+        LOG_ERROR_C("Failed to initialize ImGui GLFW backend", "ImGuiContext");
+        ::ImGui::DestroyContext();
+        return false;
     }
 
     if (!backendInitialized) {
