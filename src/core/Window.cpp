@@ -27,14 +27,16 @@ bool Window::initialize(bool useOpenGL) {
     }
     
     if (useOpenGL) {
-        // Create OpenGL context
+        // Create OpenGL context with compatibility profile for legacy rendering
+        // Using 3.3 compatibility provides both modern and legacy OpenGL features
         glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
         glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-        glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+        glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_COMPAT_PROFILE);
         #ifdef __APPLE__
+        // Note: macOS doesn't support compatibility profile, may fall back to 2.1
         glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
         #endif
-        std::cout << "Creating window with OpenGL context" << std::endl;
+        std::cout << "Creating window with OpenGL 3.3 context (compatibility)" << std::endl;
     } else {
         // Don't create OpenGL context (for Vulkan/DirectX)
         glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
