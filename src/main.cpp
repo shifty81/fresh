@@ -4,6 +4,10 @@
 #include <cstdlib>
 
 int main(int argc, char* argv[]) {
+    // Suppress unused parameter warnings
+    (void)argc;
+    (void)argv;
+    
     // Initialize logger first
     fresh::Logger::getInstance().initialize();
     

@@ -2,7 +2,7 @@
 
 #include "renderer/RenderContext.h"
 
-#ifdef FRESH_OPENGL_SUPPORT
+#if defined(FRESH_OPENGL_SUPPORT) && defined(FRESH_GLEW_AVAILABLE)
 
 #include <GL/glew.h>
 #include <memory>
@@ -62,4 +62,4 @@ private:
 
 } // namespace fresh
 
-#endif // FRESH_OPENGL_SUPPORT
+#endif // FRESH_OPENGL_SUPPORT && FRESH_GLEW_AVAILABLE

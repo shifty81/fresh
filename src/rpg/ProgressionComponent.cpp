@@ -18,7 +18,7 @@ void ProgressionComponent::addExperience(float xp) {
 
 float ProgressionComponent::getExperienceForNextLevel() const {
     // Experience required grows exponentially with level
-    return 100.0f * std::pow(1.5f, level - 1);
+    return 100.0f * static_cast<float>(std::pow(1.5f, level - 1));
 }
 
 float ProgressionComponent::getProgressToNextLevel() const {

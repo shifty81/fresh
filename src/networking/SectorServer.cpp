@@ -40,6 +40,7 @@ int SectorServer::getPlayerCount() const {
 }
 
 void SectorServer::update(float deltaTime) {
+    (void)deltaTime; // Unused - placeholder for future implementation
     // Update entities in this sector
     // This would include physics, AI, etc.
     
@@ -50,6 +51,7 @@ void SectorServer::update(float deltaTime) {
 }
 
 void SectorServer::broadcastToPlayers(const NetworkMessage& message) {
+    (void)message; // Unused - placeholder for future implementation
     std::lock_guard<std::mutex> lock(playersMutex);
     // In a real implementation, this would send the message to all connected clients
     // For now, this is a placeholder

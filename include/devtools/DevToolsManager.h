@@ -32,7 +32,7 @@ public:
     DebugConsole& getConsole() { return console; }
     
     // Enable/disable all tools
-    void setEnabled(bool enabled);
+    void setEnabled(bool isEnabled);
     bool isEnabled() const { return enabled; }
     
     // Toggle console

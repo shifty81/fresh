@@ -129,7 +129,7 @@ void GameServer::acceptConnectionsLoop() {
         struct sockaddr_in clientAddr;
         socklen_t clientAddrLen = sizeof(clientAddr);
         
-        int clientSocket = accept(serverSocket, (struct sockaddr*)&clientAddr, &clientAddrLen);
+        int clientSocket = static_cast<int>(accept(serverSocket, (struct sockaddr*)&clientAddr, &clientAddrLen));
         
         if (clientSocket < 0) {
             continue;
@@ -142,7 +142,9 @@ void GameServer::acceptConnectionsLoop() {
         }
         
         // Create client connection
-        std::string address = inet_ntoa(clientAddr.sin_addr);
+        char addrBuffer[INET_ADDRSTRLEN];
+        inet_ntop(AF_INET, &(clientAddr.sin_addr), addrBuffer, INET_ADDRSTRLEN);
+        std::string address = addrBuffer;
         auto client = std::make_unique<ClientConnection>(clientSocket, address);
         client->setClientId(nextClientId++);
         
@@ -187,6 +189,7 @@ void GameServer::handleClientMessages(ClientConnection* client) {
 }
 
 void GameServer::processMessage(ClientConnection* client, std::unique_ptr<NetworkMessage> message) {
+    (void)client; // Unused - placeholder for future implementation
     // Process different message types
     switch (message->getType()) {
         case MessageType::Connect:
@@ -214,7 +217,7 @@ void GameServer::disconnectClient(uint32_t clientId) {
 }
 
 bool GameServer::createSocket() {
-    serverSocket = socket(AF_INET, SOCK_STREAM, 0);
+    serverSocket = static_cast<int>(socket(AF_INET, SOCK_STREAM, 0));
     if (serverSocket < 0) {
         return false;
     }

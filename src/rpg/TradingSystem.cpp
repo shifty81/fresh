@@ -82,6 +82,7 @@ float TradingSystem::calculateSellPrice(ResourceType resource, float quantity) c
 }
 
 void TradingSystem::updatePrices(float deltaTime) {
+    (void)deltaTime; // Unused - placeholder for future implementation
     // Placeholder for dynamic pricing based on supply/demand
     // Could implement price fluctuations over time
 }

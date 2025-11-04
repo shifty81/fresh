@@ -34,6 +34,7 @@ bool WorldEditor::initialize(VoxelWorld* world) {
 }
 
 void WorldEditor::update(float deltaTime) {
+    (void)deltaTime; // Unused - placeholder for future implementation
     if (!m_enabled) {
         return;
     }

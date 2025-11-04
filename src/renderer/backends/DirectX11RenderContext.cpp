@@ -26,6 +26,7 @@ public:
     }
     
     void updateData(const void* data, size_t dataSize, size_t offset) override {
+        (void)data; (void)dataSize; (void)offset; // Unused - stub implementation
         // D3D11 context->UpdateSubresource would be called here
     }
     
@@ -43,6 +44,7 @@ public:
         : texture(tex), shaderResourceView(srv), width(w), height(h) {}
     
     void bind(int unit) override {
+        (void)unit; // Unused - binding done through device context
         // Binding is done through device context
     }
     
@@ -346,6 +348,7 @@ std::shared_ptr<RenderTexture> DirectX11RenderContext::createTexture(int w, int 
 }
 
 std::shared_ptr<RenderShader> DirectX11RenderContext::createShader(const std::string& vertexCode, const std::string& fragmentCode) {
+    (void)vertexCode; (void)fragmentCode; // Unused - stub implementation
     if (!device) return nullptr;
     
     // In real implementation, would compile HLSL shaders

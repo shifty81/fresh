@@ -10,7 +10,7 @@
 #include <imgui_impl_glfw.h>
 
 // Backend-specific headers
-#ifdef FRESH_OPENGL_SUPPORT
+#if defined(FRESH_OPENGL_SUPPORT) && defined(FRESH_GLEW_AVAILABLE)
 #include <imgui_impl_opengl3.h>
 #endif
 
@@ -90,7 +90,7 @@ bool ImGuiContext::initialize(Window* window, IRenderContext* renderContext) {
     bool glfwInitialized = false;
     
     switch (api) {
-#ifdef FRESH_OPENGL_SUPPORT
+#if defined(FRESH_OPENGL_SUPPORT) && defined(FRESH_GLEW_AVAILABLE)
         case GraphicsAPI::OpenGL:
             // Initialize GLFW for OpenGL
             glfwInitialized = ImGui_ImplGlfw_InitForOpenGL(window->getHandle(), true);
@@ -213,7 +213,7 @@ void ImGuiContext::newFrame() {
     GraphicsAPI api = m_renderContext->getAPI();
 
     switch (api) {
-#ifdef FRESH_OPENGL_SUPPORT
+#if defined(FRESH_OPENGL_SUPPORT) && defined(FRESH_GLEW_AVAILABLE)
         case GraphicsAPI::OpenGL:
             ImGui_ImplOpenGL3_NewFrame();
             break;
@@ -251,7 +251,7 @@ void ImGuiContext::render() {
     GraphicsAPI api = m_renderContext->getAPI();
 
     switch (api) {
-#ifdef FRESH_OPENGL_SUPPORT
+#if defined(FRESH_OPENGL_SUPPORT) && defined(FRESH_GLEW_AVAILABLE)
         case GraphicsAPI::OpenGL:
             ImGui_ImplOpenGL3_RenderDrawData(::ImGui::GetDrawData());
             break;
@@ -300,7 +300,7 @@ void ImGuiContext::shutdown() {
     GraphicsAPI api = m_renderContext->getAPI();
 
     switch (api) {
-#ifdef FRESH_OPENGL_SUPPORT
+#if defined(FRESH_OPENGL_SUPPORT) && defined(FRESH_GLEW_AVAILABLE)
         case GraphicsAPI::OpenGL:
             ImGui_ImplOpenGL3_Shutdown();
             break;

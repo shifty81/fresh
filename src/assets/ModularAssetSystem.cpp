@@ -82,6 +82,7 @@ std::vector<AssetMetadata> AssetPack::getAssetsByRule(PlacementRule rule) const 
 }
 
 bool AssetPack::parseManifest(const std::string& manifestPath) {
+    (void)manifestPath; // Unused - placeholder for future implementation
     // TODO: Implement JSON parsing
     // For now, create some example assets
     
@@ -382,7 +383,7 @@ void ModularAssetSystem::printStats() const {
     
     int totalAssets = 0;
     for (const auto& pack : loadedPacks) {
-        totalAssets += pack->getAssets().size();
+        totalAssets += static_cast<int>(pack->getAssets().size());
         std::cout << "  " << pack->getName() << " v" << pack->getVersion() 
                   << ": " << pack->getAssets().size() << " assets" << std::endl;
     }
@@ -404,7 +405,7 @@ std::vector<AssetInstance> ModularAssetSystem::placeRandomly(
     std::mt19937 rng(seed ^ (chunkX * 73856093) ^ (chunkZ * 19349663));
     std::uniform_real_distribution<float> posDist(0.0f, 16.0f);
     
-    const int CHUNK_SIZE = 16;
+    // Use the global CHUNK_SIZE constant
     glm::vec3 chunkWorldPos(chunkX * CHUNK_SIZE, 0, chunkZ * CHUNK_SIZE);
     
     // Try to place 1-3 instances
@@ -442,7 +443,7 @@ std::vector<AssetInstance> ModularAssetSystem::placeClustered(
     std::uniform_real_distribution<float> posDist(0.0f, 16.0f);
     std::uniform_int_distribution<int> sizeDist(asset.minGroupSize, asset.maxGroupSize);
     
-    const int CHUNK_SIZE = 16;
+    // Use the global CHUNK_SIZE constant
     glm::vec3 chunkWorldPos(chunkX * CHUNK_SIZE, 0, chunkZ * CHUNK_SIZE);
     
     // Place cluster center
@@ -478,9 +479,11 @@ std::vector<AssetInstance> ModularAssetSystem::placeClustered(
 
 std::vector<AssetInstance> ModularAssetSystem::placeGrid(
     const AssetMetadata& asset, VoxelWorld* world, int chunkX, int chunkZ, uint32_t seed) {
+    (void)seed; // Unused - could be used for variations in the future
+    (void)world; // Unused - placeholder for future terrain queries
     
     std::vector<AssetInstance> instances;
-    const int CHUNK_SIZE = 16;
+    // Use the global CHUNK_SIZE constant
     glm::vec3 chunkWorldPos(chunkX * CHUNK_SIZE, 0, chunkZ * CHUNK_SIZE);
     
     float spacing = asset.minDistance;
@@ -509,6 +512,8 @@ std::vector<AssetInstance> ModularAssetSystem::placeGrid(
 bool ModularAssetSystem::canPlaceAsset(const AssetMetadata& asset, 
                                        const glm::vec3& position,
                                       VoxelWorld* world, BiomeType biome) {
+    (void)world; // Unused - placeholder for future terrain queries
+    (void)position; // Unused - placeholder for position-based checks
     // Check biome compatibility
     bool biomeAllowed = std::find(asset.allowedBiomes.begin(), 
                                   asset.allowedBiomes.end(), biome) 
@@ -539,6 +544,7 @@ bool ModularAssetSystem::canPlaceAsset(const AssetMetadata& asset,
 }
 
 BiomeType ModularAssetSystem::determineBiome(VoxelWorld* world, const glm::vec3& position) {
+    (void)world; (void)position; // Unused - placeholder for future implementation
     // TODO: Query world for actual biome
     // For now, return a placeholder
     return BiomeType::Plains;

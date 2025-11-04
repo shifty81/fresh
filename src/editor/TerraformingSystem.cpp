@@ -114,7 +114,7 @@ bool TerraformingSystem::applyToolLine(const WorldPos& start, const WorldPos& en
     while (i-- >= 0) {
         // Apply tool at current position
         switch (m_currentTool) {
-            case TerraformTool::Single:
+            case TerraformTool::SingleBlock:
                 applySingle(current);
                 break;
             case TerraformTool::Brush:
@@ -186,7 +186,7 @@ void TerraformingSystem::applyBrush(const WorldPos& pos) {
     for (int y = -radius; y <= radius; ++y) {
         for (int z = -radius; z <= radius; ++z) {
             for (int x = -radius; x <= radius; ++x) {
-                float dist = std::sqrt(x*x + y*y + z*z);
+                float dist = static_cast<float>(std::sqrt(x*x + y*y + z*z));
                 if (dist <= radius) {
                     WorldPos targetPos(pos.x + x, pos.y + y, pos.z + z);
                     applySingle(targetPos);
@@ -202,7 +202,7 @@ void TerraformingSystem::applySphere(const WorldPos& pos, bool filled) {
     for (int y = -radius; y <= radius; ++y) {
         for (int z = -radius; z <= radius; ++z) {
             for (int x = -radius; x <= radius; ++x) {
-                float dist = std::sqrt(x*x + y*y + z*z);
+                float dist = static_cast<float>(std::sqrt(x*x + y*y + z*z));
                 
                 bool shouldPlace = filled ? (dist <= radius) : (dist >= radius - 0.5f && dist <= radius + 0.5f);
                 
@@ -240,7 +240,7 @@ void TerraformingSystem::applyFlatten(const WorldPos& pos) {
     
     for (int z = -radius; z <= radius; ++z) {
         for (int x = -radius; x <= radius; ++x) {
-            float dist = std::sqrt(x*x + z*z);
+            float dist = static_cast<float>(std::sqrt(x*x + z*z));
             if (dist <= radius) {
                 // Set all blocks above target height to air
                 for (int y = targetHeight + 1; y < CHUNK_HEIGHT; ++y) {
@@ -297,7 +297,7 @@ void TerraformingSystem::applySmooth(const WorldPos& pos) {
     // Apply smoothing by moving towards average height
     for (int z = -radius; z <= radius; ++z) {
         for (int x = -radius; x <= radius; ++x) {
-            float dist = std::sqrt(x*x + z*z);
+            float dist = static_cast<float>(std::sqrt(x*x + z*z));
             if (dist <= radius) {
                 // Find current surface height
                 int surfaceHeight = 0;
@@ -342,7 +342,7 @@ void TerraformingSystem::applyPaint(const WorldPos& pos) {
     for (int y = -radius; y <= radius; ++y) {
         for (int z = -radius; z <= radius; ++z) {
             for (int x = -radius; x <= radius; ++x) {
-                float dist = std::sqrt(x*x + y*y + z*z);
+                float dist = static_cast<float>(std::sqrt(x*x + y*y + z*z));
                 if (dist <= radius) {
                     WorldPos targetPos(pos.x + x, pos.y + y, pos.z + z);
                     Voxel* voxel = m_world->getVoxel(targetPos);

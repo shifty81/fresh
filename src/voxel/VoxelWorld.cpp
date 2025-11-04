@@ -18,6 +18,7 @@ bool VoxelWorld::initialize() {
 }
 
 void VoxelWorld::update(const WorldPos& playerPos) {
+    (void)playerPos; // Unused - placeholder for future implementation
     // Simple chunk loading/unloading based on player position
     // In a real implementation, this would be more sophisticated
 }

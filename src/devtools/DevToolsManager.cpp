@@ -48,23 +48,26 @@ void DevToolsManager::render() {
     console.render();
 }
 
-void DevToolsManager::setEnabled(bool enabled) {
-    this->enabled = enabled;
-    debugRenderer.setEnabled(enabled);
+void DevToolsManager::setEnabled(bool isEnabled) {
+    this->enabled = isEnabled;
+    debugRenderer.setEnabled(isEnabled);
 }
 
 void DevToolsManager::setupConsoleCommands() {
     // Performance profiler commands
     console.registerCommand("fps", [this](const std::vector<std::string>& args) {
+        (void)args; // Unused
         console.print("FPS: " + std::to_string(profiler.getFPS()));
     }, "Show current FPS");
     
     console.registerCommand("profile", [this](const std::vector<std::string>& args) {
+        (void)args; // Unused
         console.print(profiler.getReport());
     }, "Show performance profile");
     
     // Memory tracker commands
     console.registerCommand("memory", [this](const std::vector<std::string>& args) {
+        (void)args; // Unused
         console.print(memoryTracker.getReport());
     }, "Show memory usage");
     

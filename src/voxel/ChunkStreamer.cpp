@@ -158,8 +158,7 @@ void ChunkStreamer::generationThreadFunc() {
 }
 
 glm::ivec2 ChunkStreamer::worldToChunk(const glm::vec3& worldPos) const {
-    // Assuming chunk size of 16 blocks
-    const int CHUNK_SIZE = 16;
+    // Use the global CHUNK_SIZE constant
     return glm::ivec2(
         static_cast<int>(std::floor(worldPos.x / CHUNK_SIZE)),
         static_cast<int>(std::floor(worldPos.z / CHUNK_SIZE))
