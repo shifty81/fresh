@@ -16,6 +16,8 @@
 #ifdef FRESH_DIRECTX_SUPPORT
 #include <imgui_impl_dx11.h>
 #include <imgui_impl_dx12.h>
+#include "renderer/backends/DirectX11RenderContext.h"
+#include "renderer/backends/DirectX12RenderContext.h"
 #endif
 
 #include <GLFW/glfw3.h>
@@ -26,6 +28,7 @@ ImGuiContext::ImGuiContext()
     : m_initialized(false)
     , m_window(nullptr)
     , m_renderContext(nullptr)
+    , m_backendRenderContext(nullptr)
 {
 }
 
@@ -98,10 +101,28 @@ bool ImGuiContext::initialize(Window* window, IRenderContext* renderContext) {
             // Initialize GLFW for DirectX (uses "Other" mode)
             glfwInitialized = ImGui_ImplGlfw_InitForOther(window->getHandle(), true);
             if (glfwInitialized) {
-                // DirectX 11 backend requires device and context
-                // TODO: Get these from the render context when available
-                LOG_WARNING_C("DirectX 11 ImGui backend not yet implemented", "ImGuiContext");
-                backendInitialized = false;
+                // Get DirectX 11 device and context from render context
+                DirectX11RenderContext* dx11Context = dynamic_cast<DirectX11RenderContext*>(renderContext);
+                if (dx11Context) {
+                    m_backendRenderContext = dx11Context;  // Cache for later use
+                    ID3D11Device* device = dx11Context->getD3D11Device();
+                    ID3D11DeviceContext* deviceContext = dx11Context->getD3D11DeviceContext();
+                    
+                    if (device && deviceContext) {
+                        backendInitialized = ImGui_ImplDX11_Init(device, deviceContext);
+                        if (backendInitialized) {
+                            LOG_INFO_C("ImGui DirectX 11 backend initialized", "ImGuiContext");
+                        } else {
+                            LOG_ERROR_C("Failed to initialize ImGui DirectX 11 backend", "ImGuiContext");
+                        }
+                    } else {
+                        LOG_ERROR_C("Invalid DirectX 11 device or context", "ImGuiContext");
+                        backendInitialized = false;
+                    }
+                } else {
+                    LOG_ERROR_C("Failed to cast render context to DirectX11RenderContext", "ImGuiContext");
+                    backendInitialized = false;
+                }
             }
             break;
 
@@ -109,10 +130,42 @@ bool ImGuiContext::initialize(Window* window, IRenderContext* renderContext) {
             // Initialize GLFW for DirectX (uses "Other" mode)
             glfwInitialized = ImGui_ImplGlfw_InitForOther(window->getHandle(), true);
             if (glfwInitialized) {
-                // DirectX 12 backend requires multiple parameters
-                // TODO: Get these from the render context when available
-                LOG_WARNING_C("DirectX 12 ImGui backend not yet implemented", "ImGuiContext");
-                backendInitialized = false;
+                // Get DirectX 12 device and context from render context
+                DirectX12RenderContext* dx12Context = dynamic_cast<DirectX12RenderContext*>(renderContext);
+                if (dx12Context) {
+                    m_backendRenderContext = dx12Context;  // Cache for later use
+                    ID3D12Device* device = dx12Context->getD3D12Device();
+                    ID3D12DescriptorHeap* srvHeap = dx12Context->getSRVDescriptorHeap();
+                    
+                    if (device && srvHeap) {
+                        // ImGui DirectX 12 requires:
+                        // - Device
+                        // - Number of frames in flight
+                        // - RTV format
+                        // - SRV descriptor heap
+                        // - SRV CPU and GPU descriptor handles
+                        backendInitialized = ImGui_ImplDX12_Init(
+                            device,
+                            DirectX12RenderContext::FRAME_COUNT,
+                            dx12Context->getRTVFormat(),
+                            srvHeap,
+                            srvHeap->GetCPUDescriptorHandleForHeapStart(),
+                            srvHeap->GetGPUDescriptorHandleForHeapStart()
+                        );
+                        
+                        if (backendInitialized) {
+                            LOG_INFO_C("ImGui DirectX 12 backend initialized", "ImGuiContext");
+                        } else {
+                            LOG_ERROR_C("Failed to initialize ImGui DirectX 12 backend", "ImGuiContext");
+                        }
+                    } else {
+                        LOG_ERROR_C("Invalid DirectX 12 device or descriptor heap", "ImGuiContext");
+                        backendInitialized = false;
+                    }
+                } else {
+                    LOG_ERROR_C("Failed to cast render context to DirectX12RenderContext", "ImGuiContext");
+                    backendInitialized = false;
+                }
             }
             break;
 #endif
@@ -158,11 +211,11 @@ void ImGuiContext::newFrame() {
 
 #ifdef FRESH_DIRECTX_SUPPORT
         case GraphicsAPI::DirectX11:
-            // ImGui_ImplDX11_NewFrame();
+            ImGui_ImplDX11_NewFrame();
             break;
 
         case GraphicsAPI::DirectX12:
-            // ImGui_ImplDX12_NewFrame();
+            ImGui_ImplDX12_NewFrame();
             break;
 #endif
 
@@ -194,12 +247,20 @@ void ImGuiContext::render() {
 
 #ifdef FRESH_DIRECTX_SUPPORT
         case GraphicsAPI::DirectX11:
-            // ImGui_ImplDX11_RenderDrawData(::ImGui::GetDrawData());
+            ImGui_ImplDX11_RenderDrawData(::ImGui::GetDrawData());
             break;
 
-        case GraphicsAPI::DirectX12:
-            // ImGui_ImplDX12_RenderDrawData(::ImGui::GetDrawData(), command_list);
+        case GraphicsAPI::DirectX12: {
+            // Use cached DirectX12RenderContext pointer
+            if (m_backendRenderContext) {
+                DirectX12RenderContext* dx12Context = static_cast<DirectX12RenderContext*>(m_backendRenderContext);
+                ID3D12GraphicsCommandList* commandList = dx12Context->getCommandList();
+                if (commandList) {
+                    ImGui_ImplDX12_RenderDrawData(::ImGui::GetDrawData(), commandList);
+                }
+            }
             break;
+        }
 #endif
 
         default:
@@ -233,11 +294,11 @@ void ImGuiContext::shutdown() {
 
 #ifdef FRESH_DIRECTX_SUPPORT
         case GraphicsAPI::DirectX11:
-            // ImGui_ImplDX11_Shutdown();
+            ImGui_ImplDX11_Shutdown();
             break;
 
         case GraphicsAPI::DirectX12:
-            // ImGui_ImplDX12_Shutdown();
+            ImGui_ImplDX12_Shutdown();
             break;
 #endif
 
@@ -252,6 +313,7 @@ void ImGuiContext::shutdown() {
     ::ImGui::DestroyContext();
 
     m_initialized = false;
+    m_backendRenderContext = nullptr;
     LOG_INFO_C("ImGui context shutdown", "ImGuiContext");
 }
 

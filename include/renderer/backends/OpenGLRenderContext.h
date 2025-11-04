@@ -2,21 +2,26 @@
 
 #include "renderer/RenderContext.h"
 
-#ifdef _WIN32
-#define NOMINMAX
-#include <d3d11.h>
-#include <wrl/client.h>
-using Microsoft::WRL::ComPtr;
+#ifdef FRESH_OPENGL_SUPPORT
+
+#include <GL/glew.h>
+#include <memory>
+#include <vector>
 
 namespace fresh {
 
+class Window;
+
 /**
- * @brief DirectX 11 implementation of render context
+ * @brief OpenGL implementation of render context
+ * 
+ * Provides cross-platform OpenGL 4.5+ rendering support for
+ * Linux, macOS, and Windows.
  */
-class DirectX11RenderContext : public IRenderContext {
+class OpenGLRenderContext : public IRenderContext {
 public:
-    DirectX11RenderContext();
-    ~DirectX11RenderContext() override;
+    OpenGLRenderContext();
+    ~OpenGLRenderContext() override;
     
     bool initialize(Window* window) override;
     void shutdown() override;
@@ -29,15 +34,11 @@ public:
     void clearColor(float r, float g, float b, float a) override;
     void clearDepth(float depth) override;
     
-    GraphicsAPI getAPI() const override { return GraphicsAPI::DirectX11; }
-    void* getNativeDevice() override { return device.Get(); }
+    GraphicsAPI getAPI() const override { return GraphicsAPI::OpenGL; }
+    void* getNativeDevice() override { return nullptr; } // OpenGL doesn't have a device object
     
     int getSwapchainWidth() const override { return width; }
     int getSwapchainHeight() const override { return height; }
-    
-    // DirectX 11 specific getters for ImGui integration
-    ID3D11Device* getD3D11Device() const { return device.Get(); }
-    ID3D11DeviceContext* getD3D11DeviceContext() const { return deviceContext.Get(); }
     
     std::shared_ptr<RenderBuffer> createVertexBuffer(const void* data, size_t size) override;
     std::shared_ptr<RenderBuffer> createIndexBuffer(const void* data, size_t size) override;
@@ -46,23 +47,19 @@ public:
     std::shared_ptr<RenderShader> createShader(const std::string& vertexCode, const std::string& fragmentCode) override;
     
 private:
-    bool createDevice();
-    bool createSwapchain();
-    bool createRenderTargetView();
-    bool createDepthStencilView();
-    
-    ComPtr<ID3D11Device> device;
-    ComPtr<ID3D11DeviceContext> deviceContext;
-    ComPtr<IDXGISwapChain> swapchain;
-    ComPtr<ID3D11RenderTargetView> renderTargetView;
-    ComPtr<ID3D11DepthStencilView> depthStencilView;
-    ComPtr<ID3D11Texture2D> depthStencilBuffer;
+    bool initializeGLEW();
+    void checkGLErrors(const char* context);
     
     Window* window = nullptr;
     int width = 0;
     int height = 0;
+    
+    // OpenGL state
+    GLuint defaultVAO = 0;  // Default Vertex Array Object
+    glm::vec4 clearColorValue = glm::vec4(0.1f, 0.1f, 0.1f, 1.0f);
+    float clearDepthValue = 1.0f;
 };
 
 } // namespace fresh
 
-#endif // _WIN32
+#endif // FRESH_OPENGL_SUPPORT

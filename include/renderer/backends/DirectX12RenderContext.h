@@ -36,6 +36,16 @@ public:
     int getSwapchainWidth() const override { return width; }
     int getSwapchainHeight() const override { return height; }
     
+    // DirectX 12 specific getters for ImGui integration
+    ID3D12Device* getD3D12Device() const { return device.Get(); }
+    ID3D12DescriptorHeap* getSRVDescriptorHeap() const { return srvHeap.Get(); }
+    ID3D12GraphicsCommandList* getCommandList() const { return commandList.Get(); }
+    UINT getCurrentFrameIndex() const { return currentFrame; }
+    DXGI_FORMAT getRTVFormat() const { return rtvFormat; }
+    
+    // Frame count constant
+    static constexpr int FRAME_COUNT = 2;
+    
     std::shared_ptr<RenderBuffer> createVertexBuffer(const void* data, size_t size) override;
     std::shared_ptr<RenderBuffer> createIndexBuffer(const void* data, size_t size) override;
     std::shared_ptr<RenderBuffer> createUniformBuffer(size_t size) override;
@@ -57,13 +67,20 @@ private:
     void waitForGPU();
     void moveToNextFrame();
     
-    static constexpr int FRAME_COUNT = 2;
+    // SRV descriptor heap size for ImGui and other shader resources
+    // 256 descriptors is sufficient for:
+    // - ImGui font textures (1-2)
+    // - ImGui dynamic textures (variable, typically < 50)
+    // - Game textures and resources (remaining capacity)
+    // This can be increased if needed for texture-heavy applications
+    static constexpr UINT SRV_HEAP_SIZE = 256;
     
     ComPtr<ID3D12Device> device;
     ComPtr<ID3D12CommandQueue> commandQueue;
     ComPtr<IDXGISwapChain3> swapchain;
     ComPtr<ID3D12DescriptorHeap> rtvHeap;
     ComPtr<ID3D12DescriptorHeap> dsvHeap;
+    ComPtr<ID3D12DescriptorHeap> srvHeap;  // For ImGui and other shader resources
     ComPtr<ID3D12Resource> renderTargets[FRAME_COUNT];
     ComPtr<ID3D12Resource> depthStencil;
     ComPtr<ID3D12CommandAllocator> commandAllocators[FRAME_COUNT];
@@ -76,6 +93,7 @@ private:
     
     UINT rtvDescriptorSize = 0;
     UINT currentFrame = 0;
+    DXGI_FORMAT rtvFormat = DXGI_FORMAT_R8G8B8A8_UNORM;  // Store actual format
     
     Window* window = nullptr;
     int width = 0;

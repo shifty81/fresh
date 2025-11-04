@@ -201,6 +201,7 @@ void DirectX12RenderContext::shutdown() {
     
     depthStencil.Reset();
     dsvHeap.Reset();
+    srvHeap.Reset();
     rtvHeap.Reset();
     swapchain.Reset();
     commandQueue.Reset();
@@ -454,6 +455,18 @@ bool DirectX12RenderContext::createDescriptorHeaps() {
     hr = device->CreateDescriptorHeap(&dsvHeapDesc, IID_PPV_ARGS(&dsvHeap));
     if (FAILED(hr)) {
         std::cerr << "[DirectX 12] Failed to create DSV heap" << std::endl;
+        return false;
+    }
+    
+    // Create SRV descriptor heap for ImGui and other shader resources
+    D3D12_DESCRIPTOR_HEAP_DESC srvHeapDesc = {};
+    srvHeapDesc.NumDescriptors = SRV_HEAP_SIZE;
+    srvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
+    srvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
+    
+    hr = device->CreateDescriptorHeap(&srvHeapDesc, IID_PPV_ARGS(&srvHeap));
+    if (FAILED(hr)) {
+        std::cerr << "[DirectX 12] Failed to create SRV heap" << std::endl;
         return false;
     }
     

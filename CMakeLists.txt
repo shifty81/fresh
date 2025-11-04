@@ -1,11 +1,6 @@
 cmake_minimum_required(VERSION 3.20)
 project(FreshVoxelEngine VERSION 0.1.0 LANGUAGES CXX)
 
-# Windows-only build
-if(NOT WIN32)
-    message(FATAL_ERROR "This project is designed for Windows only. Please build on a Windows system.")
-endif()
-
 # Set C++ standard
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -14,15 +9,61 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 # Export compile commands for IDE support
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-# Graphics API Dependencies
-# DirectX only - this is a Windows-exclusive engine
-message(STATUS "DirectX 11/12 backends enabled (Windows-only engine)")
-add_definitions(-DFRESH_DIRECTX_SUPPORT)
-add_definitions(-DFRESH_WINDOWS_ONLY)
+# ==============================================================================
+# Platform Detection and Graphics API Configuration
+# ==============================================================================
 
-# Visual Studio 2022 Configuration
-message(STATUS "Configuring for Visual Studio 2022 / Windows with DirectX")
-message(STATUS "Build target: Windows 10+ with DirectX 11/12")
+message(STATUS "Configuring Fresh Voxel Engine for ${CMAKE_SYSTEM_NAME}")
+
+# Initialize graphics API support flags
+set(ENABLE_DIRECTX OFF)
+set(ENABLE_OPENGL OFF)
+
+# Platform-specific configuration
+if(WIN32)
+    message(STATUS "Windows platform detected")
+    message(STATUS "  - DirectX 11/12 support: ENABLED")
+    message(STATUS "  - OpenGL support: OPTIONAL (can be enabled)")
+    
+    # DirectX is available on Windows
+    set(ENABLE_DIRECTX ON)
+    add_definitions(-DFRESH_DIRECTX_SUPPORT)
+    
+    # OpenGL can also be used on Windows
+    option(USE_OPENGL_ON_WINDOWS "Enable OpenGL backend on Windows" ON)
+    if(USE_OPENGL_ON_WINDOWS)
+        set(ENABLE_OPENGL ON)
+    endif()
+    
+elseif(UNIX AND NOT APPLE)
+    message(STATUS "Linux platform detected")
+    message(STATUS "  - OpenGL support: ENABLED")
+    message(STATUS "  - Vulkan support: OPTIONAL (future)")
+    
+    # OpenGL is the primary backend on Linux
+    set(ENABLE_OPENGL ON)
+    
+elseif(APPLE)
+    message(STATUS "macOS platform detected")
+    message(STATUS "  - OpenGL support: ENABLED (deprecated by Apple)")
+    message(STATUS "  - Metal support: FUTURE")
+    
+    # OpenGL on macOS (though deprecated)
+    set(ENABLE_OPENGL ON)
+    
+else()
+    message(FATAL_ERROR "Unsupported platform: ${CMAKE_SYSTEM_NAME}")
+endif()
+
+# Add OpenGL definition if enabled
+if(ENABLE_OPENGL)
+    add_definitions(-DFRESH_OPENGL_SUPPORT)
+    message(STATUS "OpenGL backend enabled")
+endif()
+
+# ==============================================================================
+# Dependencies
+# ==============================================================================
 
 # Detect if we're using vcpkg for automatic dependency management
 if(DEFINED CMAKE_TOOLCHAIN_FILE AND CMAKE_TOOLCHAIN_FILE MATCHES "vcpkg")
@@ -34,7 +75,37 @@ else()
     message(STATUS "Not using vcpkg - dependencies must be pre-installed")
 endif()
 
-# Try to find GLFW
+# Find OpenGL (if enabled)
+if(ENABLE_OPENGL)
+    find_package(OpenGL REQUIRED)
+    if(OPENGL_FOUND)
+        message(STATUS "OpenGL found: ${OPENGL_LIBRARIES}")
+    else()
+        message(FATAL_ERROR "OpenGL not found but is required for this platform")
+    endif()
+    
+    # GLEW is needed for OpenGL extension loading on Windows/Linux
+    if(WIN32 OR UNIX)
+        find_package(GLEW QUIET)
+        if(NOT GLEW_FOUND)
+            message(STATUS "GLEW not found via find_package, trying pkg-config")
+            find_package(PkgConfig QUIET)
+            if(PKG_CONFIG_FOUND)
+                pkg_check_modules(GLEW QUIET glew)
+            endif()
+        endif()
+        
+        if(GLEW_FOUND OR GLEW_LIBRARIES)
+            message(STATUS "GLEW found")
+            set(GLEW_AVAILABLE TRUE)
+        else()
+            message(WARNING "GLEW not found. OpenGL backend may not work properly.")
+            set(GLEW_AVAILABLE FALSE)
+        endif()
+    endif()
+endif()
+
+# Try to find GLFW (required for windowing)
 find_package(glfw3 QUIET)
 if(NOT glfw3_FOUND)
     message(STATUS "GLFW not found via find_package, trying pkg-config")
@@ -44,22 +115,31 @@ if(NOT glfw3_FOUND)
     endif()
     
     if(NOT GLFW_FOUND)
-        message(WARNING "GLFW not found. Please install GLFW 3.3+ or set GLFW path manually.")
-        message(WARNING "You can use vcpkg: vcpkg install glfw3:x64-windows")
+        message(WARNING "GLFW not found. Please install GLFW 3.3+")
+        if(WIN32)
+            message(WARNING "  Windows: vcpkg install glfw3:x64-windows")
+        else()
+            message(WARNING "  Linux: sudo apt-get install libglfw3-dev")
+            message(WARNING "  macOS: brew install glfw")
+        endif()
     endif()
 endif()
 
-# GLM for math
+# GLM for math (header-only)
 find_package(glm QUIET)
 if(NOT glm_FOUND)
     message(STATUS "GLM not found, will use header-only include if available")
 endif()
 
-# ImGui for UI (DirectX bindings only)
+# ImGui for UI
 find_package(imgui QUIET)
 if(NOT imgui_FOUND)
     message(WARNING "ImGui not found. Editor UI features will be limited.")
-    message(WARNING "You can use vcpkg: vcpkg install imgui[glfw-binding,dx11-binding,dx12-binding]:x64-windows")
+    if(WIN32 AND ENABLE_DIRECTX)
+        message(WARNING "  vcpkg install imgui[glfw-binding,dx11-binding,dx12-binding,opengl3-binding]:x64-windows")
+    else()
+        message(WARNING "  vcpkg install imgui[glfw-binding,opengl3-binding]")
+    endif()
 endif()
 
 # ==============================================================================
@@ -205,11 +285,19 @@ set(ENGINE_SOURCES
     src/scripting/lua/ScriptingEngine.cpp
 )
 
-# Add DirectX backends on Windows
-list(APPEND ENGINE_SOURCES
-    src/renderer/backends/DirectX11RenderContext.cpp
-    src/renderer/backends/DirectX12RenderContext.cpp
-)
+# Add platform-specific rendering backends
+if(ENABLE_DIRECTX)
+    list(APPEND ENGINE_SOURCES
+        src/renderer/backends/DirectX11RenderContext.cpp
+        src/renderer/backends/DirectX12RenderContext.cpp
+    )
+endif()
+
+if(ENABLE_OPENGL)
+    list(APPEND ENGINE_SOURCES
+        src/renderer/backends/OpenGLRenderContext.cpp
+    )
+endif()
 
 # Header files
 set(ENGINE_HEADERS
@@ -286,7 +374,7 @@ set(ENGINE_HEADERS
 add_executable(${PROJECT_NAME} ${ENGINE_SOURCES} ${ENGINE_HEADERS})
 
 # Make it a proper Windows GUI application (no console in Release)
-if(CMAKE_BUILD_TYPE STREQUAL "Release")
+if(WIN32 AND CMAKE_BUILD_TYPE STREQUAL "Release")
     set_target_properties(${PROJECT_NAME} PROPERTIES WIN32_EXECUTABLE TRUE)
 endif()
 
@@ -296,9 +384,11 @@ target_include_directories(${PROJECT_NAME}
         ${CMAKE_CURRENT_SOURCE_DIR}/include
 )
 
-# Link libraries
+# ==============================================================================
+# Link Libraries
+# ==============================================================================
 
-# Link GLFW
+# Link GLFW (windowing)
 if(glfw3_FOUND)
     target_link_libraries(${PROJECT_NAME} PRIVATE glfw)
 elseif(GLFW_FOUND)
@@ -306,24 +396,44 @@ elseif(GLFW_FOUND)
     target_link_libraries(${PROJECT_NAME} PRIVATE ${GLFW_LIBRARIES})
 endif()
 
-# Link GLM if found
+# Link GLM (mathematics)
 if(glm_FOUND)
     target_link_libraries(${PROJECT_NAME} PRIVATE glm::glm)
 endif()
 
-# Link ImGui if found
+# Link ImGui (UI)
 if(imgui_FOUND)
     target_link_libraries(${PROJECT_NAME} PRIVATE imgui::imgui)
     add_definitions(-DFRESH_IMGUI_AVAILABLE)
 endif()
 
-# Link DirectX (system libraries)
-target_link_libraries(${PROJECT_NAME} PRIVATE 
-    d3d11.lib 
-    d3d12.lib 
-    dxgi.lib 
-    d3dcompiler.lib
-)
+# Link OpenGL (if enabled)
+if(ENABLE_OPENGL)
+    target_link_libraries(${PROJECT_NAME} PRIVATE ${OPENGL_LIBRARIES})
+    
+    # Link GLEW for OpenGL extension loading
+    if(GLEW_AVAILABLE)
+        if(TARGET GLEW::GLEW)
+            target_link_libraries(${PROJECT_NAME} PRIVATE GLEW::GLEW)
+        elseif(GLEW_LIBRARIES)
+            target_include_directories(${PROJECT_NAME} PRIVATE ${GLEW_INCLUDE_DIRS})
+            target_link_libraries(${PROJECT_NAME} PRIVATE ${GLEW_LIBRARIES})
+        endif()
+    endif()
+    
+    message(STATUS "OpenGL libraries linked")
+endif()
+
+# Link DirectX (Windows only)
+if(ENABLE_DIRECTX)
+    target_link_libraries(${PROJECT_NAME} PRIVATE 
+        d3d11.lib 
+        d3d12.lib 
+        dxgi.lib 
+        d3dcompiler.lib
+    )
+    message(STATUS "DirectX libraries linked")
+endif()
 
 # Compiler warnings
 if(MSVC)
