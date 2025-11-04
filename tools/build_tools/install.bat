@@ -192,8 +192,11 @@ if exist "%VCPKG_ROOT%\vcpkg.exe" (
         if not exist "%VCPKG_ROOT%" (
             echo Cloning vcpkg repository...
             echo Cloning vcpkg repository... >> "%LOG_FILE%"
-            git clone https://github.com/Microsoft/vcpkg.git "%VCPKG_ROOT%" >> "%LOG_FILE%" 2>&1
+            echo %YELLOW%This will download vcpkg. Progress will be shown below.%RESET%
+            echo.
+            git clone https://github.com/Microsoft/vcpkg.git "%VCPKG_ROOT%"
             if !ERRORLEVEL! NEQ 0 (
+                echo.
                 echo %RED%ERROR: Failed to clone vcpkg repository%RESET%
                 echo ERROR: Failed to clone vcpkg repository >> "%LOG_FILE%"
                 echo Make sure git is installed and you have internet connection
@@ -207,9 +210,12 @@ if exist "%VCPKG_ROOT%\vcpkg.exe" (
         echo.
         echo Bootstrapping vcpkg...
         echo Bootstrapping vcpkg... >> "%LOG_FILE%"
+        echo %YELLOW%Downloading and bootstrapping vcpkg. Progress will be shown below.%RESET%
+        echo.
         cd "%VCPKG_ROOT%"
-        call bootstrap-vcpkg.bat >> "%LOG_FILE%" 2>&1
+        call bootstrap-vcpkg.bat
         if !ERRORLEVEL! NEQ 0 (
+            echo.
             echo %RED%ERROR: Failed to bootstrap vcpkg%RESET%
             echo ERROR: Failed to bootstrap vcpkg >> "%LOG_FILE%"
             pause
@@ -220,7 +226,8 @@ if exist "%VCPKG_ROOT%\vcpkg.exe" (
         echo.
         echo Integrating vcpkg with Visual Studio...
         echo Integrating vcpkg with Visual Studio... >> "%LOG_FILE%"
-        vcpkg integrate install >> "%LOG_FILE%" 2>&1
+        echo.
+        vcpkg integrate install
         
         cd "%REPO_ROOT%"
         echo %GREEN%✓ vcpkg installed successfully!%RESET%
@@ -321,11 +328,14 @@ if exist "%VCPKG_ROOT%\scripts\buildsystems\vcpkg.cmake" (
     echo Using vcpkg toolchain file (manifest mode)... >> "%LOG_FILE%"
     echo Dependencies will be installed automatically from vcpkg.json... >> "%LOG_FILE%"
     echo. >> "%LOG_FILE%"
-    cmake -G "Visual Studio 17 2022" -A x64 -DCMAKE_TOOLCHAIN_FILE="%VCPKG_ROOT%\scripts\buildsystems\vcpkg.cmake" .. >> "%LOG_FILE%" 2>&1
+    echo %YELLOW%NOTE: vcpkg will now install dependencies. This may take 10-15 minutes on first run.%RESET%
+    echo %YELLOW%      You will see download and build progress below. Please be patient.%RESET%
+    echo.
+    cmake -G "Visual Studio 17 2022" -A x64 -DCMAKE_TOOLCHAIN_FILE="%VCPKG_ROOT%\scripts\buildsystems\vcpkg.cmake" ..
 ) else (
     echo Using system-installed dependencies...
     echo Using system-installed dependencies... >> "%LOG_FILE%"
-    cmake -G "Visual Studio 17 2022" -A x64 .. >> "%LOG_FILE%" 2>&1
+    cmake -G "Visual Studio 17 2022" -A x64 ..
 )
 
 if %ERRORLEVEL% NEQ 0 (
@@ -367,7 +377,9 @@ REM Build in Release mode
 echo Building Release configuration...
 echo Building Release configuration... >> "%LOG_FILE%"
 echo. >> "%LOG_FILE%"
-cmake --build build --config Release >> "%LOG_FILE%" 2>&1
+echo %YELLOW%Building... This may take several minutes. Progress will be shown below.%RESET%
+echo.
+cmake --build build --config Release
 
 if %ERRORLEVEL% NEQ 0 (
     echo.
