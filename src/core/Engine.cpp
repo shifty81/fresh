@@ -460,42 +460,17 @@ void Engine::render() {
         // Render chunks using immediate mode OpenGL (for simplicity)
         const auto& chunks = m_world->getChunks();
         
-        for (const auto& chunkPair : chunks) {
-            Chunk* chunk = chunkPair.second.get();  // Get raw pointer for non-const access
-            
-            // Generate mesh if dirty
-            if (chunk->isDirty()) {
-                chunk->generateMesh();
-            }
-            
-            const auto& vertices = chunk->getMeshVertices();
-            const auto& indices = chunk->getMeshIndices();
-            
-            if (vertices.empty() || indices.empty()) {
-                continue;
-            }
-            
-            // Calculate chunk world position
-            ChunkPos chunkPos = chunk->getPosition();
-            glm::mat4 modelMatrix = glm::translate(glm::mat4(1.0f), 
-                glm::vec3(chunkPos.x * CHUNK_SIZE, 0.0f, chunkPos.z * CHUNK_SIZE));
-            
-            // Use immediate mode for simple rendering (OpenGL 1.x style)
-            // This is a temporary solution for minimal changes
+        if (!chunks.empty()) {
+            // Set up projection matrix once per frame
             glMatrixMode(GL_PROJECTION);
             glLoadMatrixf(&projectionMatrix[0][0]);
             glMatrixMode(GL_MODELVIEW);
-            glm::mat4 modelView = viewMatrix * modelMatrix;
-            glLoadMatrixf(&modelView[0][0]);
             
+            // Enable vertex and normal arrays for all chunks
             glEnableClientState(GL_VERTEX_ARRAY);
             glEnableClientState(GL_NORMAL_ARRAY);
             
-            // Vertices: position (3) + normal (3) = 6 floats per vertex
-            glVertexPointer(3, GL_FLOAT, 6 * sizeof(float), vertices.data());
-            glNormalPointer(GL_FLOAT, 6 * sizeof(float), vertices.data() + 3);
-            
-            // Enable simple lighting
+            // Set up lighting once for all chunks
             glEnable(GL_LIGHTING);
             glEnable(GL_LIGHT0);
             GLfloat light_pos[] = {1.0f, 1.0f, 1.0f, 0.0f};
@@ -505,13 +480,44 @@ void Engine::render() {
             glLightfv(GL_LIGHT0, GL_AMBIENT, light_ambient);
             glLightfv(GL_LIGHT0, GL_DIFFUSE, light_diffuse);
             
-            // Set material color (greenish for grass/terrain)
+            // Set material color once for all chunks (greenish for grass/terrain)
             GLfloat mat_diffuse[] = {0.4f, 0.6f, 0.4f, 1.0f};
             glMaterialfv(GL_FRONT, GL_DIFFUSE, mat_diffuse);
             
-            glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(indices.size()), 
-                          GL_UNSIGNED_INT, indices.data());
+            // Render each chunk
+            for (const auto& chunkPair : chunks) {
+                Chunk* chunk = chunkPair.second.get();  // Get raw pointer for non-const access
+                
+                // Generate mesh if dirty
+                if (chunk->isDirty()) {
+                    chunk->generateMesh();
+                }
+                
+                const auto& vertices = chunk->getMeshVertices();
+                const auto& indices = chunk->getMeshIndices();
+                
+                if (vertices.empty() || indices.empty()) {
+                    continue;
+                }
+                
+                // Calculate chunk world position and set modelview matrix
+                ChunkPos chunkPos = chunk->getPosition();
+                glm::mat4 modelMatrix = glm::translate(glm::mat4(1.0f), 
+                    glm::vec3(chunkPos.x * CHUNK_SIZE, 0.0f, chunkPos.z * CHUNK_SIZE));
+                glm::mat4 modelView = viewMatrix * modelMatrix;
+                glLoadMatrixf(&modelView[0][0]);
+                
+                // Set vertex and normal pointers for this chunk
+                // Vertices: position (3) + normal (3) = 6 floats per vertex
+                glVertexPointer(3, GL_FLOAT, 6 * sizeof(float), vertices.data());
+                glNormalPointer(GL_FLOAT, 6 * sizeof(float), vertices.data() + 3);
+                
+                // Draw the chunk
+                glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(indices.size()), 
+                              GL_UNSIGNED_INT, indices.data());
+            }
             
+            // Clean up OpenGL state
             glDisableClientState(GL_VERTEX_ARRAY);
             glDisableClientState(GL_NORMAL_ARRAY);
             glDisable(GL_LIGHTING);
