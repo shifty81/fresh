@@ -3,6 +3,7 @@ build/
 build_test/
 cmake-build-*/
 out/
+_codeql_build_dir/
 
 # Build scripts (temporary)
 build_minimal_tests.sh
