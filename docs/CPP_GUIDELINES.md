@@ -3,7 +3,7 @@
 ## Code Style and Standards
 
 ### General Principles
-1. **Modern C++17**: Use modern C++ features (auto, smart pointers, lambdas, constexpr)
+1. **Modern C++20**: Use modern C++ features (auto, smart pointers, lambdas, constexpr, concepts, ranges)
 2. **RAII**: Resource Acquisition Is Initialization - manage resources with constructors/destructors
 3. **Rule of Zero/Five**: Follow the rule of zero when possible, rule of five when needed
 4. **DRY**: Don't Repeat Yourself - factor out common code
@@ -330,7 +330,7 @@ T clamp(T value, T min, T max) {
     return std::max(min, std::min(max, value));
 }
 
-// Use concepts (C++20) when available, or SFINAE
+// Use C++20 concepts for better type constraints
 template<typename T>
 typename std::enable_if<std::is_arithmetic<T>::value, T>::type
 square(T value) {
@@ -576,7 +576,7 @@ test: Add unit tests for noise generator
 
 ## Summary of Key Principles
 
-1. **Modern C++**: Use C++17 features, smart pointers, RAII
+1. **Modern C++**: Use C++20 features, smart pointers, RAII, concepts, ranges
 2. **Clear Naming**: Descriptive names following conventions
 3. **Memory Safety**: Smart pointers, RAII, no manual new/delete
 4. **Const Correctness**: Mark everything const that should be

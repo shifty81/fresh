@@ -1,7 +1,7 @@
 # Fresh Voxel Engine
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![C++17](https://img.shields.io/badge/C++-17-blue.svg)](https://en.cppreference.com/w/cpp/17)
+[![C++20](https://img.shields.io/badge/C++-20-blue.svg)](https://en.cppreference.com/w/cpp/20)
 [![.NET 9](https://img.shields.io/badge/.NET-9.0-512BD4.svg)](https://dotnet.microsoft.com/)
 [![CMake](https://img.shields.io/badge/CMake-3.20+-064F8C.svg)](https://cmake.org/)
 [![Graphics](https://img.shields.io/badge/Graphics-DirectX%2011%2F12%2FOpenGL-blue.svg)](https://github.com/shifty81/fresh)
@@ -9,7 +9,7 @@
 [![VS2022](https://img.shields.io/badge/Visual%20Studio-2022-5C2D91.svg)](https://visualstudio.microsoft.com/)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 
-A modern **cross-platform** voxel-based game engine built with **C++17**, featuring **DirectX 11/12** and **OpenGL 4.5+** rendering, **.NET 9 bindings**, procedural terrain generation, AI systems, and an integrated world editor.
+A modern **cross-platform** voxel-based game engine built with **C++20**, featuring **DirectX 11/12** and **OpenGL 4.5+** rendering, **.NET 9 bindings**, procedural terrain generation, AI systems, and an integrated world editor.
 
 **Platform Support:** Windows, Linux, macOS  
 **Graphics APIs:** DirectX 11/12 (Windows), OpenGL 4.5+ (All Platforms)
@@ -269,7 +269,7 @@ See [docs/TERRAFORMING.md](docs/TERRAFORMING.md) for detailed documentation.
 ### Prerequisites
 
 - CMake 3.20 or higher
-- C++17 compatible compiler (MSVC 2017+ / Visual Studio 2017+)
+- C++20 compatible compiler (MSVC 2019 16.11+ / Visual Studio 2019+ / GCC 10+ / Clang 10+)
 - **Graphics API Dependencies**:
   - **DirectX 11/12** (included with Windows SDK)
   - **OpenGL 4.5+** drivers (usually pre-installed)

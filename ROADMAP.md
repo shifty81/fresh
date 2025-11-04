@@ -529,7 +529,7 @@ A high-performance C++ voxel game engine with multiplayer support, featuring pro
 ### Technology Stack
 
 #### Current
-- **Language**: C++17
+- **Language**: C++20
 - **Build System**: CMake 3.20+
 - **Graphics API**: Vulkan 1.2+
 - **Window/Input**: GLFW 3.3+

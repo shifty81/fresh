@@ -69,7 +69,7 @@ luabridge::getGlobalNamespace(L)
 
 #### Option B: sol2
 **Pros:**
-- Modern C++17/20 support
+- Modern C++20 support
 - Very comprehensive features
 - Excellent error messages
 
@@ -490,5 +490,5 @@ end
 For issues with Lua integration, check:
 1. Lua version compatibility (5.3+ recommended)
 2. Binding library documentation
-3. Compiler C++17 support
+3. Compiler C++20 support
 4. Platform-specific build issues

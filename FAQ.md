@@ -4,7 +4,7 @@
 
 ### What is Fresh Voxel Engine?
 
-Fresh Voxel Engine is a modern, open-source voxel game engine built with C++17 supporting multiple graphics APIs (OpenGL, DirectX 11/12). It features procedural terrain generation, a powerful world editor, and supports creating voxel-based games and applications.
+Fresh Voxel Engine is a modern, open-source voxel game engine built with C++20 supporting multiple graphics APIs (OpenGL, DirectX 11/12). It features procedural terrain generation, a powerful world editor, and supports creating voxel-based games and applications.
 
 ### What can I build with it?
 
@@ -153,7 +153,7 @@ We welcome:
 ### What coding standards do you follow?
 
 See [CPP_GUIDELINES.md](CPP_GUIDELINES.md) for complete guidelines:
-- C++17 standard
+- C++20 standard
 - 4-space indentation
 - PascalCase for classes
 - camelCase for functions
@@ -291,17 +291,17 @@ You can extend support by implementing the `IRenderContext` interface for other 
 3. Check for missing smart pointer usage
 4. Verify proper cleanup in destructors
 
-### Build errors with C++17
+### Build errors with C++20
 
 **Solution:**
 ```bash
-cmake .. -DCMAKE_CXX_STANDARD=17 -DCMAKE_CXX_STANDARD_REQUIRED=ON
+cmake .. -DCMAKE_CXX_STANDARD=20 -DCMAKE_CXX_STANDARD_REQUIRED=ON
 ```
 
-Ensure compiler supports C++17:
-- GCC 7+
-- Clang 5+
-- MSVC 2017+
+Ensure compiler supports C++20:
+- GCC 10+
+- Clang 10+
+- MSVC 2019 16.11+
 
 ## Community
 

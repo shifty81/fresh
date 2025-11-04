@@ -23,7 +23,7 @@ This project adheres to a Code of Conduct that all contributors are expected to 
 Before you begin, ensure you have the following installed:
 
 - CMake 3.20 or higher
-- C++17 compatible compiler (GCC 7+, Clang 5+, MSVC 2017+)
+- C++20 compatible compiler (GCC 10+, Clang 10+, MSVC 2019 16.11+)
 - OpenGL 4.5+ drivers (or DirectX 11+ on Windows)
 - GLFW 3.3 or higher
 - Git
@@ -108,7 +108,7 @@ We follow modern C++ best practices. See [CPP_GUIDELINES.md](CPP_GUIDELINES.md) 
 
 **Key Points:**
 
-- Use C++17 features appropriately
+- Use C++20 features appropriately
 - Prefer `std::unique_ptr` and `std::shared_ptr` over raw pointers
 - Use RAII for resource management
 - Follow the Rule of Zero/Five

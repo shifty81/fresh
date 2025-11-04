@@ -174,7 +174,7 @@ start build\FreshVoxelEngine.sln
 #### Project Configuration
 
 The solution is pre-configured with:
-- C++17 standard
+- C++20 standard
 - Multi-threaded DLL runtime (/MD)
 - Windows SDK for DirectX support
 - Optimized build settings

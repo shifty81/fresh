@@ -3,7 +3,7 @@
 ## 🎯 What This Is
 
 **Fresh** is a standalone C++ game engine built from scratch with:
-- **Language**: Pure C++17 (no Unity, no Unreal)
+- **Language**: Pure C++20 (no Unity, no Unreal)
 - **Graphics**: Vulkan API for modern rendering
 - **Architecture**: Custom ECS-like design
 - **Purpose**: Voxel-based multiplayer survival/building game

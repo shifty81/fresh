@@ -12,7 +12,7 @@
 
 ## Overview
 
-Fresh Voxel Engine is a modern, high-performance voxel game engine built with C++17 supporting multiple graphics APIs (OpenGL, DirectX 11/12). The architecture is designed to be modular, extensible, and optimized for real-time rendering of massive voxel worlds.
+Fresh Voxel Engine is a modern, high-performance voxel game engine built with C++20 supporting multiple graphics APIs (OpenGL, DirectX 11/12). The architecture is designed to be modular, extensible, and optimized for real-time rendering of massive voxel worlds.
 
 ### Key Design Goals
 
