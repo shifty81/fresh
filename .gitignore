@@ -28,6 +28,12 @@ Run_Engine.bat
 *~
 .idea/
 
+# .NET build artifacts
+dotnet/bin/
+dotnet/obj/
+dotnet/*.user
+dotnet/*.DotSettings.user
+
 # Compiled files
 *.o
 *.obj
@@ -39,6 +45,8 @@ Run_Engine.bat
 *.dylib
 *.a
 *.lib
+*.pdb
+*.ilk
 
 # CMake generated files
 CMakeCache.txt

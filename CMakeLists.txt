@@ -18,6 +18,11 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 # DirectX only - this is a Windows-exclusive engine
 message(STATUS "DirectX 11/12 backends enabled (Windows-only engine)")
 add_definitions(-DFRESH_DIRECTX_SUPPORT)
+add_definitions(-DFRESH_WINDOWS_ONLY)
+
+# Visual Studio 2022 Configuration
+message(STATUS "Configuring for Visual Studio 2022 / Windows with DirectX")
+message(STATUS "Build target: Windows 10+ with DirectX 11/12")
 
 # Detect if we're using vcpkg for automatic dependency management
 if(DEFINED CMAKE_TOOLCHAIN_FILE AND CMAKE_TOOLCHAIN_FILE MATCHES "vcpkg")
@@ -50,11 +55,11 @@ if(NOT glm_FOUND)
     message(STATUS "GLM not found, will use header-only include if available")
 endif()
 
-# ImGui for UI
+# ImGui for UI (DirectX bindings only)
 find_package(imgui QUIET)
 if(NOT imgui_FOUND)
     message(WARNING "ImGui not found. Editor UI features will be limited.")
-    message(WARNING "You can use vcpkg: vcpkg install imgui[glfw-binding,opengl3-binding,dx11-binding,dx12-binding]:x64-windows")
+    message(WARNING "You can use vcpkg: vcpkg install imgui[glfw-binding,dx11-binding,dx12-binding]:x64-windows")
 endif()
 
 # ==============================================================================

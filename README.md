@@ -2,23 +2,38 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![C++17](https://img.shields.io/badge/C++-17-blue.svg)](https://en.cppreference.com/w/cpp/17)
+[![.NET 9](https://img.shields.io/badge/.NET-9.0-512BD4.svg)](https://dotnet.microsoft.com/)
 [![CMake](https://img.shields.io/badge/CMake-3.20+-064F8C.svg)](https://cmake.org/)
-[![Graphics](https://img.shields.io/badge/Graphics-OpenGL%20|%20DirectX-blue.svg)](https://github.com/shifty81/fresh)
+[![Graphics](https://img.shields.io/badge/Graphics-DirectX%2011%2F12-blue.svg)](https://github.com/shifty81/fresh)
+[![VS2022](https://img.shields.io/badge/Visual%20Studio-2022-5C2D91.svg)](https://visualstudio.microsoft.com/)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 
-A modern voxel-based game engine built with C++17 for **Windows**, featuring **multiple graphics API support** (OpenGL, DirectX 11/12), procedural terrain generation, AI systems, and an integrated world editor.
+A modern voxel-based game engine built with **C++17** for **Windows**, featuring **DirectX 11/12** rendering, **.NET 9 bindings**, procedural terrain generation, AI systems, and an integrated world editor.
 
 ---
 
 ## 🎨 Graphics API Support
 
-Fresh Voxel Engine supports multiple graphics APIs on Windows:
+Fresh Voxel Engine is optimized for Windows with native DirectX support:
 
 - **DirectX 12** - Windows 10+, cutting-edge performance (default)
 - **DirectX 11** - Excellent compatibility across Windows versions
-- **OpenGL 4.5+** - Mature ecosystem with broad hardware support
+- **OpenGL 4.5+** - Available as optional future enhancement
 
-The engine **automatically selects DirectX 12** for best performance, falling back to DirectX 11 or OpenGL as needed.
+The engine **automatically selects DirectX 12** for best performance, falling back to DirectX 11 as needed.
+
+---
+
+## 🔷 .NET 9 Support
+
+Fresh Engine includes **.NET 9 bindings** for managed code development:
+
+- **C# Game Scripting** - Write game logic in modern C# while leveraging native performance
+- **P/Invoke Integration** - Seamless interop between managed and native code  
+- **Modern .NET Features** - Use latest .NET 9 capabilities
+- **Visual Studio Integration** - Full IntelliSense and debugging support
+
+See [dotnet/README.md](dotnet/README.md) for details on using the .NET bindings.
 
 ---
 

@@ -1,4 +1,4 @@
-# Visual Studio Setup Guide
+# Visual Studio 2022 Setup Guide
 
 This guide will help you build and run the Fresh Voxel Engine using Visual Studio 2022.
 
@@ -6,26 +6,25 @@ This guide will help you build and run the Fresh Voxel Engine using Visual Studi
 
 ### Required Software
 
-1. **Visual Studio 2022** (Community, Professional, or Enterprise)
+1. **Visual Studio 2022** (Community, Professional, or Enterprise) - version 17.8 or later
    - Download from: https://visualstudio.microsoft.com/downloads/
    - Required workloads:
      - "Desktop development with C++"
      - "Game development with C++" (optional, but recommended)
+     - ".NET desktop development" (for .NET 9 bindings)
 
 2. **CMake 3.20 or higher**
    - Download from: https://cmake.org/download/
    - Make sure to add CMake to system PATH during installation
 
-3. **OpenGL/DirectX SDK** (for OpenGL/DirectX backend)
-   - Download from: https://graphics.lunarg.com/
-   - Version 1.2 or higher
-   - Includes validation layers and debugging tools
+3. **.NET 9 SDK** (for managed bindings)
+   - Download from: https://dotnet.microsoft.com/download/dotnet/9.0
+   - Required for C# interop layer
 
-### Optional Dependencies
-
-4. **Windows SDK** (usually included with Visual Studio)
+4. **Windows SDK** (included with Visual Studio)
    - Required for DirectX 11 and DirectX 12 support
    - Version 10.0.19041.0 or higher recommended
+   - Automatically installed with "Desktop development with C++" workload
 
 ## Quick Start
 
@@ -94,42 +93,31 @@ After generating the solution, you'll see the following project structure:
 
 ```
 Solution 'FreshVoxelEngine'
-├── FreshVoxelEngine (Executable)
+├── FreshVoxelEngine (C++ Executable)
 │   ├── Source Files
 │   │   ├── core/
 │   │   ├── renderer/
-│   │   │   └── backends/  (OpenGL, DirectX11, DirectX12, OpenGL/DirectX)
+│   │   │   └── backends/  (DirectX11, DirectX12)
 │   │   ├── voxel/
 │   │   ├── generation/
 │   │   ├── physics/
 │   │   └── ... (other subsystems)
 │   └── Header Files
 │       └── (mirrors source structure)
+├── FreshEngine.Managed (.NET 9 Library)
+│   └── C# interop wrappers
 └── FreshVoxelEngineTests (Optional, if BUILD_TESTS=ON)
 ```
 
 ## Graphics API Configuration
 
-The engine automatically selects the best available graphics API for your platform:
+The engine uses **DirectX as the primary graphics API** for Windows:
 
-### Windows Priority Order:
+### Windows Graphics Stack:
 1. **DirectX 12** (default, Windows 10+)
 2. **DirectX 11** (fallback)
-3. **OpenGL 4.5+**
-4. **OpenGL/DirectX**
 
-To manually select a graphics API, modify `src/renderer/GraphicsAPI.h`:
-
-```cpp
-// Change the selectBestGraphicsAPI() function
-inline GraphicsAPI selectBestGraphicsAPI() {
-#ifdef _WIN32
-    return GraphicsAPI::DirectX11;  // or DirectX12, OpenGL, OpenGL/DirectX
-#else
-    return GraphicsAPI::OpenGL/DirectX;
-#endif
-}
-```
+OpenGL support is available as an optional future enhancement and is not currently built by default.
 
 ## Build Configurations
 
@@ -202,31 +190,28 @@ build\Release\FreshVoxelEngine.exe
 1. Install **Graphics Tools** from Windows optional features
 2. In Visual Studio: `Debug > Graphics > Start Graphics Debugging`
 3. Capture frames to analyze GPU state
-
-#### OpenGL/DirectX Debugging
-1. Enable validation layers in Debug builds (automatic)
-2. Check Output window for OpenGL/DirectX validation messages
-3. Use RenderDoc for detailed GPU debugging
+4. Use PIX for Windows for advanced DirectX debugging
 
 ## Common Build Issues
-
-### Issue: "Cannot find OpenGL/DirectX SDK"
-**Solution**: 
-- Install OpenGL/DirectX SDK from https://graphics.lunarg.com/
-- Set `VULKAN_SDK` environment variable
-- Restart Visual Studio
 
 ### Issue: "DirectX headers not found"
 **Solution**:
 - Install Windows SDK via Visual Studio Installer
 - Update Visual Studio to latest version
 - Check that "Windows SDK" is installed in Visual Studio components
+- Verify Windows 10/11 SDK version 10.0.19041.0 or higher is installed
+
+### Issue: ".NET 9 SDK not found"
+**Solution**:
+- Download and install .NET 9 SDK from https://dotnet.microsoft.com/download/dotnet/9.0
+- Restart Visual Studio after installation
+- Verify installation with: `dotnet --version` (should show 9.0.x)
 
 ### Issue: "GLFW not found"
 **Solution**:
 - If using vcpkg: Dependencies are declared in `vcpkg.json` and will be automatically installed when using the vcpkg toolchain
 - Configure CMake with vcpkg: `cmake -B build -DCMAKE_TOOLCHAIN_FILE=path/to/vcpkg/scripts/buildsystems/vcpkg.cmake`
-- Alternatively, manually install: `vcpkg install glfw3:x64-windows glm:x64-windows`
+- Alternatively, manually install: `vcpkg install glfw3:x64-windows glm:x64-windows imgui[glfw-binding,dx11-binding,dx12-binding]:x64-windows`
 
 ### Issue: "Link error LNK2019"
 **Solution**:
@@ -303,17 +288,18 @@ cmake --build . --config Release
 ### Runtime Crashes
 1. Run with debugger (F5) to catch exceptions
 2. Check Output window for error messages
-3. Enable DirectX/OpenGL/DirectX validation layers (Debug build)
+3. Enable DirectX validation layers (Debug build)
 4. Verify all DLLs are in the executable directory
+5. Check that DirectX runtime is up to date
 
 ## Additional Resources
 
 - [CMake Documentation](https://cmake.org/documentation/)
 - [Visual Studio C++ Documentation](https://docs.microsoft.com/en-us/cpp/)
-- [OpenGL/DirectX Tutorial](https://graphics-tutorial.com/)
 - [DirectX 11 Programming Guide](https://docs.microsoft.com/en-us/windows/win32/direct3d11/dx-graphics-overviews)
 - [DirectX 12 Programming Guide](https://docs.microsoft.com/en-us/windows/win32/direct3d12/directx-12-programming-guide)
-- [Learn OpenGL](https://learnopengl.com/)
+- [.NET 9 Documentation](https://docs.microsoft.com/en-us/dotnet/)
+- [P/Invoke Guide](https://docs.microsoft.com/en-us/dotnet/standard/native-interop/pinvoke)
 
 ## Support
 

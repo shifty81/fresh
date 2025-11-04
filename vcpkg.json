@@ -2,7 +2,7 @@
   "$schema": "https://raw.githubusercontent.com/microsoft/vcpkg-tool/main/docs/vcpkg.schema.json",
   "name": "fresh-voxel-engine",
   "version": "0.1.0",
-  "description": "A modern voxel-based game engine built with C++17 for Windows",
+  "description": "A modern voxel-based game engine built with C++17 for Windows with DirectX 11/12 support",
   "homepage": "https://github.com/shifty81/fresh",
   "license": "MIT",
   "dependencies": [
@@ -16,7 +16,7 @@
     },
     {
       "name": "imgui",
-      "features": ["glfw-binding", "opengl3-binding", "dx11-binding", "dx12-binding"],
+      "features": ["glfw-binding", "dx11-binding", "dx12-binding"],
       "platform": "windows"
     }
   ],
