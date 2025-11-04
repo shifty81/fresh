@@ -2,19 +2,18 @@
 
 ## Overview
 
-This document describes the comprehensive advanced features implementation added to the Fresh Voxel Engine, including multi-API graphics backend, advanced rendering, input systems, and in-game configuration.
+This document describes the comprehensive advanced features implementation added to the Fresh Voxel Engine, including multi-API graphics backend (DirectX and OpenGL), advanced rendering, input systems, and in-game configuration.
 
 ---
 
 ## 1. Multi-API Graphics Backend
 
 ### Supported Graphics APIs
-The engine now supports **4 graphics APIs** that can be selected at runtime:
+The engine supports **3 graphics APIs on Windows**:
 
-1. **Vulkan** - Modern cross-platform API (Windows, Linux, macOS via MoltenVK)
-2. **OpenGL** - Legacy cross-platform API (Windows, Linux, macOS)
-3. **DirectX 11** - Windows-only, mature API
-4. **DirectX 12** - Windows-only, modern API
+1. **DirectX 12** - Modern API for Windows 10+, best performance
+2. **DirectX 11** - Mature API with excellent Windows compatibility
+3. **OpenGL 4.5+** - Broad hardware support, legacy compatibility
 
 ### API Selection
 
@@ -23,9 +22,9 @@ The engine now supports **4 graphics APIs** that can be selected at runtime:
 #include "renderer/GraphicsAPI.h"
 
 // Manual selection
-auto renderContext = RenderContextFactory::create(GraphicsAPI::Vulkan);
+auto renderContext = RenderContextFactory::create(GraphicsAPI::DirectX12);
 
-// Automatic selection (chooses best for platform)
+// Automatic selection (chooses DirectX 12 by default)
 auto renderContext = RenderContextFactory::createBest();
 
 // Check availability
@@ -34,10 +33,10 @@ if (isGraphicsAPIAvailable(GraphicsAPI::DirectX12)) {
 }
 ```
 
-### Platform-Specific Selection
-- **Windows**: Prefers DirectX 12 → DirectX 11 → Vulkan → OpenGL
-- **macOS**: Prefers Vulkan (MoltenVK) → OpenGL
-- **Linux**: Prefers Vulkan → OpenGL
+### Windows API Selection Priority
+- **Default**: DirectX 12 (Windows 10+, best performance)
+- **Fallback 1**: DirectX 11 (excellent compatibility)
+- **Fallback 2**: OpenGL (legacy hardware support)
 
 ### Unified Rendering Interface
 
@@ -420,7 +419,7 @@ configPanel.loadConfig("config/engine.cfg");
 ### Configuration Tabs
 
 1. **Graphics**
-   - API selection (Vulkan/OpenGL/DX11/DX12)
+   - API selection (DirectX 12/OpenGL/DX11/DX12)
    - Resolution and display settings
    - VSync, refresh rate
    - Render quality presets
@@ -572,7 +571,7 @@ int main() {
 ## Performance Considerations
 
 ### Graphics API Selection
-- **Vulkan**: Best performance, modern hardware, complex
+- **DirectX 12**: Best performance, modern hardware, complex
 - **DirectX 12**: Best on Windows 10+, modern hardware
 - **DirectX 11**: Good compatibility, easier than DX12
 - **OpenGL**: Widest compatibility, good for older hardware
@@ -585,7 +584,7 @@ int main() {
 - **DOF**: Expensive (~3-5ms)
 
 ### Recommendations
-1. Start with DirectX 12 (Windows) or Vulkan (Linux/macOS)
+1. Start with DirectX 12 for best performance on Windows
 2. Enable FXAA and Bloom by default
 3. Make SSAO/SSR optional for high-end hardware
 4. Use material LOD system for distant objects
@@ -598,7 +597,7 @@ int main() {
 
 ### Graphics API Not Available
 ```cpp
-if (!isGraphicsAPIAvailable(GraphicsAPI::Vulkan)) {
+if (!isGraphicsAPIAvailable(GraphicsAPI::DirectX 12)) {
     // Fall back to OpenGL
     renderContext = RenderContextFactory::create(GraphicsAPI::OpenGL);
 }
@@ -626,7 +625,7 @@ if (!input.isGamepadConnected(0)) {
 ## Future Enhancements
 
 Planned features:
-- Ray tracing support (DXR, Vulkan RT)
+- Ray tracing support (DXR, DirectX 12 RT)
 - Mesh shaders
 - Variable rate shading
 - Virtual texturing

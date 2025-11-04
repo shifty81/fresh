@@ -11,14 +11,8 @@ logs/
 ├── .gitkeep                           # Preserves directory structure in git
 ├── application_errors_<timestamp>.txt # General application logs (all levels)
 └── Environment/                       # Platform-specific error logs
-    ├── Windows/
-    │   └── errors_<timestamp>.txt     # Windows-specific error logs
-    ├── Linux/
-    │   └── errors_<timestamp>.txt     # Linux-specific error logs
-    ├── macOS/
-    │   └── errors_<timestamp>.txt     # macOS-specific error logs
-    └── Other/
-        └── errors_<timestamp>.txt     # Other platform error logs
+    └── Windows/
+        └── errors_<timestamp>.txt     # Windows-specific error logs
 ```
 
 ## Log Files
@@ -168,7 +162,7 @@ The timestamped filenames make it easy to identify which logs correspond to spec
 
 ```
 === Fresh Voxel Engine - Log Started at 2025-11-03_21-03-23.467 ===
-Platform: Linux
+Platform: Windows
 ========================================
 
 [2025-11-03_21-03-23.467][INFO][Logger] Logger initialized successfully

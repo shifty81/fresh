@@ -86,17 +86,15 @@ tools\build_tools\install.bat
 
 ## Platform Support
 
-Currently, automated tools are available for:
-- ✅ **Windows** - Full support with batch scripts
-- ⏳ **Linux** - Manual build (see DEVELOPER_SETUP.md)
-- ⏳ **macOS** - Manual build (see DEVELOPER_SETUP.md)
-
-Linux and macOS automated scripts are planned for future releases.
+Fresh Voxel Engine build tools are designed for:
+- ✅ **Windows 10+** - Full support with automated batch scripts
+- Includes Visual Studio 2022 integration
+- DirectX 12/11 and OpenGL support
 
 ## Requirements
 
 All build tools require:
-- Windows 10 or later
+- Windows 10 or later (64-bit)
 - CMake 3.20+
 - Visual Studio 2022 (any edition)
 - Git (for vcpkg installation)
@@ -141,7 +139,7 @@ Planned additions to this directory:
 - `package_tools/` - Distribution packaging scripts
 - `test_tools/` - Automated testing utilities
 - `deploy_tools/` - Deployment automation
-- Linux/macOS equivalents of build tools
+- Additional Windows build optimization tools
 
 ## Contributing
 

@@ -230,9 +230,7 @@ std::shared_ptr<RenderShader> OpenGLRenderContext::createShader(const std::strin
 }
 
 bool OpenGLRenderContext::loadGLFunctions() {
-    // Platform-specific GL function loading
-    // On Windows: wglGetProcAddress
-    // On Linux: glXGetProcAddress or use GLAD/GLEW
+    // Windows-specific GL function loading using wglGetProcAddress
     // For now, return true as stub
     std::cout << "[OpenGL] Loading OpenGL functions..." << std::endl;
     return true;

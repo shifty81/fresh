@@ -5,12 +5,12 @@ namespace fresh {
 /**
  * @brief Graphics API enumeration
  * 
- * Defines which graphics API backend to use for rendering.
+ * Defines which graphics API backend to use for rendering on Windows.
  */
 enum class GraphicsAPI {
-    OpenGL,       // OpenGL 4.5+ (cross-platform)
-    DirectX11,    // DirectX 11 (Windows only)
-    DirectX12,    // DirectX 12 (Windows only, modern)
+    OpenGL,       // OpenGL 4.5+ (broad hardware support)
+    DirectX11,    // DirectX 11 (excellent compatibility)
+    DirectX12,    // DirectX 12 (modern, best performance)
     Auto          // Automatically select best available API
 };
 
@@ -28,29 +28,19 @@ inline const char* getGraphicsAPIName(GraphicsAPI api) {
 }
 
 /**
- * @brief Check if graphics API is available on current platform
+ * @brief Check if graphics API is available on Windows
  */
 inline bool isGraphicsAPIAvailable(GraphicsAPI api) {
-#ifdef _WIN32
-    // Windows supports DirectX and OpenGL
+    // Windows supports DirectX 11/12 and OpenGL
     return api == GraphicsAPI::DirectX11 || api == GraphicsAPI::DirectX12 || api == GraphicsAPI::OpenGL;
-#else
-    // Linux and macOS support OpenGL
-    return api == GraphicsAPI::OpenGL;
-#endif
 }
 
 /**
- * @brief Select best available graphics API for platform
+ * @brief Select best available graphics API for Windows
  */
 inline GraphicsAPI selectBestGraphicsAPI() {
-#ifdef _WIN32
     // Prefer DirectX 12 on Windows 10+, fallback to DirectX 11
     return GraphicsAPI::DirectX12;
-#else
-    // Prefer OpenGL on Linux and macOS
-    return GraphicsAPI::OpenGL;
-#endif
 }
 
 } // namespace fresh
