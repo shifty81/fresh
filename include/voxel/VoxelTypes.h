@@ -17,6 +17,7 @@ enum class VoxelType : uint8_t {
     Water,
     Wood,
     Leaves,
+    Bedrock,
     // Add more types as needed
     Count
 };

@@ -4,6 +4,7 @@
 #include "renderer/RenderContext.h"
 #include "renderer/GraphicsAPI.h"
 
+#ifdef FRESH_IMGUI_AVAILABLE
 // ImGui headers
 #include <imgui.h>
 #include <imgui_impl_glfw.h>
@@ -19,6 +20,7 @@
 #include "renderer/backends/DirectX11RenderContext.h"
 #include "renderer/backends/DirectX12RenderContext.h"
 #endif
+#endif // FRESH_IMGUI_AVAILABLE
 
 #include <GLFW/glfw3.h>
 
@@ -37,6 +39,12 @@ ImGuiContext::~ImGuiContext() {
 }
 
 bool ImGuiContext::initialize(Window* window, IRenderContext* renderContext) {
+#ifndef FRESH_IMGUI_AVAILABLE
+    (void)window;
+    (void)renderContext;
+    LOG_WARNING_C("ImGui not available - Editor UI disabled", "ImGuiContext");
+    return false;
+#else
     if (m_initialized) {
         LOG_WARNING_C("ImGuiContext already initialized", "ImGuiContext");
         return true;
@@ -192,9 +200,11 @@ bool ImGuiContext::initialize(Window* window, IRenderContext* renderContext) {
     m_initialized = true;
     LOG_INFO_C("ImGui context initialized successfully", "ImGuiContext");
     return true;
+#endif // FRESH_IMGUI_AVAILABLE
 }
 
 void ImGuiContext::newFrame() {
+#ifdef FRESH_IMGUI_AVAILABLE
     if (!m_initialized) {
         return;
     }
@@ -225,9 +235,11 @@ void ImGuiContext::newFrame() {
 
     ImGui_ImplGlfw_NewFrame();
     ::ImGui::NewFrame();
+#endif // FRESH_IMGUI_AVAILABLE
 }
 
 void ImGuiContext::render() {
+#ifdef FRESH_IMGUI_AVAILABLE
     if (!m_initialized) {
         return;
     }
@@ -275,9 +287,11 @@ void ImGuiContext::render() {
         ::ImGui::RenderPlatformWindowsDefault();
         glfwMakeContextCurrent(backup_current_context);
     }
+#endif // FRESH_IMGUI_AVAILABLE
 }
 
 void ImGuiContext::shutdown() {
+#ifdef FRESH_IMGUI_AVAILABLE
     if (!m_initialized) {
         return;
     }
@@ -315,24 +329,33 @@ void ImGuiContext::shutdown() {
     m_initialized = false;
     m_backendRenderContext = nullptr;
     LOG_INFO_C("ImGui context shutdown", "ImGuiContext");
+#endif // FRESH_IMGUI_AVAILABLE
 }
 
 bool ImGuiContext::wantCaptureMouse() const {
+#ifdef FRESH_IMGUI_AVAILABLE
     if (!m_initialized) {
         return false;
     }
     
     ImGuiIO& io = ::ImGui::GetIO();
     return io.WantCaptureMouse;
+#else
+    return false;
+#endif
 }
 
 bool ImGuiContext::wantCaptureKeyboard() const {
+#ifdef FRESH_IMGUI_AVAILABLE
     if (!m_initialized) {
         return false;
     }
     
     ImGuiIO& io = ::ImGui::GetIO();
     return io.WantCaptureKeyboard;
+#else
+    return false;
+#endif
 }
 
 } // namespace fresh
