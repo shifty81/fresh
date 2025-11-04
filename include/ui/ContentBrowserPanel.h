@@ -59,11 +59,33 @@ public:
      */
     void refresh();
 
+    /**
+     * @brief Delete the currently selected asset
+     * @return true if successful
+     */
+    bool deleteSelectedAsset();
+
+    /**
+     * @brief Rename the currently selected asset
+     * @param newName New name for the asset
+     * @return true if successful
+     */
+    bool renameSelectedAsset(const std::string& newName);
+
+    /**
+     * @brief Import a file into the current directory
+     * @param sourcePath Path to the file to import
+     * @return true if successful
+     */
+    bool importAsset(const std::string& sourcePath);
+
 private:
     void scanAssets(const std::string& path);
     void renderAssetGrid();
     void renderAssetDetails(const AssetInfo& asset);
     const char* getAssetIcon(const std::string& type);
+    bool showConfirmDialog(const std::string& title, const std::string& message);
+    bool showRenameDialog(std::string& outName);
 
 private:
     bool m_visible;
@@ -72,6 +94,11 @@ private:
     std::vector<AssetInfo> m_assets;
     AssetInfo* m_selectedAsset;
     char m_searchBuffer[256];
+    
+    // Dialog state
+    bool m_showDeleteDialog;
+    bool m_showRenameDialog;
+    char m_renameBuffer[256];
 };
 
 } // namespace fresh
