@@ -38,6 +38,7 @@ bool MainMenu::initialize() {
 }
 
 void MainMenu::update(float deltaTime) {
+    (void)deltaTime; // Parameter reserved for future use
     // Menu state updates would happen here
     // For now, this is handled in render()
 }

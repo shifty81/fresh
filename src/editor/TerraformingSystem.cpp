@@ -9,7 +9,7 @@ namespace fresh {
 
 TerraformingSystem::TerraformingSystem(VoxelWorld* world)
     : m_world(world)
-    , m_currentTool(TerraformTool::Single)
+    , m_currentTool(TerraformTool::SingleBlock)
     , m_currentMode(TerraformMode::Place)
     , m_selectedVoxelType(VoxelType::Stone)
     , m_toolSize(1)
@@ -38,7 +38,7 @@ bool TerraformingSystem::applyTool(const WorldPos& pos) {
     
     // Apply the selected tool
     switch (m_currentTool) {
-        case TerraformTool::Single:
+        case TerraformTool::SingleBlock:
             applySingle(pos);
             break;
         case TerraformTool::Brush:

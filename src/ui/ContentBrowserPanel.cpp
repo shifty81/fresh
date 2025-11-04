@@ -161,8 +161,12 @@ void ContentBrowserPanel::renderAssetDetails(const AssetInfo& asset) {
     if (ImGui::Button("Rename")) {
         m_showRenameDialog = true;
         // Pre-fill rename buffer with current name
+#ifdef _MSC_VER
+        strncpy_s(m_renameBuffer, sizeof(m_renameBuffer), asset.name.c_str(), _TRUNCATE);
+#else
         strncpy(m_renameBuffer, asset.name.c_str(), sizeof(m_renameBuffer) - 1);
         m_renameBuffer[sizeof(m_renameBuffer) - 1] = '\0';
+#endif
     }
     
     // Delete confirmation dialog

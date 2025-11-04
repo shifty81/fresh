@@ -151,8 +151,12 @@ void SceneHierarchyPanel::renderNode(SceneNode* node) {
     if (ImGui::BeginPopupContextItem()) {
         if (ImGui::MenuItem("Rename")) {
             m_showRenameDialog = true;
+#ifdef _MSC_VER
+            strncpy_s(m_renameBuffer, sizeof(m_renameBuffer), node->name.c_str(), _TRUNCATE);
+#else
             strncpy(m_renameBuffer, node->name.c_str(), sizeof(m_renameBuffer) - 1);
             m_renameBuffer[sizeof(m_renameBuffer) - 1] = '\0';
+#endif
         }
         if (ImGui::MenuItem("Duplicate")) {
             if (duplicateSelectedNode()) {
