@@ -321,6 +321,7 @@ echo.
 echo. >> "%LOG_FILE%"
 
 REM Use a more robust existence check
+REM Defensive check in case VCPKG_ROOT was somehow not set (should never happen, but good practice)
 if not defined VCPKG_ROOT (
     echo %RED%ERROR: VCPKG_ROOT variable is not set%RESET%
     echo ERROR: VCPKG_ROOT variable is not set >> "%LOG_FILE%"
