@@ -170,8 +170,10 @@ See [docs/TERRAFORMING.md](docs/TERRAFORMING.md) for detailed documentation.
 - **Graphics API Dependencies**:
   - **DirectX 11/12** (included with Windows SDK)
   - **OpenGL 4.5+** drivers (usually pre-installed)
-- GLFW 3.3 or higher (will be downloaded if not found)
-- GLM (optional, header-only)
+- GLFW 3.3 or higher (automatically managed via vcpkg.json)
+- GLM (automatically managed via vcpkg.json)
+
+**Note**: The project includes a `vcpkg.json` manifest file. When using vcpkg with the CMake toolchain file, dependencies are automatically installed.
 
 ### Building on Windows (Visual Studio 2022)
 
@@ -214,6 +216,7 @@ To manually select a specific API, edit `src/renderer/GraphicsAPI.h` or use envi
 fresh/
 ├── CMakeLists.txt              # Build configuration
 ├── CMakePresets.json           # CMake presets for Visual Studio
+├── vcpkg.json                  # vcpkg manifest for dependencies
 ├── generate_vs2022.bat         # Visual Studio project generator
 ├── VISUAL_STUDIO_SETUP.md      # Visual Studio setup guide
 ├── include/                    # Header files

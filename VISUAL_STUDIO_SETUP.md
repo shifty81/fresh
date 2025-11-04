@@ -196,8 +196,9 @@ build\Release\FreshVoxelEngine.exe
 
 ### Issue: "GLFW not found"
 **Solution**:
-- GLFW will be automatically downloaded by CMake
-- If issues persist, manually install: `vcpkg install glfw3:x64-windows`
+- If using vcpkg: Dependencies are declared in `vcpkg.json` and will be automatically installed when using the vcpkg toolchain
+- Configure CMake with vcpkg: `cmake -B build -DCMAKE_TOOLCHAIN_FILE=path/to/vcpkg/scripts/buildsystems/vcpkg.cmake`
+- Alternatively, manually install: `vcpkg install glfw3:x64-windows glm:x64-windows`
 
 ### Issue: "Link error LNK2019"
 **Solution**:

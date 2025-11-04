@@ -1,0 +1,19 @@
+{
+  "$schema": "https://raw.githubusercontent.com/microsoft/vcpkg-tool/main/docs/vcpkg.schema.json",
+  "name": "fresh-voxel-engine",
+  "version": "0.1.0",
+  "description": "A modern voxel-based game engine built with C++17 for Windows",
+  "homepage": "https://github.com/shifty81/fresh",
+  "license": "MIT",
+  "dependencies": [
+    {
+      "name": "glfw3",
+      "platform": "windows"
+    },
+    {
+      "name": "glm",
+      "platform": "windows"
+    }
+  ],
+  "builtin-baseline": "c8696863d371ab7f46545af1d618ff2c59dcc7d1"
+}

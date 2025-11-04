@@ -73,15 +73,17 @@ cd vcpkg
 bootstrap-vcpkg.bat
 vcpkg integrate install
 
-# Install dependencies
-vcpkg install glfw3:x64-windows glm:x64-windows
-
 # Clone and build Fresh
 cd ..
 git clone https://github.com/shifty81/fresh.git
 cd fresh
-generate_vs2022.bat
+
+# Dependencies will be automatically installed via vcpkg.json manifest
+# Generate Visual Studio solution with vcpkg toolchain
+cmake -B build -G "Visual Studio 17 2022" -A x64 -DCMAKE_TOOLCHAIN_FILE=../vcpkg/scripts/buildsystems/vcpkg.cmake
 ```
+
+**Note**: The project now includes a `vcpkg.json` manifest file. When using vcpkg with the toolchain file, dependencies (GLFW and GLM) will be automatically installed. Manual installation with `vcpkg install` is no longer required.
 
 ## Building from Source
 
