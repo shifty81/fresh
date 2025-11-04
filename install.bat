@@ -27,7 +27,7 @@ pause
 
 call "%~dp0tools\build_tools\install.bat"
 
-if %ERRORLEVEL% EQU 0 (
+if !ERRORLEVEL! EQU 0 (
     echo.
     echo ============================================================================
     echo                    Installation Complete!

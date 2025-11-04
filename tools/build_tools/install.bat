@@ -97,7 +97,7 @@ REM Check CMake
 echo Checking for CMake...
 echo Checking for CMake... >> "%LOG_FILE%"
 where cmake >nul 2>nul
-if %ERRORLEVEL% NEQ 0 (
+if !ERRORLEVEL! NEQ 0 (
     echo %RED%ERROR: CMake is not installed or not in PATH%RESET%
     echo ERROR: CMake is not installed or not in PATH >> "%LOG_FILE%"
     echo.
@@ -404,10 +404,10 @@ if exist "%VCPKG_ROOT%\scripts\buildsystems\vcpkg.cmake" (
     cmake -G "Visual Studio 17 2022" -A x64 ..
 )
 
-if %ERRORLEVEL% NEQ 0 (
+if !ERRORLEVEL! NEQ 0 (
     echo.
     echo %RED%ERROR: CMake project generation failed%RESET%
-    echo ERROR: CMake project generation failed with exit code %ERRORLEVEL% >> "%LOG_FILE%"
+    echo ERROR: CMake project generation failed with exit code !ERRORLEVEL! >> "%LOG_FILE%"
     echo Please check the error messages above
     echo.
     echo Full CMake output has been saved to: %LOG_FILE%
@@ -447,10 +447,10 @@ echo %YELLOW%Building... This may take several minutes. Progress will be shown b
 echo.
 cmake --build build --config Release
 
-if %ERRORLEVEL% NEQ 0 (
+if !ERRORLEVEL! NEQ 0 (
     echo.
     echo %RED%ERROR: Build failed%RESET%
-    echo ERROR: Build failed with exit code %ERRORLEVEL% >> "%LOG_FILE%"
+    echo ERROR: Build failed with exit code !ERRORLEVEL! >> "%LOG_FILE%"
     echo Please check the error messages above
     echo.
     echo Full build output has been saved to: %LOG_FILE%
