@@ -12,25 +12,32 @@ namespace fresh {
 // Helper classes for OpenGL resources
 class OpenGLBuffer : public RenderBuffer {
 public:
-    OpenGLBuffer(unsigned int type) : bufferType(type), bufferId(0), size(0) {}
+    OpenGLBuffer(unsigned int type, const void* data, size_t dataSize) 
+        : bufferType(type), bufferId(0), size(dataSize) {
+        glGenBuffers(1, &bufferId);
+        glBindBuffer(bufferType, bufferId);
+        glBufferData(bufferType, dataSize, data, GL_STATIC_DRAW);
+        glBindBuffer(bufferType, 0);
+    }
     
     ~OpenGLBuffer() override {
         if (bufferId != 0) {
-            // glDeleteBuffers(1, &bufferId);
+            glDeleteBuffers(1, &bufferId);
         }
     }
     
     void bind() override {
-        // glBindBuffer(bufferType, bufferId);
+        glBindBuffer(bufferType, bufferId);
     }
     
     void unbind() override {
-        // glBindBuffer(bufferType, 0);
+        glBindBuffer(bufferType, 0);
     }
     
     void updateData(const void* data, size_t dataSize, size_t offset = 0) override {
-        // glBindBuffer(bufferType, bufferId);
-        // glBufferSubData(bufferType, offset, dataSize, data);
+        glBindBuffer(bufferType, bufferId);
+        glBufferSubData(bufferType, offset, dataSize, data);
+        glBindBuffer(bufferType, 0);
     }
     
     size_t getSize() const override { return size; }
@@ -44,21 +51,30 @@ private:
 
 class OpenGLTexture : public RenderTexture {
 public:
-    OpenGLTexture(int w, int h) : textureId(0), texWidth(w), texHeight(h) {}
+    OpenGLTexture(int w, int h, const void* data) : textureId(0), texWidth(w), texHeight(h) {
+        glGenTextures(1, &textureId);
+        glBindTexture(GL_TEXTURE_2D, textureId);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+        glBindTexture(GL_TEXTURE_2D, 0);
+    }
     
     ~OpenGLTexture() override {
         if (textureId != 0) {
-            // glDeleteTextures(1, &textureId);
+            glDeleteTextures(1, &textureId);
         }
     }
     
     void bind(int unit) override {
-        // glActiveTexture(GL_TEXTURE0 + unit);
-        // glBindTexture(GL_TEXTURE_2D, textureId);
+        glActiveTexture(GL_TEXTURE0 + unit);
+        glBindTexture(GL_TEXTURE_2D, textureId);
     }
     
     void unbind() override {
-        // glBindTexture(GL_TEXTURE_2D, 0);
+        glBindTexture(GL_TEXTURE_2D, 0);
     }
     
     int getWidth() const override { return texWidth; }
@@ -73,50 +89,97 @@ private:
 
 class OpenGLShader : public RenderShader {
 public:
-    OpenGLShader() : programId(0) {}
+    OpenGLShader(const std::string& vertexCode, const std::string& fragmentCode) : programId(0) {
+        // Compile vertex shader
+        unsigned int vertexShader = glCreateShader(GL_VERTEX_SHADER);
+        const char* vertSrc = vertexCode.c_str();
+        glShaderSource(vertexShader, 1, &vertSrc, nullptr);
+        glCompileShader(vertexShader);
+        
+        // Check vertex shader compilation
+        int success;
+        glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success);
+        if (!success) {
+            char infoLog[512];
+            glGetShaderInfoLog(vertexShader, 512, nullptr, infoLog);
+            std::cerr << "[OpenGL] Vertex shader compilation failed: " << infoLog << std::endl;
+        }
+        
+        // Compile fragment shader
+        unsigned int fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
+        const char* fragSrc = fragmentCode.c_str();
+        glShaderSource(fragmentShader, 1, &fragSrc, nullptr);
+        glCompileShader(fragmentShader);
+        
+        // Check fragment shader compilation
+        glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &success);
+        if (!success) {
+            char infoLog[512];
+            glGetShaderInfoLog(fragmentShader, 512, nullptr, infoLog);
+            std::cerr << "[OpenGL] Fragment shader compilation failed: " << infoLog << std::endl;
+        }
+        
+        // Link shaders into program
+        programId = glCreateProgram();
+        glAttachShader(programId, vertexShader);
+        glAttachShader(programId, fragmentShader);
+        glLinkProgram(programId);
+        
+        // Check linking
+        glGetProgramiv(programId, GL_LINK_STATUS, &success);
+        if (!success) {
+            char infoLog[512];
+            glGetProgramInfoLog(programId, 512, nullptr, infoLog);
+            std::cerr << "[OpenGL] Shader linking failed: " << infoLog << std::endl;
+        }
+        
+        // Clean up shaders (they're linked into the program now)
+        glDeleteShader(vertexShader);
+        glDeleteShader(fragmentShader);
+    }
     
     ~OpenGLShader() override {
         if (programId != 0) {
-            // glDeleteProgram(programId);
+            glDeleteProgram(programId);
         }
     }
     
     void bind() override {
-        // glUseProgram(programId);
+        glUseProgram(programId);
     }
     
     void unbind() override {
-        // glUseProgram(0);
+        glUseProgram(0);
     }
     
     void setUniformInt(const std::string& name, int value) override {
-        // int location = glGetUniformLocation(programId, name.c_str());
-        // glUniform1i(location, value);
+        int location = glGetUniformLocation(programId, name.c_str());
+        if (location >= 0) glUniform1i(location, value);
     }
     
     void setUniformFloat(const std::string& name, float value) override {
-        // int location = glGetUniformLocation(programId, name.c_str());
-        // glUniform1f(location, value);
+        int location = glGetUniformLocation(programId, name.c_str());
+        if (location >= 0) glUniform1f(location, value);
     }
     
     void setUniformVec2(const std::string& name, const glm::vec2& value) override {
-        // int location = glGetUniformLocation(programId, name.c_str());
-        // glUniform2fv(location, 1, &value[0]);
+        int location = glGetUniformLocation(programId, name.c_str());
+        if (location >= 0) glUniform2fv(location, 1, &value[0]);
     }
     
     void setUniformVec3(const std::string& name, const glm::vec3& value) override {
-        // int location = glGetUniformLocation(programId, name.c_str());
-        // glUniform3fv(location, 1, &value[0]);
+        int location = glGetUniformLocation(programId, name.c_str());
+        if (location >= 0) glUniform3fv(location, 1, &value[0]);
     }
     
     void setUniformVec4(const std::string& name, const glm::vec4& value) override {
-        // int location = glGetUniformLocation(programId, name.c_str());
-        // glUniform4fv(location, 1, &value[0]);
+        int location = glGetUniformLocation(programId, name.c_str());
+        if (location >= 0) glUniform4fv(location, 1, &value[0]);
     }
     
     void setUniformMat4(const std::string& name, const glm::mat4& value) override {
-        // int location = glGetUniformLocation(programId, name.c_str());
-        // glUniformMatrix4fv(location, 1, GL_FALSE, &value[0][0]);
+        int location = glGetUniformLocation(programId, name.c_str());
+        if (location >= 0) glUniformMatrix4fv(location, 1, GL_FALSE, &value[0][0]);
     }
     
     void* getNativeHandle() override { return &programId; }
@@ -200,33 +263,23 @@ void OpenGLRenderContext::clearDepth(float depth) {
 }
 
 std::shared_ptr<RenderBuffer> OpenGLRenderContext::createVertexBuffer(const void* data, size_t size) {
-    auto buffer = std::make_shared<OpenGLBuffer>(0x8892); // GL_ARRAY_BUFFER
-    // Implementation would create and upload buffer data
-    return buffer;
+    return std::make_shared<OpenGLBuffer>(GL_ARRAY_BUFFER, data, size);
 }
 
 std::shared_ptr<RenderBuffer> OpenGLRenderContext::createIndexBuffer(const void* data, size_t size) {
-    auto buffer = std::make_shared<OpenGLBuffer>(0x8893); // GL_ELEMENT_ARRAY_BUFFER
-    // Implementation would create and upload buffer data
-    return buffer;
+    return std::make_shared<OpenGLBuffer>(GL_ELEMENT_ARRAY_BUFFER, data, size);
 }
 
 std::shared_ptr<RenderBuffer> OpenGLRenderContext::createUniformBuffer(size_t size) {
-    auto buffer = std::make_shared<OpenGLBuffer>(0x8A11); // GL_UNIFORM_BUFFER
-    // Implementation would create buffer
-    return buffer;
+    return std::make_shared<OpenGLBuffer>(GL_UNIFORM_BUFFER, nullptr, size);
 }
 
 std::shared_ptr<RenderTexture> OpenGLRenderContext::createTexture(int w, int h, const void* data) {
-    auto texture = std::make_shared<OpenGLTexture>(w, h);
-    // Implementation would create and upload texture data
-    return texture;
+    return std::make_shared<OpenGLTexture>(w, h, data);
 }
 
 std::shared_ptr<RenderShader> OpenGLRenderContext::createShader(const std::string& vertexCode, const std::string& fragmentCode) {
-    auto shader = std::make_shared<OpenGLShader>();
-    // Implementation would compile and link shaders
-    return shader;
+    return std::make_shared<OpenGLShader>(vertexCode, fragmentCode);
 }
 
 bool OpenGLRenderContext::loadGLFunctions() {
