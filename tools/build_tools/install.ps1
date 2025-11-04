@@ -484,64 +484,100 @@ $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
 #endregion
 
 #region Step 3: Install Dependencies
-Show-SectionBanner -Title "STEP 3/6: Configuring Dependencies" -Icon "🔧"
-Add-Content -Path $LogFile -Value "[Step 3/6] Installing dependencies...`n"
-
-if (Test-Path $VcpkgExe) {
-    Write-Host "This project uses vcpkg manifest mode (vcpkg.json)."
-    Write-Host "Dependencies will be installed automatically during CMake configuration.`n"
-    Add-Content -Path $LogFile -Value @"
+try {
+    Show-SectionBanner -Title "STEP 3/6: Configuring Dependencies" -Icon "🔧"
+    Add-Content -Path $LogFile -Value "[Step 3/6] Installing dependencies...`n"
+    
+    Write-Host "Checking for vcpkg executable..." -ForegroundColor DarkGray
+    Add-Content -Path $LogFile -Value "Checking for vcpkg executable..."
+    
+    if (Test-Path $VcpkgExe) {
+        Write-Host "vcpkg found at: $VcpkgExe" -ForegroundColor Green
+        Add-Content -Path $LogFile -Value "vcpkg found at: $VcpkgExe"
+        
+        Write-Host "This project uses vcpkg manifest mode (vcpkg.json)."
+        Write-Host "Dependencies will be installed automatically during CMake configuration.`n"
+        Add-Content -Path $LogFile -Value @"
 This project uses vcpkg manifest mode (vcpkg.json).
 Dependencies will be installed automatically during CMake configuration.
 
 "@
-    
-    Write-Host "Dependencies defined in vcpkg.json:"
-    Write-Host "  - GLFW3 (window management)"
-    Write-Host "  - GLM (math library)"
-    Write-Host "  - ImGui (editor UI)`n"
-    
-    Add-Content -Path $LogFile -Value @"
+        
+        Write-Host "Dependencies defined in vcpkg.json:"
+        Write-Host "  - GLFW3 (window management)"
+        Write-Host "  - GLM (math library)"
+        Write-Host "  - ImGui (editor UI)`n"
+        
+        Add-Content -Path $LogFile -Value @"
 Dependencies defined in vcpkg.json:
   - GLFW3 (window management)
   - GLM (math library)
   - ImGui (editor UI)
 
 "@
-    
-    Write-Success "vcpkg is configured for manifest mode"
-    Write-Host "  Dependencies will be installed in the next step during CMake configuration.`n"
-    Add-Content -Path $LogFile -Value "vcpkg is configured for manifest mode"
-    Add-Content -Path $LogFile -Value "Dependencies will be installed in the next step during CMake configuration.`n"
-} else {
-    Write-Warning "vcpkg not available. Dependencies must be installed manually.`n"
-    Add-Content -Path $LogFile -Value "vcpkg not available. Dependencies must be installed manually.`n"
-    
-    Write-Host "The following libraries are required:"
-    Write-Host "  - GLFW 3.3+"
-    Write-Host "  - GLM"
-    Write-Host "  - ImGui (optional, for editor UI)`n"
-    
-    Add-Content -Path $LogFile -Value @"
+        
+        Write-Success "vcpkg is configured for manifest mode"
+        Write-Host "  Dependencies will be installed in the next step during CMake configuration.`n"
+        Add-Content -Path $LogFile -Value "vcpkg is configured for manifest mode"
+        Add-Content -Path $LogFile -Value "Dependencies will be installed in the next step during CMake configuration.`n"
+    } else {
+        Write-Warning "vcpkg not available at: $VcpkgExe"
+        Write-Warning "Dependencies must be installed manually.`n"
+        Add-Content -Path $LogFile -Value "vcpkg not available at: $VcpkgExe"
+        Add-Content -Path $LogFile -Value "Dependencies must be installed manually.`n"
+        
+        Write-Host "The following libraries are required:"
+        Write-Host "  - GLFW 3.3+"
+        Write-Host "  - GLM"
+        Write-Host "  - ImGui (optional, for editor UI)`n"
+        
+        Add-Content -Path $LogFile -Value @"
 The following libraries are required:
   - GLFW 3.3+
   - GLM
   - ImGui (optional, for editor UI)
 
 "@
-    
-    Write-Host "See $RepoRoot\DEVELOPER_SETUP.md for manual installation instructions.`n"
-    Add-Content -Path $LogFile -Value "See DEVELOPER_SETUP.md for manual installation instructions.`n"
+        
+        Write-Host "See $RepoRoot\DEVELOPER_SETUP.md for manual installation instructions.`n"
+        Add-Content -Path $LogFile -Value "See DEVELOPER_SETUP.md for manual installation instructions.`n"
+    }
+}
+catch {
+    Write-ErrorMessage "Error in Step 3 (Installing Dependencies): $_"
+    Add-Content -Path $LogFile -Value "ERROR in Step 3: $_"
+    Add-Content -Path $LogFile -Value "Stack Trace: $($_.ScriptStackTrace)"
+    Write-Host "`nPress any key to exit..."
+    $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
+    exit 1
 }
 
 Write-Host "Press any key to continue..."
-$null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
+try {
+    $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
+    Write-Host "Key pressed, continuing to next step..."
+    Add-Content -Path $LogFile -Value "User pressed key, continuing to Step 4..."
+}
+catch {
+    Write-ErrorMessage "Error reading key input: $_"
+    Add-Content -Path $LogFile -Value "ERROR: Failed to read key input: $_"
+    Write-Host "Continuing anyway...`n"
+}
 
 #endregion
 
 #region Step 4: Generate Visual Studio Project Files
-Show-SectionBanner -Title "STEP 4/6: Generating Visual Studio Project Files" -Icon "⚙️"
-Add-Content -Path $LogFile -Value "[Step 4/6] Generating Visual Studio project files...`n"
+try {
+    Show-SectionBanner -Title "STEP 4/6: Generating Visual Studio Project Files" -Icon "⚙️"
+    Add-Content -Path $LogFile -Value "[Step 4/6] Generating Visual Studio project files...`n"
+}
+catch {
+    Write-ErrorMessage "Error starting Step 4: $_"
+    Add-Content -Path $LogFile -Value "ERROR: Failed to start Step 4: $_"
+    Write-Host "`nPress any key to exit..."
+    $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
+    exit 1
+}
 
 Write-Host "NOTE: This step will automatically install dependencies from vcpkg.json"
 Write-Host "      if vcpkg is available. This may take several minutes on first run.`n"
