@@ -1,9 +1,11 @@
 @echo off
-REM Fresh Voxel Engine - Visual Studio Project Generation Script
+REM Fresh Voxel Engine - Visual Studio 2022 Project Generation Script
+REM Windows-only DirectX 11/12 Game Engine
 REM This script generates Visual Studio 2022 solution files using CMake
 
 echo ================================================
-echo Fresh Voxel Engine - Visual Studio Build Setup
+echo Fresh Voxel Engine - Visual Studio 2022 Setup
+echo Windows-Only DirectX 11/12 Build Configuration
 echo ================================================
 echo.
 
@@ -35,6 +37,7 @@ cd build
 
 echo.
 echo Generating Visual Studio 2022 solution...
+echo Configuration: Windows x64 with DirectX 11/12
 echo.
 
 REM Check if vcpkg is available for dependency management

@@ -17,13 +17,15 @@
       "cacheVariables": {
         "CMAKE_CXX_STANDARD": "17",
         "CMAKE_CXX_STANDARD_REQUIRED": "ON",
-        "CMAKE_EXPORT_COMPILE_COMMANDS": "ON"
+        "CMAKE_EXPORT_COMPILE_COMMANDS": "ON",
+        "CMAKE_SYSTEM_NAME": "Windows",
+        "CMAKE_SYSTEM_VERSION": "10.0"
       }
     },
     {
       "name": "windows-debug",
-      "displayName": "Windows x64 Debug",
-      "description": "Debug build for Windows with Visual Studio 2022",
+      "displayName": "Windows x64 Debug (DirectX)",
+      "description": "Debug build for Windows with Visual Studio 2022 and DirectX 11/12",
       "inherits": "windows-base",
       "binaryDir": "${sourceDir}/build/debug",
       "cacheVariables": {
@@ -32,36 +34,12 @@
     },
     {
       "name": "windows-release",
-      "displayName": "Windows x64 Release",
-      "description": "Release build for Windows with Visual Studio 2022",
+      "displayName": "Windows x64 Release (DirectX)",
+      "description": "Release build for Windows with Visual Studio 2022 and DirectX 11/12",
       "inherits": "windows-base",
       "binaryDir": "${sourceDir}/build/release",
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Release"
-      }
-    },
-    {
-      "name": "linux-debug",
-      "displayName": "Linux Debug",
-      "description": "Debug build for Linux",
-      "generator": "Unix Makefiles",
-      "binaryDir": "${sourceDir}/build/debug",
-      "cacheVariables": {
-        "CMAKE_BUILD_TYPE": "Debug",
-        "CMAKE_CXX_STANDARD": "17",
-        "CMAKE_EXPORT_COMPILE_COMMANDS": "ON"
-      }
-    },
-    {
-      "name": "linux-release",
-      "displayName": "Linux Release",
-      "description": "Release build for Linux",
-      "generator": "Unix Makefiles",
-      "binaryDir": "${sourceDir}/build/release",
-      "cacheVariables": {
-        "CMAKE_BUILD_TYPE": "Release",
-        "CMAKE_CXX_STANDARD": "17",
-        "CMAKE_EXPORT_COMPILE_COMMANDS": "ON"
       }
     }
   ],
@@ -75,14 +53,6 @@
       "name": "windows-release",
       "configurePreset": "windows-release",
       "configuration": "Release"
-    },
-    {
-      "name": "linux-debug",
-      "configurePreset": "linux-debug"
-    },
-    {
-      "name": "linux-release",
-      "configurePreset": "linux-release"
     }
   ]
 }
