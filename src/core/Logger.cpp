@@ -4,15 +4,10 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 
-#ifdef _WIN32
-    #include <direct.h>
-    #define MKDIR(path) _mkdir(path)
-    #define PATH_SEPARATOR "\\"
-#else
-    #include <unistd.h>
-    #define MKDIR(path) mkdir(path, 0755)
-    #define PATH_SEPARATOR "/"
-#endif
+// Windows-only build
+#include <direct.h>
+#define MKDIR(path) _mkdir(path)
+#define PATH_SEPARATOR "\\"
 
 namespace fresh {
 
@@ -178,13 +173,9 @@ std::string Logger::getTimestamp() const {
         now.time_since_epoch()) % 1000;
     
     std::stringstream ss;
-    // Use thread-safe version of localtime
+    // Use Windows-specific thread-safe version of localtime
     std::tm tm_info;
-#ifdef _WIN32
     localtime_s(&tm_info, &time);
-#else
-    localtime_r(&time, &tm_info);
-#endif
     ss << std::put_time(&tm_info, "%Y-%m-%d_%H-%M-%S");
     ss << "." << std::setfill('0') << std::setw(3) << ms.count();
     
@@ -202,15 +193,7 @@ std::string Logger::getLevelString(LogLevel level) const {
 }
 
 std::string Logger::getPlatformName() const {
-#ifdef _WIN32
     return "Windows";
-#elif defined(__APPLE__) || defined(__MACH__)
-    return "macOS";
-#elif defined(__linux__)
-    return "Linux";
-#else
-    return "Other";
-#endif
 }
 
 std::string Logger::getEnvironmentLogPath() const {

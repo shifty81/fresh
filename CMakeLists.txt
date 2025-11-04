@@ -1,6 +1,11 @@
 cmake_minimum_required(VERSION 3.20)
 project(FreshVoxelEngine VERSION 0.1.0 LANGUAGES CXX)
 
+# Windows-only build
+if(NOT WIN32)
+    message(FATAL_ERROR "This project is designed for Windows only. Please build on a Windows system.")
+endif()
+
 # Set C++ standard
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -10,15 +15,13 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 # Graphics API Dependencies
-# OpenGL is available on most systems
-message(STATUS "OpenGL backend will be available (system OpenGL)")
-add_definitions(-DFRESH_OPENGL_SUPPORT)
+# DirectX is available on Windows
+message(STATUS "DirectX 11/12 backends will be available (Windows)")
+add_definitions(-DFRESH_DIRECTX_SUPPORT)
 
-# DirectX is only available on Windows
-if(WIN32)
-    message(STATUS "DirectX 11/12 backends will be available (Windows)")
-    add_definitions(-DFRESH_DIRECTX_SUPPORT)
-endif()
+# OpenGL is also available on Windows
+message(STATUS "OpenGL backend will be available (Windows)")
+add_definitions(-DFRESH_OPENGL_SUPPORT)
 
 # Try to find GLFW
 find_package(glfw3 QUIET)
@@ -31,9 +34,7 @@ if(NOT glfw3_FOUND)
     
     if(NOT GLFW_FOUND)
         message(WARNING "GLFW not found. Please install GLFW 3.3+ or set GLFW path manually.")
-        message(WARNING "On Ubuntu/Debian: sudo apt-get install libglfw3-dev")
-        message(WARNING "On Fedora: sudo dnf install glfw-devel")
-        message(WARNING "On macOS: brew install glfw")
+        message(WARNING "You can use vcpkg: vcpkg install glfw3:x64-windows")
     endif()
 endif()
 
@@ -111,12 +112,10 @@ set(ENGINE_SOURCES
 )
 
 # Add DirectX backends on Windows
-if(WIN32)
-    list(APPEND ENGINE_SOURCES
-        src/renderer/backends/DirectX11RenderContext.cpp
-        src/renderer/backends/DirectX12RenderContext.cpp
-    )
-endif()
+list(APPEND ENGINE_SOURCES
+    src/renderer/backends/DirectX11RenderContext.cpp
+    src/renderer/backends/DirectX12RenderContext.cpp
+)
 
 # Header files
 set(ENGINE_HEADERS
@@ -182,11 +181,9 @@ set(ENGINE_HEADERS
 # Create executable
 add_executable(${PROJECT_NAME} ${ENGINE_SOURCES} ${ENGINE_HEADERS})
 
-# Windows-specific: Make it a proper Windows GUI application (no console in Release)
-if(WIN32)
-    if(CMAKE_BUILD_TYPE STREQUAL "Release")
-        set_target_properties(${PROJECT_NAME} PROPERTIES WIN32_EXECUTABLE TRUE)
-    endif()
+# Make it a proper Windows GUI application (no console in Release)
+if(CMAKE_BUILD_TYPE STREQUAL "Release")
+    set_target_properties(${PROJECT_NAME} PROPERTIES WIN32_EXECUTABLE TRUE)
 endif()
 
 # Include directories
@@ -202,9 +199,7 @@ if(OpenGL_FOUND)
     target_link_libraries(${PROJECT_NAME} PRIVATE OpenGL::GL)
 else()
     # Fallback for Windows if CMake can't find OpenGL package
-    if(WIN32)
-        target_link_libraries(${PROJECT_NAME} PRIVATE opengl32)
-    endif()
+    target_link_libraries(${PROJECT_NAME} PRIVATE opengl32)
 endif()
 
 # Link GLFW
@@ -220,15 +215,13 @@ if(glm_FOUND)
     target_link_libraries(${PROJECT_NAME} PRIVATE glm::glm)
 endif()
 
-# Link DirectX on Windows (system libraries)
-if(WIN32)
-    target_link_libraries(${PROJECT_NAME} PRIVATE 
-        d3d11.lib 
-        d3d12.lib 
-        dxgi.lib 
-        d3dcompiler.lib
-    )
-endif()
+# Link DirectX (system libraries)
+target_link_libraries(${PROJECT_NAME} PRIVATE 
+    d3d11.lib 
+    d3d12.lib 
+    dxgi.lib 
+    d3dcompiler.lib
+)
 
 # Compiler warnings
 if(MSVC)

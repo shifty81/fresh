@@ -2,16 +2,10 @@
 #include "core/Window.h"
 #include <iostream>
 
-// Platform-specific OpenGL headers
-#ifdef _WIN32
+// Windows-only OpenGL headers
 #define NOMINMAX
 #include <windows.h>
 #include <GL/gl.h>
-#elif defined(__APPLE__)
-#include <OpenGL/gl.h>
-#else
-#include <GL/gl.h>
-#endif
 
 namespace fresh {
 

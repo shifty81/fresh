@@ -23,16 +23,10 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-// OpenGL headers for rendering
-#ifdef _WIN32
+// Windows-only OpenGL headers
 #define NOMINMAX
 #include <windows.h>
 #include <GL/gl.h>
-#elif defined(__APPLE__)
-#include <OpenGL/gl.h>
-#else
-#include <GL/gl.h>
-#endif
 
 namespace fresh {
 
