@@ -71,8 +71,26 @@ function Show-AnimatedBanner {
     Write-Host ""
     Write-Host ""
     
+    # Futuristic/Cyberpunk Style Designer Credit with glitch effect borders
+    $designerBanner = @"
+    ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
+    ▒▒                                                                         ▒▒
+    ▒▒  ░▒▓█  I N S T A L L E R   S C R I P T   D E S I G N E D   B Y:  █▓▒░  ▒▒
+    ▒▒                                                                         ▒▒
+    ▒▒  ░▒▓█►                    S H I F T Y                    ◄█▓▒░         ▒▒
+    ▒▒                                                                         ▒▒
+    ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
+"@
+
+    foreach ($line in ($designerBanner -split "`n")) {
+        Write-Host $line -ForegroundColor Magenta
+        Start-Sleep -Milliseconds 30
+    }
+    
+    Write-Host ""
+    
     # Tagline with typing effect
-    $tagline = "       [ A u t o m a t e d   I n s t a l l a t i o n   S y s t e m ]"
+    $tagline = "       [ A U T O M A T E D   I N S T A L L A T I O N   S Y S T E M ]"
     Write-Host "    " -NoNewline
     foreach ($char in $tagline.ToCharArray()) {
         Write-Host $char -ForegroundColor Yellow -NoNewline
@@ -81,11 +99,11 @@ function Show-AnimatedBanner {
     Write-Host ""
     Write-Host ""
     
-    # Version and info
-    Write-Host "    ═══════════════════════════════════════════════════════════════════════════════" -ForegroundColor DarkCyan
-    Write-Host "                         Automated Windows Installation Script                      " -ForegroundColor White
-    Write-Host "                              PowerShell Edition v2.0                               " -ForegroundColor Gray
-    Write-Host "    ═══════════════════════════════════════════════════════════════════════════════" -ForegroundColor DarkCyan
+    # Version and info with futuristic borders
+    Write-Host "    ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓" -ForegroundColor DarkCyan
+    Write-Host "                      Automated Windows Installation Script                      " -ForegroundColor White
+    Write-Host "                           PowerShell Edition v2.0                               " -ForegroundColor Gray
+    Write-Host "    ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓" -ForegroundColor DarkCyan
     Write-Host ""
     
     Start-Sleep -Milliseconds 800
@@ -772,7 +790,7 @@ Write-Host $finalMessage
 Add-Content -Path $LogFile -Value $finalMessage
 
 Write-Host ""
-Write-Host "    ═══════════════════════════════════════════════════════════════════════════" -ForegroundColor DarkCyan
+Write-Host "    ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓" -ForegroundColor DarkCyan
 Write-Host ""
 Write-Host "    " -NoNewline
 Write-ColorOutput "🚀 Thank you for installing Fresh Voxel Engine! 🚀" -ForegroundColor Cyan
@@ -780,7 +798,9 @@ Write-Host ""
 Write-Host "    📝 Complete installation log saved to:" -ForegroundColor Gray
 Write-Host "       $LogFile" -ForegroundColor White
 Write-Host ""
-Write-Host "    ═══════════════════════════════════════════════════════════════════════════" -ForegroundColor DarkCyan
+Write-Host "    ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓" -ForegroundColor DarkCyan
+Write-Host "          ░▒▓█► I N S T A L L E R   D E S I G N E D   B Y:  S H I F T Y ◄█▓▒░          " -ForegroundColor Magenta
+Write-Host "    ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓" -ForegroundColor DarkCyan
 Add-Content -Path $LogFile -Value "Complete installation log saved to: $LogFile"
 
 Write-Host ""
