@@ -6,27 +6,25 @@
 [![Graphics](https://img.shields.io/badge/Graphics-OpenGL%20|%20DirectX-blue.svg)](https://github.com/shifty81/fresh)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 
-A modern voxel-based game engine built with C++17, featuring **multiple graphics API support** (OpenGL, DirectX 11/12), procedural terrain generation, AI systems, and an integrated world editor.
+A modern voxel-based game engine built with C++17 for **Windows**, featuring **multiple graphics API support** (OpenGL, DirectX 11/12), procedural terrain generation, AI systems, and an integrated world editor.
 
 ---
 
 ## 🎨 Graphics API Support
 
-Fresh Voxel Engine now supports multiple graphics APIs:
+Fresh Voxel Engine supports multiple graphics APIs on Windows:
 
-- **OpenGL 4.5+** - Cross-platform, mature ecosystem
-- **DirectX 11** - Windows, excellent compatibility
-- **DirectX 12** - Windows 10+, cutting-edge performance
+- **DirectX 12** - Windows 10+, cutting-edge performance (default)
+- **DirectX 11** - Excellent compatibility across Windows versions
+- **OpenGL 4.5+** - Mature ecosystem with broad hardware support
 
-The engine **automatically selects the best API** for your platform, or you can manually choose your preferred API.
+The engine **automatically selects DirectX 12** for best performance, falling back to DirectX 11 or OpenGL as needed.
 
 ---
 
-## 🚀 Quick Start
+## 🚀 Quick Start (Windows)
 
-### Windows (Visual Studio 2022)
-
-#### Option 1: Automated Installation (Recommended)
+### Option 1: Automated Installation (Recommended)
 
 ```batch
 # Clone the repository
@@ -47,7 +45,7 @@ The automated installer will:
 
 See [tools/build_tools/README.md](tools/build_tools/README.md) for detailed installation options.
 
-#### Option 2: Manual Setup
+### Option 2: Manual Setup
 
 ```batch
 # Clone the repository
@@ -62,27 +60,6 @@ start build\FreshVoxelEngine.sln
 ```
 
 See [VISUAL_STUDIO_SETUP.md](VISUAL_STUDIO_SETUP.md) for detailed Visual Studio instructions.
-
-### Linux/macOS
-
-```bash
-# Clone the repository
-git clone https://github.com/shifty81/fresh.git
-cd fresh
-
-# Install dependencies (Ubuntu/Debian)
-sudo apt-get install cmake g++ libglfw3-dev
-
-# Build
-mkdir build && cd build
-cmake ..
-make -j$(nproc)
-
-# Run
-./FreshVoxelEngine
-```
-
-See [GETTING_STARTED.md](GETTING_STARTED.md) for detailed setup instructions.
 
 ## Features
 
@@ -189,14 +166,14 @@ See [docs/TERRAFORMING.md](docs/TERRAFORMING.md) for detailed documentation.
 ### Prerequisites
 
 - CMake 3.20 or higher
-- C++17 compatible compiler (GCC 7+, Clang 5+, MSVC 2017+)
-- **Graphics API Dependencies** (at least one):
+- C++17 compatible compiler (MSVC 2017+ / Visual Studio 2017+)
+- **Graphics API Dependencies**:
+  - **DirectX 11/12** (included with Windows SDK)
   - **OpenGL 4.5+** drivers (usually pre-installed)
-  - **DirectX 11/12** (Windows only, included with Windows SDK)
 - GLFW 3.3 or higher (will be downloaded if not found)
 - GLM (optional, header-only)
 
-### Windows (Visual Studio 2022)
+### Building on Windows (Visual Studio 2022)
 
 #### Automated Installation (Easiest)
 
@@ -222,27 +199,12 @@ cmake --build build --config Release
 
 **Detailed instructions**: See [VISUAL_STUDIO_SETUP.md](VISUAL_STUDIO_SETUP.md)
 
-### Linux/macOS
-
-```bash
-# Install dependencies (Ubuntu/Debian)
-sudo apt-get install cmake g++ libglfw3-dev
-
-# Build
-mkdir build && cd build
-cmake ..
-make -j$(nproc)
-
-# Run
-./FreshVoxelEngine
-```
-
 ## Graphics API Selection
 
-The engine automatically selects the best graphics API for your platform:
-- **Windows**: DirectX 12 → DirectX 11 → OpenGL
-- **Linux**: OpenGL
-- **macOS**: OpenGL
+The engine automatically selects the best graphics API for Windows:
+- **Default**: DirectX 12 (best performance on Windows 10+)
+- **Fallback**: DirectX 11 (excellent compatibility)
+- **Legacy**: OpenGL (broadest hardware support)
 
 To manually select a specific API, edit `src/renderer/GraphicsAPI.h` or use environment variables (feature coming soon).
 
@@ -304,10 +266,7 @@ fresh/
 ├── logs/                  # Application and error logs
 │   ├── application_errors_<timestamp>.txt
 │   └── Environment/       # Platform-specific error logs
-│       ├── Windows/
-│       ├── Linux/
-│       ├── macOS/
-│       └── Other/
+│       └── Windows/
 └── README.md             # This file
 ```
 
@@ -350,16 +309,15 @@ The engine uses an abstraction layer supporting multiple graphics APIs:
 - **DirectX 12** - Low-level API for maximum performance on Windows
 
 **Features:**
-- Automatic API selection based on platform
+- Multiple graphics API support (OpenGL, DirectX 11/12)
+- Automatic API selection (DirectX 12 by default)
 - Unified interface for all backends (`IRenderContext`)
 - Swapchain and framebuffer management
 - Resource creation (buffers, textures, shaders)
 - Synchronization and frame pacing
 
-**API Priority:**
-- Windows: DirectX 12 → DirectX 11 → OpenGL
-- Linux: OpenGL
-- macOS: OpenGL
+**API Priority on Windows:**
+DirectX 12 → DirectX 11 → OpenGL
 
 ### Voxel World
 The world is divided into chunks for efficient rendering and streaming:
