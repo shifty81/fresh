@@ -67,8 +67,11 @@ bool ImGuiContext::initialize(Window* window, IRenderContext* renderContext) {
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;
     
-    // Enable docking and multi-viewport (optional, for advanced layouts)
+    // Enable docking (optional, for advanced layouts)
+    // Only available when ImGui is built with docking branch
+#ifdef IMGUI_HAS_DOCK
     io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+#endif
     
     // Setup Dear ImGui style
     ::ImGui::StyleColorsDark();
@@ -280,13 +283,16 @@ void ImGuiContext::render() {
     }
 
     // Handle multi-viewport if enabled
+    // Only available when ImGui is built with docking branch and multi-viewport support
     ImGuiIO& io = ::ImGui::GetIO();
+#ifdef IMGUI_HAS_VIEWPORT
     if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
         GLFWwindow* backup_current_context = glfwGetCurrentContext();
         ::ImGui::UpdatePlatformWindows();
         ::ImGui::RenderPlatformWindowsDefault();
         glfwMakeContextCurrent(backup_current_context);
     }
+#endif
 #endif // FRESH_IMGUI_AVAILABLE
 }
 
