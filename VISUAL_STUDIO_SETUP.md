@@ -41,7 +41,7 @@ install.bat
 After installation completes, the solution will be ready in `build/FreshVoxelEngine.sln`
 
 **Option B: Manual Setup**
-If you prefer to manage dependencies manually, see [DEVELOPER_SETUP.md](DEVELOPER_SETUP.md) for instructions on installing dependencies, then proceed with the methods below.
+If you prefer to manage dependencies manually, see [DEVELOPER_SETUP.md - Installing Prerequisites](DEVELOPER_SETUP.md#installing-prerequisites) for instructions on installing dependencies, then proceed with the methods below.
 
 ### Method 1: Using the Batch Script
 
@@ -54,7 +54,7 @@ If you prefer to manage dependencies manually, see [DEVELOPER_SETUP.md](DEVELOPE
    ```
 3. If you see warnings about missing dependencies, you need to either:
    - Run `install.bat` to set up vcpkg and dependencies
-   - Or install GLFW, GLM, and ImGui manually (see DEVELOPER_SETUP.md)
+   - Or install GLFW, GLM, and ImGui manually (see [DEVELOPER_SETUP.md - Installing Prerequisites](DEVELOPER_SETUP.md#installing-prerequisites))
 4. Open `build/FreshVoxelEngine.sln` in Visual Studio 2022
 5. Select your configuration (Debug or Release)
 6. Press F7 or Ctrl+Shift+B to build
