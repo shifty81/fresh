@@ -63,6 +63,20 @@ See [VISUAL_STUDIO_SETUP.md](VISUAL_STUDIO_SETUP.md) for detailed Visual Studio 
 
 ## Features
 
+### Integrated Game Engine Editor (NEW! 🎨)
+- ✅ **Comprehensive Editor UI** - Professional ImGui-based editor interface
+- ✅ **Menu Bar** - Full menu system (File, Edit, Window, Build, Settings, Help)
+- ✅ **Toolbar** - Quick-access tools (Select, Move, Rotate, Scale, Place, Remove, Paint)
+- ✅ **Scene Hierarchy** - Tree-structure view of all world objects
+- ✅ **Inspector Panel** - Dynamic property editor with transform, component, and material editing
+- ✅ **Content Browser** - Asset management with preview, search, and import
+- ✅ **Console** - Message logging, filtering, and command execution
+- ✅ **Voxel Tool Palette** - 10+ terraforming tools (Brush, Sphere, Cube, Flatten, Smooth, etc.)
+- ✅ **Material Picker** - 13 voxel types with color-coded buttons
+- ✅ **Smart Input Handling** - GUI/world input differentiation
+- ✅ **Docking System** - Flexible panel layouts
+- ✅ **Keyboard Shortcuts** - Full shortcut support (Ctrl+S, Ctrl+Z, tool shortcuts)
+
 ### Core Systems (Phase 1-2)
 - ✅ CMake-based build system with Visual Studio 2022 support
 - ✅ **Multi-API rendering**: OpenGL, DirectX 11/12
@@ -172,8 +186,9 @@ See [docs/TERRAFORMING.md](docs/TERRAFORMING.md) for detailed documentation.
   - **OpenGL 4.5+** drivers (usually pre-installed)
 - GLFW 3.3 or higher (automatically managed via vcpkg.json)
 - GLM (automatically managed via vcpkg.json)
+- **ImGui** (automatically managed via vcpkg.json) - for editor UI
 
-**Note**: The project includes a `vcpkg.json` manifest file. When using vcpkg with the CMake toolchain file, dependencies are automatically installed.
+**Note**: The project includes a `vcpkg.json` manifest file. When using vcpkg with the CMake toolchain file, dependencies (including ImGui) are automatically installed.
 
 ### Building on Windows (Visual Studio 2022)
 
@@ -353,6 +368,53 @@ When starting the engine, you'll be greeted with a main menu offering:
 
 All worlds are saved in the `saves/` directory as `.world` files.
 
+## Integrated Editor
+
+Once in a world, the comprehensive game engine editor loads automatically:
+
+### Editor Interface
+
+**Toggle Editor**: Press `T` to show/hide the full editor interface
+
+**Main Components:**
+- **Menu Bar**: File operations, editing tools, window management, build options, settings, help
+- **Toolbar**: Transform tools (Select, Move, Rotate, Scale) and editing tools (Place, Remove, Paint)
+- **Scene Hierarchy**: Browse world structure (Chunks, Entities, Lights)
+- **Inspector**: Edit properties of selected objects (Transform, Components, Materials)
+- **Content Browser**: Manage assets (textures, models, sounds, scripts)
+- **Console**: View logs, errors, and execute commands
+- **Voxel Tools**: Terraforming tools with material picker
+
+### Quick Start Editor Guide
+
+**Transform Tools:**
+- `W` - Move tool
+- `E` - Rotate tool
+- `R` - Scale tool
+
+**Editing Tools:**
+- `B` - Place blocks
+- `X` - Remove blocks
+- `P` - Paint (change block type)
+
+**File Operations:**
+- `Ctrl+N` - New World
+- `Ctrl+O` - Open World
+- `Ctrl+S` - Save World
+
+**Edit Operations:**
+- `Ctrl+Z` - Undo
+- `Ctrl+Y` - Redo
+- `Ctrl+C` - Copy
+- `Ctrl+V` - Paste
+
+**Window Management:**
+- Toggle panels via Window menu
+- Drag panels to dock in different positions
+- Save/load custom layouts
+
+For complete editor documentation, see [Editor Integration Guide](docs/EDITOR_INTEGRATION.md).
+
 ## Terraforming (World Editing)
 
 Once in a world, use the terraforming system to modify terrain:
@@ -419,6 +481,8 @@ Please read our [Code of Conduct](CODE_OF_CONDUCT.md) before contributing.
 - 📚 [Tutorials](docs/tutorials/) - Step-by-step guides
 - 🔨 [Examples](examples/) - Sample code and usage
 - 🌍 [Terraforming Guide](docs/TERRAFORMING.md) - World editing system
+- 🎨 [Editor Integration Guide](docs/EDITOR_INTEGRATION.md) - Comprehensive editor documentation (NEW!)
+- 📋 [Editor Implementation Summary](docs/EDITOR_IMPLEMENTATION_SUMMARY.md) - Technical implementation details (NEW!)
 - 📝 [Logging System](docs/LOGGING.md) - Error tracking and debugging
 - 🎨 [Texture System](textures/USAGE.md) - Using placeholder textures and assets
 - ⚙️ [GitHub Workflows](WORKFLOWS.md) - CI/CD and automation

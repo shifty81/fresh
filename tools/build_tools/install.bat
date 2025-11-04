@@ -53,9 +53,9 @@ echo.
 echo This script will:
 echo   1. Check for prerequisites (CMake, Visual Studio)
 echo   2. Install vcpkg package manager (optional)
-echo   3. Install dependencies (GLFW, GLM)
+echo   3. Verify vcpkg manifest mode configuration
 echo   4. Generate Visual Studio project files
-echo   5. Build the engine
+echo   5. Build the engine (dependencies installed during CMake)
 echo.
 echo %YELLOW%Press any key to continue or Ctrl+C to cancel...%RESET%
 pause >nul
@@ -185,57 +185,33 @@ echo.
 pause
 
 REM ============================================================================
-REM Step 3: Install Dependencies
+REM Step 3: Install Dependencies (Manifest Mode)
 REM ============================================================================
 echo %BLUE%[Step 3/6] Installing dependencies...%RESET%
 echo.
 
 if exist "%VCPKG_ROOT%\vcpkg.exe" (
-    echo Installing GLFW and GLM via vcpkg...
-    echo This may take several minutes...
+    echo This project uses vcpkg manifest mode (vcpkg.json).
+    echo Dependencies will be installed automatically during CMake configuration.
     echo.
-    
-    cd "%VCPKG_ROOT%"
-    
-    REM Check if packages are already installed
-    vcpkg list | findstr "glfw3:x64-windows" >nul
-    if !ERRORLEVEL! EQU 0 (
-        echo %GREEN%✓ GLFW already installed%RESET%
-    ) else (
-        echo Installing GLFW...
-        vcpkg install glfw3:x64-windows
-        if !ERRORLEVEL! NEQ 0 (
-            echo %RED%ERROR: Failed to install GLFW%RESET%
-            cd "%REPO_ROOT%"
-            pause
-            exit /b 1
-        )
-        echo %GREEN%✓ GLFW installed successfully%RESET%
-    )
-    
-    vcpkg list | findstr "glm:x64-windows" >nul
-    if !ERRORLEVEL! EQU 0 (
-        echo %GREEN%✓ GLM already installed%RESET%
-    ) else (
-        echo Installing GLM...
-        vcpkg install glm:x64-windows
-        if !ERRORLEVEL! NEQ 0 (
-            echo %RED%ERROR: Failed to install GLM%RESET%
-            cd "%REPO_ROOT%"
-            pause
-            exit /b 1
-        )
-        echo %GREEN%✓ GLM installed successfully%RESET%
-    )
-    
-    cd "%REPO_ROOT%"
+    echo Dependencies defined in vcpkg.json:
+    echo   - GLFW3 (window management)
+    echo   - GLM (math library)
+    echo   - ImGui (editor UI)
     echo.
-    echo %GREEN%All dependencies installed successfully!%RESET%
+    echo %GREEN%✓ vcpkg is configured for manifest mode%RESET%
+    echo   Dependencies will be installed in the next step during CMake configuration.
+    echo.
 ) else (
-    echo %YELLOW%vcpkg not available. Skipping automatic dependency installation.%RESET%
-    echo Please ensure GLFW and GLM are installed manually.
+    echo %YELLOW%vcpkg not available. Dependencies must be installed manually.%RESET%
+    echo.
+    echo The following libraries are required:
+    echo   - GLFW 3.3+
+    echo   - GLM
+    echo   - ImGui (optional, for editor UI)
     echo.
     echo See %REPO_ROOT%\DEVELOPER_SETUP.md for manual installation instructions.
+    echo.
 )
 
 echo.
@@ -246,6 +222,9 @@ REM Step 4: Generate Visual Studio Project Files
 REM ============================================================================
 echo %BLUE%[Step 4/6] Generating Visual Studio project files...%RESET%
 echo.
+echo NOTE: This step will automatically install dependencies from vcpkg.json
+echo       if vcpkg is available. This may take several minutes on first run.
+echo.
 
 REM Create build directory if it doesn't exist
 if not exist "build" mkdir build
@@ -255,7 +234,9 @@ cd build
 REM Generate project files
 echo Running CMake...
 if exist "%VCPKG_ROOT%\scripts\buildsystems\vcpkg.cmake" (
-    echo Using vcpkg toolchain file...
+    echo Using vcpkg toolchain file (manifest mode)...
+    echo Dependencies will be installed automatically from vcpkg.json...
+    echo.
     cmake -G "Visual Studio 17 2022" -A x64 -DCMAKE_TOOLCHAIN_FILE="%VCPKG_ROOT%\scripts\buildsystems\vcpkg.cmake" ..
 ) else (
     echo Using system-installed dependencies...
