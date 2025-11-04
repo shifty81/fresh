@@ -524,42 +524,21 @@ echo ===========================================================================
 echo. >> "%LOG_FILE%"
 echo Installation finished: %date% %time% >> "%LOG_FILE%"
 echo. >> "%LOG_FILE%"
-echo Next steps:
-echo.
-echo   1. Open the solution:
-echo      - Double-click: Open_Solution.bat
-echo      - Or manually: build\FreshVoxelEngine.sln
-echo.
-echo   2. IMPORTANT - Set Startup Project in Visual Studio:
-echo      - In Solution Explorer, right-click "FreshVoxelEngine"
-echo      - Select "Set as Startup Project"
-echo      - See FIXING_ALL_BUILD_ERROR.md for details
-echo.
-echo   3. Run the engine:
+echo %BLUE%Installation Summary:%RESET%
+echo   - Visual Studio solution: build\FreshVoxelEngine.sln
 if exist "build\Release\FreshVoxelEngine.exe" (
-    echo      - Double-click: Run_Engine.bat
-    echo      - Or manually: build\Release\FreshVoxelEngine.exe
-) else (
-    echo      - Build the project first in Visual Studio (F7)
-    echo      - Then run: build\Release\FreshVoxelEngine.exe
+    echo   - Engine executable: build\Release\FreshVoxelEngine.exe
 )
+echo   - Installation log: %LOG_FILE%
 echo.
-echo   4. Learn more:
-echo      - QUICKSTART_VISUAL.md - Visual quick start guide
-echo      - FIXING_ALL_BUILD_ERROR.md - Fix "ALL_BUILD access denied"
-echo      - README.md - Project overview
-echo      - GETTING_STARTED.md - Usage guide
-echo.
-echo Next steps: >> "%LOG_FILE%"
-echo   1. Open the solution: build\FreshVoxelEngine.sln >> "%LOG_FILE%"
-echo   2. Run the engine: build\Release\FreshVoxelEngine.exe >> "%LOG_FILE%"
-echo   3. See documentation in docs/ folder >> "%LOG_FILE%"
+echo Installation Summary: >> "%LOG_FILE%"
+echo   - Visual Studio solution: build\FreshVoxelEngine.sln >> "%LOG_FILE%"
+if exist "build\Release\FreshVoxelEngine.exe" (
+    echo   - Engine executable: build\Release\FreshVoxelEngine.exe >> "%LOG_FILE%"
+)
+echo   - Installation log: %LOG_FILE% >> "%LOG_FILE%"
 echo. >> "%LOG_FILE%"
-echo %BLUE%Thank you for installing Fresh Voxel Engine!%RESET%
-echo.
-echo Complete installation log saved to: >> "%LOG_FILE%"
-echo %LOG_FILE% >> "%LOG_FILE%"
-echo.
-echo Complete installation log saved to: %LOG_FILE%
+echo %YELLOW%The root install.bat will show next steps.%RESET%
+echo %YELLOW%Press any key to return to the main installer...%RESET%
 echo.
 pause

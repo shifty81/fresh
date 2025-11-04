@@ -2,7 +2,14 @@
 
 ## Overview
 
-The Fresh Voxel Engine now uses **batch files exclusively** for installation. PowerShell is no longer required.
+The Fresh Voxel Engine uses **batch files exclusively** for installation. PowerShell is no longer required.
+
+**New in Latest Version:**
+- ✨ **Clear next steps** displayed after installation completes
+- ✨ **Option to open Visual Studio** automatically after installation
+- ✨ **Better error messages** with troubleshooting guidance
+- ✨ **Improved user flow** between launcher and main installer
+- 📚 **Documentation index** to help you find the right docs
 
 ---
 
@@ -19,20 +26,30 @@ The Fresh Voxel Engine now uses **batch files exclusively** for installation. Po
 
 ## Installation
 
+### Quick Start
+
 Simply double-click `install.bat` in the root directory:
 
 ```
 fresh/
-├── install.bat          <-- Double-click this file
+├── install.bat          <-- Double-click this file (Launcher)
 ├── CMakeLists.txt
 ├── vcpkg.json
 └── tools/
     └── build_tools/
-        ├── install.bat   <-- Main installer script
+        ├── install.bat   <-- Main installer (called automatically)
         ├── build.bat
         ├── clean.bat
         └── rebuild.bat
 ```
+
+**Estimated time**: 10-20 minutes (depending on internet speed)
+
+### What Happens
+
+1. **Root `install.bat`** shows overview and launches the main installer
+2. **Main installer** (`tools\build_tools\install.bat`) performs installation
+3. **Root `install.bat`** displays completion summary and next steps
 
 ---
 
