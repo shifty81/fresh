@@ -216,7 +216,7 @@ if exist "%VCPKG_ROOT%\vcpkg.exe" (
         echo Bootstrapping vcpkg... >> "%LOG_FILE%"
         echo %YELLOW%Downloading and bootstrapping vcpkg. Progress will be shown below.%RESET%
         echo.
-        cd "%VCPKG_ROOT%"
+        cd /d "%VCPKG_ROOT%"
         call bootstrap-vcpkg.bat
         if !ERRORLEVEL! NEQ 0 (
             echo.
@@ -234,7 +234,7 @@ if exist "%VCPKG_ROOT%\vcpkg.exe" (
             echo Expected location: %VCPKG_ROOT%\vcpkg.exe >> "%LOG_FILE%"
             echo This could be due to antivirus, permissions, or bootstrap failure.
             echo This could be due to antivirus, permissions, or bootstrap failure. >> "%LOG_FILE%"
-            cd "%REPO_ROOT%"
+            cd /d "%REPO_ROOT%"
             pause
             exit /b 1
         )
@@ -432,12 +432,12 @@ if !ERRORLEVEL! NEQ 0 (
     echo.
     echo Full CMake output has been saved to: %LOG_FILE%
     echo.
-    cd "%REPO_ROOT%"
+    cd /d "%REPO_ROOT%"
     pause
     exit /b 1
 )
 
-cd "%REPO_ROOT%"
+cd /d "%REPO_ROOT%"
 
 echo.
 echo %GREEN%✓ Visual Studio project files generated successfully!%RESET%
