@@ -3,6 +3,7 @@
 #include "renderer/RenderContext.h"
 
 #ifdef _WIN32
+#define NOMINMAX
 #include <d3d11.h>
 #include <wrl/client.h>
 using Microsoft::WRL::ComPtr;

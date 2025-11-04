@@ -3,6 +3,7 @@
 #include "renderer/RenderContext.h"
 
 #ifdef _WIN32
+#define NOMINMAX
 #include <d3d12.h>
 #include <dxgi1_6.h>
 #include <wrl/client.h>
