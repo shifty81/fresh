@@ -25,6 +25,7 @@
 
 // OpenGL headers for rendering
 #ifdef _WIN32
+#define NOMINMAX
 #include <windows.h>
 #include <GL/gl.h>
 #elif defined(__APPLE__)
