@@ -332,8 +332,10 @@ T clamp(T value, T min, T max) {
 
 // Use C++20 concepts for better type constraints
 template<typename T>
-typename std::enable_if<std::is_arithmetic<T>::value, T>::type
-square(T value) {
+concept Arithmetic = std::is_arithmetic_v<T>;
+
+template<Arithmetic T>
+T square(T value) {
     return value * value;
 }
 
@@ -465,7 +467,7 @@ public:
 cmake_minimum_required(VERSION 3.20)
 
 # Set C++ standard
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
