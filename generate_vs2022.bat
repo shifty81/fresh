@@ -75,6 +75,19 @@ echo ================================================
 echo.
 echo Solution file: build\FreshVoxelEngine.sln
 echo.
+
+REM Check if vcpkg was used
+if not exist "%VCPKG_ROOT%\scripts\buildsystems\vcpkg.cmake" (
+    echo NOTE: This project was generated WITHOUT vcpkg.
+    echo       If you see warnings about missing dependencies above,
+    echo       the build may fail. Please review the CMake output.
+    echo.
+    echo To install dependencies automatically:
+    echo   - Run install.bat (recommended)
+    echo   - Or see DEVELOPER_SETUP.md for manual installation
+    echo.
+)
+
 echo To build the project:
 echo   1. Open build\FreshVoxelEngine.sln in Visual Studio 2022
 echo   2. Select your configuration (Debug/Release)

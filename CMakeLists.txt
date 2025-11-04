@@ -19,6 +19,16 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 message(STATUS "DirectX 11/12 backends enabled (Windows-only engine)")
 add_definitions(-DFRESH_DIRECTX_SUPPORT)
 
+# Detect if we're using vcpkg for automatic dependency management
+if(DEFINED CMAKE_TOOLCHAIN_FILE AND CMAKE_TOOLCHAIN_FILE MATCHES "vcpkg")
+    set(USING_VCPKG TRUE)
+    message(STATUS "Using vcpkg for dependency management")
+    message(STATUS "Dependencies will be automatically installed from vcpkg.json")
+else()
+    set(USING_VCPKG FALSE)
+    message(STATUS "Not using vcpkg - dependencies must be pre-installed")
+endif()
+
 # Try to find GLFW
 find_package(glfw3 QUIET)
 if(NOT glfw3_FOUND)
@@ -45,6 +55,72 @@ find_package(imgui QUIET)
 if(NOT imgui_FOUND)
     message(WARNING "ImGui not found. Editor UI features will be limited.")
     message(WARNING "You can use vcpkg: vcpkg install imgui[glfw-binding,opengl3-binding,dx11-binding,dx12-binding]:x64-windows")
+endif()
+
+# ==============================================================================
+# Dependency Check Summary
+# ==============================================================================
+
+# Check if critical dependencies are available
+set(GLFW_AVAILABLE FALSE)
+if(glfw3_FOUND OR GLFW_FOUND)
+    set(GLFW_AVAILABLE TRUE)
+endif()
+
+set(DEPENDENCIES_OK TRUE)
+set(MISSING_DEPS "")
+
+if(NOT GLFW_AVAILABLE)
+    set(DEPENDENCIES_OK FALSE)
+    list(APPEND MISSING_DEPS "GLFW")
+endif()
+
+if(NOT glm_FOUND)
+    set(DEPENDENCIES_OK FALSE)
+    list(APPEND MISSING_DEPS "GLM")
+endif()
+
+# ImGui is optional but recommended
+if(NOT imgui_FOUND)
+    list(APPEND MISSING_DEPS "ImGui (optional)")
+endif()
+
+# If not using vcpkg and dependencies are missing, provide clear guidance
+if(NOT USING_VCPKG AND NOT DEPENDENCIES_OK)
+    message("")
+    message("========================================================================")
+    message(STATUS "DEPENDENCY CHECK FAILED")
+    message("========================================================================")
+    message(STATUS "The following required dependencies are missing:")
+    foreach(dep ${MISSING_DEPS})
+        message(STATUS "  - ${dep}")
+    endforeach()
+    message("")
+    message(STATUS "To resolve this issue, you have two options:")
+    message("")
+    message(STATUS "Option 1: Use vcpkg for automatic dependency management (RECOMMENDED)")
+    message(STATUS "  1. Run: install.bat")
+    message(STATUS "  2. Or manually:")
+    message(STATUS "     - git clone https://github.com/Microsoft/vcpkg.git")
+    message(STATUS "     - cd vcpkg && bootstrap-vcpkg.bat")
+    message(STATUS "     - Then re-run: generate_vs2022.bat")
+    message("")
+    message(STATUS "Option 2: Install dependencies manually")
+    message(STATUS "  Download and install each library, then set CMAKE_PREFIX_PATH")
+    message(STATUS "  See DEVELOPER_SETUP.md for detailed instructions")
+    message("")
+    message(WARNING "CMake configuration will continue, but the build WILL FAIL without these dependencies!")
+    message("========================================================================")
+    message("")
+elseif(NOT USING_VCPKG AND DEPENDENCIES_OK)
+    message("")
+    message("========================================================================")
+    message(STATUS "All required dependencies found!")
+    if(NOT imgui_FOUND)
+        message(STATUS "Note: ImGui not found - editor UI will be limited")
+    endif()
+    message("========================================================================")
+    message("")
 endif()
 
 # Enable GLM experimental features
