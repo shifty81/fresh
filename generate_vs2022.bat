@@ -37,8 +37,27 @@ echo.
 echo Generating Visual Studio 2022 solution...
 echo.
 
-REM Generate Visual Studio 2022 project files
-cmake -G "Visual Studio 17 2022" -A x64 ..
+REM Check if vcpkg is available for dependency management
+set "VCPKG_ROOT=%~dp0vcpkg"
+if exist "%VCPKG_ROOT%\scripts\buildsystems\vcpkg.cmake" (
+    echo Using vcpkg toolchain for dependency management...
+    echo Dependencies will be installed automatically from vcpkg.json
+    echo This may take several minutes on first run.
+    echo.
+    REM Generate Visual Studio 2022 project files with vcpkg
+    cmake -G "Visual Studio 17 2022" -A x64 -DCMAKE_TOOLCHAIN_FILE="%VCPKG_ROOT%\scripts\buildsystems\vcpkg.cmake" ..
+) else (
+    echo WARNING: vcpkg not found at: %VCPKG_ROOT%
+    echo.
+    echo Generating without vcpkg (dependencies must be installed manually)
+    echo.
+    echo To use vcpkg for automatic dependency management:
+    echo   1. Run install.bat (recommended)
+    echo   2. Or manually install vcpkg and re-run this script
+    echo.
+    REM Generate Visual Studio 2022 project files without vcpkg
+    cmake -G "Visual Studio 17 2022" -A x64 ..
+)
 
 if %ERRORLEVEL% NEQ 0 (
     echo.
