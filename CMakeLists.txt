@@ -412,6 +412,12 @@ endif()
 if(imgui_FOUND)
     target_link_libraries(${PROJECT_NAME} PRIVATE imgui::imgui)
     add_definitions(-DFRESH_IMGUI_AVAILABLE)
+    
+    # Enable ImGui docking and multi-viewport features
+    # These are experimental features that need to be explicitly enabled
+    add_definitions(-DIMGUI_HAS_DOCK)
+    add_definitions(-DIMGUI_HAS_VIEWPORT)
+    message(STATUS "ImGui enabled with docking and viewport support")
 endif()
 
 # Link OpenGL (if enabled)

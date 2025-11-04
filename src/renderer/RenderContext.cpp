@@ -10,6 +10,7 @@
 #endif
 
 #include <iostream>
+#include <memory>
 #include <stdexcept>
 
 namespace fresh {
