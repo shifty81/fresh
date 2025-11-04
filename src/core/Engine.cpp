@@ -9,6 +9,7 @@
 #include "physics/PhysicsSystem.h"
 #include "ai/AISystem.h"
 #include "editor/EditorGUI.h"
+#include "editor/EditorManager.h"
 #include "editor/WorldEditor.h"
 #include "ui/MainMenu.h"
 #include "generation/TerrainGenerator.h"
@@ -141,7 +142,18 @@ bool Engine::initialize() {
     std::cout << "World editor initialized" << std::endl;
     LOG_INFO_C("World editor initialized", "Engine");
     
-    // Create editor GUI
+    // Create comprehensive editor manager
+    m_editorManager = std::make_unique<EditorManager>();
+    if (!m_editorManager->initialize(m_window.get(), m_renderer.get(), m_world.get(), m_worldEditor.get())) {
+        std::cerr << "Failed to initialize editor manager" << std::endl;
+        LOG_ERROR_C("Failed to initialize editor manager", "Engine");
+        // Continue without full editor if ImGui not available
+    } else {
+        std::cout << "Editor manager initialized" << std::endl;
+        LOG_INFO_C("Editor manager initialized", "Engine");
+    }
+    
+    // Create legacy editor GUI (for backward compatibility)
     m_editor = std::make_unique<EditorGUI>();
     if (!m_editor->initialize(m_worldEditor.get())) {
         std::cerr << "Failed to initialize editor GUI" << std::endl;
@@ -366,8 +378,20 @@ void Engine::processInput() {
     if (m_inputManager) {
         m_inputManager->update();
         
-        // Allow ESC to close the window
-        if (m_inputManager->isActionJustPressed(InputAction::OpenMenu)) {
+        // Check if GUI wants input (only process world input if GUI doesn't need it)
+        bool guiCapturesMouse = m_editorManager && m_editorManager->wantCaptureMouse();
+        bool guiCapturesKeyboard = m_editorManager && m_editorManager->wantCaptureKeyboard();
+        
+        // Toggle editor with 'T' key (only if GUI doesn't want keyboard)
+        if (!guiCapturesKeyboard && m_inputManager->isActionJustPressed(InputAction::ToggleEditor)) {
+            if (m_editorManager) {
+                m_editorManager->toggle();
+                LOG_INFO_C("Editor toggled", "Engine");
+            }
+        }
+        
+        // Allow ESC to close the window (only if GUI doesn't want keyboard)
+        if (!guiCapturesKeyboard && m_inputManager->isActionJustPressed(InputAction::OpenMenu)) {
             m_running = false;
         }
     }
@@ -378,8 +402,12 @@ void Engine::update(float deltaTime) {
         return;
     }
     
-    // Handle player input (needs to happen during update with proper deltaTime)
-    if (m_player && m_inputManager) {
+    // Check if GUI wants input before processing player updates
+    bool guiCapturesMouse = m_editorManager && m_editorManager->wantCaptureMouse();
+    bool guiCapturesKeyboard = m_editorManager && m_editorManager->wantCaptureKeyboard();
+    
+    // Handle player input (only if GUI doesn't capture input)
+    if (m_player && m_inputManager && !guiCapturesMouse && !guiCapturesKeyboard) {
         m_player->handleInput(*m_inputManager, deltaTime);
         
         // Handle mouse movement for camera
@@ -524,9 +552,19 @@ void Engine::render() {
         }
     }
     
-    // Render editor UI
-    if (m_editor) {
-        m_editor->render();
+    // Begin editor frame (ImGui) before rendering editor UI
+    if (m_editorManager) {
+        m_editorManager->beginFrame();
+    }
+    
+    // Render comprehensive editor UI
+    if (m_editorManager && m_editorManager->isVisible()) {
+        m_editorManager->render();
+    }
+    
+    // End editor frame (render ImGui)
+    if (m_editorManager) {
+        m_editorManager->endFrame();
     }
     
     m_renderer->endFrame();
