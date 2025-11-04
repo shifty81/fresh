@@ -2,22 +2,82 @@
 
 This directory contains automated build and installation tools for the Fresh Voxel Engine.
 
-## Installation Script
+## Installation Scripts
 
-### `install.bat` - Automated Windows Installation
+### Recommended: PowerShell Installation (`install.ps1`)
 
-A comprehensive, one-click installation script that automates the entire setup process for Windows users.
+A modern, feature-rich installation script with animated banners and real-time progress display.
+
+#### Features
+
+- ✅ **Animated ASCII Art Banner** - Eye-catching Fresh Voxel Engine banner on startup
+- ✅ **Real-time Progress Display** - See live output from all operations
+- ✅ **Colored Output** - Clear, color-coded messages for easy reading
+- ✅ **Section Banners** - Visual separation between installation steps
+- ✅ **Better Error Handling** - Try-catch blocks with detailed error messages
+- ✅ **Prerequisites Check** - Verifies CMake and Visual Studio 2022 installation
+- ✅ **Package Manager Setup** - Optionally installs vcpkg for dependency management
+- ✅ **Dependency Installation** - Automatically installs GLFW, GLM, and ImGui
+- ✅ **Project Generation** - Creates Visual Studio 2022 solution files
+- ✅ **Automated Build** - Compiles the engine in Release mode
+- ✅ **Comprehensive Logging** - Captures all build output to timestamped log files
+- ✅ **Shortcut Creation** - Creates convenient shortcuts for running the engine
+
+#### Why PowerShell is Recommended
+
+- **No Silent Operations**: All long-running commands (vcpkg clone, CMake, build) show real-time output
+- **No Freezing**: Users can see progress during dependency installation (10-15 minutes)
+- **Better UX**: Animated banners, emojis, and colored output make the process engaging
+- **Clearer Errors**: Detailed error messages with context when something fails
+- **Modern**: Uses PowerShell's advanced features for better reliability
+
+#### How to Use
+
+**Option 1: Double-click from File Explorer**
+1. Right-click `install.ps1`
+2. Select "Run with PowerShell"
+3. Follow the on-screen prompts
+
+**Option 2: From PowerShell console**
+```powershell
+cd path\to\fresh\tools\build_tools
+.\install.ps1
+```
+
+**Option 3: From Command Prompt**
+```batch
+powershell -ExecutionPolicy Bypass -File tools\build_tools\install.ps1
+```
+
+**Option 4: Using the Launcher**
+```batch
+# From repository root
+install.bat
+# Then choose option 1 (PowerShell)
+```
+
+### Classic: Batch File Installation (`install.bat`)
+
+A traditional batch file installation script that works on all Windows versions.
 
 #### Features
 
 - ✅ **Prerequisites Check** - Verifies CMake and Visual Studio 2022 installation
 - ✅ **Package Manager Setup** - Optionally installs vcpkg for dependency management
-- ✅ **Dependency Installation** - Automatically installs GLFW and GLM
+- ✅ **Dependency Installation** - Automatically installs GLFW, GLM, and ImGui
 - ✅ **Project Generation** - Creates Visual Studio 2022 solution files
 - ✅ **Automated Build** - Compiles the engine in Release mode
-- ✅ **Comprehensive Logging** - Captures all build output to timestamped log files in `logs/` directory
+- ✅ **Comprehensive Logging** - Captures all build output to timestamped log files
 - ✅ **Shortcut Creation** - Creates convenient shortcuts for running the engine
 - ✅ **Interactive** - Provides clear prompts and feedback throughout the process
+- ✅ **Real-time Output** - Shows progress from long-running operations (improved in v2.0)
+
+#### Recent Improvements (v2.0)
+
+- **Visible Progress**: CMake and build commands now display output to console in real-time
+- **No More Freezing**: Users can see what's happening during dependency installation
+- **Better Feedback**: Added warning messages before long operations
+- **Improved Error Visibility**: Errors are displayed immediately, not just in log files
 
 #### How to Use
 

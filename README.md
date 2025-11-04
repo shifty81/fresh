@@ -31,17 +31,22 @@ The engine **automatically selects DirectX 12** for best performance, falling ba
 git clone https://github.com/shifty81/fresh.git
 cd fresh
 
-# Run automated installer (handles everything!)
-tools\build_tools\install.bat
+# Run installation launcher (choose between PowerShell or Batch)
+install.bat
+
+# Or run PowerShell installer directly (Recommended for better progress display)
+powershell -ExecutionPolicy Bypass -File tools\build_tools\install.ps1
 ```
 
 The automated installer will:
-- ✅ Check prerequisites (CMake, Visual Studio)
+- ✅ Check prerequisites (CMake, Visual Studio 2022)
 - ✅ Install vcpkg package manager (optional)
-- ✅ Install dependencies (GLFW, GLM)
-- ✅ Generate Visual Studio solution
+- ✅ Install dependencies (GLFW, GLM, ImGui)
+- ✅ Generate Visual Studio 2022 solution
 - ✅ Build the project automatically
 - ✅ Create shortcuts for easy access
+
+**Note**: The PowerShell version is recommended as it shows real-time progress during long operations like dependency installation, making it clear the installation hasn't frozen.
 
 See [tools/build_tools/README.md](tools/build_tools/README.md) for detailed installation options.
 

@@ -48,21 +48,38 @@ This guide will help you set up a development environment for Fresh Voxel Engine
 
 ### Option 1: Automated Setup (Recommended)
 
+**Easy Installation (Choose Your Method)**
+
 ```batch
 # Clone the repository
 git clone https://github.com/shifty81/fresh.git
 cd fresh
 
-# Run automated installer
+# Option A: Run the launcher (lets you choose between PowerShell and Batch)
+install.bat
+
+# Option B: Run PowerShell installer directly (Recommended)
+powershell -ExecutionPolicy Bypass -File tools\build_tools\install.ps1
+
+# Option C: Run Batch installer directly (Classic method)
 tools\build_tools\install.bat
 ```
 
-The installer will:
-- Check for required software
-- Install vcpkg (optional)
-- Install GLFW and GLM via vcpkg
-- Generate Visual Studio solution
-- Build the project
+**Why PowerShell is Recommended:**
+- Better progress visibility during long operations (vcpkg installation, CMake configuration)
+- More reliable error handling and reporting
+- Real-time output from CMake and build processes
+- Clearer status messages and colored output
+- Less likely to appear frozen during dependency installation
+
+The installer (both versions) will:
+- Check for required software (CMake, Visual Studio 2022)
+- Install vcpkg package manager (optional, but recommended)
+- Configure vcpkg in manifest mode
+- Generate Visual Studio 2022 solution files
+- Automatically install dependencies (GLFW, GLM, ImGui) during CMake
+- Build the project in Release configuration
+- Create convenient shortcut scripts
 
 ### Option 2: Manual Setup with vcpkg
 
