@@ -247,18 +247,26 @@ pause
 REM ============================================================================
 REM Step 3: Install Dependencies (Manifest Mode)
 REM ============================================================================
-echo %BLUE%[Step 3/6] Installing dependencies...%RESET%
-echo [Step 3/6] Installing dependencies... >> "%LOG_FILE%"
+echo %BLUE%[Step 3/6] Configuring dependencies...%RESET%
+echo [Step 3/6] Configuring dependencies... >> "%LOG_FILE%"
 echo.
 echo. >> "%LOG_FILE%"
 
+REM Check if vcpkg executable exists
+echo Checking for vcpkg executable...
+echo Checking for vcpkg executable... >> "%LOG_FILE%"
+
 if exist "%VCPKG_ROOT%\vcpkg.exe" (
+    echo %GREEN%✓ vcpkg found at: %VCPKG_ROOT%\vcpkg.exe%RESET%
+    echo vcpkg found at: %VCPKG_ROOT%\vcpkg.exe >> "%LOG_FILE%"
+    echo.
     echo This project uses vcpkg manifest mode (vcpkg.json).
     echo Dependencies will be installed automatically during CMake configuration.
     echo.
     echo This project uses vcpkg manifest mode (vcpkg.json). >> "%LOG_FILE%"
     echo Dependencies will be installed automatically during CMake configuration. >> "%LOG_FILE%"
     echo. >> "%LOG_FILE%"
+    
     echo Dependencies defined in vcpkg.json:
     echo   - GLFW3 (window management)
     echo   - GLM (math library)
@@ -269,6 +277,7 @@ if exist "%VCPKG_ROOT%\vcpkg.exe" (
     echo   - GLM (math library) >> "%LOG_FILE%"
     echo   - ImGui (editor UI) >> "%LOG_FILE%"
     echo. >> "%LOG_FILE%"
+    
     echo %GREEN%✓ vcpkg is configured for manifest mode%RESET%
     echo   Dependencies will be installed in the next step during CMake configuration.
     echo.
@@ -276,10 +285,13 @@ if exist "%VCPKG_ROOT%\vcpkg.exe" (
     echo Dependencies will be installed in the next step during CMake configuration. >> "%LOG_FILE%"
     echo. >> "%LOG_FILE%"
 ) else (
-    echo %YELLOW%vcpkg not available. Dependencies must be installed manually.%RESET%
+    echo %YELLOW%WARNING: vcpkg not available at: %VCPKG_ROOT%\vcpkg.exe%RESET%
+    echo %YELLOW%Dependencies must be installed manually.%RESET%
     echo.
-    echo vcpkg not available. Dependencies must be installed manually. >> "%LOG_FILE%"
+    echo WARNING: vcpkg not available at: %VCPKG_ROOT%\vcpkg.exe >> "%LOG_FILE%"
+    echo Dependencies must be installed manually. >> "%LOG_FILE%"
     echo. >> "%LOG_FILE%"
+    
     echo The following libraries are required:
     echo   - GLFW 3.3+
     echo   - GLM
@@ -290,24 +302,32 @@ if exist "%VCPKG_ROOT%\vcpkg.exe" (
     echo   - GLM >> "%LOG_FILE%"
     echo   - ImGui (optional, for editor UI) >> "%LOG_FILE%"
     echo. >> "%LOG_FILE%"
+    
     echo See %REPO_ROOT%\DEVELOPER_SETUP.md for manual installation instructions.
     echo.
     echo See DEVELOPER_SETUP.md for manual installation instructions. >> "%LOG_FILE%"
     echo. >> "%LOG_FILE%"
 )
 
+echo %YELLOW%Press any key to continue to CMake configuration...%RESET%
+echo User prompted to continue... >> "%LOG_FILE%"
+pause >nul
+echo Continuing to Step 4... >> "%LOG_FILE%"
 echo.
 echo. >> "%LOG_FILE%"
-pause
 
 REM ============================================================================
 REM Step 4: Generate Visual Studio Project Files
 REM ============================================================================
+echo.
+echo. >> "%LOG_FILE%"
 echo %BLUE%[Step 4/6] Generating Visual Studio project files...%RESET%
 echo [Step 4/6] Generating Visual Studio project files... >> "%LOG_FILE%"
 echo.
-echo NOTE: This step will automatically install dependencies from vcpkg.json
-echo       if vcpkg is available. This may take several minutes on first run.
+echo. >> "%LOG_FILE%"
+
+echo %YELLOW%NOTE: This step will automatically install dependencies from vcpkg.json%RESET%
+echo %YELLOW%      if vcpkg is available. This may take several minutes on first run.%RESET%
 echo.
 echo NOTE: This step will automatically install dependencies from vcpkg.json >> "%LOG_FILE%"
 echo       if vcpkg is available. This may take several minutes on first run. >> "%LOG_FILE%"
