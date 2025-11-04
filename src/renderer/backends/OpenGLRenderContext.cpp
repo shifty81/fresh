@@ -161,8 +161,8 @@ bool OpenGLRenderContext::initialize(Window* win) {
     }
     
     window = win;
-    width = 1280;   // TODO: Get from window
-    height = 720;
+    width = window->getWidth();
+    height = window->getHeight();
     
     // Initialize GLEW for OpenGL extension loading
     if (!initializeGLEW()) {

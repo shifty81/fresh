@@ -67,7 +67,13 @@ private:
     void waitForGPU();
     void moveToNextFrame();
     
-    static constexpr UINT SRV_HEAP_SIZE = 256;  // Size of SRV descriptor heap for ImGui and other resources
+    // SRV descriptor heap size for ImGui and other shader resources
+    // 256 descriptors is sufficient for:
+    // - ImGui font textures (1-2)
+    // - ImGui dynamic textures (variable, typically < 50)
+    // - Game textures and resources (remaining capacity)
+    // This can be increased if needed for texture-heavy applications
+    static constexpr UINT SRV_HEAP_SIZE = 256;
     
     ComPtr<ID3D12Device> device;
     ComPtr<ID3D12CommandQueue> commandQueue;

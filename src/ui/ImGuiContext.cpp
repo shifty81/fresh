@@ -252,8 +252,8 @@ void ImGuiContext::render() {
 
         case GraphicsAPI::DirectX12: {
             // Use cached DirectX12RenderContext pointer
-            DirectX12RenderContext* dx12Context = static_cast<DirectX12RenderContext*>(m_backendRenderContext);
-            if (dx12Context) {
+            if (m_backendRenderContext) {
+                DirectX12RenderContext* dx12Context = static_cast<DirectX12RenderContext*>(m_backendRenderContext);
                 ID3D12GraphicsCommandList* commandList = dx12Context->getCommandList();
                 if (commandList) {
                     ImGui_ImplDX12_RenderDrawData(::ImGui::GetDrawData(), commandList);
