@@ -52,17 +52,24 @@ See [tools/build_tools/README.md](tools/build_tools/README.md) for detailed inst
 
 ### Option 2: Manual Setup
 
+**Note**: This option requires you to install dependencies (GLFW, GLM, ImGui) manually before building. We recommend using Option 1 (automated installation) instead.
+
 ```batch
 # Clone the repository
 git clone https://github.com/shifty81/fresh.git
 cd fresh
 
 # Generate Visual Studio solution
+# This will show warnings if dependencies are missing
 generate_vs2022.bat
 
 # Open in Visual Studio
 start build\FreshVoxelEngine.sln
 ```
+
+If you see dependency warnings, either:
+- Run `install.bat` to set up vcpkg and automatically install dependencies
+- See [DEVELOPER_SETUP.md](DEVELOPER_SETUP.md) for manual dependency installation instructions
 
 See [VISUAL_STUDIO_SETUP.md](VISUAL_STUDIO_SETUP.md) for detailed Visual Studio instructions.
 
