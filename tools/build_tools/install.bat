@@ -241,6 +241,22 @@ if exist "%VCPKG_ROOT%\vcpkg.exe" (
         echo %GREEN%✓ vcpkg.exe created successfully%RESET%
         echo vcpkg.exe created successfully at: %VCPKG_ROOT%\vcpkg.exe >> "%LOG_FILE%"
         
+        REM Update vcpkg repository to get latest baseline commits
+        echo.
+        echo Updating vcpkg repository...
+        echo Updating vcpkg repository... >> "%LOG_FILE%"
+        git pull origin master
+        if !ERRORLEVEL! NEQ 0 (
+            echo.
+            echo %YELLOW%WARNING: Failed to update vcpkg repository%RESET%
+            echo WARNING: Failed to update vcpkg repository >> "%LOG_FILE%"
+            echo This may cause issues if the baseline commit is not available.
+            echo This may cause issues if the baseline commit is not available. >> "%LOG_FILE%"
+        ) else (
+            echo %GREEN%✓ vcpkg repository updated%RESET%
+            echo vcpkg repository updated >> "%LOG_FILE%"
+        )
+        
         REM Integrate vcpkg with Visual Studio
         echo.
         echo Integrating vcpkg with Visual Studio...
