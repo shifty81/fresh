@@ -274,7 +274,15 @@ if exist "%VCPKG_ROOT%\vcpkg.exe" (
             echo vcpkg integrated with Visual Studio >> "%LOG_FILE%"
         )
         
-        cd "%REPO_ROOT%"
+        cd /d "%REPO_ROOT%"
+        if !ERRORLEVEL! NEQ 0 (
+            echo %RED%ERROR: Failed to return to repository root%RESET%
+            echo ERROR: Failed to return to repository root >> "%LOG_FILE%"
+            echo Expected: %REPO_ROOT% >> "%LOG_FILE%"
+            echo Current: %CD% >> "%LOG_FILE%"
+            pause
+            exit /b 1
+        )
         echo.
         echo %GREEN%✓ vcpkg installed successfully!%RESET%
         echo vcpkg installed successfully! >> "%LOG_FILE%"
@@ -366,6 +374,7 @@ if exist "%VCPKG_ROOT%\vcpkg.exe" (
     echo. >> "%LOG_FILE%"
 )
 
+echo vcpkg check completed >> "%LOG_FILE%"
 echo %YELLOW%Press any key to continue to CMake configuration...%RESET%
 echo User prompted to continue... >> "%LOG_FILE%"
 pause >nul
