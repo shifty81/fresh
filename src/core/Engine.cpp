@@ -485,8 +485,12 @@ void Engine::render() {
             glMaterialfv(GL_FRONT, GL_DIFFUSE, mat_diffuse);
             
             // Render each chunk
+            // TODO: Future optimizations:
+            // - Use VBOs to store mesh data on GPU (update only when dirty)
+            // - Move mesh generation to background thread to avoid frame drops
+            // - Implement frustum culling to skip off-screen chunks
             for (const auto& chunkPair : chunks) {
-                Chunk* chunk = chunkPair.second.get();  // Get raw pointer for non-const access
+                Chunk* chunk = chunkPair.second.get();
                 
                 // Generate mesh if dirty
                 if (chunk->isDirty()) {
@@ -512,7 +516,8 @@ void Engine::render() {
                 glVertexPointer(3, GL_FLOAT, 6 * sizeof(float), vertices.data());
                 glNormalPointer(GL_FLOAT, 6 * sizeof(float), vertices.data() + 3);
                 
-                // Draw the chunk
+                // Draw the chunk using client-side arrays
+                // Note: This uploads data to GPU every frame - VBOs would be more efficient
                 glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(indices.size()), 
                               GL_UNSIGNED_INT, indices.data());
             }
