@@ -1,6 +1,6 @@
 # Developer Setup Guide
 
-This guide will help you set up a development environment for Fresh Voxel Engine.
+This guide will help you set up a development environment for Fresh Voxel Engine on Windows.
 
 ## Table of Contents
 
@@ -16,414 +16,314 @@ This guide will help you set up a development environment for Fresh Voxel Engine
 
 ### Minimum Requirements
 
-- **OS**: Ubuntu 20.04+, Windows 10+, macOS 11+
+- **OS**: Windows 10 (64-bit)
 - **CPU**: 4-core processor (2.5 GHz+)
 - **RAM**: 8 GB
-- **GPU**: OpenGL 4.5+ capable (or DirectX 11+ on Windows)
+- **GPU**: DirectX 11+ or OpenGL 4.5+ capable
 - **Storage**: 2 GB free space
 
 ### Recommended Requirements
 
-- **OS**: Ubuntu 22.04+, Windows 11, macOS 13+
+- **OS**: Windows 11 (64-bit)
 - **CPU**: 8-core processor (3.5 GHz+)
 - **RAM**: 16 GB
-- **GPU**: Modern GPU (RTX 2060, RX 5700, or better)
+- **GPU**: Modern GPU with DirectX 12 support (RTX 2060, RX 5700, or better)
 - **Storage**: 10 GB free space (for builds and assets)
 
 ## Installing Prerequisites
 
-### Ubuntu/Debian
+### Required Software
 
-```bash
-# Update package list
-sudo apt-get update
-
-# Install build tools
-sudo apt-get install -y \
-    build-essential \
-    cmake \
-    ninja-build \
-    git
-
-# Install graphics dependencies
-sudo apt-get install -y \
-    libglfw3-dev \
-    libglm-dev
-
-# Install optional tools
-sudo apt-get install -y \
-    clang-format \
-    clang-tidy \
-    cppcheck \
-    valgrind \
-    gdb
-```
-
-### Fedora/RHEL
-
-```bash
-sudo dnf install -y \
-    cmake \
-    gcc-c++ \
-    ninja-build \
-    git \
-    glfw-devel \
-    glm-devel
-```
-
-### macOS
-
-```bash
-# Install Homebrew if not already installed
-/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-
-# Install dependencies
-brew install cmake ninja git glfw glm
-```
-
-### Windows
-
-1. **Install Visual Studio 2019+** with C++ development tools
+1. **Visual Studio 2022** (recommended) or Visual Studio 2019
    - Download from: https://visualstudio.microsoft.com/
+   - Select "Desktop development with C++" workload
+   - Includes Windows SDK (required for DirectX 11/12)
 
-2. **Install CMake**
+2. **CMake 3.20 or higher**
    - Download from: https://cmake.org/download/
    - Add to PATH during installation
 
-3. **Install vcpkg** (for libraries)
-   ```powershell
-   git clone https://github.com/Microsoft/vcpkg.git
-   cd vcpkg
-   .\bootstrap-vcpkg.bat
-   .\vcpkg integrate install
-   .\vcpkg install glfw3:x64-windows glm:x64-windows
-   ```
+3. **Git for Windows**
+   - Download from: https://git-scm.com/download/win
+
+### Option 1: Automated Setup (Recommended)
+
+```batch
+# Clone the repository
+git clone https://github.com/shifty81/fresh.git
+cd fresh
+
+# Run automated installer
+tools\build_tools\install.bat
+```
+
+The installer will:
+- Check for required software
+- Install vcpkg (optional)
+- Install GLFW and GLM via vcpkg
+- Generate Visual Studio solution
+- Build the project
+
+### Option 2: Manual Setup with vcpkg
+
+```batch
+# Install vcpkg for package management
+git clone https://github.com/Microsoft/vcpkg.git
+cd vcpkg
+bootstrap-vcpkg.bat
+vcpkg integrate install
+
+# Install dependencies
+vcpkg install glfw3:x64-windows glm:x64-windows
+
+# Clone and build Fresh
+cd ..
+git clone https://github.com/shifty81/fresh.git
+cd fresh
+generate_vs2022.bat
+```
 
 ## Building from Source
 
-### Clone the Repository
+### Using Visual Studio (Recommended)
 
-```bash
-git clone https://github.com/shifty81/fresh.git
-cd fresh
+#### Method 1: Visual Studio GUI
+
+```batch
+# Generate solution
+generate_vs2022.bat
+
+# Open in Visual Studio
+start build\FreshVoxelEngine.sln
 ```
 
-### Configure Build
+In Visual Studio:
+1. Select build configuration (Debug/Release)
+2. Build → Build Solution (Ctrl+Shift+B)
+3. Set FreshVoxelEngine as startup project
+4. Debug → Start Debugging (F5) or Start Without Debugging (Ctrl+F5)
 
-#### Linux/macOS (Unix Makefiles)
+#### Method 2: Command Line
 
-```bash
-mkdir build && cd build
-cmake .. -DCMAKE_BUILD_TYPE=Debug
+```batch
+# Generate solution
+cmake -B build -G "Visual Studio 17 2022" -A x64
+
+# Build Debug
+cmake --build build --config Debug
+
+# Build Release
+cmake --build build --config Release
+
+# Run
+build\Debug\FreshVoxelEngine.exe
 ```
 
-#### Linux/macOS (Ninja)
+### Build Configurations
 
-```bash
-mkdir build && cd build
-cmake .. -G Ninja -DCMAKE_BUILD_TYPE=Debug
-```
-
-#### Windows (Visual Studio)
-
-```powershell
-mkdir build
-cd build
-cmake .. -DCMAKE_TOOLCHAIN_FILE=C:\path\to\vcpkg\scripts\buildsystems\vcpkg.cmake
-```
-
-### Build Types
-
-- **Debug**: Full debug symbols, no optimization, assertions enabled
-  ```bash
-  cmake .. -DCMAKE_BUILD_TYPE=Debug
-  ```
-
-- **Release**: Optimized, no debug symbols, assertions disabled
-  ```bash
-  cmake .. -DCMAKE_BUILD_TYPE=Release
-  ```
-
-- **RelWithDebInfo**: Optimized with debug symbols
-  ```bash
-  cmake .. -DCMAKE_BUILD_TYPE=RelWithDebInfo
-  ```
-
-### Compile
-
-#### Linux/macOS
-
-```bash
-# Using make
-make -j$(nproc)
-
-# Using ninja
-ninja
-```
-
-#### Windows
-
-```powershell
-cmake --build . --config Debug
-# or
-cmake --build . --config Release
-```
-
-### Run
-
-```bash
-# Linux/macOS
-./FreshVoxelEngine
-
-# Windows
-Debug\FreshVoxelEngine.exe
-```
+- **Debug**: Full debugging symbols, no optimizations
+- **Release**: Optimized build, minimal debugging info
+- **RelWithDebInfo**: Optimized with debugging symbols
+- **MinSizeRel**: Optimized for size
 
 ## IDE Setup
 
-### Visual Studio Code
+### Visual Studio 2022
 
-1. **Install Extensions**
-   - C/C++ (Microsoft)
-   - CMake Tools
-   - CMake Language Support
-   - GitLens
+Fresh Voxel Engine is designed to work seamlessly with Visual Studio 2022.
 
-2. **Configure CMake Kit**
-   - Press `Ctrl+Shift+P`
-   - Select "CMake: Select a Kit"
-   - Choose your compiler
+#### Opening the Project
 
-3. **Build**
-   - Press `F7` or use CMake sidebar
-
-4. **Debug**
-   - Set breakpoints
-   - Press `F5`
-
-#### Recommended settings.json
-
-```json
-{
-    "cmake.buildDirectory": "${workspaceFolder}/build",
-    "cmake.configureOnOpen": true,
-    "C_Cpp.default.configurationProvider": "ms-vscode.cmake-tools",
-    "files.associations": {
-        "*.h": "cpp",
-        "*.cpp": "cpp"
-    }
-}
+```batch
+# Generate and open solution
+generate_vs2022.bat
 ```
 
-### CLion
+Or manually:
+```batch
+cmake -B build -G "Visual Studio 17 2022" -A x64
+start build\FreshVoxelEngine.sln
+```
 
-1. **Open Project**
-   - File → Open → Select repository root
+#### Recommended Extensions
 
-2. **Configure Toolchain**
-   - Settings → Build, Execution, Deployment → Toolchains
-   - Select compiler and CMake
+- **C++ Insights**: Better code visualization
+- **Visual Assist**: Enhanced IntelliSense
+- **CodeMaid**: Code cleanup and formatting
+- **ReSharper C++**: Advanced refactoring tools
 
-3. **Build**
-   - Click hammer icon or `Ctrl+F9`
+#### Project Configuration
 
-4. **Debug**
-   - Set breakpoints
-   - Click bug icon or `Shift+F9`
+The solution is pre-configured with:
+- C++17 standard
+- Multi-threaded DLL runtime (/MD)
+- Windows SDK for DirectX support
+- Optimized build settings
 
-### Visual Studio (Windows)
+### Visual Studio Code
 
-1. **Open Folder**
-   - File → Open → Folder
-   - Select repository root
+While Visual Studio is recommended, VS Code can also be used:
 
-2. **Configure CMake**
-   - CMakeSettings.json will be auto-generated
-   - Customize build configurations if needed
+#### Required Extensions
 
-3. **Build**
-   - Build → Build All or `Ctrl+Shift+B`
+- C/C++ (Microsoft)
+- CMake Tools
+- CMake
 
-4. **Debug**
-   - Set breakpoints
-   - Debug → Start Debugging or `F5`
+#### Configuration
+
+1. Open the project folder in VS Code
+2. CMake Tools will auto-detect the CMakeLists.txt
+3. Select kit: "Visual Studio Community 2022 Release - amd64"
+4. Build using CMake Tools panel (bottom toolbar)
 
 ## Running Tests
 
-> **Note**: Test infrastructure is under development
+### Enable Testing
 
-When available:
+```batch
+# Configure with tests enabled
+cmake -B build -DBUILD_TESTS=ON
 
-```bash
+# Build
+cmake --build build --config Debug
+
+# Run tests
 cd build
-ctest --output-on-failure
+ctest -C Debug --output-on-failure
+```
+
+### Visual Studio Test Explorer
+
+1. Build the solution with tests enabled
+2. Test → Test Explorer
+3. Run All Tests
+
+### Individual Test Execution
+
+```batch
+# Run specific test executable
+build\Debug\FreshVoxelEngineTests.exe
 ```
 
 ## Debugging
 
-### GDB (Linux)
+### Visual Studio Debugger
 
-```bash
-# Build with debug symbols
-cmake .. -DCMAKE_BUILD_TYPE=Debug
-make
+#### Basic Debugging
 
-# Run with GDB
-gdb ./FreshVoxelEngine
+1. Set breakpoints (F9)
+2. Start debugging (F5)
+3. Use standard debug controls:
+   - Step Over (F10)
+   - Step Into (F11)
+   - Step Out (Shift+F11)
+   - Continue (F5)
 
-# Common GDB commands
-(gdb) run              # Start program
-(gdb) break main       # Set breakpoint
-(gdb) continue         # Continue execution
-(gdb) backtrace        # Show stack trace
-(gdb) print variable   # Print variable value
-```
+#### Debug Windows
 
-### LLDB (macOS)
+- **Locals**: View local variables
+- **Autos**: View automatically tracked variables
+- **Watch**: Monitor specific expressions
+- **Call Stack**: View function call hierarchy
+- **Immediate Window**: Execute code during debugging
 
-```bash
-lldb ./FreshVoxelEngine
+#### Graphics Debugging
 
-# Common LLDB commands
-(lldb) run
-(lldb) breakpoint set --name main
-(lldb) continue
-(lldb) bt              # Backtrace
-(lldb) frame variable  # Show variables
-```
+For DirectX debugging:
+1. Install Graphics Tools from Windows SDK
+2. Debug → Graphics → Start Diagnostics
+3. Capture frames for analysis
 
-### Visual Studio Debugger (Windows)
+### Performance Profiling
 
-1. Set breakpoints by clicking in the margin
-2. Press `F5` to start debugging
-3. Use debugging windows: Locals, Watch, Call Stack
+#### Visual Studio Profiler
 
+1. Debug → Performance Profiler
+2. Select profiling tools:
+   - **CPU Usage**: Identify hotspots
+   - **Memory Usage**: Track allocations
+   - **GPU Usage**: DirectX performance
+
+#### PIX (for DirectX)
+
+1. Download PIX from Microsoft Store
+2. Launch and attach to FreshVoxelEngine.exe
+3. Capture GPU traces and analyze performance
 
 ## Troubleshooting
 
-### Build Errors
+### Common Issues
 
-#### "GLFW not found"
+#### CMake Configuration Fails
 
-**Solution:**
-```bash
-# Install GLFW
-sudo apt-get install libglfw3-dev
+**Problem**: CMake can't find Visual Studio
 
-# Or specify path
-cmake .. -DGLFW_DIR=/path/to/glfw
+**Solution**:
+```batch
+# Specify generator explicitly
+cmake -B build -G "Visual Studio 17 2022" -A x64
 ```
 
-#### Compiler errors with C++17
+#### DirectX Compilation Errors
 
-**Solution:**
-```bash
-# Ensure C++17 support
-cmake .. -DCMAKE_CXX_STANDARD=17 -DCMAKE_CXX_STANDARD_REQUIRED=ON
+**Problem**: Missing DirectX headers
+
+**Solution**:
+- Ensure Windows SDK is installed with Visual Studio
+- Reinstall "Windows 10 SDK" component
+- Check CMakeLists.txt for DirectX library links
+
+#### GLFW/GLM Not Found
+
+**Problem**: CMake can't find dependencies
+
+**Solution** (if using vcpkg):
+```batch
+cmake -B build -DCMAKE_TOOLCHAIN_FILE=C:\path\to\vcpkg\scripts\buildsystems\vcpkg.cmake
 ```
 
-### Runtime Errors
-
-#### Black screen / nothing renders
-
-**Causes:**
-- Shaders not compiled
-- Swapchain creation failed
-- Render pass issues
-
-**Solution:**
-```bash
-# Ensure shaders are in build directory
-ls build/shaders/
-
-# Run with validation layers for errors
-export VK_INSTANCE_LAYERS=VK_LAYER_KHRONOS_validation
-./FreshVoxelEngine
+Or use automated installer:
+```batch
+tools\build_tools\install.bat
 ```
 
-### Performance Issues
+#### Build Hangs or Crashes
 
-#### Low FPS
+**Problem**: Out of memory during compilation
 
-**Solutions:**
-- Build in Release mode
-- Reduce chunk count
-- Check GPU usage
-- Disable validation layers
+**Solution**:
+- Close other applications
+- Use Release configuration (less memory)
+- Build with fewer parallel jobs:
+  ```batch
+  cmake --build build -- /maxcpucount:2
+  ```
 
-```bash
-cmake .. -DCMAKE_BUILD_TYPE=Release -DENABLE_VALIDATION_LAYERS=OFF
-```
+#### Runtime Crashes
 
-#### High memory usage
+**Problem**: Application crashes on startup
 
-**Solutions:**
-- Reduce chunk streaming distance
-- Check for memory leaks with Valgrind
-- Enable memory profiling
+**Solutions**:
+1. Check GPU drivers are up to date
+2. Verify DirectX runtime is installed
+3. Run in Debug mode to see error messages
+4. Check logs in `logs/` directory
 
-```bash
-valgrind --leak-check=full ./FreshVoxelEngine
-```
+### Getting Help
 
-## Development Workflow
+If you encounter issues:
+1. Check the [FAQ](FAQ.md)
+2. Review [closed issues](https://github.com/shifty81/fresh/issues?q=is%3Aissue+is%3Aclosed)
+3. Open a [new issue](https://github.com/shifty81/fresh/issues/new) with:
+   - Windows version
+   - Visual Studio version
+   - Error messages
+   - Log files from `logs/` directory
 
-### Recommended Workflow
+## Additional Resources
 
-1. **Create feature branch**
-   ```bash
-   git checkout -b feature/my-feature
-   ```
-
-2. **Make changes**
-   - Edit code
-   - Build frequently
-   - Test changes
-
-3. **Format code**
-   ```bash
-   clang-format -i src/**/*.cpp include/**/*.h
-   ```
-
-4. **Run static analysis**
-   ```bash
-   cppcheck --enable=all src/
-   ```
-
-5. **Commit**
-   ```bash
-   git add .
-   git commit -m "Add my feature"
-   ```
-
-6. **Push and create PR**
-   ```bash
-   git push origin feature/my-feature
-   ```
-
-## Additional Tools
-
-### Recommended Development Tools
-
-- **Profiler**: Tracy, Valgrind (Callgrind)
-- **Memory**: Valgrind (Memcheck), AddressSanitizer
-- **Graphics**: RenderDoc, Nsight Graphics
-- **Diff**: Meld, Beyond Compare
-- **Git GUI**: GitKraken, GitHub Desktop
-
-### Hot Reload
-
-The engine supports shader hot-reloading:
-
-1. Edit shader files in `shaders/`
-2. Shaders automatically recompile on save
-3. See changes immediately in running application
-
-## Getting Help
-
-- 📖 [Documentation](docs/)
-- 💬 [GitHub Discussions](https://github.com/shifty81/fresh/discussions)
-- 🐛 [Report Issues](https://github.com/shifty81/fresh/issues)
-- 📧 Email: dev@freshvoxelengine.org
-
-Happy developing! 🚀
+- [VISUAL_STUDIO_SETUP.md](VISUAL_STUDIO_SETUP.md) - Detailed VS setup
+- [Build Tools README](tools/build_tools/README.md) - Automated installer docs
+- [ARCHITECTURE.md](ARCHITECTURE.md) - Engine architecture overview
+- [CONTRIBUTING.md](CONTRIBUTING.md) - Contribution guidelines

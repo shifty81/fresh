@@ -39,29 +39,22 @@ ctest --verbose
 
 ### Installation
 
-#### Option 1: Automatic (Recommended)
+Google Test is automatically downloaded and built when you enable BUILD_TESTS on Windows.
 
-Google Test will be automatically downloaded and built when you enable BUILD_TESTS.
+#### Automatic Installation (Recommended)
 
-#### Option 2: Manual Installation
+When you configure CMake with `-DBUILD_TESTS=ON`, Google Test will be fetched automatically:
 
-**Ubuntu/Debian:**
-```bash
-sudo apt-get install libgtest-dev
-cd /usr/src/gtest
-sudo cmake .
-sudo make
-sudo mv lib/*.a /usr/lib
+```batch
+cmake -B build -DBUILD_TESTS=ON
+cmake --build build --config Debug
 ```
 
-**macOS:**
-```bash
-brew install googletest
-```
+#### Manual Installation (Optional)
 
-**Windows:**
-- Download from https://github.com/google/googletest
-- Build and install manually
+If you prefer to install Google Test manually:
+- Use vcpkg: `vcpkg install gtest:x64-windows`
+- Or download from https://github.com/google/googletest and build manually
 
 ## Project Structure
 

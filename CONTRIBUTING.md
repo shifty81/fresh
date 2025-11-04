@@ -269,9 +269,9 @@ What you expected to happen.
 If applicable, add screenshots.
 
 **Environment:**
- - OS: [e.g., Ubuntu 22.04]
- - Compiler: [e.g., GCC 13.2]
- - Graphics API: [OpenGL/DirectX version]
+ - OS: [e.g., Windows 11]
+ - Compiler: [e.g., MSVC 19.35 / Visual Studio 2022]
+ - Graphics API: [DirectX 12/DirectX 11/OpenGL version]
  - GPU: [e.g., NVIDIA RTX 3060]
 
 **Additional context**

@@ -25,9 +25,10 @@ Yes! Fresh Voxel Engine is released under the MIT License, which means:
 
 ### What platforms are supported?
 
-- **Linux**: Ubuntu 20.04+, Fedora, Arch, etc.
-- **Windows**: Windows 10+
-- **macOS**: macOS 11+ (with MoltenVK)
+Fresh Voxel Engine is designed specifically for Windows:
+- **Windows 10** (64-bit) or newer
+- DirectX 12 support recommended
+- DirectX 11 or OpenGL fallback available
 
 ### What are the system requirements?
 

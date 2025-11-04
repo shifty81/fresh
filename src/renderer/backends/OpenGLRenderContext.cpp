@@ -2,16 +2,10 @@
 #include "core/Window.h"
 #include <iostream>
 
-// Platform-specific OpenGL headers
-#ifdef _WIN32
+// Windows-only OpenGL headers
 #define NOMINMAX
 #include <windows.h>
 #include <GL/gl.h>
-#elif defined(__APPLE__)
-#include <OpenGL/gl.h>
-#else
-#include <GL/gl.h>
-#endif
 
 namespace fresh {
 
@@ -236,9 +230,7 @@ std::shared_ptr<RenderShader> OpenGLRenderContext::createShader(const std::strin
 }
 
 bool OpenGLRenderContext::loadGLFunctions() {
-    // Platform-specific GL function loading
-    // On Windows: wglGetProcAddress
-    // On Linux: glXGetProcAddress or use GLAD/GLEW
+    // Windows-specific GL function loading using wglGetProcAddress
     // For now, return true as stub
     std::cout << "[OpenGL] Loading OpenGL functions..." << std::endl;
     return true;

@@ -387,23 +387,22 @@ Use this checklist to track implementation:
 - [ ] Crafting system
 ```
 
-## 🔧 Build Instructions
+## 🔧 Build Instructions (Windows Only)
 
-```bash
-# Install dependencies (Ubuntu/Debian)
-sudo apt-get update
-sudo apt-get install cmake g++ libvulkan-dev libglfw3-dev libglm-dev
+```batch
+# Clone the repository
+git clone https://github.com/shifty81/fresh.git
+cd fresh
 
-# Build
-cd /home/runner/work/fresh/fresh
-mkdir -p build
-cd build
-cmake ..
-make -j$(nproc)
+# Option 1: Automated Installation (Recommended)
+tools\build_tools\install.bat
 
-# Run
-./FreshVoxelEngine
+# Option 2: Manual Build
+generate_vs2022.bat
+start build\FreshVoxelEngine.sln
 ```
+
+For detailed instructions, see [VISUAL_STUDIO_SETUP.md](VISUAL_STUDIO_SETUP.md) and [tools/build_tools/README.md](tools/build_tools/README.md).
 
 ## 📚 Architecture Principles
 

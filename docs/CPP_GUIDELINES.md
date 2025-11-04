@@ -556,13 +556,13 @@ test: Add unit tests for noise generator
    ```
 
 4. **Profiling**: Profile before optimizing
-   ```bash
-   # Use perf on Linux
-   perf record ./FreshVoxelEngine
-   perf report
+   ```batch
+   # Use Visual Studio Profiler
+   # Debug -> Performance Profiler
+   # Select CPU Usage, Memory Usage, or GPU Usage
    
-   # Use valgrind for memory
-   valgrind --leak-check=full ./FreshVoxelEngine
+   # Or use command line
+   vsperf /launch FreshVoxelEngine.exe
    ```
 
 ### Resources
