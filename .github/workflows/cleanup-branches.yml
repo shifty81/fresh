@@ -1,0 +1,123 @@
+name: Cleanup Old Branches
+
+on:
+  schedule:
+    # Run weekly on Sundays at 00:00 UTC
+    - cron: '0 0 * * 0'
+  workflow_dispatch: # Allow manual triggering
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Fetch all branches
+      
+      - name: Clean up old branches
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -e  # Exit on error
+          
+          # Set protected branches that should never be deleted
+          PROTECTED_BRANCHES="main"
+          
+          # Number of recent branches to keep (excluding protected branches)
+          KEEP_COUNT=5
+          
+          echo "==================================="
+          echo "Branch Cleanup Workflow"
+          echo "==================================="
+          echo "Protected branches: $PROTECTED_BRANCHES"
+          echo "Branches to keep (most recent): $KEEP_COUNT"
+          echo ""
+          
+          echo "Fetching all remote branches..."
+          git fetch --all
+          
+          # Get all remote branches sorted by last commit date (newest first)
+          echo "Getting list of branches sorted by last commit date..."
+          ALL_BRANCHES=$(git for-each-ref --sort=-committerdate refs/remotes/origin/ --format='%(refname:short)' | sed 's|origin/||')
+          
+          # Filter out protected branches and create an array
+          FILTERED_BRANCHES=()
+          while IFS= read -r branch; do
+            if [ ! -z "$branch" ] && ! echo "$PROTECTED_BRANCHES" | grep -w "$branch" > /dev/null; then
+              FILTERED_BRANCHES+=("$branch")
+            fi
+          done <<< "$ALL_BRANCHES"
+          
+          # Count total branches (excluding protected)
+          TOTAL_COUNT=${#FILTERED_BRANCHES[@]}
+          echo ""
+          echo "Total branches found: $TOTAL_COUNT (excluding protected)"
+          echo "Keeping the most recent $KEEP_COUNT branches"
+          
+          # Calculate how many to delete
+          DELETE_COUNT=$((TOTAL_COUNT - KEEP_COUNT))
+          
+          if [ $DELETE_COUNT -le 0 ]; then
+            echo ""
+            echo "✓ No branches to delete. Current count ($TOTAL_COUNT) is already at or below the limit ($KEEP_COUNT)."
+            exit 0
+          fi
+          
+          echo "Will delete $DELETE_COUNT old branches"
+          echo ""
+          
+          # Show branches to keep
+          echo "Branches to KEEP (most recent $KEEP_COUNT):"
+          for i in $(seq 0 $((KEEP_COUNT - 1))); do
+            if [ $i -lt ${#FILTERED_BRANCHES[@]} ]; then
+              echo "  ✓ ${FILTERED_BRANCHES[$i]}"
+            fi
+          done
+          
+          echo ""
+          echo "Branches to DELETE (oldest $DELETE_COUNT):"
+          
+          # Delete old branches
+          DELETED_COUNT=0
+          FAILED_COUNT=0
+          
+          for i in $(seq $KEEP_COUNT $((TOTAL_COUNT - 1))); do
+            branch="${FILTERED_BRANCHES[$i]}"
+            if [ ! -z "$branch" ]; then
+              echo "  Deleting: $branch"
+              
+              # URL encode the branch name for the API call
+              ENCODED_BRANCH=$(printf %s "$branch" | jq -sRr @uri)
+              
+              # Use GitHub API to delete the branch
+              HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" \
+                -X DELETE \
+                -H "Authorization: Bearer $GITHUB_TOKEN" \
+                -H "Accept: application/vnd.github.v3+json" \
+                "https://api.github.com/repos/${{ github.repository }}/git/refs/heads/$ENCODED_BRANCH")
+              
+              if [ "$HTTP_CODE" = "204" ] || [ "$HTTP_CODE" = "200" ]; then
+                echo "    ✓ Deleted successfully (HTTP $HTTP_CODE)"
+                DELETED_COUNT=$((DELETED_COUNT + 1))
+              else
+                echo "    ✗ Failed to delete (HTTP $HTTP_CODE)"
+                FAILED_COUNT=$((FAILED_COUNT + 1))
+              fi
+            fi
+          done
+          
+          echo ""
+          echo "==================================="
+          echo "Branch cleanup completed!"
+          echo "==================================="
+          echo "Deleted: $DELETED_COUNT branches"
+          if [ $FAILED_COUNT -gt 0 ]; then
+            echo "Failed: $FAILED_COUNT branches"
+          fi
+          
+          # Show remaining branches
+          echo ""
+          echo "Remaining branches:"
+          git ls-remote --heads origin | awk '{print $2}' | sed 's|refs/heads/||' | while read -r b; do echo "  - $b"; done

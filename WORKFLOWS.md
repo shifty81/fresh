@@ -4,9 +4,39 @@ This document describes the GitHub Actions workflows used in the Fresh Voxel Eng
 
 ## Overview
 
-The repository uses GitHub Actions for continuous integration (CI) on Windows. All workflows are defined in the `.github/workflows/` directory.
+The repository uses GitHub Actions for continuous integration (CI) on Windows and automated branch cleanup. All workflows are defined in the `.github/workflows/` directory.
 
 **Note:** The CI workflow is currently disabled (renamed to `ci.yml.disabled`). To re-enable it, rename the file back to `ci.yml`.
+
+## Active Workflows
+
+### Branch Cleanup Workflow (`cleanup-branches.yml`)
+
+**Status:** Active
+
+Automatically cleans up old branches to keep the repository organized. This workflow:
+- Runs weekly on Sundays at 00:00 UTC
+- Can be triggered manually via workflow_dispatch
+- Keeps the `main` branch protected
+- Keeps the 5 most recent branches (by last commit date)
+- Deletes older branches automatically
+
+**Configuration:**
+- **Protected Branches:** `main` (never deleted)
+- **Keep Count:** 5 most recent branches
+- **Schedule:** Weekly (Sundays at 00:00 UTC)
+
+**Manual Trigger:**
+1. Go to the GitHub Actions tab
+2. Select "Cleanup Old Branches" workflow
+3. Click "Run workflow"
+4. Select the branch to run from (usually `main`)
+5. Click "Run workflow" to execute
+
+The workflow will provide detailed output showing:
+- Which branches are kept
+- Which branches are deleted
+- Success/failure status for each deletion
 
 ## CI Workflow (`ci.yml`)
 
