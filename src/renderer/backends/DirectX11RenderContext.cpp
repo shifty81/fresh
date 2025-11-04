@@ -75,26 +75,32 @@ public:
     }
     
     void setUniformInt(const std::string& name, int value) override {
+        (void)name; (void)value; // Parameters reserved for D3D11 constant buffer implementation
         // Set via constant buffers in D3D11
     }
     
     void setUniformFloat(const std::string& name, float value) override {
+        (void)name; (void)value; // Parameters reserved for D3D11 constant buffer implementation
         // Set via constant buffers in D3D11
     }
     
     void setUniformVec2(const std::string& name, const glm::vec2& value) override {
+        (void)name; (void)value; // Parameters reserved for D3D11 constant buffer implementation
         // Set via constant buffers in D3D11
     }
     
     void setUniformVec3(const std::string& name, const glm::vec3& value) override {
+        (void)name; (void)value; // Parameters reserved for D3D11 constant buffer implementation
         // Set via constant buffers in D3D11
     }
     
     void setUniformVec4(const std::string& name, const glm::vec4& value) override {
+        (void)name; (void)value; // Parameters reserved for D3D11 constant buffer implementation
         // Set via constant buffers in D3D11
     }
     
     void setUniformMat4(const std::string& name, const glm::mat4& value) override {
+        (void)name; (void)value; // Parameters reserved for D3D11 constant buffer implementation
         // Set via constant buffers in D3D11
     }
     

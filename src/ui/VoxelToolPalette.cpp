@@ -233,6 +233,11 @@ bool VoxelToolPalette::voxelTypeButton(const char* label, VoxelType type) {
         case VoxelType::Water: buttonColor = ImVec4(0.2f, 0.5f, 0.8f, 1.0f); break;
         case VoxelType::Wood: buttonColor = ImVec4(0.6f, 0.4f, 0.2f, 1.0f); break;
         case VoxelType::Leaves: buttonColor = ImVec4(0.2f, 0.6f, 0.2f, 1.0f); break;
+        case VoxelType::Snow: buttonColor = ImVec4(0.95f, 0.95f, 0.95f, 1.0f); break;
+        case VoxelType::Ice: buttonColor = ImVec4(0.7f, 0.9f, 1.0f, 1.0f); break;
+        case VoxelType::Cobblestone: buttonColor = ImVec4(0.4f, 0.4f, 0.4f, 1.0f); break;
+        case VoxelType::Planks: buttonColor = ImVec4(0.7f, 0.5f, 0.3f, 1.0f); break;
+        case VoxelType::Glass: buttonColor = ImVec4(0.8f, 0.9f, 1.0f, 0.6f); break;
         default: buttonColor = ImVec4(0.4f, 0.4f, 0.4f, 1.0f); break;
     }
     
