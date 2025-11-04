@@ -61,8 +61,27 @@ make
 
 ### I'm getting build errors. What should I do?
 
+**For Visual Studio 2022 users**: See [QUICKSTART_VISUAL.md](QUICKSTART_VISUAL.md) for step-by-step setup with troubleshooting.
+
+**Common errors and solutions**:
+
+1. **"'OpenGLRenderContext': undeclared identifier"**
+   - Solution: Make sure GLEW is installed: `vcpkg install glew:x64-windows`
+
+2. **"'std::make_unique': no matching overloaded function"**
+   - Solution: Fixed in latest version. Update your code or add `#include <memory>`
+
+3. **"'ImGuiConfigFlags_DockingEnable': undeclared identifier"**
+   - Solution: Install ImGui with docking: `vcpkg install imgui[docking-experimental]:x64-windows`
+   - See [VISUAL_STUDIO_SETUP.md](VISUAL_STUDIO_SETUP.md#common-compilation-errors)
+
+4. **"Unable to start program ... ALL_BUILD access is denied"**
+   - Solution: Set `FreshVoxelEngine` as startup project (right-click in Solution Explorer)
+   - Detailed guide: [FIXING_ALL_BUILD_ERROR.md](FIXING_ALL_BUILD_ERROR.md)
+
+**General troubleshooting**:
 1. Check [DEVELOPER_SETUP.md](DEVELOPER_SETUP.md) for prerequisites
-2. Check that GLFW is available
+2. Check [VISUAL_STUDIO_SETUP.md](VISUAL_STUDIO_SETUP.md) for Visual Studio-specific issues
 3. See [Troubleshooting](#troubleshooting) section below
 4. Search existing [GitHub Issues](https://github.com/shifty81/fresh/issues)
 5. Create a new issue if not found
@@ -248,6 +267,18 @@ The architecture is designed to be modular with a unified `IRenderContext` inter
 You can extend support by implementing the `IRenderContext` interface for other graphics APIs.
 
 ## Troubleshooting
+
+### Visual Studio Build & Runtime Errors
+
+For comprehensive Visual Studio troubleshooting, see:
+- **[QUICKSTART_VISUAL.md](QUICKSTART_VISUAL.md)** - Complete visual setup and troubleshooting guide
+- **[FIXING_ALL_BUILD_ERROR.md](FIXING_ALL_BUILD_ERROR.md)** - Fix "ALL_BUILD access denied" error
+- **[VISUAL_STUDIO_SETUP.md](VISUAL_STUDIO_SETUP.md)** - Detailed VS2022 setup and troubleshooting
+
+**Quick fixes for common VS errors**:
+- **ALL_BUILD access denied**: Right-click `FreshVoxelEngine` → Set as Startup Project
+- **ImGui errors**: Install with docking support: `vcpkg install imgui[docking-experimental]:x64-windows`
+- **std::make_unique error**: Update to latest code (fixed) or add `#include <memory>`
 
 ### Black screen / nothing renders
 
