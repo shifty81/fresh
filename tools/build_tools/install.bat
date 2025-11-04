@@ -147,6 +147,7 @@ if %VS2022_FOUND%==1 (
     echo Download from: https://visualstudio.microsoft.com/downloads/ >> "%LOG_FILE%"
     echo. >> "%LOG_FILE%"
     set /p CONTINUE="Continue anyway? (Y/N): "
+    echo User response: !CONTINUE! >> "%LOG_FILE%"
     if /i "!CONTINUE!" NEQ "Y" (
         echo Installation cancelled.
         echo Installation cancelled. >> "%LOG_FILE%"
@@ -180,8 +181,11 @@ if exist "%VCPKG_ROOT%\vcpkg.exe" (
     echo vcpkg is a package manager for C++ that makes dependency management easier.
     echo.
     echo vcpkg not found. >> "%LOG_FILE%"
+    echo Would you like to install it? >> "%LOG_FILE%"
+    echo vcpkg is a package manager for C++ that makes dependency management easier. >> "%LOG_FILE%"
     echo. >> "%LOG_FILE%"
     set /p INSTALL_VCPKG="Install vcpkg? (Y/N): "
+    echo User response: !INSTALL_VCPKG! >> "%LOG_FILE%"
     
     if /i "!INSTALL_VCPKG!"=="Y" (
         echo.
@@ -222,14 +226,40 @@ if exist "%VCPKG_ROOT%\vcpkg.exe" (
             exit /b 1
         )
         
+        REM Verify vcpkg.exe was created
+        if not exist "%VCPKG_ROOT%\vcpkg.exe" (
+            echo.
+            echo %RED%ERROR: vcpkg.exe not found after bootstrapping%RESET%
+            echo ERROR: vcpkg.exe not found after bootstrapping >> "%LOG_FILE%"
+            echo Expected location: %VCPKG_ROOT%\vcpkg.exe >> "%LOG_FILE%"
+            echo This could be due to antivirus, permissions, or bootstrap failure.
+            echo This could be due to antivirus, permissions, or bootstrap failure. >> "%LOG_FILE%"
+            cd "%REPO_ROOT%"
+            pause
+            exit /b 1
+        )
+        echo %GREEN%✓ vcpkg.exe created successfully%RESET%
+        echo vcpkg.exe created successfully at: %VCPKG_ROOT%\vcpkg.exe >> "%LOG_FILE%"
+        
         REM Integrate vcpkg with Visual Studio
         echo.
         echo Integrating vcpkg with Visual Studio...
         echo Integrating vcpkg with Visual Studio... >> "%LOG_FILE%"
         echo.
-        vcpkg integrate install
+        "%VCPKG_ROOT%\vcpkg.exe" integrate install
+        if !ERRORLEVEL! NEQ 0 (
+            echo.
+            echo %YELLOW%WARNING: vcpkg integrate install returned error code !ERRORLEVEL!%RESET%
+            echo WARNING: vcpkg integrate install returned error code !ERRORLEVEL! >> "%LOG_FILE%"
+            echo This is not critical - you can integrate manually later if needed.
+            echo This is not critical - you can integrate manually later if needed. >> "%LOG_FILE%"
+        ) else (
+            echo %GREEN%✓ vcpkg integrated with Visual Studio%RESET%
+            echo vcpkg integrated with Visual Studio >> "%LOG_FILE%"
+        )
         
         cd "%REPO_ROOT%"
+        echo.
         echo %GREEN%✓ vcpkg installed successfully!%RESET%
         echo vcpkg installed successfully! >> "%LOG_FILE%"
     ) else (
@@ -434,6 +464,7 @@ echo.
 echo. >> "%LOG_FILE%"
 
 set /p CREATE_SHORTCUTS="Would you like to create desktop shortcuts? (Y/N): "
+echo User response: !CREATE_SHORTCUTS! >> "%LOG_FILE%"
 
 if /i "!CREATE_SHORTCUTS!"=="Y" (
     REM Create a shortcut script
