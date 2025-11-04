@@ -68,15 +68,41 @@ public:
      */
     void refresh();
 
+    /**
+     * @brief Rename the currently selected node
+     * @param newName New name for the node
+     * @return true if successful
+     */
+    bool renameSelectedNode(const std::string& newName);
+
+    /**
+     * @brief Duplicate the currently selected node
+     * @return true if successful
+     */
+    bool duplicateSelectedNode();
+
+    /**
+     * @brief Delete the currently selected node
+     * @return true if successful
+     */
+    bool deleteSelectedNode();
+
 private:
     void renderNode(SceneNode* node);
     void buildHierarchyFromWorld();
+    bool findAndRemoveNode(std::shared_ptr<SceneNode>& parent, SceneNode* target);
+    std::shared_ptr<SceneNode> duplicateNode(SceneNode* node);
 
 private:
     bool m_visible;
     VoxelWorld* m_world;
     std::shared_ptr<SceneNode> m_rootNode;
     SceneNode* m_selectedNode;
+    
+    // Dialog state
+    bool m_showRenameDialog;
+    bool m_showDeleteDialog;
+    char m_renameBuffer[256];
 };
 
 } // namespace fresh

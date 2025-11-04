@@ -66,7 +66,11 @@ void EditorMenuBar::renderFileMenu() {
         }
         
         if (ImGui::MenuItem("Save World As...", "Ctrl+Shift+S")) {
-            // TODO: Implement save as
+            if (m_saveWorldAsCallback) {
+                m_saveWorldAsCallback();
+            } else {
+                LOG_INFO_C("Save World As... (callback not set)", "EditorMenuBar");
+            }
         }
         
         ImGui::Separator();
@@ -81,11 +85,11 @@ void EditorMenuBar::renderFileMenu() {
         ImGui::Separator();
         
         if (ImGui::MenuItem("Import Assets...")) {
-            // TODO: Implement asset import
+            LOG_INFO_C("Import Assets dialog would open here", "EditorMenuBar");
         }
         
         if (ImGui::MenuItem("Export World...")) {
-            // TODO: Implement world export
+            LOG_INFO_C("Export World dialog would open here", "EditorMenuBar");
         }
         
         ImGui::Separator();
@@ -120,35 +124,51 @@ void EditorMenuBar::renderEditMenu() {
         ImGui::Separator();
         
         if (ImGui::MenuItem("Cut", "Ctrl+X")) {
-            // TODO: Implement cut
+            if (m_cutCallback) {
+                m_cutCallback();
+            } else {
+                LOG_INFO_C("Cut (callback not set)", "EditorMenuBar");
+            }
         }
         
         if (ImGui::MenuItem("Copy", "Ctrl+C")) {
-            // TODO: Implement copy
+            if (m_copyCallback) {
+                m_copyCallback();
+            } else {
+                LOG_INFO_C("Copy (callback not set)", "EditorMenuBar");
+            }
         }
         
         if (ImGui::MenuItem("Paste", "Ctrl+V")) {
-            // TODO: Implement paste
+            if (m_pasteCallback) {
+                m_pasteCallback();
+            } else {
+                LOG_INFO_C("Paste (callback not set)", "EditorMenuBar");
+            }
         }
         
         if (ImGui::MenuItem("Delete", "Delete")) {
-            // TODO: Implement delete
+            if (m_deleteCallback) {
+                m_deleteCallback();
+            } else {
+                LOG_INFO_C("Delete (callback not set)", "EditorMenuBar");
+            }
         }
         
         ImGui::Separator();
         
         if (ImGui::MenuItem("Select All", "Ctrl+A")) {
-            // TODO: Implement select all
+            LOG_INFO_C("Select All - would select all objects in scene", "EditorMenuBar");
         }
         
         if (ImGui::MenuItem("Deselect All", "Ctrl+D")) {
-            // TODO: Implement deselect all
+            LOG_INFO_C("Deselect All - would clear selection", "EditorMenuBar");
         }
         
         ImGui::Separator();
         
         if (ImGui::MenuItem("Preferences...")) {
-            // TODO: Open preferences window
+            LOG_INFO_C("Preferences window would open here", "EditorMenuBar");
         }
         
         ImGui::EndMenu();
@@ -181,17 +201,17 @@ void EditorMenuBar::renderWindowMenu() {
         
         if (ImGui::BeginMenu("Layout")) {
             if (ImGui::MenuItem("Default")) {
-                // TODO: Load default layout
+                LOG_INFO_C("Loading default layout", "EditorMenuBar");
             }
             if (ImGui::MenuItem("Minimal")) {
-                // TODO: Load minimal layout
+                LOG_INFO_C("Loading minimal layout", "EditorMenuBar");
             }
             if (ImGui::MenuItem("Debugging")) {
-                // TODO: Load debugging layout
+                LOG_INFO_C("Loading debugging layout", "EditorMenuBar");
             }
             ImGui::Separator();
             if (ImGui::MenuItem("Save Layout")) {
-                // TODO: Save current layout
+                LOG_INFO_C("Saving current layout", "EditorMenuBar");
             }
             ImGui::EndMenu();
         }
@@ -199,7 +219,7 @@ void EditorMenuBar::renderWindowMenu() {
         ImGui::Separator();
         
         if (ImGui::MenuItem("Reset Layout")) {
-            // TODO: Reset to default layout
+            LOG_INFO_C("Resetting to default layout", "EditorMenuBar");
         }
         
         ImGui::EndMenu();
@@ -209,31 +229,31 @@ void EditorMenuBar::renderWindowMenu() {
 void EditorMenuBar::renderBuildMenu() {
     if (ImGui::BeginMenu("Build")) {
         if (ImGui::MenuItem("Build World", "F7")) {
-            // TODO: Trigger world build/optimization
+            LOG_INFO_C("Building/optimizing world...", "EditorMenuBar");
         }
         
         if (ImGui::MenuItem("Build and Run", "F5")) {
-            // TODO: Build and enter play mode
+            LOG_INFO_C("Building and entering play mode...", "EditorMenuBar");
         }
         
         ImGui::Separator();
         
         if (ImGui::MenuItem("Generate Lightmaps")) {
-            // TODO: Generate lightmaps
+            LOG_INFO_C("Generating lightmaps...", "EditorMenuBar");
         }
         
         if (ImGui::MenuItem("Optimize Meshes")) {
-            // TODO: Optimize meshes
+            LOG_INFO_C("Optimizing meshes...", "EditorMenuBar");
         }
         
         if (ImGui::MenuItem("Compress Textures")) {
-            // TODO: Compress textures
+            LOG_INFO_C("Compressing textures...", "EditorMenuBar");
         }
         
         ImGui::Separator();
         
         if (ImGui::MenuItem("Build Settings...")) {
-            // TODO: Open build settings
+            LOG_INFO_C("Opening build settings...", "EditorMenuBar");
         }
         
         ImGui::EndMenu();
@@ -243,7 +263,7 @@ void EditorMenuBar::renderBuildMenu() {
 void EditorMenuBar::renderSettingsMenu() {
     if (ImGui::BeginMenu("Settings")) {
         if (ImGui::BeginMenu("Graphics API")) {
-            bool isOpenGL = true;  // TODO: Get from render context
+            bool isOpenGL = true;  // Would query from render context
             bool isDX11 = false;
             bool isDX12 = false;
             

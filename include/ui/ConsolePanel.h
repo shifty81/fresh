@@ -3,6 +3,8 @@
 #include <string>
 #include <vector>
 #include <deque>
+#include <map>
+#include <functional>
 
 namespace fresh {
 
@@ -74,10 +76,28 @@ public:
      */
     void clear();
 
+    /**
+     * @brief Register a console command
+     * @param name Command name
+     * @param callback Function to call when command is executed
+     * @param description Command description
+     */
+    void registerCommand(const std::string& name,
+                        std::function<void(const std::vector<std::string>&)> callback,
+                        const std::string& description = "");
+
+    /**
+     * @brief Execute a command string
+     * @param commandLine Full command line with arguments
+     */
+    void executeCommand(const std::string& commandLine);
+
 private:
     void renderMessages();
     void renderCommandInput();
     std::string getTimestamp();
+    void registerDefaultCommands();
+    std::vector<std::string> parseCommandLine(const std::string& commandLine);
 
 private:
     bool m_visible;
@@ -88,6 +108,12 @@ private:
     bool m_filterInfo;
     bool m_filterWarning;
     bool m_filterError;
+
+    struct CommandInfo {
+        std::function<void(const std::vector<std::string>&)> callback;
+        std::string description;
+    };
+    std::map<std::string, CommandInfo> m_commands;
 };
 
 } // namespace fresh

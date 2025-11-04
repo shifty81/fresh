@@ -4,6 +4,8 @@
 #include <chrono>
 #include <iomanip>
 #include <sstream>
+#include <algorithm>
+#include <ctime>
 
 namespace fresh {
 
@@ -22,6 +24,7 @@ ConsolePanel::~ConsolePanel() {
 }
 
 bool ConsolePanel::initialize() {
+    registerDefaultCommands();
     addMessage(ConsoleMessageType::Info, "Console initialized");
     LOG_INFO_C("Console Panel initialized", "ConsolePanel");
     return true;
@@ -139,9 +142,8 @@ void ConsolePanel::renderCommandInput() {
             std::string command(m_commandBuffer);
             addMessage(ConsoleMessageType::Info, "> " + command);
             
-            // TODO: Process command
-            // For now, just echo back
-            addMessage(ConsoleMessageType::Warning, "Command execution not yet implemented");
+            // Process command
+            executeCommand(command);
             
             m_commandBuffer[0] = '\0';
         }
@@ -170,13 +172,140 @@ std::string ConsolePanel::getTimestamp() {
         now.time_since_epoch()) % 1000;
     
     std::tm tm;
+#ifdef _WIN32
     localtime_s(&tm, &time);
+#else
+    localtime_r(&time, &tm);
+#endif
     
     std::ostringstream oss;
     oss << std::put_time(&tm, "%H:%M:%S") << "." 
         << std::setfill('0') << std::setw(3) << ms.count();
     
     return oss.str();
+}
+
+void ConsolePanel::registerCommand(const std::string& name,
+                                   std::function<void(const std::vector<std::string>&)> callback,
+                                   const std::string& description) {
+    CommandInfo info;
+    info.callback = callback;
+    info.description = description;
+    m_commands[name] = info;
+}
+
+void ConsolePanel::executeCommand(const std::string& commandLine) {
+    if (commandLine.empty()) {
+        return;
+    }
+
+    // Parse command line into command and arguments
+    std::vector<std::string> parts = parseCommandLine(commandLine);
+    if (parts.empty()) {
+        return;
+    }
+
+    std::string cmdName = parts[0];
+    std::vector<std::string> args(parts.begin() + 1, parts.end());
+
+    // Find and execute command
+    auto it = m_commands.find(cmdName);
+    if (it != m_commands.end()) {
+        try {
+            it->second.callback(args);
+        } catch (const std::exception& e) {
+            addMessage(ConsoleMessageType::Error, 
+                      "Command error: " + std::string(e.what()));
+        }
+    } else {
+        addMessage(ConsoleMessageType::Error, 
+                  "Unknown command: " + cmdName + ". Type 'help' for available commands.");
+    }
+}
+
+std::vector<std::string> ConsolePanel::parseCommandLine(const std::string& commandLine) {
+    std::vector<std::string> result;
+    std::string current;
+    bool inQuotes = false;
+
+    for (char c : commandLine) {
+        if (c == '"') {
+            inQuotes = !inQuotes;
+        } else if (c == ' ' && !inQuotes) {
+            if (!current.empty()) {
+                result.push_back(current);
+                current.clear();
+            }
+        } else {
+            current += c;
+        }
+    }
+
+    if (!current.empty()) {
+        result.push_back(current);
+    }
+
+    return result;
+}
+
+void ConsolePanel::registerDefaultCommands() {
+    // Help command
+    registerCommand("help", [this](const std::vector<std::string>& args) {
+        if (args.empty()) {
+            addMessage(ConsoleMessageType::Info, "Available commands:");
+            for (const auto& cmd : m_commands) {
+                std::string desc = cmd.second.description.empty() ? 
+                                  "No description" : cmd.second.description;
+                addMessage(ConsoleMessageType::Info, "  " + cmd.first + " - " + desc);
+            }
+        } else {
+            // Show help for specific command
+            auto it = m_commands.find(args[0]);
+            if (it != m_commands.end()) {
+                addMessage(ConsoleMessageType::Info, 
+                          args[0] + ": " + it->second.description);
+            } else {
+                addMessage(ConsoleMessageType::Error, "Unknown command: " + args[0]);
+            }
+        }
+    }, "Display available commands or help for a specific command");
+
+    // Clear command
+    registerCommand("clear", [this](const std::vector<std::string>&) {
+        clear();
+    }, "Clear all console messages");
+
+    // Echo command
+    registerCommand("echo", [this](const std::vector<std::string>& args) {
+        std::string message;
+        for (size_t i = 0; i < args.size(); ++i) {
+            if (i > 0) message += " ";
+            message += args[i];
+        }
+        addMessage(ConsoleMessageType::Info, message);
+    }, "Echo arguments to console");
+
+    // Version command
+    registerCommand("version", [this](const std::vector<std::string>&) {
+        addMessage(ConsoleMessageType::Info, "Fresh Voxel Engine v0.1.0");
+    }, "Display engine version");
+
+    // Info command
+    registerCommand("info", [this](const std::vector<std::string>&) {
+        addMessage(ConsoleMessageType::Info, "=== Engine Information ===");
+        addMessage(ConsoleMessageType::Info, "Engine: Fresh Voxel Engine");
+        addMessage(ConsoleMessageType::Info, "Version: 0.1.0");
+        addMessage(ConsoleMessageType::Info, "Graphics: OpenGL");
+#ifdef _WIN32
+        addMessage(ConsoleMessageType::Info, "Platform: Windows");
+#elif __linux__
+        addMessage(ConsoleMessageType::Info, "Platform: Linux");
+#elif __APPLE__
+        addMessage(ConsoleMessageType::Info, "Platform: macOS");
+#else
+        addMessage(ConsoleMessageType::Info, "Platform: Unknown");
+#endif
+    }, "Display engine information");
 }
 
 } // namespace fresh

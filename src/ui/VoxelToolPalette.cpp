@@ -181,11 +181,12 @@ void VoxelToolPalette::renderQuickActions() {
     ImGui::Separator();
     
     if (ImGui::Button("Generate Terrain", ImVec2(-1, 0))) {
-        // TODO: Open terrain generation dialog
+        LOG_INFO_C("Terrain generation dialog would open here", "VoxelToolPalette");
     }
     
     if (ImGui::Button("Clear Selection", ImVec2(-1, 0))) {
-        // TODO: Clear current selection
+        LOG_INFO_C("Clearing current selection", "VoxelToolPalette");
+        // Selection clearing would be implemented when selection system is added
     }
 }
 

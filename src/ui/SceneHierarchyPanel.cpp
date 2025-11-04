@@ -2,6 +2,7 @@
 #include "voxel/VoxelWorld.h"
 #include "core/Logger.h"
 #include <imgui.h>
+#include <cstring>
 
 namespace fresh {
 
@@ -10,8 +11,11 @@ SceneHierarchyPanel::SceneHierarchyPanel()
     , m_world(nullptr)
     , m_rootNode(nullptr)
     , m_selectedNode(nullptr)
+    , m_showRenameDialog(false)
+    , m_showDeleteDialog(false)
 {
     m_rootNode = std::make_shared<SceneNode>("Scene Root");
+    m_renameBuffer[0] = '\0';
 }
 
 SceneHierarchyPanel::~SceneHierarchyPanel() {
@@ -53,6 +57,55 @@ void SceneHierarchyPanel::render() {
     // Render hierarchy tree
     if (m_rootNode) {
         renderNode(m_rootNode.get());
+    }
+    
+    // Render dialogs
+    if (m_showRenameDialog && m_selectedNode) {
+        ImGui::OpenPopup("Rename Node");
+        if (ImGui::BeginPopupModal("Rename Node", nullptr, ImGuiWindowFlags_AlwaysAutoResize)) {
+            ImGui::Text("Enter new name for '%s':", m_selectedNode->name.c_str());
+            ImGui::InputText("##rename", m_renameBuffer, sizeof(m_renameBuffer));
+            ImGui::Separator();
+            
+            if (ImGui::Button("Rename", ImVec2(120, 0))) {
+                if (m_renameBuffer[0] != '\0') {
+                    if (renameSelectedNode(std::string(m_renameBuffer))) {
+                        LOG_INFO_C("Renamed node to: " + std::string(m_renameBuffer), "SceneHierarchyPanel");
+                    }
+                }
+                m_showRenameDialog = false;
+                ImGui::CloseCurrentPopup();
+            }
+            ImGui::SameLine();
+            if (ImGui::Button("Cancel", ImVec2(120, 0))) {
+                m_showRenameDialog = false;
+                ImGui::CloseCurrentPopup();
+            }
+            ImGui::EndPopup();
+        }
+    }
+    
+    if (m_showDeleteDialog && m_selectedNode) {
+        ImGui::OpenPopup("Delete Node?");
+        if (ImGui::BeginPopupModal("Delete Node?", nullptr, ImGuiWindowFlags_AlwaysAutoResize)) {
+            ImGui::Text("Are you sure you want to delete '%s'?", m_selectedNode->name.c_str());
+            ImGui::Text("This will delete the node and all its children.");
+            ImGui::Separator();
+            
+            if (ImGui::Button("Delete", ImVec2(120, 0))) {
+                if (deleteSelectedNode()) {
+                    LOG_INFO_C("Deleted node: " + m_selectedNode->name, "SceneHierarchyPanel");
+                }
+                m_showDeleteDialog = false;
+                ImGui::CloseCurrentPopup();
+            }
+            ImGui::SameLine();
+            if (ImGui::Button("Cancel", ImVec2(120, 0))) {
+                m_showDeleteDialog = false;
+                ImGui::CloseCurrentPopup();
+            }
+            ImGui::EndPopup();
+        }
     }
 
     ImGui::End();
@@ -97,13 +150,17 @@ void SceneHierarchyPanel::renderNode(SceneNode* node) {
     // Context menu
     if (ImGui::BeginPopupContextItem()) {
         if (ImGui::MenuItem("Rename")) {
-            // TODO: Implement rename dialog
+            m_showRenameDialog = true;
+            strncpy(m_renameBuffer, node->name.c_str(), sizeof(m_renameBuffer) - 1);
+            m_renameBuffer[sizeof(m_renameBuffer) - 1] = '\0';
         }
         if (ImGui::MenuItem("Duplicate")) {
-            // TODO: Implement duplication
+            if (duplicateSelectedNode()) {
+                LOG_INFO_C("Duplicated node: " + node->name, "SceneHierarchyPanel");
+            }
         }
         if (ImGui::MenuItem("Delete")) {
-            // TODO: Implement deletion
+            m_showDeleteDialog = true;
         }
         ImGui::Separator();
         if (ImGui::MenuItem(node->visible ? "Hide" : "Show")) {
@@ -169,6 +226,96 @@ void SceneHierarchyPanel::buildHierarchyFromWorld() {
 void SceneHierarchyPanel::refresh() {
     buildHierarchyFromWorld();
     LOG_INFO_C("Scene hierarchy refreshed", "SceneHierarchyPanel");
+}
+
+bool SceneHierarchyPanel::renameSelectedNode(const std::string& newName) {
+    if (!m_selectedNode || newName.empty()) {
+        return false;
+    }
+    
+    m_selectedNode->name = newName;
+    return true;
+}
+
+bool SceneHierarchyPanel::duplicateSelectedNode() {
+    if (!m_selectedNode || !m_rootNode) {
+        return false;
+    }
+    
+    // Create a duplicate of the node
+    auto duplicatedNode = duplicateNode(m_selectedNode);
+    if (!duplicatedNode) {
+        return false;
+    }
+    
+    // Find parent and add duplicate as sibling
+    // For simplicity, add to root for now
+    m_rootNode->children.push_back(duplicatedNode);
+    
+    return true;
+}
+
+bool SceneHierarchyPanel::deleteSelectedNode() {
+    if (!m_selectedNode || !m_rootNode) {
+        return false;
+    }
+    
+    // Don't allow deleting root
+    if (m_selectedNode == m_rootNode.get()) {
+        LOG_WARNING_C("Cannot delete root node", "SceneHierarchyPanel");
+        return false;
+    }
+    
+    // Find and remove the node
+    bool removed = findAndRemoveNode(m_rootNode, m_selectedNode);
+    if (removed) {
+        m_selectedNode = nullptr;
+    }
+    
+    return removed;
+}
+
+bool SceneHierarchyPanel::findAndRemoveNode(std::shared_ptr<SceneNode>& parent, SceneNode* target) {
+    if (!parent || !target) {
+        return false;
+    }
+    
+    // Check direct children
+    for (auto it = parent->children.begin(); it != parent->children.end(); ++it) {
+        if (it->get() == target) {
+            parent->children.erase(it);
+            return true;
+        }
+    }
+    
+    // Recursively search children
+    for (auto& child : parent->children) {
+        if (findAndRemoveNode(child, target)) {
+            return true;
+        }
+    }
+    
+    return false;
+}
+
+std::shared_ptr<SceneNode> SceneHierarchyPanel::duplicateNode(SceneNode* node) {
+    if (!node) {
+        return nullptr;
+    }
+    
+    auto duplicate = std::make_shared<SceneNode>(node->name + " (Copy)");
+    duplicate->visible = node->visible;
+    duplicate->userData = node->userData;
+    
+    // Recursively duplicate children
+    for (auto& child : node->children) {
+        auto childDuplicate = duplicateNode(child.get());
+        if (childDuplicate) {
+            duplicate->children.push_back(childDuplicate);
+        }
+    }
+    
+    return duplicate;
 }
 
 } // namespace fresh

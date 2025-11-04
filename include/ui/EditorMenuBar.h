@@ -39,10 +39,15 @@ public:
      */
     void setNewWorldCallback(MenuCallback callback) { m_newWorldCallback = callback; }
     void setSaveWorldCallback(MenuCallback callback) { m_saveWorldCallback = callback; }
+    void setSaveWorldAsCallback(MenuCallback callback) { m_saveWorldAsCallback = callback; }
     void setLoadWorldCallback(MenuCallback callback) { m_loadWorldCallback = callback; }
     void setExitCallback(MenuCallback callback) { m_exitCallback = callback; }
     void setUndoCallback(MenuCallback callback) { m_undoCallback = callback; }
     void setRedoCallback(MenuCallback callback) { m_redoCallback = callback; }
+    void setCutCallback(MenuCallback callback) { m_cutCallback = callback; }
+    void setCopyCallback(MenuCallback callback) { m_copyCallback = callback; }
+    void setPasteCallback(MenuCallback callback) { m_pasteCallback = callback; }
+    void setDeleteCallback(MenuCallback callback) { m_deleteCallback = callback; }
 
 private:
     void renderFileMenu();
@@ -59,10 +64,15 @@ private:
     // Menu callbacks
     MenuCallback m_newWorldCallback;
     MenuCallback m_saveWorldCallback;
+    MenuCallback m_saveWorldAsCallback;
     MenuCallback m_loadWorldCallback;
     MenuCallback m_exitCallback;
     MenuCallback m_undoCallback;
     MenuCallback m_redoCallback;
+    MenuCallback m_cutCallback;
+    MenuCallback m_copyCallback;
+    MenuCallback m_pasteCallback;
+    MenuCallback m_deleteCallback;
     
     // Window visibility flags (shared with other systems)
     bool* m_showSceneHierarchy;
