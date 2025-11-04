@@ -4,7 +4,9 @@
 
 namespace fresh {
 
-class Entity;
+// Forward declare from ECS namespace
+namespace ecs { class Entity; }
+
 class BehaviorTree;
 
 // Forward declare implementation
@@ -35,13 +37,13 @@ public:
      * @param entity Entity to control
      * @param behavior Behavior tree for decision making
      */
-    void addNPC(std::unique_ptr<Entity> entity, std::unique_ptr<BehaviorTree> behavior);
+    void addNPC(std::unique_ptr<ecs::Entity> entity, std::unique_ptr<BehaviorTree> behavior);
     
     /**
      * @brief Remove an NPC from the system
      * @param entity Entity to remove
      */
-    void removeNPC(Entity* entity);
+    void removeNPC(ecs::Entity* entity);
     
     /**
      * @brief Get number of active NPCs

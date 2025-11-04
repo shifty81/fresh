@@ -4,14 +4,18 @@
 #include "core/Logger.h"
 #include <vector>
 #include <memory>
+#include <algorithm>
 
 namespace fresh {
+
+// Use the ecs::Entity type
+using Entity = ecs::Entity;
 
 /**
  * @brief Internal NPC data structure
  */
 struct NPC {
-    std::unique_ptr<Entity> entity;
+    std::unique_ptr<ecs::Entity> entity;
     std::unique_ptr<BehaviorTree> behaviorTree;
     bool active = true;
 };
@@ -45,14 +49,14 @@ void AISystem::update(float deltaTime) {
     }
 }
 
-void AISystem::addNPC(std::unique_ptr<Entity> entity, std::unique_ptr<BehaviorTree> behavior) {
+void AISystem::addNPC(std::unique_ptr<ecs::Entity> entity, std::unique_ptr<BehaviorTree> behavior) {
     auto npc = std::make_unique<NPC>();
     npc->entity = std::move(entity);
     npc->behaviorTree = std::move(behavior);
     pImpl->npcs.push_back(std::move(npc));
 }
 
-void AISystem::removeNPC(Entity* entity) {
+void AISystem::removeNPC(ecs::Entity* entity) {
     pImpl->npcs.erase(
         std::remove_if(pImpl->npcs.begin(), pImpl->npcs.end(),
             [entity](const std::unique_ptr<NPC>& npc) {

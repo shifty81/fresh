@@ -2,6 +2,7 @@
 
 #include <glm/glm.hpp>
 #include "physics/CollisionDetection.h"
+#include "voxel/VoxelTypes.h"
 
 namespace fresh {
 

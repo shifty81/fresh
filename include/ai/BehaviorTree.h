@@ -1,8 +1,12 @@
 #pragma once
 
+#include <vector>
+#include <glm/glm.hpp>
+
 namespace fresh {
 
-class Entity;
+// Forward declare from ECS namespace
+namespace ecs { class Entity; }
 class VoxelWorld;
 
 /**
@@ -20,7 +24,7 @@ enum class NodeStatus {
 class BehaviorNode {
 public:
     virtual ~BehaviorNode() = default;
-    virtual NodeStatus execute(Entity* entity, float deltaTime) = 0;
+    virtual NodeStatus execute(ecs::Entity* entity, float deltaTime) = 0;
 };
 
 /**
@@ -39,7 +43,7 @@ public:
     /**
      * @brief Execute the behavior tree
      */
-    NodeStatus tick(Entity* entity, float deltaTime);
+    NodeStatus tick(ecs::Entity* entity, float deltaTime);
     
 private:
     BehaviorNode* rootNode;
@@ -51,7 +55,7 @@ private:
 class SequenceNode : public BehaviorNode {
 public:
     void addChild(BehaviorNode* child);
-    NodeStatus execute(Entity* entity, float deltaTime) override;
+    NodeStatus execute(ecs::Entity* entity, float deltaTime) override;
     
 private:
     std::vector<BehaviorNode*> children;
@@ -63,7 +67,7 @@ private:
 class SelectorNode : public BehaviorNode {
 public:
     void addChild(BehaviorNode* child);
-    NodeStatus execute(Entity* entity, float deltaTime) override;
+    NodeStatus execute(ecs::Entity* entity, float deltaTime) override;
     
 private:
     std::vector<BehaviorNode*> children;
@@ -75,7 +79,7 @@ private:
 class WanderBehavior : public BehaviorNode {
 public:
     WanderBehavior(VoxelWorld* world);
-    NodeStatus execute(Entity* entity, float deltaTime) override;
+    NodeStatus execute(ecs::Entity* entity, float deltaTime) override;
     
 private:
     VoxelWorld* world;
@@ -88,11 +92,11 @@ private:
  */
 class FollowBehavior : public BehaviorNode {
 public:
-    FollowBehavior(Entity* target, float followDistance = 5.0f);
-    NodeStatus execute(Entity* entity, float deltaTime) override;
+    FollowBehavior(ecs::Entity* target, float followDistance = 5.0f);
+    NodeStatus execute(ecs::Entity* entity, float deltaTime) override;
     
 private:
-    Entity* targetEntity;
+    ecs::Entity* targetEntity;
     float followDistance;
 };
 

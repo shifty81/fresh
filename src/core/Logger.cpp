@@ -4,10 +4,16 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 
-// Windows-only build
-#include <direct.h>
-#define MKDIR(path) _mkdir(path)
-#define PATH_SEPARATOR "\\"
+// Cross-platform directory creation
+#ifdef _WIN32
+    #include <direct.h>
+    #define MKDIR(path) _mkdir(path)
+    #define PATH_SEPARATOR "\\"
+#else
+    #include <unistd.h>
+    #define MKDIR(path) mkdir(path, 0755)
+    #define PATH_SEPARATOR "/"
+#endif
 
 namespace fresh {
 
@@ -173,9 +179,13 @@ std::string Logger::getTimestamp() const {
         now.time_since_epoch()) % 1000;
     
     std::stringstream ss;
-    // Use Windows-specific thread-safe version of localtime
+    // Cross-platform thread-safe version of localtime
     std::tm tm_info;
+#ifdef _WIN32
     localtime_s(&tm_info, &time);
+#else
+    localtime_r(&time, &tm_info);
+#endif
     ss << std::put_time(&tm_info, "%Y-%m-%d_%H-%M-%S");
     ss << "." << std::setfill('0') << std::setw(3) << ms.count();
     
