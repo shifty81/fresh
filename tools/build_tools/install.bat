@@ -301,6 +301,17 @@ echo. >> "%LOG_FILE%"
 REM Check if vcpkg executable exists
 echo Checking for vcpkg executable...
 echo Checking for vcpkg executable... >> "%LOG_FILE%"
+echo Checking path: %VCPKG_ROOT%\vcpkg.exe >> "%LOG_FILE%"
+echo.
+echo. >> "%LOG_FILE%"
+
+REM Use a more robust existence check
+if not defined VCPKG_ROOT (
+    echo %RED%ERROR: VCPKG_ROOT variable is not set%RESET%
+    echo ERROR: VCPKG_ROOT variable is not set >> "%LOG_FILE%"
+    pause
+    exit /b 1
+)
 
 if exist "%VCPKG_ROOT%\vcpkg.exe" (
     echo %GREEN%✓ vcpkg found at: %VCPKG_ROOT%\vcpkg.exe%RESET%
