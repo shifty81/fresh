@@ -14,6 +14,8 @@ A modern **cross-platform** voxel-based game engine built with **C++20**, featur
 **Platform Support:** Windows, Linux, macOS  
 **Graphics APIs:** DirectX 11/12 (Windows), OpenGL 4.5+ (All Platforms)
 
+> 📚 **New to Fresh?** See [DOCUMENTATION_INDEX.md](DOCUMENTATION_INDEX.md) for a guide to all documentation.
+
 ---
 
 ## 🎨 Graphics API Support
@@ -41,41 +43,53 @@ The engine **automatically detects and selects** the best available graphics API
 
 ### 📖 New User? Start Here!
 
-**For Visual Studio 2022 users with step-by-step visual instructions:**
-- 👉 **[QUICKSTART_VISUAL.md](QUICKSTART_VISUAL.md)** - Complete visual guide with screenshots and troubleshooting
+**Complete installation in 3 steps:**
 
-### Windows
+1. **Clone the repository**
+   ```batch
+   git clone https://github.com/shifty81/fresh.git
+   cd fresh
+   ```
 
-**New to the project?** Check out [VS2022_MIGRATION_GUIDE.md](VS2022_MIGRATION_GUIDE.md) for a complete overview!
+2. **Run the installer**
+   ```batch
+   install.bat
+   ```
+   The installer will automatically:
+   - Check prerequisites (CMake, Visual Studio 2022)
+   - Install vcpkg package manager and dependencies
+   - Generate Visual Studio 2022 solution
+   - Build the engine
+   
+   *Estimated time: 10-20 minutes*
 
-#### Option 1: Automated Installation (Recommended)
+3. **Open and run**
+   - Open `build\FreshVoxelEngine.sln` in Visual Studio 2022
+   - Right-click "FreshVoxelEngine" project → "Set as Startup Project"
+   - Press F5 to build and run
+
+**Need help?** See [QUICKSTART_VISUAL.md](QUICKSTART_VISUAL.md) for step-by-step guide with screenshots.
+
+**Lost in documentation?** See [DOCUMENTATION_INDEX.md](DOCUMENTATION_INDEX.md) to find what you need.
+
+### Alternative Installation Methods
+
+<details>
+<summary><b>Option 2: Build All (Includes .NET 9 support)</b></summary>
 
 ```batch
-# Clone the repository
-git clone https://github.com/shifty81/fresh.git
-cd fresh
-
-# Complete automated build (includes .NET 9 support)
+# Complete automated build with .NET 9 bindings
 build_all.bat
-
-# Or use the traditional installer
-install.bat
 ```
 
-The automated build will:
-- ✅ Check prerequisites (CMake, Visual Studio 2022, .NET 9 SDK)
-- ✅ Generate Visual Studio 2022 solution
-- ✅ Build native C++ engine (DirectX 11/12)
-- ✅ Build .NET 9 managed wrapper (optional)
-- ✅ Verify all components
+For .NET 9 development, run `check_dotnet.bat` to verify .NET SDK installation.
 
-**For .NET 9 Development**: Run `check_dotnet.bat` to verify .NET SDK installation.
+</details>
 
-See [VS2022_MIGRATION_GUIDE.md](VS2022_MIGRATION_GUIDE.md) for detailed setup instructions.
+<details>
+<summary><b>Option 3: Manual Setup (Advanced users)</b></summary>
 
-#### Option 2: Manual Setup
-
-**Note**: This option requires you to install dependencies (GLFW, GLM, ImGui) manually before building. We recommend using Option 1 (automated build) instead.
+**Note**: Requires manual dependency installation. We recommend Option 1 instead.
 
 ```batch
 # Clone the repository
@@ -90,13 +104,16 @@ generate_vs2022.bat
 start build\FreshVoxelEngine.sln
 ```
 
-If you see dependency warnings, either:
-- Run `install.bat` to set up vcpkg and automatically install dependencies
-- See [DEVELOPER_SETUP.md](DEVELOPER_SETUP.md) for manual dependency installation instructions
+If you see dependency warnings:
+- Run `install.bat` to automatically install dependencies
+- Or see [DEVELOPER_SETUP.md](DEVELOPER_SETUP.md) for manual installation
 
-See [VISUAL_STUDIO_SETUP.md](VISUAL_STUDIO_SETUP.md) for detailed Visual Studio instructions.
+</details>
 
-### Linux
+### Linux & macOS
+
+<details>
+<summary><b>Linux Installation</b></summary>
 
 ```bash
 # Clone the repository
@@ -118,7 +135,10 @@ make -j$(nproc)
 
 For other Linux distributions, see [CROSS_PLATFORM_BUILD.md](CROSS_PLATFORM_BUILD.md).
 
-### macOS
+</details>
+
+<details>
+<summary><b>macOS Installation</b></summary>
 
 ```bash
 # Clone the repository
@@ -137,7 +157,9 @@ make -j$(sysctl -n hw.ncpu)
 ./FreshVoxelEngine
 ```
 
-For detailed cross-platform build instructions, see **[CROSS_PLATFORM_BUILD.md](CROSS_PLATFORM_BUILD.md)**.
+For detailed cross-platform build instructions, see [CROSS_PLATFORM_BUILD.md](CROSS_PLATFORM_BUILD.md).
+
+</details>
 
 ---
 
