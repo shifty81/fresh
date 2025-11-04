@@ -217,6 +217,13 @@ if exist "%VCPKG_ROOT%\vcpkg.exe" (
         echo %YELLOW%Downloading and bootstrapping vcpkg. Progress will be shown below.%RESET%
         echo.
         cd /d "%VCPKG_ROOT%"
+        if !ERRORLEVEL! NEQ 0 (
+            echo %RED%ERROR: Failed to change to vcpkg directory%RESET%
+            echo ERROR: Failed to change to vcpkg directory >> "%LOG_FILE%"
+            echo Expected: %VCPKG_ROOT% >> "%LOG_FILE%"
+            pause
+            exit /b 1
+        )
         call bootstrap-vcpkg.bat
         if !ERRORLEVEL! NEQ 0 (
             echo.
@@ -402,7 +409,7 @@ echo. >> "%LOG_FILE%"
 REM Create build directory if it doesn't exist
 if not exist "build" mkdir build
 
-cd build
+cd /d build
 
 REM Generate project files
 echo Running CMake...
