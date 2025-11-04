@@ -23,6 +23,55 @@ $ErrorActionPreference = "Stop"
 # Enable verbose output
 $VerbosePreference = "Continue"
 
+# Global error handler - trap all unhandled errors
+trap {
+    $errorDetails = @"
+
+============================================================================
+CRITICAL ERROR OCCURRED
+============================================================================
+Error Message: $($_.Exception.Message)
+Error Type: $($_.Exception.GetType().FullName)
+Script Line: $($_.InvocationInfo.ScriptLineNumber)
+Line Content: $($_.InvocationInfo.Line.Trim())
+Position: $($_.InvocationInfo.PositionMessage)
+
+Stack Trace:
+$($_.ScriptStackTrace)
+
+Full Exception:
+$($_ | Format-List -Force | Out-String)
+============================================================================
+
+"@
+    
+    Write-Host $errorDetails -ForegroundColor Red
+    
+    # Try to log to file if LogFile variable exists
+    if ($script:LogFile -and (Test-Path (Split-Path $script:LogFile -Parent))) {
+        try {
+            Add-Content -Path $script:LogFile -Value $errorDetails
+            Write-Host "`nError details have been logged to: $script:LogFile" -ForegroundColor Yellow
+        }
+        catch {
+            Write-Host "`nWARNING: Could not write error to log file: $_" -ForegroundColor Yellow
+            Write-Host "Log file path was: $script:LogFile" -ForegroundColor Yellow
+        }
+    }
+    else {
+        Write-Host "`nWARNING: Log file not available - error details shown above only" -ForegroundColor Yellow
+    }
+    
+    Write-Host "`nPress any key to exit..." -ForegroundColor Gray
+    try {
+        $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
+    }
+    catch {
+        # If ReadKey fails, just exit
+    }
+    exit 1
+}
+
 #region Helper Functions
 
 function Show-AnimatedBanner {
@@ -178,10 +227,40 @@ function Write-Warning {
 function Write-ErrorMessage {
     param(
         [Parameter(Mandatory=$true)]
-        [string]$Message
+        [string]$Message,
+        
+        [Parameter(Mandatory=$false)]
+        [System.Management.Automation.ErrorRecord]$ErrorRecord
     )
     
-    Write-ColorOutput "✗ ERROR: $Message" -ForegroundColor Red
+    $errorOutput = "✗ ERROR: $Message"
+    Write-ColorOutput $errorOutput -ForegroundColor Red
+    
+    # Log to file with detailed information
+    if ($script:LogFile) {
+        try {
+            Add-Content -Path $script:LogFile -Value "`n$errorOutput"
+            
+            if ($ErrorRecord) {
+                $errorDetails = @"
+  Error Details:
+    - Exception Type: $($ErrorRecord.Exception.GetType().FullName)
+    - Exception Message: $($ErrorRecord.Exception.Message)
+    - Script Line: $($ErrorRecord.InvocationInfo.ScriptLineNumber)
+    - Line Content: $($ErrorRecord.InvocationInfo.Line.Trim())
+    - Position: Line $($ErrorRecord.InvocationInfo.ScriptLineNumber), Char $($ErrorRecord.InvocationInfo.OffsetInLine)
+    - Stack Trace: $($ErrorRecord.ScriptStackTrace)
+"@
+                Add-Content -Path $script:LogFile -Value $errorDetails
+                
+                # Also display abbreviated error info to console
+                Write-Host "  └─ At line $($ErrorRecord.InvocationInfo.ScriptLineNumber): $($ErrorRecord.Exception.Message)" -ForegroundColor DarkRed
+            }
+        }
+        catch {
+            Write-Host "  └─ WARNING: Could not write error details to log file" -ForegroundColor Yellow
+        }
+    }
 }
 
 function Write-LogAndConsole {
@@ -190,12 +269,20 @@ function Write-LogAndConsole {
         [string]$Message,
         
         [Parameter(Mandatory=$false)]
-        [string]$LogFile
+        [string]$ForegroundColor = "White"
     )
     
-    Write-Host $Message
-    if ($LogFile) {
-        Add-Content -Path $LogFile -Value $Message
+    Write-Host $Message -ForegroundColor $ForegroundColor
+    if ($script:LogFile) {
+        try {
+            # Strip ANSI color codes and special characters for log file
+            $cleanMessage = $Message -replace '\x1b\[[0-9;]*m', ''
+            Add-Content -Path $script:LogFile -Value $cleanMessage
+        }
+        catch {
+            # Silently fail if we can't write to log
+            Write-Verbose "Could not write to log file: $_"
+        }
     }
 }
 
@@ -208,24 +295,65 @@ function Invoke-CommandWithLogging {
         [string]$ErrorMessage,
         
         [Parameter(Mandatory=$false)]
-        [string]$LogFile
+        [string]$LogFile,
+        
+        [Parameter(Mandatory=$false)]
+        [string]$SuccessMessage
     )
     
     try {
-        & $Command
-        if ($LASTEXITCODE -ne 0 -and $null -ne $LASTEXITCODE) {
-            throw "$ErrorMessage (Exit code: $LASTEXITCODE)"
+        if ($LogFile) {
+            Add-Content -Path $LogFile -Value "[$(Get-Date -Format 'HH:mm:ss')] Executing: $($Command.ToString().Trim())"
         }
+        
+        $output = & $Command 2>&1
+        
+        # Log command output
+        if ($output -and $LogFile) {
+            Add-Content -Path $LogFile -Value "Command output:"
+            Add-Content -Path $LogFile -Value ($output | Out-String)
+        }
+        
+        if ($LASTEXITCODE -ne 0 -and $null -ne $LASTEXITCODE) {
+            $exitCodeError = "$ErrorMessage (Exit code: $LASTEXITCODE)"
+            if ($LogFile) {
+                Add-Content -Path $LogFile -Value "ERROR: $exitCodeError"
+                if ($output) {
+                    Add-Content -Path $LogFile -Value "Last output before failure:"
+                    Add-Content -Path $LogFile -Value ($output | Out-String)
+                }
+            }
+            throw $exitCodeError
+        }
+        
+        if ($SuccessMessage) {
+            Write-Success $SuccessMessage
+            if ($LogFile) {
+                Add-Content -Path $LogFile -Value "SUCCESS: $SuccessMessage"
+            }
+        }
+        
         return $true
     }
     catch {
-        Write-ErrorMessage $ErrorMessage
+        Write-ErrorMessage $ErrorMessage -ErrorRecord $_
         if ($LogFile) {
-            Add-Content -Path $LogFile -Value "ERROR: $ErrorMessage"
-            Add-Content -Path $LogFile -Value "Details: $_"
+            Add-Content -Path $LogFile -Value "`nERROR: $ErrorMessage"
+            Add-Content -Path $LogFile -Value "Exception Details: $($_.Exception.Message)"
+            Add-Content -Path $LogFile -Value "Stack Trace: $($_.ScriptStackTrace)"
+            
+            # Log the last exit code if available
+            if ($null -ne $LASTEXITCODE) {
+                Add-Content -Path $LogFile -Value "Last Exit Code: $LASTEXITCODE"
+            }
         }
-        Write-Host "`nPress any key to exit..."
-        $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
+        Write-Host "`nPress any key to exit..." -ForegroundColor Gray
+        try {
+            $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
+        }
+        catch {
+            # If ReadKey fails, just continue to exit
+        }
         exit 1
     }
 }
@@ -246,7 +374,7 @@ if (-not (Test-Path $LogDir)) {
 }
 
 $Timestamp = Get-Date -Format "yyyy-MM-dd_HH-mm-ss"
-$LogFile = Join-Path $LogDir "install_log_$Timestamp.txt"
+$script:LogFile = Join-Path $LogDir "install_log_$Timestamp.txt"
 
 # Create log file with header
 $LogHeader = @"
@@ -254,19 +382,37 @@ $LogHeader = @"
 Fresh Voxel Engine - Installation Log
 Started: $(Get-Date -Format "yyyy-MM-dd HH:mm:ss")
 PowerShell Version: $($PSVersionTable.PSVersion)
+Operating System: $([System.Environment]::OSVersion.VersionString)
+Computer Name: $env:COMPUTERNAME
+User: $env:USERNAME
+Script Path: $PSCommandPath
+Repository Root: $RepoRoot
 ============================================================================
 
 "@
-Set-Content -Path $LogFile -Value $LogHeader
+
+try {
+    Set-Content -Path $script:LogFile -Value $LogHeader
+    # Verify we can write to the log file
+    Add-Content -Path $script:LogFile -Value "Log file initialized successfully`n"
+    Write-Verbose "Log file created and verified: $script:LogFile"
+}
+catch {
+    Write-Host "ERROR: Cannot create or write to log file at: $script:LogFile" -ForegroundColor Red
+    Write-Host "Error details: $_" -ForegroundColor Red
+    Write-Host "The installation will continue but errors will only be shown in the console." -ForegroundColor Yellow
+    Write-Host "`nPress any key to continue or Ctrl+C to cancel..." -ForegroundColor Gray
+    $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
+}
 
 # Display animated banner
 Show-AnimatedBanner
 
 # Display welcome message
 Write-Host "    📁 Log file: " -ForegroundColor Gray -NoNewline
-Write-Host $LogFile -ForegroundColor White
+Write-Host $script:LogFile -ForegroundColor White
 Write-Host ""
-Add-Content -Path $LogFile -Value "Log file: $LogFile`n"
+Add-Content -Path $script:LogFile -Value "Log file: $script:LogFile`n"
 
 Write-Host "    This automated installation will:" -ForegroundColor White
 Write-Host "      1. " -ForegroundColor DarkGray -NoNewline
@@ -281,7 +427,7 @@ Write-Host "      5. " -ForegroundColor DarkGray -NoNewline
 Write-Host "Build the engine (dependencies installed during CMake)" -ForegroundColor Gray
 Write-Host ""
 
-Add-Content -Path $LogFile -Value @"
+Add-Content -Path $script:LogFile -Value @"
 This script will:
   1. Check for prerequisites (CMake, Visual Studio)
   2. Install vcpkg package manager (optional)
@@ -823,7 +969,7 @@ Write-Host "       • docs/EDITOR_INTEGRATION.md - Editor guide" -ForegroundCol
 Write-Host ""
 
 Write-Host $finalMessage
-Add-Content -Path $LogFile -Value $finalMessage
+Add-Content -Path $script:LogFile -Value $finalMessage
 
 Write-Host ""
 Write-Host "    ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓" -ForegroundColor DarkCyan
@@ -832,12 +978,12 @@ Write-Host "    " -NoNewline
 Write-ColorOutput "🚀 Thank you for installing Fresh Voxel Engine! 🚀" -ForegroundColor Cyan
 Write-Host ""
 Write-Host "    📝 Complete installation log saved to:" -ForegroundColor Gray
-Write-Host "       $LogFile" -ForegroundColor White
+Write-Host "       $script:LogFile" -ForegroundColor White
 Write-Host ""
 Write-Host "    ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓" -ForegroundColor DarkCyan
 Write-Host "          ░▒▓█► I N S T A L L E R   D E S I G N E D   B Y:  S H I F T Y ◄█▓▒░          " -ForegroundColor Magenta
 Write-Host "    ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓" -ForegroundColor DarkCyan
-Add-Content -Path $LogFile -Value "Complete installation log saved to: $LogFile"
+Add-Content -Path $script:LogFile -Value "Complete installation log saved to: $script:LogFile"
 
 Write-Host ""
 Write-Host "    Press any key to exit..." -ForegroundColor Gray
