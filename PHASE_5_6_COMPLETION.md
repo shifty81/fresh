@@ -86,8 +86,8 @@ Phase 5-6 of the Fresh Voxel Engine project has been successfully completed! Thi
 
 **Graphics API Selection Logic**:
 - Windows: Prefers DirectX 12 > DirectX 11 > OpenGL
-- Linux/macOS: Uses OpenGL
-- Can be manually specified or auto-detected
+- Auto-detection based on system capabilities
+- Can be manually specified in configuration
 
 ### 4. Window & Event Handling Improvements ✅
 **Location**: `src/core/Engine.cpp`, `include/core/Window.h`
@@ -181,7 +181,7 @@ This is by design - Phase 5-6 focused on **player interaction systems**, not ren
 ## Testing & Validation
 
 ### Manual Testing Performed
-1. ✅ Built successfully on Ubuntu with GCC 13.3.0
+1. ✅ Built successfully on Windows with MSVC
 2. ✅ Verified all systems initialize without errors
 3. ✅ Confirmed frame rate limiter works (60 FPS vs 100k+)
 4. ✅ Tested window close with ESC and X button

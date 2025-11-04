@@ -4,7 +4,7 @@ This document describes the GitHub Actions workflows used in the Fresh Voxel Eng
 
 ## Overview
 
-The repository uses GitHub Actions for continuous integration (CI) and quality assurance. All workflows are defined in the `.github/workflows/` directory.
+The repository uses GitHub Actions for continuous integration (CI) on Windows. All workflows are defined in the `.github/workflows/` directory.
 
 **Note:** The CI workflow is currently disabled (renamed to `ci.yml.disabled`). To re-enable it, rename the file back to `ci.yml`.
 
@@ -14,38 +14,15 @@ The main CI workflow runs on every push to `main` and `develop` branches, as wel
 
 ### Jobs
 
-#### 1. **build-linux**
-Builds and tests the project on Ubuntu Linux with multiple compiler configurations.
-
-**Build Matrix:**
-- **Build Types:** Debug, Release
-- **Compilers:**
-  - GCC 11 (gcc-11/g++-11)
-  - GCC 12 (gcc-12/g++-12)
-  - Clang 14 (clang-14/clang++-14)
-
-**Steps:**
-1. Checks out the repository
-2. Installs dependencies (CMake, Ninja, Vulkan SDK, GLFW, GLM, GoogleTest, Vulkan tools)
-3. Configures CMake with Ninja generator
-4. Builds the project using the configured build type
-5. Runs CTest test suite with verbose output
-6. Uploads build artifacts (Release build with GCC 12 only)
-   - Artifact name: `fresh-linux-x64`
-   - Contents: FreshVoxelEngine binary and shaders
-   - Retention: 7 days
-
-**Purpose:** Ensures the code builds correctly on Linux with multiple compilers and passes all tests.
-
-#### 2. **build-windows**
-Builds and tests the project on Windows.
+#### **build-windows**
+Builds and tests the project on Windows with DirectX and OpenGL support.
 
 **Build Matrix:**
 - **Build Types:** Debug, Release
 
 **Steps:**
 1. Checks out the repository
-2. Sets up Vulkan SDK using humbletim/setup-vulkan-sdk action
+2. Sets up DirectX SDK (included with Windows SDK on GitHub runners)
 3. Installs GLFW via vcpkg
 4. Configures CMake with vcpkg toolchain
 5. Builds the project using the configured build type
@@ -55,133 +32,194 @@ Builds and tests the project on Windows.
    - Contents: FreshVoxelEngine.exe and shaders
    - Retention: 7 days
 
-**Purpose:** Ensures the code builds correctly on Windows and passes all tests.
+**Purpose:** Ensures the code builds correctly on Windows with DirectX 12/11 and OpenGL support, and passes all tests.
 
-#### 3. **build-macos**
-Builds and tests the project on macOS.
+## Workflow Configuration
 
-**Build Matrix:**
-- **Build Types:** Debug, Release
+### Enabling/Disabling Workflows
 
-**Steps:**
-1. Checks out the repository
-2. Installs dependencies via Homebrew (CMake, Ninja, GLFW, Vulkan headers/loader, MoltenVK, GLM, GoogleTest)
-3. Configures CMake with Ninja generator
-4. Builds the project using the configured build type
-5. Runs CTest test suite with verbose output
-6. Uploads build artifacts (Release build only)
-   - Artifact name: `fresh-macos-arm64`
-   - Contents: FreshVoxelEngine binary and shaders
-   - Retention: 7 days
-
-**Purpose:** Ensures the code builds correctly on macOS (including Apple Silicon) and passes all tests.
-
-#### 4. **code-quality**
-Performs static code analysis and formatting checks.
-
-**Steps:**
-1. Checks out the repository
-2. Installs analysis tools (clang-format, clang-tidy, cppcheck)
-3. Runs clang-format to check code formatting compliance
-4. Runs cppcheck for static analysis (checks for potential bugs, undefined behavior, etc.)
-
-**Purpose:** Maintains code quality standards and catches potential issues early.
-
-**Note:** Steps are configured with `continue-on-error: true`, meaning failures won't block the workflow.
-
-#### 5. **documentation**
-Validates documentation files and structure.
-
-**Steps:**
-1. Checks out the repository
-2. Checks for broken links in Markdown files
-   - Scans all `.md` files
-   - Validates relative links to other Markdown files
-3. Validates presence of required documentation files:
-   - README.md
-   - CONTRIBUTING.md
-   - CODE_OF_CONDUCT.md
-   - LICENSE
-   - CHANGELOG.md
-   - ARCHITECTURE.md
-
-**Purpose:** Ensures documentation is complete and all internal links are valid.
-
-**Note:** Steps are configured with `continue-on-error: true`, meaning failures won't block the workflow.
-
-## Workflow Artifacts
-
-The CI workflow produces downloadable artifacts for Release builds on all three platforms:
-
-- **Linux (GCC 12):** `fresh-linux-x64`
-- **Windows:** `fresh-windows-x64`
-- **macOS:** `fresh-macos-arm64`
-
-All artifacts include the compiled executable and shader files, and are retained for 7 days.
-
-## Triggers
-
-All jobs in the CI workflow are triggered by:
-- **Push events** to `main` or `develop` branches
-- **Pull request events** targeting `main` or `develop` branches
-
-## Dependencies
-
-The workflows require the following external dependencies:
-- **Linux:** Vulkan SDK, GLFW, GLM, GoogleTest, various compilers
-- **Windows:** Vulkan SDK, GLFW (via vcpkg)
-- **macOS:** Vulkan headers/loader, MoltenVK, GLFW, GLM, GoogleTest (via Homebrew)
-
-## Status Badges
-
-You can add status badges to your README.md to show the current state of the CI workflow:
-
-```markdown
-![CI](https://github.com/shifty81/fresh/workflows/CI/badge.svg)
-```
-
-## Running Workflows Manually
-
-Workflows can be triggered manually from the GitHub Actions tab in the repository, though the current configuration only includes automatic triggers.
-
-## Enabling/Disabling Workflows
-
-### To Re-enable the CI Workflow
-
-The CI workflow is currently disabled. To re-enable it:
-
-```bash
-cd .github/workflows/
-mv ci.yml.disabled ci.yml
-git add ci.yml
-git commit -m "Re-enable CI workflow"
+To enable the CI workflow:
+```batch
+cd .github\workflows
+rename ci.yml.disabled ci.yml
+git add .
+git commit -m "Enable CI workflow"
 git push
 ```
 
-### To Disable the CI Workflow
-
-To disable the workflow again:
-
-```bash
-cd .github/workflows/
-mv ci.yml ci.yml.disabled
-git add ci.yml.disabled
-git rm ci.yml
+To disable the CI workflow:
+```batch
+cd .github\workflows
+rename ci.yml ci.yml.disabled
+git add .
 git commit -m "Disable CI workflow"
 git push
 ```
 
-## Extending the Workflows
+### Customizing Build Matrix
 
-To add new workflows or modify existing ones:
+You can customize the build matrix in `ci.yml`:
 
-1. Create or edit YAML files in `.github/workflows/`
-2. Follow GitHub Actions syntax
-3. Test changes in a pull request before merging to main branches
-4. Consider adding status checks in branch protection rules
+```yaml
+strategy:
+  matrix:
+    build_type: [Debug, Release, RelWithDebInfo]
+```
 
-## See Also
+### Adding New Jobs
+
+To add a new job to the workflow:
+
+1. Edit `.github/workflows/ci.yml`
+2. Add a new job under `jobs:`:
+   ```yaml
+   my-new-job:
+     runs-on: windows-latest
+     steps:
+       - uses: actions/checkout@v3
+       - name: Run custom step
+         run: echo "Hello from new job"
+   ```
+
+## Build Artifacts
+
+### Accessing Artifacts
+
+Artifacts from successful builds are available for download:
+1. Go to the GitHub Actions tab
+2. Click on a completed workflow run
+3. Scroll to the "Artifacts" section at the bottom
+4. Download the artifact you need
+
+### Artifact Structure
+
+Windows artifacts (`fresh-windows-x64.zip`):
+```
+fresh-windows-x64/
+├── FreshVoxelEngine.exe
+└── shaders/
+    ├── voxel.vert
+    └── voxel.frag
+```
+
+## Local Testing
+
+To test the workflow steps locally:
+
+### Build and Test
+
+```batch
+# Configure
+cmake -B build -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTS=ON
+
+# Build
+cmake --build build --config Release
+
+# Test
+cd build
+ctest -C Release --output-on-failure
+```
+
+### Using vcpkg
+
+```batch
+# Set up vcpkg
+git clone https://github.com/Microsoft/vcpkg.git
+cd vcpkg
+.\bootstrap-vcpkg.bat
+.\vcpkg integrate install
+
+# Install dependencies
+.\vcpkg install glfw3:x64-windows glm:x64-windows
+
+# Build with vcpkg
+cd ..\fresh
+cmake -B build -DCMAKE_TOOLCHAIN_FILE=..\vcpkg\scripts\buildsystems\vcpkg.cmake
+cmake --build build --config Release
+```
+
+## Troubleshooting
+
+### Common Issues
+
+#### Workflow Fails to Find Dependencies
+
+**Problem:** CMake can't find GLFW or GLM
+
+**Solution:** Ensure vcpkg is properly integrated:
+```yaml
+- name: Configure CMake
+  run: |
+    cmake -B build `
+      -DCMAKE_TOOLCHAIN_FILE=$env:VCPKG_INSTALLATION_ROOT\scripts\buildsystems\vcpkg.cmake
+```
+
+#### DirectX Compilation Errors
+
+**Problem:** DirectX headers or libraries not found
+
+**Solution:** Windows runners include Windows SDK by default. Verify CMakeLists.txt links:
+```cmake
+target_link_libraries(${PROJECT_NAME} PRIVATE 
+    d3d11.lib 
+    d3d12.lib 
+    dxgi.lib 
+    d3dcompiler.lib
+)
+```
+
+#### Test Failures
+
+**Problem:** Tests fail in CI but pass locally
+
+**Solution:** Check for:
+- Path separator differences (use CMake's file paths)
+- Hardcoded absolute paths
+- Missing test data files
+
+### Viewing Logs
+
+To view detailed logs:
+1. Click on the failed workflow run
+2. Click on the failed job
+3. Expand the failed step to see full output
+
+For test failures:
+```batch
+# Run tests with verbose output locally
+cd build
+ctest -C Release --output-on-failure --verbose
+```
+
+## Best Practices
+
+### Before Pushing
+
+Always test locally before pushing:
+```batch
+# Full local test
+cmake -B build -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTS=ON
+cmake --build build --config Release
+cd build
+ctest -C Release --output-on-failure
+```
+
+### Pull Requests
+
+- Ensure CI passes before requesting review
+- Fix any workflow failures promptly
+- Update documentation if workflow changes
+
+### Workflow Updates
+
+When modifying workflows:
+1. Test changes in a fork first
+2. Document any new steps or requirements
+3. Update this document if adding new jobs
+
+## Additional Resources
 
 - [GitHub Actions Documentation](https://docs.github.com/en/actions)
-- [CONTRIBUTING.md](CONTRIBUTING.md) - Contributing guidelines
-- [DEVELOPER_SETUP.md](DEVELOPER_SETUP.md) - Development environment setup
+- [CMake Documentation](https://cmake.org/documentation/)
+- [vcpkg Documentation](https://github.com/Microsoft/vcpkg)
+- [Fresh Voxel Engine Build Guide](VISUAL_STUDIO_SETUP.md)

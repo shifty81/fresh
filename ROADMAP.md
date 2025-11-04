@@ -644,11 +644,11 @@ This roadmap is a living document. As development progresses:
 - **Modular Design**: Easy to extend and modify
 - **Multiplayer-Ready**: Network architecture from the start
 - **Mod-Friendly**: Asset system designed for community content
-- **Cross-Platform**: Windows, Linux, macOS support
+- **Windows-Native**: Optimized for Windows with DirectX 12 support
 
 ### Known Limitations
-- Vulkan requirement limits older hardware support
-- No mobile platform support planned (PC-focused)
+- Windows-only platform (Windows 10+)
+- DirectX 12 recommended for best performance
 - Server hardware requirements TBD based on player count
 - World size limited by disk space and RAM
 

@@ -21,27 +21,18 @@ The Fresh Voxel Engine includes a prepared scripting framework that requires Lua
 
 ### Step 1: Install Lua Library
 
-#### Ubuntu/Debian
-```bash
-sudo apt-get install lua5.4 lua5.4-dev
+#### Windows (Recommended: vcpkg)
+
+```batch
+# Using vcpkg
+vcpkg install lua:x64-windows
 ```
 
-#### Fedora/RHEL
-```bash
-sudo dnf install lua lua-devel
-```
+#### Windows (Manual)
 
-#### macOS
-```bash
-brew install lua
-```
-
-#### Windows
-Download from: https://www.lua.org/download.html
-Or use vcpkg:
-```
-vcpkg install lua
-```
+Download prebuilt binaries from:
+- https://www.lua.org/download.html
+- Or build from source using Visual Studio
 
 ### Step 2: Choose Binding Library
 

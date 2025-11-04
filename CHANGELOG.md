@@ -117,7 +117,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Technical Details
 - C++17 standard
 - Modern CMake configuration
-- Cross-platform support (Linux, Windows, macOS)
+- Windows-native with DirectX 12 support
 - Modular architecture
 - Clean code structure
 
