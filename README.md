@@ -39,6 +39,8 @@ See [dotnet/README.md](dotnet/README.md) for details on using the .NET bindings.
 
 ## 🚀 Quick Start (Windows)
 
+**New to the project?** Check out [VS2022_MIGRATION_GUIDE.md](VS2022_MIGRATION_GUIDE.md) for a complete overview of the architecture!
+
 ### Option 1: Automated Installation (Recommended)
 
 ```batch
@@ -46,28 +48,27 @@ See [dotnet/README.md](dotnet/README.md) for details on using the .NET bindings.
 git clone https://github.com/shifty81/fresh.git
 cd fresh
 
-# Run installation launcher (choose between PowerShell or Batch)
-install.bat
+# Complete automated build (includes .NET 9 support)
+build_all.bat
 
-# Or run PowerShell installer directly (Recommended for better progress display)
-powershell -ExecutionPolicy Bypass -File tools\build_tools\install.ps1
+# Or use the traditional installer
+install.bat
 ```
 
-The automated installer will:
-- ✅ Check prerequisites (CMake, Visual Studio 2022)
-- ✅ Install vcpkg package manager (optional)
-- ✅ Install dependencies (GLFW, GLM, ImGui)
+The automated build will:
+- ✅ Check prerequisites (CMake, Visual Studio 2022, .NET 9 SDK)
 - ✅ Generate Visual Studio 2022 solution
-- ✅ Build the project automatically
-- ✅ Create shortcuts for easy access
+- ✅ Build native C++ engine (DirectX 11/12)
+- ✅ Build .NET 9 managed wrapper (optional)
+- ✅ Verify all components
 
-**Note**: The PowerShell version is recommended as it shows real-time progress during long operations like dependency installation, making it clear the installation hasn't frozen.
+**For .NET 9 Development**: Run `check_dotnet.bat` to verify .NET SDK installation.
 
-See [tools/build_tools/README.md](tools/build_tools/README.md) for detailed installation options.
+See [VS2022_MIGRATION_GUIDE.md](VS2022_MIGRATION_GUIDE.md) for detailed setup instructions.
 
 ### Option 2: Manual Setup
 
-**Note**: This option requires you to install dependencies (GLFW, GLM, ImGui) manually before building. We recommend using Option 1 (automated installation) instead.
+**Note**: This option requires you to install dependencies (GLFW, GLM, ImGui) manually before building. We recommend using Option 1 (automated build) instead.
 
 ```batch
 # Clone the repository
@@ -106,8 +107,9 @@ See [VISUAL_STUDIO_SETUP.md](VISUAL_STUDIO_SETUP.md) for detailed Visual Studio 
 
 ### Core Systems (Phase 1-2)
 - ✅ CMake-based build system with Visual Studio 2022 support
-- ✅ **Multi-API rendering**: OpenGL, DirectX 11/12
-- ✅ Automatic graphics API selection
+- ✅ **DirectX 11/12 rendering** - Native Windows graphics APIs
+- ✅ **.NET 9 bindings** - C# interop for managed game development
+- ✅ Automatic graphics API selection (DX12 → DX11 fallback)
 - ✅ Window management with GLFW
 - ✅ Shader system with hot-reloading support
 - ✅ **Comprehensive Logging System** - File-based error tracking and debugging
