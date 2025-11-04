@@ -419,7 +419,7 @@ configPanel.loadConfig("config/engine.cfg");
 ### Configuration Tabs
 
 1. **Graphics**
-   - API selection (DirectX 12/OpenGL/DX11/DX12)
+   - API selection (DirectX 12/DirectX 11/OpenGL)
    - Resolution and display settings
    - VSync, refresh rate
    - Render quality presets
@@ -592,12 +592,11 @@ int main() {
 6. Use instanced rendering for repeated objects
 
 ---
-
 ## Troubleshooting
 
 ### Graphics API Not Available
 ```cpp
-if (!isGraphicsAPIAvailable(GraphicsAPI::DirectX 12)) {
+if (!isGraphicsAPIAvailable(GraphicsAPI::DirectX12)) {
     // Fall back to OpenGL
     renderContext = RenderContextFactory::create(GraphicsAPI::OpenGL);
 }
