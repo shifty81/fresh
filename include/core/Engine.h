@@ -11,6 +11,7 @@ class VoxelWorld;
 class PhysicsSystem;
 class AISystem;
 class EditorGUI;
+class EditorManager;
 class MainMenu;
 class WorldEditor;
 class Player;
@@ -67,6 +68,7 @@ private:
     std::unique_ptr<PhysicsSystem> m_physics;
     std::unique_ptr<AISystem> m_aiSystem;
     std::unique_ptr<EditorGUI> m_editor;
+    std::unique_ptr<EditorManager> m_editorManager;
     std::unique_ptr<MainMenu> m_mainMenu;
     std::unique_ptr<WorldEditor> m_worldEditor;
     std::unique_ptr<Player> m_player;

@@ -1,13 +1,14 @@
 #include "editor/EditorGUI.h"
 #include "editor/WorldEditor.h"
 #include "editor/TerraformingSystem.h"
+#include "core/Logger.h"
 #include <iostream>
 
 namespace fresh {
 
 EditorGUI::EditorGUI()
     : m_worldEditor(nullptr)
-    , m_visible(false)
+    , m_visible(true)
     , m_showTerraformingPanel(true)
     , m_showWorldInfo(true)
 {
@@ -17,7 +18,14 @@ EditorGUI::~EditorGUI() {
 }
 
 bool EditorGUI::initialize(WorldEditor* worldEditor) {
+    if (!worldEditor) {
+        LOG_ERROR_C("Invalid world editor", "EditorGUI");
+        return false;
+    }
+
     m_worldEditor = worldEditor;
+    
+    LOG_INFO_C("EditorGUI initialized", "EditorGUI");
     std::cout << "Editor GUI initialized" << std::endl;
     return true;
 }

@@ -44,6 +44,13 @@ if(NOT glm_FOUND)
     message(STATUS "GLM not found, will use header-only include if available")
 endif()
 
+# ImGui for UI
+find_package(imgui QUIET)
+if(NOT imgui_FOUND)
+    message(WARNING "ImGui not found. Editor UI features will be limited.")
+    message(WARNING "You can use vcpkg: vcpkg install imgui[glfw-binding,opengl3-binding,dx11-binding,dx12-binding]:x64-windows")
+endif()
+
 # Enable GLM experimental features
 add_definitions(-DGLM_ENABLE_EXPERIMENTAL)
 
@@ -81,8 +88,17 @@ set(ENGINE_SOURCES
     src/editor/EditorGUI.cpp
     src/editor/WorldEditor.cpp
     src/editor/TerraformingSystem.cpp
+    src/editor/EditorManager.cpp
     src/serialization/WorldSerializer.cpp
     src/ui/MainMenu.cpp
+    src/ui/ImGuiContext.cpp
+    src/ui/SceneHierarchyPanel.cpp
+    src/ui/InspectorPanel.cpp
+    src/ui/EditorMenuBar.cpp
+    src/ui/EditorToolbar.cpp
+    src/ui/ContentBrowserPanel.cpp
+    src/ui/ConsolePanel.cpp
+    src/ui/VoxelToolPalette.cpp
     src/input/InputManager.cpp
     src/gameplay/Camera.cpp
     src/gameplay/Player.cpp
@@ -145,8 +161,17 @@ set(ENGINE_HEADERS
     include/editor/EditorGUI.h
     include/editor/WorldEditor.h
     include/editor/TerraformingSystem.h
+    include/editor/EditorManager.h
     include/serialization/WorldSerializer.h
     include/ui/MainMenu.h
+    include/ui/ImGuiContext.h
+    include/ui/SceneHierarchyPanel.h
+    include/ui/InspectorPanel.h
+    include/ui/EditorMenuBar.h
+    include/ui/EditorToolbar.h
+    include/ui/ContentBrowserPanel.h
+    include/ui/ConsolePanel.h
+    include/ui/VoxelToolPalette.h
     include/input/InputManager.h
     include/gameplay/Camera.h
     include/gameplay/Player.h
@@ -213,6 +238,12 @@ endif()
 # Link GLM if found
 if(glm_FOUND)
     target_link_libraries(${PROJECT_NAME} PRIVATE glm::glm)
+endif()
+
+# Link ImGui if found
+if(imgui_FOUND)
+    target_link_libraries(${PROJECT_NAME} PRIVATE imgui::imgui)
+    add_definitions(-DFRESH_IMGUI_AVAILABLE)
 endif()
 
 # Link DirectX (system libraries)

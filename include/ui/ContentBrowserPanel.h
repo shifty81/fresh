@@ -1,0 +1,77 @@
+#pragma once
+
+#include <string>
+#include <vector>
+
+namespace fresh {
+
+/**
+ * @brief Asset information structure
+ */
+struct AssetInfo {
+    std::string name;
+    std::string path;
+    std::string type;  // "texture", "model", "sound", "script", etc.
+    size_t size;
+    
+    AssetInfo(const std::string& n = "", const std::string& p = "", 
+              const std::string& t = "", size_t s = 0)
+        : name(n), path(p), type(t), size(s) {}
+};
+
+/**
+ * @brief Content Browser / Asset Manager Panel
+ * 
+ * Manages all project assets (textures, models, sounds, scripts),
+ * allowing for filtering, searching, importing, and previewing.
+ */
+class ContentBrowserPanel {
+public:
+    ContentBrowserPanel();
+    ~ContentBrowserPanel();
+
+    /**
+     * @brief Initialize the panel
+     * @param assetsPath Root path for assets
+     * @return true if successful
+     */
+    bool initialize(const std::string& assetsPath = "assets");
+
+    /**
+     * @brief Render the panel UI
+     */
+    void render();
+
+    /**
+     * @brief Set panel visibility
+     * @param visible true to show, false to hide
+     */
+    void setVisible(bool visible) { m_visible = visible; }
+
+    /**
+     * @brief Check if panel is visible
+     * @return true if visible
+     */
+    bool isVisible() const { return m_visible; }
+
+    /**
+     * @brief Refresh asset list
+     */
+    void refresh();
+
+private:
+    void scanAssets(const std::string& path);
+    void renderAssetGrid();
+    void renderAssetDetails(const AssetInfo& asset);
+    const char* getAssetIcon(const std::string& type);
+
+private:
+    bool m_visible;
+    std::string m_assetsPath;
+    std::string m_currentPath;
+    std::vector<AssetInfo> m_assets;
+    AssetInfo* m_selectedAsset;
+    char m_searchBuffer[256];
+};
+
+} // namespace fresh
