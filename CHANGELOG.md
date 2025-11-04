@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **ImGui DirectX Rendering Backends** - Complete DirectX 11/12 support for ImGui
+  - Implemented DirectX 11 ImGui rendering backend
+  - Implemented DirectX 12 ImGui rendering backend
+  - Added SRV descriptor heap to DirectX12RenderContext for ImGui
+  - Added public getters to access DirectX device/context for ImGui integration
+  - Full support for ImGui initialization, frame rendering, and cleanup
+
 ### Changed
 - **Removed Vulkan Support** - Simplified graphics stack
   - Removed Vulkan-specific renderer, device, and pipeline classes
