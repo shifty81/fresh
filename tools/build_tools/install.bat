@@ -530,20 +530,25 @@ echo   1. Open the solution:
 echo      - Double-click: Open_Solution.bat
 echo      - Or manually: build\FreshVoxelEngine.sln
 echo.
-echo   2. Run the engine:
+echo   2. IMPORTANT - Set Startup Project in Visual Studio:
+echo      - In Solution Explorer, right-click "FreshVoxelEngine"
+echo      - Select "Set as Startup Project"
+echo      - See FIXING_ALL_BUILD_ERROR.md for details
+echo.
+echo   3. Run the engine:
 if exist "build\Release\FreshVoxelEngine.exe" (
     echo      - Double-click: Run_Engine.bat
     echo      - Or manually: build\Release\FreshVoxelEngine.exe
 ) else (
-    echo      - Build the project first in Visual Studio
+    echo      - Build the project first in Visual Studio (F7)
     echo      - Then run: build\Release\FreshVoxelEngine.exe
 )
 echo.
-echo   3. Learn more:
+echo   4. Learn more:
+echo      - QUICKSTART_VISUAL.md - Visual quick start guide
+echo      - FIXING_ALL_BUILD_ERROR.md - Fix "ALL_BUILD access denied"
 echo      - README.md - Project overview
 echo      - GETTING_STARTED.md - Usage guide
-echo      - DEVELOPER_SETUP.md - Development setup
-echo      - docs/EDITOR_INTEGRATION.md - Editor guide
 echo.
 echo Next steps: >> "%LOG_FILE%"
 echo   1. Open the solution: build\FreshVoxelEngine.sln >> "%LOG_FILE%"
