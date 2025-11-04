@@ -55,6 +55,7 @@ bool ScriptingEngine::loadScript(const std::string& filepath) {
 }
 
 bool ScriptingEngine::executeScript(const std::string& code) {
+    (void)code; // Parameter reserved for Lua implementation
     // TODO: Execute Lua code
     // Example:
     // if (luaL_dostring((lua_State*)luaState, code.c_str()) != LUA_OK) {
@@ -68,6 +69,7 @@ bool ScriptingEngine::executeScript(const std::string& code) {
 }
 
 bool ScriptingEngine::callFunction(const std::string& functionName) {
+    (void)functionName; // Parameter reserved for Lua implementation
     // TODO: Call Lua function
     // Example:
     // lua_getglobal((lua_State*)luaState, functionName.c_str());
@@ -88,6 +90,8 @@ bool ScriptingEngine::callFunction(const std::string& functionName) {
 
 void ScriptingEngine::registerFunction(const std::string& name,
                                       std::function<void()> func) {
+    (void)name; // Parameters reserved for Lua implementation
+    (void)func;
     // TODO: Register C++ function for Lua
     // Example with LuaBridge:
     // luabridge::getGlobalNamespace((lua_State*)luaState)
@@ -95,24 +99,31 @@ void ScriptingEngine::registerFunction(const std::string& name,
 }
 
 void ScriptingEngine::setGlobal(const std::string& name, int value) {
+    (void)name; // Parameters reserved for Lua implementation
+    (void)value;
     // TODO: Set Lua global
     // lua_pushinteger((lua_State*)luaState, value);
     // lua_setglobal((lua_State*)luaState, name.c_str());
 }
 
 void ScriptingEngine::setGlobal(const std::string& name, float value) {
+    (void)name; // Parameters reserved for Lua implementation
+    (void)value;
     // TODO: Set Lua global
     // lua_pushnumber((lua_State*)luaState, value);
     // lua_setglobal((lua_State*)luaState, name.c_str());
 }
 
 void ScriptingEngine::setGlobal(const std::string& name, const std::string& value) {
+    (void)name; // Parameters reserved for Lua implementation
+    (void)value;
     // TODO: Set Lua global
     // lua_pushstring((lua_State*)luaState, value.c_str());
     // lua_setglobal((lua_State*)luaState, name.c_str());
 }
 
 int ScriptingEngine::getGlobalInt(const std::string& name) {
+    (void)name; // Parameter reserved for Lua implementation
     // TODO: Get Lua global
     // lua_getglobal((lua_State*)luaState, name.c_str());
     // int value = lua_tointeger((lua_State*)luaState, -1);
@@ -122,6 +133,7 @@ int ScriptingEngine::getGlobalInt(const std::string& name) {
 }
 
 float ScriptingEngine::getGlobalFloat(const std::string& name) {
+    (void)name; // Parameter reserved for Lua implementation
     // TODO: Get Lua global
     // lua_getglobal((lua_State*)luaState, name.c_str());
     // float value = lua_tonumber((lua_State*)luaState, -1);
@@ -131,6 +143,7 @@ float ScriptingEngine::getGlobalFloat(const std::string& name) {
 }
 
 std::string ScriptingEngine::getGlobalString(const std::string& name) {
+    (void)name; // Parameter reserved for Lua implementation
     // TODO: Get Lua global
     // lua_getglobal((lua_State*)luaState, name.c_str());
     // const char* value = lua_tostring((lua_State*)luaState, -1);

@@ -18,6 +18,11 @@ enum class VoxelType : uint8_t {
     Wood,
     Leaves,
     Bedrock,
+    Snow,
+    Ice,
+    Cobblestone,
+    Planks,
+    Glass,
     // Add more types as needed
     Count
 };
@@ -33,11 +38,11 @@ struct Voxel {
     explicit Voxel(VoxelType t) : type(t), light(0) {}
     
     bool isOpaque() const {
-        return type != VoxelType::Air && type != VoxelType::Water;
+        return type != VoxelType::Air && type != VoxelType::Water && type != VoxelType::Glass;
     }
     
     bool isTransparent() const {
-        return type == VoxelType::Water;
+        return type == VoxelType::Water || type == VoxelType::Glass || type == VoxelType::Ice;
     }
     
     bool isSolid() const {

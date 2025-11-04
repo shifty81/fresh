@@ -2,7 +2,7 @@
 
 namespace fresh {
 
-class SceneNode;
+struct SceneNode;
 
 /**
  * @brief Inspector/Details Panel

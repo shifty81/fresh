@@ -231,19 +231,25 @@ void EditorManager::shutdown() {
 
 void EditorManager::setupDockspace() {
 #ifdef FRESH_IMGUI_AVAILABLE
-    // Create a fullscreen dockspace
+    // Create a fullscreen dockspace (requires ImGui docking branch)
     ImGuiViewport* viewport = ImGui::GetMainViewport();
     ImGui::SetNextWindowPos(viewport->WorkPos);
     ImGui::SetNextWindowSize(viewport->WorkSize);
-    ImGui::SetNextWindowViewport(viewport->ID);
     
-    ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoDocking | 
-                                   ImGuiWindowFlags_NoTitleBar | 
+#ifdef IMGUI_HAS_VIEWPORT
+    ImGui::SetNextWindowViewport(viewport->ID);
+#endif
+    
+    ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoTitleBar | 
                                    ImGuiWindowFlags_NoCollapse |
                                    ImGuiWindowFlags_NoResize | 
                                    ImGuiWindowFlags_NoMove |
                                    ImGuiWindowFlags_NoBringToFrontOnFocus | 
                                    ImGuiWindowFlags_NoNavFocus;
+    
+#ifdef IMGUI_HAS_DOCK
+    window_flags |= ImGuiWindowFlags_NoDocking;
+#endif
     
     ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
     ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
@@ -252,9 +258,11 @@ void EditorManager::setupDockspace() {
     ImGui::Begin("DockSpaceWindow", nullptr, window_flags);
     ImGui::PopStyleVar(3);
     
-    // DockSpace
+#ifdef IMGUI_HAS_DOCK
+    // DockSpace (only available in docking branch)
     ImGuiID dockspace_id = ImGui::GetID("MyDockSpace");
     ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f), ImGuiDockNodeFlags_PassthruCentralNode);
+#endif
     
     ImGui::End();
 #endif

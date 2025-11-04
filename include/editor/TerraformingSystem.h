@@ -12,7 +12,7 @@ class VoxelWorld;
  * @brief Tool types for terraforming
  */
 enum class TerraformTool {
-    Single,      // Single block placement/removal
+    SingleBlock, // Single block placement/removal
     Brush,       // Brush with radius
     Sphere,      // Hollow sphere
     FilledSphere,// Filled sphere

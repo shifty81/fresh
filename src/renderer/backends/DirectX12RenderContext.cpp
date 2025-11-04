@@ -71,26 +71,32 @@ public:
     }
     
     void setUniformInt(const std::string& name, int value) override {
+        (void)name; (void)value; // Parameters reserved for D3D12 root constants/constant buffer implementation
         // Constants in D3D12 are set via root constants or constant buffers
     }
     
     void setUniformFloat(const std::string& name, float value) override {
+        (void)name; (void)value; // Parameters reserved for D3D12 root constants/constant buffer implementation
         // Constants in D3D12 are set via root constants or constant buffers
     }
     
     void setUniformVec2(const std::string& name, const glm::vec2& value) override {
+        (void)name; (void)value; // Parameters reserved for D3D12 root constants/constant buffer implementation
         // Constants in D3D12 are set via root constants or constant buffers
     }
     
     void setUniformVec3(const std::string& name, const glm::vec3& value) override {
+        (void)name; (void)value; // Parameters reserved for D3D12 root constants/constant buffer implementation
         // Constants in D3D12 are set via root constants or constant buffers
     }
     
     void setUniformVec4(const std::string& name, const glm::vec4& value) override {
+        (void)name; (void)value; // Parameters reserved for D3D12 root constants/constant buffer implementation
         // Constants in D3D12 are set via root constants or constant buffers
     }
     
     void setUniformMat4(const std::string& name, const glm::mat4& value) override {
+        (void)name; (void)value; // Parameters reserved for D3D12 root constants/constant buffer implementation
         // Constants in D3D12 are set via root constants or constant buffers
     }
     

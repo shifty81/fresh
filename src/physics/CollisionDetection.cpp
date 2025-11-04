@@ -298,6 +298,7 @@ void SpatialHash::insert(CollisionBody* body) {
 }
 
 void SpatialHash::remove(CollisionBody* body) {
+    (void)body; // Parameter reserved for future implementation
     // TODO: Implement removal
 }
 
