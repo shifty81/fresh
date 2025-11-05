@@ -385,7 +385,8 @@ If you encounter issues:
 
 ## Additional Resources
 
+- [BUILD.md](BUILD.md) - Complete step-by-step build instructions
 - [VISUAL_STUDIO_SETUP.md](VISUAL_STUDIO_SETUP.md) - Detailed VS setup
-- [Build Tools README](tools/build_tools/README.md) - Automated installer docs
+- [tools/README.md](tools/README.md) - Tools directory overview
 - [ARCHITECTURE.md](ARCHITECTURE.md) - Engine architecture overview
 - [CONTRIBUTING.md](CONTRIBUTING.md) - Contribution guidelines

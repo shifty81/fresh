@@ -72,16 +72,17 @@ If you're new to Fresh Voxel Engine, follow this path:
 ### Workflows
 - **[WORKFLOWS.md](WORKFLOWS.md)** - CI/CD and automation
 
-### Build Tools
-- **[tools/build_tools/README.md](tools/build_tools/README.md)** - Build automation tools
+### Build & Tools
+- **[BUILD.md](BUILD.md)** - Complete build instructions for Windows with VS2022
+- **[tools/README.md](tools/README.md)** - Tools directory overview
 
 ## 🔍 Finding Specific Information
 
 ### "How do I install on Windows?"
-→ Start with **[QUICKSTART_VISUAL.md](QUICKSTART_VISUAL.md)**
+→ Start with **[BUILD.md](BUILD.md)** for complete step-by-step instructions
 
 ### "I'm getting build errors"
-→ Check **[FIXING_ALL_BUILD_ERROR.md](FIXING_ALL_BUILD_ERROR.md)**
+→ Check **[BUILD.md](BUILD.md)** Troubleshooting section or **[FIXING_ALL_BUILD_ERROR.md](FIXING_ALL_BUILD_ERROR.md)**
 
 ### "How do I use the editor?"
 → See **[docs/TERRAFORMING.md](docs/TERRAFORMING.md)** and the Editor section in **[README.md](README.md)**
