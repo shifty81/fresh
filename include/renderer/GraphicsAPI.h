@@ -20,7 +20,11 @@ inline bool isGraphicsAPIAvailable(GraphicsAPI api) {
         case GraphicsAPI::Auto:
             return true;
         case GraphicsAPI::OpenGL:
-            return true; // Available on all platforms
+#if defined(FRESH_OPENGL_SUPPORT) && defined(FRESH_GLEW_AVAILABLE)
+            return true;
+#else
+            return false;
+#endif
 #ifdef _WIN32
         case GraphicsAPI::DirectX11:
         case GraphicsAPI::DirectX12:
@@ -46,17 +50,23 @@ inline const char* getGraphicsAPIName(GraphicsAPI api) {
 
 /**
  * @brief Select the best graphics API for the platform
- * Windows: DirectX 12 -> DirectX 11 -> OpenGL
- * Linux/Mac: OpenGL
+ * Windows: DirectX 12 -> DirectX 11 -> OpenGL (if GLEW available)
+ * Linux/Mac: OpenGL (if GLEW available)
  */
 inline GraphicsAPI selectBestGraphicsAPI() {
 #ifdef _WIN32
-    // TODO: Check Windows version and DirectX 12 support at runtime
-    // For now, default to DirectX 12
+    // On Windows, prefer DirectX 12, fallback to DirectX 11
+    // OpenGL is optional if GLEW is available
     return GraphicsAPI::DirectX12;
 #else
     // Linux, Mac, and other platforms use OpenGL
+#if defined(FRESH_OPENGL_SUPPORT) && defined(FRESH_GLEW_AVAILABLE)
     return GraphicsAPI::OpenGL;
+#else
+    // If OpenGL is not available, we have a problem
+    // This should not happen in practice on Linux/Mac
+    return GraphicsAPI::OpenGL;
+#endif
 #endif
 }
 

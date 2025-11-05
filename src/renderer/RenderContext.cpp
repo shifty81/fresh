@@ -5,7 +5,7 @@
 #include "renderer/backends/DirectX12RenderContext.h"
 #endif
 
-#ifdef FRESH_OPENGL_SUPPORT
+#if defined(FRESH_OPENGL_SUPPORT) && defined(FRESH_GLEW_AVAILABLE)
 #include "renderer/backends/OpenGLRenderContext.h"
 #endif
 
@@ -24,7 +24,7 @@ std::unique_ptr<IRenderContext> RenderContextFactory::create(GraphicsAPI api) {
     }
     
     switch (api) {
-#ifdef FRESH_OPENGL_SUPPORT
+#if defined(FRESH_OPENGL_SUPPORT) && defined(FRESH_GLEW_AVAILABLE)
         case GraphicsAPI::OpenGL:
             std::cout << "Creating OpenGL render context" << std::endl;
             return std::make_unique<OpenGLRenderContext>();
