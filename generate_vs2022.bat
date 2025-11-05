@@ -44,12 +44,12 @@ if exist "%VCPKG_LOCAL%\scripts\buildsystems\vcpkg.cmake" (
     echo/
     echo vcpkg is required for automatic dependency management.
     echo/
-    echo To set up vcpkg, run these commands from the project root:
-    echo   git clone https://github.com/microsoft/vcpkg.git
-    echo   cd vcpkg
-    echo   bootstrap-vcpkg.bat
-    echo   cd ..
-    echo   generate_vs2022.bat
+    echo To set up vcpkg from the project root directory:
+    echo   1. Clone vcpkg:    git clone https://github.com/microsoft/vcpkg.git
+    echo   2. Enter vcpkg:    cd vcpkg
+    echo   3. Bootstrap it:   bootstrap-vcpkg.bat
+    echo   4. Return to root: cd ..
+    echo   5. Generate VS:    generate_vs2022.bat
     echo/
     echo Or see BUILD.md for detailed setup instructions.
     echo/
