@@ -57,10 +57,6 @@ if not exist "%~dp0dotnet" (
     exit /b 1
 )
 cd /d "%~dp0dotnet"
-if %ERRORLEVEL% NEQ 0 (
-    echo ERROR: Failed to navigate to dotnet directory
-    exit /b 1
-)
 
 dotnet build -c Release
 

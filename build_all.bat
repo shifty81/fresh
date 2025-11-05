@@ -78,13 +78,13 @@ if not exist "dotnet" (
 )
 cd /d dotnet
 dotnet build -c Release
-if !ERRORLEVEL! NEQ 0 (
+set BUILD_RESULT=!ERRORLEVEL!
+cd /d ..
+if !BUILD_RESULT! NEQ 0 (
     echo ERROR: Failed to build .NET wrapper
-    cd /d ..
     pause
     exit /b 1
 )
-cd /d ..
 
 echo/
 echo [OK] .NET managed wrapper built successfully!
