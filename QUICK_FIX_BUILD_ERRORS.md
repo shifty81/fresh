@@ -14,7 +14,7 @@ install.bat
 ```
 
 This will:
-1. Install vcpkg in the parent directory (shared across projects)
+1. Install vcpkg in the project directory (simplest setup)
 2. Automatically install GLFW, GLM, and ImGui
 3. Generate the Visual Studio solution
 4. Build the project
@@ -23,24 +23,24 @@ This will:
 
 If you prefer manual setup:
 
-### Option 1: Install vcpkg in parent directory (Recommended)
+### Option 1: Install vcpkg in project directory (Recommended)
 ```batch
-cd ..
 git clone https://github.com/Microsoft/vcpkg.git
 cd vcpkg
 bootstrap-vcpkg.bat
 vcpkg integrate install
-cd ..\fresh
+cd ..
 generate_vs2022.bat
 ```
 
-### Option 2: Install vcpkg in project directory
+### Option 2: Install vcpkg in parent directory (Alternative)
 ```batch
+cd ..
 git clone https://github.com/Microsoft/vcpkg.git
 cd vcpkg
 bootstrap-vcpkg.bat
 vcpkg integrate install
-cd ..
+cd fresh
 generate_vs2022.bat
 ```
 
@@ -51,13 +51,15 @@ Check if vcpkg is properly installed:
 verify_vcpkg.bat
 ```
 
-## Why Parent Directory?
+## Why Project Directory?
 
-Installing vcpkg in the parent directory (one level above the project):
-- Saves disk space (2-5 GB per additional project)
-- Avoids re-downloading dependencies for each project
-- Faster setup for multiple projects
-- Can be shared across different Fresh project clones
+Installing vcpkg in the project directory (recommended):
+- Simplest setup with no path confusion
+- Self-contained within the project
+- Easier to understand for beginners
+- Works consistently across different environments
+
+Alternative: Installing in parent directory saves disk space if you work with multiple projects.
 
 ## Need More Help?
 

@@ -396,12 +396,11 @@ Use this checklist to track implementation:
 git clone https://github.com/shifty81/fresh.git
 cd fresh
 
-# Set up vcpkg (one-time)
-cd ..
+# Set up vcpkg in project directory (one-time)
 git clone https://github.com/microsoft/vcpkg.git
 cd vcpkg
 bootstrap-vcpkg.bat
-cd ..\fresh
+cd ..
 
 # Generate Visual Studio 2022 solution
 generate_vs2022.bat
