@@ -2,6 +2,31 @@
 
 This directory contains automated build and installation tools for the Fresh Voxel Engine.
 
+## 🚀 .NET 9 First Approach
+
+Fresh Voxel Engine uses **.NET 9 as the primary development method**. All installation scripts now:
+
+1. **Check for .NET 9 SDK first** - Required for the recommended development approach
+2. **Build the managed wrapper** - Creates C# bindings automatically
+3. **Set up native backend** - Configures the C++ engine for optimal performance
+4. **Provide dual development paths** - C# for game logic, C++ for engine internals
+
+### Prerequisites
+
+**Required (Primary Development):**
+- **.NET 9 SDK** - https://dotnet.microsoft.com/download/dotnet/9.0
+  - Verify: `dotnet --version` (should show 9.0.x)
+
+**Required (Native Backend):**
+- **CMake 3.20+** - https://cmake.org/download/
+- **Visual Studio 2022** with "Desktop development with C++" workload
+  - Download from [visualstudio.microsoft.com](https://visualstudio.microsoft.com/downloads/)
+- **Git** - For vcpkg package management
+
+**Optional:**
+- **Windows 10 or later**
+- **Internet connection** - For downloading dependencies
+
 ## Installation Scripts
 
 ### Recommended: PowerShell Installation (`install.ps1`)
@@ -10,6 +35,8 @@ A modern, feature-rich installation script with animated banners and real-time p
 
 #### Features
 
+- ✅ **.NET 9 SDK Check** - Verifies .NET 9 is installed (primary requirement)
+- ✅ **Managed Wrapper Build** - Builds C# bindings automatically
 - ✅ **Animated ASCII Art Banner** - Eye-catching Fresh Voxel Engine banner on startup
 - ✅ **Real-time Progress Display** - See live output from all operations
 - ✅ **Colored Output** - Clear, color-coded messages for easy reading
@@ -30,6 +57,7 @@ A modern, feature-rich installation script with animated banners and real-time p
 - **Better UX**: Animated banners, emojis, and colored output make the process engaging
 - **Clearer Errors**: Detailed error messages with context when something fails
 - **Modern**: Uses PowerShell's advanced features for better reliability
+- **.NET Integration**: Better support for checking and building .NET components
 
 #### How to Use
 
@@ -58,10 +86,12 @@ install.bat
 
 ### Classic: Batch File Installation (`install.bat`)
 
-A traditional batch file installation script that works on all Windows versions.
+A traditional batch file installation script that works on all Windows versions, now with .NET 9 first approach.
 
 #### Features
 
+- ✅ **.NET 9 SDK Check** - Verifies .NET 9 first (primary development method)
+- ✅ **Managed Wrapper Build** - Builds C# bindings before native engine
 - ✅ **Prerequisites Check** - Verifies CMake and Visual Studio 2022 installation
 - ✅ **Package Manager Setup** - Optionally installs vcpkg for dependency management
 - ✅ **Dependency Installation** - Automatically installs GLFW, GLM, and ImGui
@@ -72,30 +102,45 @@ A traditional batch file installation script that works on all Windows versions.
 - ✅ **Interactive** - Provides clear prompts and feedback throughout the process
 - ✅ **Real-time Output** - Shows progress from long-running operations (improved in v2.0)
 
-#### Recent Improvements (v2.0)
+#### Recent Improvements (v3.0)
 
-- **Visible Progress**: CMake and build commands now display output to console in real-time
+- **.NET First**: Now checks for .NET 9 SDK before other prerequisites
+- **Managed Priority**: Builds C# wrapper before native engine
+- **Better Guidance**: Clear messages about .NET as the primary development method
+- **Flexible Installation**: Option to continue without .NET (not recommended)
+- **Visible Progress**: CMake and build commands display output in real-time
 - **No More Freezing**: Users can see what's happening during dependency installation
 - **Better Feedback**: Added warning messages before long operations
 - **Improved Error Visibility**: Errors are displayed immediately, not just in log files
 
 #### How to Use
 
-1. **Double-click** `install.bat` to start the installation
-2. Follow the on-screen prompts
-3. Wait for the installation to complete
-4. Use the generated shortcuts to run the engine
+1. **Install .NET 9 SDK first** (Required)
+   - Download from: https://dotnet.microsoft.com/download/dotnet/9.0
+   - Verify: `dotnet --version`
+
+2. **Double-click** `install.bat` to start the installation
+3. Follow the on-screen prompts
+4. Wait for the installation to complete
+5. Use the generated shortcuts to run the engine
 
 #### Requirements
 
 Before running the installation script, ensure you have:
 
+**Primary Requirements:**
+- **.NET 9 SDK** - https://dotnet.microsoft.com/download/dotnet/9.0
+  - **This is the primary development method**
+  - Verify: `dotnet --version` (should show 9.0.x)
+
+**Secondary Requirements:**
 - **Windows 10 or later**
 - **Internet connection** (for downloading dependencies)
 - **Git** (for cloning vcpkg, if needed)
 - **CMake 3.20+** - Download from [cmake.org](https://cmake.org/download/)
 - **Visual Studio 2022** (Community, Professional, or Enterprise)
   - With "Desktop development with C++" workload
+  - With ".NET desktop development" workload (for C# development)
   - Download from [visualstudio.microsoft.com](https://visualstudio.microsoft.com/downloads/)
 
 #### What the Script Does

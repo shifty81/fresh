@@ -1,8 +1,9 @@
 @echo off
-REM Fresh Voxel Engine - .NET 9 SDK Check Script
+setlocal enabledelayedexpansion
+REM Fresh Voxel Engine - .NET 9 SDK Check and Build Script
 
 echo ================================================
-echo Fresh Voxel Engine - .NET SDK Check
+echo Fresh Voxel Engine - .NET 9 SDK Check
 echo ================================================
 echo/
 
@@ -11,14 +12,19 @@ where dotnet >nul 2>nul
 if %ERRORLEVEL% NEQ 0 (
     echo ERROR: .NET SDK is not found in PATH
     echo/
+    echo .NET 9 is the primary build method for Fresh Voxel Engine.
+    echo/
     echo Please install .NET 9 SDK from:
     echo https://dotnet.microsoft.com/download/dotnet/9.0
     echo/
-    pause
+    echo After installation:
+    echo   1. Restart your command prompt
+    echo   2. Run this installer again
+    echo/
     exit /b 1
 )
 
-echo .NET SDK found!
+echo [OK] .NET SDK found!
 echo/
 
 REM Check .NET version
@@ -34,33 +40,49 @@ if %ERRORLEVEL% NEQ 0 (
     echo Installed SDKs:
     dotnet --list-sdks
     echo/
+    echo .NET 9 is required for the primary build method.
+    echo/
     echo Please install .NET 9 SDK from:
     echo https://dotnet.microsoft.com/download/dotnet/9.0
     echo/
-    pause
     exit /b 1
 )
 
-echo .NET 9 SDK is installed!
+echo [OK] .NET 9 SDK is installed!
 echo/
 echo Building .NET managed wrapper...
-cd dotnet
+echo/
+if not exist "%~dp0dotnet" (
+    echo ERROR: dotnet directory not found at %~dp0dotnet
+    exit /b 1
+)
+cd /d "%~dp0dotnet"
+
 dotnet build -c Release
 
 if %ERRORLEVEL% NEQ 0 (
     echo/
     echo ERROR: .NET build failed
     echo/
-    pause
+    echo Please check:
+    echo   1. .NET 9 SDK is properly installed
+    echo   2. FreshEngine.Managed.csproj is valid
+    echo   3. All dependencies are available
+    echo/
     exit /b 1
 )
+
+cd /d "%~dp0"
 
 echo/
 echo ================================================
 echo .NET 9 SDK check completed successfully!
 echo ================================================
 echo/
-echo The managed wrapper has been built successfully.
-echo You can now build the main project with Visual Studio 2022.
+echo [OK] Managed wrapper built: dotnet\bin\Release\net9.0-windows\FreshEngine.Managed.dll
 echo/
-pause
+echo The .NET bindings are ready. You can now:
+echo   1. Use the managed wrapper in C# applications
+echo   2. Continue with native engine build
+echo/
+exit /b 0

@@ -45,28 +45,36 @@ The engine **automatically detects and selects** the best available graphics API
 
 **Complete installation in 3 steps:**
 
-1. **Clone the repository**
+1. **Install .NET 9 SDK** (Required for primary build method)
+   - Download and install from: https://dotnet.microsoft.com/download/dotnet/9.0
+   - Verify installation: `dotnet --version` (should show 9.0.x)
+
+2. **Clone the repository**
    ```batch
    git clone https://github.com/shifty81/fresh.git
    cd fresh
    ```
 
-2. **Run the installer**
+3. **Run the installer**
    ```batch
    install.bat
    ```
    The installer will automatically:
+   - Check for .NET 9 SDK (primary build method)
+   - Build the .NET 9 managed wrapper for C# development
    - Check prerequisites (CMake, Visual Studio 2022)
    - Install vcpkg package manager and dependencies
    - Generate Visual Studio 2022 solution
-   - Build the engine
+   - Build the native engine
    
    *Estimated time: 10-20 minutes*
 
-3. **Open and run**
-   - Open `build\FreshVoxelEngine.sln` in Visual Studio 2022
-   - Right-click "FreshVoxelEngine" project → "Set as Startup Project"
-   - Press F5 to build and run
+4. **Start developing**
+   - **C# Development** (Recommended): Use the .NET managed wrapper
+     - See [dotnet/README.md](dotnet/README.md) for C# examples
+   - **C++ Development**: Open `build\FreshVoxelEngine.sln` in Visual Studio 2022
+     - Right-click "FreshVoxelEngine" project → "Set as Startup Project"
+     - Press F5 to build and run
 
 **Need help?** See [QUICKSTART_VISUAL.md](QUICKSTART_VISUAL.md) for step-by-step guide with screenshots.
 
@@ -75,19 +83,31 @@ The engine **automatically detects and selects** the best available graphics API
 ### Alternative Installation Methods
 
 <details>
-<summary><b>Option 2: Build All (Includes .NET 9 support)</b></summary>
+<summary><b>Option 2: Build All (Complete .NET + Native build)</b></summary>
 
 ```batch
-# Complete automated build with .NET 9 bindings
+# Complete automated build with .NET 9 bindings and native engine
 build_all.bat
 ```
 
-For .NET 9 development, run `check_dotnet.bat` to verify .NET SDK installation.
+This builds both the .NET 9 managed wrapper and the native C++ engine.
 
 </details>
 
 <details>
-<summary><b>Option 3: Manual Setup (Advanced users)</b></summary>
+<summary><b>Option 3: .NET Only (For C# developers)</b></summary>
+
+```batch
+# Check .NET SDK and build managed wrapper only
+check_dotnet.bat
+```
+
+For .NET 9 development without building the native engine.
+
+</details>
+
+<details>
+<summary><b>Option 4: Manual Setup (Advanced users)</b></summary>
 
 **Note**: Requires manual dependency installation. We recommend Option 1 instead.
 
@@ -96,8 +116,12 @@ For .NET 9 development, run `check_dotnet.bat` to verify .NET SDK installation.
 git clone https://github.com/shifty81/fresh.git
 cd fresh
 
+# Build .NET wrapper first (recommended)
+cd dotnet
+dotnet build -c Release
+cd ..
+
 # Generate Visual Studio solution
-# This will show warnings if dependencies are missing
 generate_vs2022.bat
 
 # Open in Visual Studio
@@ -163,16 +187,45 @@ For detailed cross-platform build instructions, see [CROSS_PLATFORM_BUILD.md](CR
 
 ---
 
-## 🔷 .NET 9 Support (Windows Only)
+## 🔷 .NET 9 Support (Primary Development Method)
 
-Fresh Engine includes **.NET 9 bindings** for managed code development:
+Fresh Engine uses **.NET 9 as the primary development method** with C# bindings for managed code development:
 
-- **C# Game Scripting** - Write game logic in modern C# while leveraging native performance
+- **C# Game Scripting** - Write game logic in modern C# while leveraging native performance (Recommended)
 - **P/Invoke Integration** - Seamless interop between managed and native code  
 - **Modern .NET Features** - Use latest .NET 9 capabilities
 - **Visual Studio Integration** - Full IntelliSense and debugging support
+- **Cross-Platform** - Windows is the primary platform, with Linux/macOS support planned
 
-See [dotnet/README.md](dotnet/README.md) for details on using the .NET bindings.
+### Why .NET 9 First?
+
+1. **Modern Development** - Use C# and the latest .NET features
+2. **Easier Debugging** - Managed code debugging is more straightforward
+3. **Rapid Prototyping** - Faster iteration with C# scripting
+4. **Rich Ecosystem** - Access to NuGet packages and .NET libraries
+5. **Safety** - Memory safety and automatic garbage collection
+
+### Getting Started with .NET
+
+```batch
+# Install .NET 9 SDK
+# Download from: https://dotnet.microsoft.com/download/dotnet/9.0
+
+# Run the installer (it will check for .NET 9 first)
+install.bat
+
+# Or build just the .NET wrapper
+check_dotnet.bat
+```
+
+See [dotnet/README.md](dotnet/README.md) for detailed C# usage examples and API documentation.
+
+### Alternative: Native C++ Development
+
+For developers who prefer C++ or need maximum performance, the native engine can still be built directly:
+- Use `generate_vs2022.bat` to create Visual Studio projects
+- Build with CMake and Visual Studio 2022
+- See [DEVELOPER_SETUP.md](DEVELOPER_SETUP.md) for details
 
 ---
 

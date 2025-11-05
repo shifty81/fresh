@@ -1,15 +1,34 @@
 # .NET 9 Integration Guide
 
-This guide explains how to integrate .NET 9 with the Fresh Voxel Engine for managed code development.
+This guide explains how to use .NET 9 with the Fresh Voxel Engine, which is the **primary and recommended development method** for the project.
 
 ## Overview
 
-The Fresh Voxel Engine provides .NET 9 bindings that allow you to:
+The Fresh Voxel Engine uses .NET 9 as its primary development platform, allowing you to:
 
-- Write game logic in C# while leveraging native C++ performance
+- Write game logic in C# while leveraging native C++ performance (Recommended approach)
 - Use modern .NET features and libraries
 - Seamlessly interop between managed and native code
 - Deploy on Windows with full DirectX support
+- Benefit from memory safety and easier debugging
+
+## Why .NET 9 First?
+
+### Primary Benefits
+
+1. **Modern Language Features** - Use C# 12 with latest language improvements
+2. **Safer Development** - Memory safety and automatic garbage collection
+3. **Faster Iteration** - Hot reload and rapid prototyping
+4. **Rich Ecosystem** - Access thousands of NuGet packages
+5. **Better Tooling** - Superior IDE support and debugging experience
+6. **Easier Learning Curve** - More approachable for new developers
+
+### When to Use Native C++
+
+- When you need absolute maximum performance
+- When working on low-level engine internals
+- When implementing new graphics features
+- When porting to non-Windows platforms (future)
 
 ## Architecture
 
@@ -58,28 +77,36 @@ The Fresh Voxel Engine provides .NET 9 bindings that allow you to:
 
 ## Quick Start
 
-### 1. Build the Native Engine
+### 1. Install .NET 9 SDK
 
-First, build the native C++ engine:
+First, install the .NET 9 SDK (required):
+
+**Download:** https://dotnet.microsoft.com/download/dotnet/9.0
+
+**Verify installation:**
+```batch
+dotnet --version
+```
+Should show 9.0.x or higher.
+
+### 2. Run the Automated Installer
+
+The main installer checks for .NET 9 first and builds the managed wrapper:
 
 ```batch
 cd fresh
-generate_vs2022.bat
-cmake --build build --config Release
+install.bat
 ```
 
-### 2. Build the .NET Bindings
+The installer will:
+1. Check for .NET 9 SDK (required)
+2. Build the managed wrapper (FreshEngine.Managed.dll)
+3. Install native engine dependencies
+4. Build the native engine backend
 
-Build the managed wrapper library:
+### 3. Create Your First C# Game
 
-```batch
-cd dotnet
-dotnet build -c Release
-```
-
-### 3. Create a C# Application
-
-Create a new C# console application that uses the engine:
+Create a new C# console application:
 
 ```csharp
 using FreshEngine.Managed;
@@ -116,7 +143,7 @@ namespace MyVoxelGame
 
 ### 4. Reference the Managed Library
 
-Add a reference to `FreshEngine.Managed.dll` in your C# project:
+Add a reference to the built managed wrapper:
 
 ```xml
 <Project Sdk="Microsoft.NET.Sdk">
@@ -128,7 +155,7 @@ Add a reference to `FreshEngine.Managed.dll` in your C# project:
 
   <ItemGroup>
     <Reference Include="FreshEngine.Managed">
-      <HintPath>$(SolutionDir)dotnet\bin\Release\net9.0-windows\FreshEngine.Managed.dll</HintPath>
+      <HintPath>path\to\fresh\dotnet\bin\Release\net9.0-windows\FreshEngine.Managed.dll</HintPath>
     </Reference>
   </ItemGroup>
 </Project>
