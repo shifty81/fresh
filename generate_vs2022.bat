@@ -1,11 +1,10 @@
 @echo off
-REM Fresh Voxel Engine - Visual Studio 2022 Project Generation Script
-REM Windows-only DirectX 11/12 Game Engine
-REM This script generates Visual Studio 2022 solution files using CMake
+REM Fresh Voxel Engine - Visual Studio 2022 Solution Generator
+REM This script generates the Visual Studio 2022 solution using CMake
+REM For detailed build instructions, see BUILD.md
 
 echo ================================================
 echo Fresh Voxel Engine - Visual Studio 2022 Setup
-echo Windows-Only DirectX 11/12 Build Configuration
 echo ================================================
 echo/
 
@@ -13,72 +12,70 @@ REM Check if CMake is installed
 where cmake >nul 2>nul
 if %ERRORLEVEL% NEQ 0 (
     echo ERROR: CMake is not found in PATH
-    echo Please install CMake from https://cmake.org/download/
     echo/
+    echo Please install CMake 3.20 or higher from:
+    echo https://cmake.org/download/
+    echo/
+    echo Make sure to add CMake to system PATH during installation.
     pause
     exit /b 1
 )
 
-REM Check for Visual Studio 2022
-set VS2022_FOUND=0
-if exist "C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\IDE\devenv.exe" set VS2022_FOUND=1
-if exist "C:\Program Files\Microsoft Visual Studio\2022\Professional\Common7\IDE\devenv.exe" set VS2022_FOUND=1
-if exist "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\Common7\IDE\devenv.exe" set VS2022_FOUND=1
-
-if %VS2022_FOUND%==0 (
-    echo WARNING: Visual Studio 2022 not found in default location
-    echo The project will be generated anyway, but you may need to adjust paths
-    echo/
-)
+echo [OK] CMake found
+echo/
 
 REM Create build directory
 if not exist "build" mkdir build
 cd build
 
-echo/
-echo Generating Visual Studio 2022 solution...
-echo Configuration: Windows x64 with DirectX 11/12
-echo/
-
-REM Check if vcpkg is available for dependency management
-REM First check parent directory (shared location), then project directory
+REM Check for vcpkg (parent directory first, then project directory)
 set "VCPKG_ROOT="
 set "VCPKG_PARENT=%~dp0..\vcpkg"
 set "VCPKG_LOCAL=%~dp0vcpkg"
 
 if exist "%VCPKG_PARENT%\scripts\buildsystems\vcpkg.cmake" (
     set "VCPKG_ROOT=%VCPKG_PARENT%"
-    echo Found vcpkg in parent directory: %VCPKG_PARENT%
+    echo [OK] Found vcpkg in parent directory
+) else if exist "%VCPKG_LOCAL%\scripts\buildsystems\vcpkg.cmake" (
+    set "VCPKG_ROOT=%VCPKG_LOCAL%"
+    echo [OK] Found vcpkg in project directory
 ) else (
-    if exist "%VCPKG_LOCAL%\scripts\buildsystems\vcpkg.cmake" (
-        set "VCPKG_ROOT=%VCPKG_LOCAL%"
-        echo Found vcpkg in project directory: %VCPKG_LOCAL%
-    )
+    echo [WARNING] vcpkg not found
+    echo/
+    echo vcpkg is required for automatic dependency management.
+    echo/
+    echo To set up vcpkg, run these commands:
+    echo   cd ..
+    echo   git clone https://github.com/microsoft/vcpkg.git
+    echo   cd vcpkg
+    echo   bootstrap-vcpkg.bat
+    echo   cd ..\fresh
+    echo   generate_vs2022.bat
+    echo/
+    echo Or see BUILD.md for detailed setup instructions.
+    echo/
+    pause
+    cd ..
+    exit /b 1
 )
 
-if defined VCPKG_ROOT (
-    echo Using vcpkg toolchain for dependency management...
-    echo Dependencies will be installed automatically from vcpkg.json
-    echo This may take several minutes on first run.
-    echo/
-    REM Generate Visual Studio 2022 project files with vcpkg
-    cmake -G "Visual Studio 17 2022" -A x64 -DCMAKE_TOOLCHAIN_FILE="%VCPKG_ROOT%\scripts\buildsystems\vcpkg.cmake" ..
-) else (
-    echo WARNING: vcpkg not found in parent directory (%VCPKG_PARENT%) or project directory (%VCPKG_LOCAL%)
-    echo/
-    echo Generating without vcpkg (dependencies must be installed manually)
-    echo/
-    echo To use vcpkg for automatic dependency management:
-    echo   1. Run install.bat (recommended - will install in parent directory)
-    echo   2. Or manually install vcpkg and re-run this script
-    echo/
-    REM Generate Visual Studio 2022 project files without vcpkg
-    cmake -G "Visual Studio 17 2022" -A x64 ..
-)
+echo/
+echo Generating Visual Studio 2022 solution...
+echo Configuration: Windows x64 with DirectX 11/12
+echo/
+echo Dependencies will be automatically installed via vcpkg.
+echo This may take 5-15 minutes on first run.
+echo/
+
+REM Generate Visual Studio 2022 solution with vcpkg
+cmake -G "Visual Studio 17 2022" -A x64 -DCMAKE_TOOLCHAIN_FILE="%VCPKG_ROOT%\scripts\buildsystems\vcpkg.cmake" ..
 
 if %ERRORLEVEL% NEQ 0 (
     echo/
-    echo ERROR: CMake generation failed
+    echo [ERROR] CMake generation failed
+    echo/
+    echo Please check the error messages above.
+    echo See BUILD.md for troubleshooting help.
     echo/
     cd ..
     pause
@@ -87,31 +84,20 @@ if %ERRORLEVEL% NEQ 0 (
 
 echo/
 echo ================================================
-echo Visual Studio solution generated successfully!
+echo SUCCESS! Visual Studio solution generated
 echo ================================================
 echo/
-echo Solution file: build\FreshVoxelEngine.sln
+echo Solution: build\FreshVoxelEngine.sln
 echo/
-
-REM Check if vcpkg was used
-if not defined VCPKG_ROOT (
-    echo NOTE: This project was generated WITHOUT vcpkg.
-    echo       If you see warnings about missing dependencies above,
-    echo       the build may fail. Please review the CMake output.
-    echo/
-    echo To install dependencies automatically:
-    echo   - Run install.bat (recommended - will install vcpkg in parent directory)
-    echo   - Or see DEVELOPER_SETUP.md for manual installation
-    echo/
-)
-
-echo To build the project:
+echo Next steps:
 echo   1. Open build\FreshVoxelEngine.sln in Visual Studio 2022
-echo   2. Select your configuration (Debug/Release)
-echo   3. Build the solution (F7 or Ctrl+Shift+B)
+echo   2. Right-click "FreshVoxelEngine" project, select "Set as Startup Project"
+echo   3. Press F7 to build or F5 to build and run
 echo/
 echo Or build from command line:
 echo   cmake --build build --config Release
+echo/
+echo For detailed instructions, see BUILD.md
 echo/
 pause
 cd ..

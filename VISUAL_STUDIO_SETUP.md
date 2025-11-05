@@ -28,62 +28,52 @@ This guide will help you build and run the Fresh Voxel Engine using Visual Studi
 
 ## Quick Start
 
-### Important: Dependency Management
+**For complete step-by-step instructions, see [BUILD.md](BUILD.md).**
 
-This project requires several dependencies: GLFW, GLM, and ImGui. You have two options:
+### Setting Up Dependencies with vcpkg
 
-**Option A: Automated Setup with vcpkg (Recommended)**
+This project requires dependencies (GLFW, GLM, ImGui, GLEW) which are managed via vcpkg.
+
 ```batch
-# This will install vcpkg and all dependencies automatically
-install.bat
+# Set up vcpkg in parent directory (one-time setup)
+cd ..
+git clone https://github.com/microsoft/vcpkg.git
+cd vcpkg
+bootstrap-vcpkg.bat
+cd ..\fresh
 ```
-After installation completes, the solution will be ready in `build/FreshVoxelEngine.sln`
 
-**Option B: Manual Setup**
-If you prefer to manage dependencies manually, see [DEVELOPER_SETUP.md - Installing Prerequisites](DEVELOPER_SETUP.md#installing-prerequisites) for instructions on installing dependencies, then proceed with the methods below.
+See [BUILD.md](BUILD.md) for detailed vcpkg setup instructions.
 
-### Method 1: Using the Batch Script
-
-**Note**: This method requires dependencies to be pre-installed (see above) or vcpkg to be set up.
+### Method 1: Using the Batch Script (Recommended)
 
 1. Open a command prompt in the project root directory
 2. Run the generation script:
    ```batch
    generate_vs2022.bat
    ```
-3. If you see warnings about missing dependencies, you need to either:
-   - Run `install.bat` to set up vcpkg and dependencies
-   - Or install GLFW, GLM, and ImGui manually (see [DEVELOPER_SETUP.md - Installing Prerequisites](DEVELOPER_SETUP.md#installing-prerequisites))
-4. Open `build/FreshVoxelEngine.sln` in Visual Studio 2022
-5. Select your configuration (Debug or Release)
-6. Press F7 or Ctrl+Shift+B to build
+3. Open `build/FreshVoxelEngine.sln` in Visual Studio 2022
+4. Select your configuration (Debug or Release)
+5. Press F7 or Ctrl+Shift+B to build
 
 ### Method 2: Using CMake GUI
-
-**Note**: Requires dependencies to be pre-installed (see "Dependency Management" section above).
 
 1. Open CMake GUI
 2. Set "Where is the source code" to the project root directory
 3. Set "Where to build the binaries" to `<project-root>/build`
-4. (Optional) To use vcpkg: Set CMAKE_TOOLCHAIN_FILE to `<vcpkg-root>/scripts/buildsystems/vcpkg.cmake`
+4. Set CMAKE_TOOLCHAIN_FILE to `<vcpkg-root>/scripts/buildsystems/vcpkg.cmake`
 5. Click "Configure"
 6. Select "Visual Studio 17 2022" as the generator
 7. Select "x64" as the platform
 8. Click "Generate"
-9. If you see warnings about missing dependencies, install them (see above)
-10. Open `build/FreshVoxelEngine.sln` in Visual Studio 2022
+9. Open `build/FreshVoxelEngine.sln` in Visual Studio 2022
 
 ### Method 3: Using CMake Command Line
-
-**Note**: Requires dependencies to be pre-installed (see "Dependency Management" section above).
 
 ```batch
 mkdir build
 cd build
-# Without vcpkg (requires manual dependency installation):
-cmake -G "Visual Studio 17 2022" -A x64 ..
-# Or with vcpkg (recommended):
-cmake -G "Visual Studio 17 2022" -A x64 -DCMAKE_TOOLCHAIN_FILE=../vcpkg/scripts/buildsystems/vcpkg.cmake ..
+cmake -G "Visual Studio 17 2022" -A x64 -DCMAKE_TOOLCHAIN_FILE=..\..\vcpkg\scripts\buildsystems\vcpkg.cmake ..
 cmake --build . --config Release
 ```
 

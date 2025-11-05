@@ -389,20 +389,29 @@ Use this checklist to track implementation:
 
 ## 🔧 Build Instructions (Windows Only)
 
+**For complete step-by-step instructions, see [BUILD.md](BUILD.md).**
+
 ```batch
 # Clone the repository
 git clone https://github.com/shifty81/fresh.git
 cd fresh
 
-# Option 1: Automated Installation (Recommended)
-tools\build_tools\install.bat
+# Set up vcpkg (one-time)
+cd ..
+git clone https://github.com/microsoft/vcpkg.git
+cd vcpkg
+bootstrap-vcpkg.bat
+cd ..\fresh
 
-# Option 2: Manual Build
+# Generate Visual Studio 2022 solution
 generate_vs2022.bat
-start build\FreshVoxelEngine.sln
+
+# Build
+cd build
+cmake --build . --config Release
 ```
 
-For detailed instructions, see [VISUAL_STUDIO_SETUP.md](VISUAL_STUDIO_SETUP.md) and [tools/build_tools/README.md](tools/build_tools/README.md).
+For detailed instructions and troubleshooting, see [BUILD.md](BUILD.md).
 
 ## 📚 Architecture Principles
 

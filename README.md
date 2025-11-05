@@ -41,98 +41,48 @@ The engine **automatically detects and selects** the best available graphics API
 
 ## 🚀 Quick Start
 
-### 📖 New User? Start Here!
+### 📖 Building on Windows with Visual Studio 2022
 
-**Complete installation in 3 steps:**
+**See [BUILD.md](BUILD.md) for complete step-by-step build instructions.**
 
-1. **Install .NET 9 SDK** (Required for primary build method)
-   - Download and install from: https://dotnet.microsoft.com/download/dotnet/9.0
-   - Verify installation: `dotnet --version` (should show 9.0.x)
-
-2. **Clone the repository**
-   ```batch
-   git clone https://github.com/shifty81/fresh.git
-   cd fresh
-   ```
-
-3. **Run the installer**
-   ```batch
-   install.bat
-   ```
-   The installer will automatically:
-   - Check for .NET 9 SDK (primary build method)
-   - Build the .NET 9 managed wrapper for C# development
-   - Check prerequisites (CMake, Visual Studio 2022)
-   - Install vcpkg package manager and dependencies
-   - Generate Visual Studio 2022 solution
-   - Build the native engine
-   
-   *Estimated time: 10-20 minutes*
-
-4. **Start developing**
-   - **C# Development** (Recommended): Use the .NET managed wrapper
-     - See [dotnet/README.md](dotnet/README.md) for C# examples
-   - **C++ Development**: Open `build\FreshVoxelEngine.sln` in Visual Studio 2022
-     - Right-click "FreshVoxelEngine" project → "Set as Startup Project"
-     - Press F5 to build and run
-
-**Need help?** See [QUICKSTART_VISUAL.md](QUICKSTART_VISUAL.md) for step-by-step guide with screenshots.
-
-**Lost in documentation?** See [DOCUMENTATION_INDEX.md](DOCUMENTATION_INDEX.md) to find what you need.
-
-### Alternative Installation Methods
-
-<details>
-<summary><b>Option 2: Build All (Complete .NET + Native build)</b></summary>
+**Quick build from scratch:**
 
 ```batch
-# Complete automated build with .NET 9 bindings and native engine
-build_all.bat
-```
-
-This builds both the .NET 9 managed wrapper and the native C++ engine.
-
-</details>
-
-<details>
-<summary><b>Option 3: .NET Only (For C# developers)</b></summary>
-
-```batch
-# Check .NET SDK and build managed wrapper only
-check_dotnet.bat
-```
-
-For .NET 9 development without building the native engine.
-
-</details>
-
-<details>
-<summary><b>Option 4: Manual Setup (Advanced users)</b></summary>
-
-**Note**: Requires manual dependency installation. We recommend Option 1 instead.
-
-```batch
-# Clone the repository
+# 1. Clone repository
 git clone https://github.com/shifty81/fresh.git
 cd fresh
 
-# Build .NET wrapper first (recommended)
-cd dotnet
-dotnet build -c Release
+# 2. Set up vcpkg for dependencies (one-time setup)
 cd ..
+git clone https://github.com/microsoft/vcpkg.git
+cd vcpkg
+bootstrap-vcpkg.bat
+cd ..\fresh
 
-# Generate Visual Studio solution
+# 3. Generate Visual Studio 2022 solution
 generate_vs2022.bat
 
-# Open in Visual Studio
-start build\FreshVoxelEngine.sln
+# 4. Build
+cd build
+cmake --build . --config Release
+
+# 5. Run
+Release\FreshVoxelEngine.exe
 ```
 
-If you see dependency warnings:
-- Run `install.bat` to automatically install dependencies
-- Or see [DEVELOPER_SETUP.md](DEVELOPER_SETUP.md) for manual installation
+**Or use Visual Studio GUI:**
+1. Run `generate_vs2022.bat`
+2. Open `build\FreshVoxelEngine.sln` in Visual Studio 2022
+3. Set **FreshVoxelEngine** as startup project (right-click → "Set as Startup Project")
+4. Press **F7** to build, **F5** to run
 
-</details>
+**Prerequisites:**
+- Visual Studio 2022 with "Desktop development with C++"
+- CMake 3.20+
+- Git for Windows
+- .NET 9 SDK (optional, for C# bindings)
+
+**Detailed instructions:** [BUILD.md](BUILD.md) provides complete step-by-step guidance including troubleshooting.
 
 ### Linux & macOS
 
@@ -187,45 +137,29 @@ For detailed cross-platform build instructions, see [CROSS_PLATFORM_BUILD.md](CR
 
 ---
 
-## 🔷 .NET 9 Support (Primary Development Method)
+## 🔷 .NET 9 Support (Optional C# Bindings)
 
-Fresh Engine uses **.NET 9 as the primary development method** with C# bindings for managed code development:
+Fresh Engine provides optional **.NET 9 C# bindings** for managed code development:
 
-- **C# Game Scripting** - Write game logic in modern C# while leveraging native performance (Recommended)
+- **C# Game Scripting** - Write game logic in modern C# while leveraging native performance
 - **P/Invoke Integration** - Seamless interop between managed and native code  
 - **Modern .NET Features** - Use latest .NET 9 capabilities
 - **Visual Studio Integration** - Full IntelliSense and debugging support
-- **Cross-Platform** - Windows is the primary platform, with Linux/macOS support planned
 
-### Why .NET 9 First?
+### Building .NET Bindings
 
-1. **Modern Development** - Use C# and the latest .NET features
-2. **Easier Debugging** - Managed code debugging is more straightforward
-3. **Rapid Prototyping** - Faster iteration with C# scripting
-4. **Rich Ecosystem** - Access to NuGet packages and .NET libraries
-5. **Safety** - Memory safety and automatic garbage collection
-
-### Getting Started with .NET
+If you want C# scripting support:
 
 ```batch
-# Install .NET 9 SDK
-# Download from: https://dotnet.microsoft.com/download/dotnet/9.0
-
-# Run the installer (it will check for .NET 9 first)
-install.bat
-
-# Or build just the .NET wrapper
-check_dotnet.bat
+# From repository root
+cd dotnet
+dotnet build -c Release
+cd ..
 ```
 
+The managed assembly will be located at: `dotnet\bin\Release\net9.0-windows\FreshEngine.Managed.dll`
+
 See [dotnet/README.md](dotnet/README.md) for detailed C# usage examples and API documentation.
-
-### Alternative: Native C++ Development
-
-For developers who prefer C++ or need maximum performance, the native engine can still be built directly:
-- Use `generate_vs2022.bat` to create Visual Studio projects
-- Build with CMake and Visual Studio 2022
-- See [DEVELOPER_SETUP.md](DEVELOPER_SETUP.md) for details
 
 ---
 
@@ -346,44 +280,32 @@ See [docs/TERRAFORMING.md](docs/TERRAFORMING.md) for detailed documentation.
 
 ## Building
 
+**For complete step-by-step build instructions, see [BUILD.md](BUILD.md).**
+
 ### Prerequisites
 
-- CMake 3.20 or higher
-- C++20 compatible compiler (MSVC 2019 16.11+ / Visual Studio 2019+ / GCC 10+ / Clang 10+)
-- **Graphics API Dependencies**:
-  - **DirectX 11/12** (included with Windows SDK)
-  - **OpenGL 4.5+** drivers (usually pre-installed)
-- GLFW 3.3 or higher (automatically managed via vcpkg.json)
-- GLM (automatically managed via vcpkg.json)
-- **ImGui** (automatically managed via vcpkg.json) - for editor UI
+- **Visual Studio 2022** with "Desktop development with C++" workload
+- **CMake 3.20+** (add to PATH during installation)
+- **Git for Windows**
+- **.NET 9 SDK** (optional, for C# bindings only)
 
-**Note**: The project includes a `vcpkg.json` manifest file. When using vcpkg with the CMake toolchain file, dependencies (including ImGui) are automatically installed.
+### Quick Build
+
+```batch
+# See BUILD.md for detailed instructions
+generate_vs2022.bat
+```
+
+Dependencies (GLFW, GLM, ImGui, GLEW) are automatically installed via vcpkg during CMake configuration.
 
 ### Building on Windows (Visual Studio 2022)
 
-#### Automated Installation (Easiest)
-
-```batch
-# Run the automated installer
-tools\build_tools\install.bat
-```
-
-This handles all setup automatically! See [tools/build_tools/README.md](tools/build_tools/README.md) for details.
-
-#### Manual Installation
-
-```batch
-# Generate Visual Studio solution
-generate_vs2022.bat
-
-# Open solution in Visual Studio
-start build\FreshVoxelEngine.sln
-
-# Or build from command line
-cmake --build build --config Release
-```
-
-**Detailed instructions**: See [VISUAL_STUDIO_SETUP.md](VISUAL_STUDIO_SETUP.md)
+See [BUILD.md](BUILD.md) for complete instructions including:
+- vcpkg setup
+- CMake configuration
+- Visual Studio usage
+- Command-line build
+- Troubleshooting
 
 ## Graphics API Selection
 
