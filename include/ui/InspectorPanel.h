@@ -2,7 +2,7 @@
 
 namespace fresh {
 
-struct SceneNode;
+struct HierarchyNode;
 
 /**
  * @brief Inspector/Details Panel
@@ -42,7 +42,7 @@ public:
      * @brief Set the object to inspect
      * @param node Scene node to inspect
      */
-    void setInspectedNode(SceneNode* node) { m_inspectedNode = node; }
+    void setInspectedNode(HierarchyNode* node) { m_inspectedNode = node; }
 
 private:
     void renderTransformProperties();
@@ -51,7 +51,7 @@ private:
 
 private:
     bool m_visible;
-    SceneNode* m_inspectedNode;
+    HierarchyNode* m_inspectedNode;
 };
 
 } // namespace fresh
