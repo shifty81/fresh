@@ -81,26 +81,76 @@ The installer (both versions) will:
 - Build the project in Release configuration
 - Create convenient shortcut scripts
 
+### Understanding vcpkg Setup
+
+Fresh Voxel Engine uses vcpkg for dependency management. The build system supports two vcpkg installation locations:
+
+1. **Parent Directory (Recommended)**: `../vcpkg` 
+   - Shared across multiple projects
+   - Saves disk space (dependencies are cached once)
+   - Avoids re-downloading packages for each project
+   - Example: If Fresh is in `C:\Projects\fresh`, vcpkg is in `C:\Projects\vcpkg`
+
+2. **Project Directory**: `./vcpkg`
+   - Self-contained within the project
+   - Useful for isolated builds
+   - Each project has its own vcpkg installation
+
+**The build scripts automatically detect and use vcpkg in either location**, with parent directory taking precedence.
+
+**Verify Your Setup**: Run `verify_vcpkg.bat` to check if vcpkg is properly installed and configured.
+
 ### Option 2: Manual Setup with vcpkg
 
+**Recommended Approach (Shared vcpkg in Parent Directory)**
+
+This approach installs vcpkg once in a parent directory, allowing it to be shared across multiple projects:
+
 ```batch
-# Install vcpkg for package management
+# Navigate to parent directory (one level above where you'll clone fresh)
+cd C:\Projects  # or your preferred location
+
+# Install vcpkg for package management (shared location)
 git clone https://github.com/Microsoft/vcpkg.git
 cd vcpkg
 bootstrap-vcpkg.bat
 vcpkg integrate install
 
-# Clone and build Fresh
+# Clone Fresh in the same parent directory
 cd ..
 git clone https://github.com/shifty81/fresh.git
 cd fresh
 
 # Dependencies will be automatically installed via vcpkg.json manifest
-# Generate Visual Studio solution with vcpkg toolchain
-cmake -B build -G "Visual Studio 17 2022" -A x64 -DCMAKE_TOOLCHAIN_FILE=../vcpkg/scripts/buildsystems/vcpkg.cmake
+# The build scripts will automatically find vcpkg in ../vcpkg
+generate_vs2022.bat
 ```
 
-**Note**: The project now includes a `vcpkg.json` manifest file. When using vcpkg with the toolchain file, dependencies (GLFW and GLM) will be automatically installed. Manual installation with `vcpkg install` is no longer required.
+**Alternative: Project-Local vcpkg**
+
+If you prefer to keep vcpkg within the project directory:
+
+```batch
+# Clone Fresh
+git clone https://github.com/shifty81/fresh.git
+cd fresh
+
+# Install vcpkg locally in the project
+git clone https://github.com/Microsoft/vcpkg.git
+cd vcpkg
+bootstrap-vcpkg.bat
+vcpkg integrate install
+cd ..
+
+# Generate Visual Studio solution
+generate_vs2022.bat
+```
+
+**Note**: 
+- The project now includes a `vcpkg.json` manifest file that automatically manages dependencies
+- Build scripts check for vcpkg in the parent directory first (`../vcpkg`), then the project directory (`./vcpkg`)
+- Using a shared vcpkg installation saves disk space and avoids re-downloading packages for multiple projects
+- When using vcpkg with the toolchain file, dependencies (GLFW, GLM, ImGui) will be automatically installed during CMake configuration
 
 ## Building from Source
 
