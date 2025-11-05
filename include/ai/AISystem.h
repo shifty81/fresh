@@ -51,7 +51,7 @@ public:
     size_t getNPCCount() const;
     
 private:
-    AISystemImpl* pImpl;
+    std::unique_ptr<AISystemImpl> pImpl;
 };
 
 } // namespace fresh

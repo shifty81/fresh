@@ -28,12 +28,10 @@ public:
     std::vector<std::unique_ptr<NPC>> npcs;
 };
 
-AISystem::AISystem() : pImpl(new AISystemImpl()) {
+AISystem::AISystem() : pImpl(std::make_unique<AISystemImpl>()) {
 }
 
-AISystem::~AISystem() {
-    delete pImpl;
-}
+AISystem::~AISystem() = default;
 
 bool AISystem::initialize() {
     LOG_INFO_C("AI System initialized", "AISystem");
