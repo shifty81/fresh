@@ -52,15 +52,19 @@ echo [OK] .NET 9 SDK is installed!
 echo/
 echo Building .NET managed wrapper...
 echo/
+if not exist "%~dp0dotnet" (
+    echo ERROR: dotnet directory not found at %~dp0dotnet
+    exit /b 1
+)
 cd /d "%~dp0dotnet"
-if !ERRORLEVEL! NEQ 0 (
+if %ERRORLEVEL% NEQ 0 (
     echo ERROR: Failed to navigate to dotnet directory
     exit /b 1
 )
 
 dotnet build -c Release
 
-if !ERRORLEVEL! NEQ 0 (
+if %ERRORLEVEL% NEQ 0 (
     echo/
     echo ERROR: .NET build failed
     echo/

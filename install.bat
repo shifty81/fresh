@@ -30,7 +30,11 @@ REM Check for .NET 9 SDK first as it's the primary build method
 echo Checking for .NET 9 SDK...
 echo/
 call "%~dp0check_dotnet.bat"
-set DOTNET_CHECK_RESULT=!ERRORLEVEL!
+if %ERRORLEVEL% NEQ 0 (
+    set DOTNET_CHECK_RESULT=1
+) else (
+    set DOTNET_CHECK_RESULT=0
+)
 
 if !DOTNET_CHECK_RESULT! NEQ 0 (
     echo/

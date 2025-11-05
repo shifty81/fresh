@@ -71,15 +71,20 @@ echo/
 echo Step 2: Building .NET 9 managed wrapper...
 echo/
 
-cd dotnet
-dotnet build -c Release
-if %ERRORLEVEL% NEQ 0 (
-    echo ERROR: Failed to build .NET wrapper
-    cd ..
+if not exist "dotnet" (
+    echo ERROR: dotnet directory not found
     pause
     exit /b 1
 )
-cd ..
+cd /d dotnet
+dotnet build -c Release
+if !ERRORLEVEL! NEQ 0 (
+    echo ERROR: Failed to build .NET wrapper
+    cd /d ..
+    pause
+    exit /b 1
+)
+cd /d ..
 
 echo/
 echo [OK] .NET managed wrapper built successfully!
@@ -90,7 +95,7 @@ echo Step 3: Generating Visual Studio 2022 solution...
 echo/
 
 call generate_vs2022.bat
-if %ERRORLEVEL% NEQ 0 (
+if !ERRORLEVEL! NEQ 0 (
     echo ERROR: Failed to generate Visual Studio solution
     pause
     exit /b 1
@@ -101,7 +106,7 @@ echo Step 4: Building native C++ engine...
 echo/
 
 cmake --build build --config Release
-if %ERRORLEVEL% NEQ 0 (
+if !ERRORLEVEL! NEQ 0 (
     echo ERROR: Failed to build native engine
     pause
     exit /b 1
