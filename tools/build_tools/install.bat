@@ -161,6 +161,9 @@ echo %GREEN%Prerequisites check completed!%RESET%
 echo/
 echo Prerequisites check completed! >> "%LOG_FILE%"
 echo/ >> "%LOG_FILE%"
+echo/
+echo %YELLOW%Step 1 completed. Press any key to continue to Step 2 (vcpkg setup)...%RESET%
+echo/
 pause
 
 REM ============================================================================
@@ -173,12 +176,23 @@ echo/ >> "%LOG_FILE%"
 
 set "VCPKG_ROOT=%REPO_ROOT%\vcpkg"
 
+echo DEBUG: Checking for vcpkg at: %VCPKG_ROOT%
+echo DEBUG: Checking for vcpkg at: %VCPKG_ROOT% >> "%LOG_FILE%"
+
 if exist "%VCPKG_ROOT%\vcpkg.exe" (
     echo %GREEN%✓ vcpkg already installed at: %VCPKG_ROOT%%RESET%
     echo vcpkg already installed at: %VCPKG_ROOT% >> "%LOG_FILE%"
+    echo/
+    echo Verifying vcpkg installation...
+    echo Verifying vcpkg installation... >> "%LOG_FILE%"
+    "%VCPKG_ROOT%\vcpkg.exe" version >> "%LOG_FILE%" 2>&1
+    echo/
 ) else (
-    echo vcpkg not found. Would you like to install it?
+    echo vcpkg not found at: %VCPKG_ROOT%
+    echo vcpkg not found at: %VCPKG_ROOT% >> "%LOG_FILE%"
+    echo/
     echo vcpkg is a package manager for C++ that makes dependency management easier.
+    echo It is recommended but not required for this project.
     echo/
     echo vcpkg not found. >> "%LOG_FILE%"
     echo Would you like to install it? >> "%LOG_FILE%"
@@ -194,20 +208,39 @@ if exist "%VCPKG_ROOT%\vcpkg.exe" (
         
         REM Clone vcpkg
         if not exist "%VCPKG_ROOT%" (
+            echo/
             echo Cloning vcpkg repository...
             echo Cloning vcpkg repository... >> "%LOG_FILE%"
             echo %YELLOW%This will download vcpkg. Progress will be shown below.%RESET%
+            echo %YELLOW%Press any key to start the download...%RESET%
+            pause
             echo/
+            echo Running: git clone https://github.com/Microsoft/vcpkg.git "%VCPKG_ROOT%"
+            echo Running: git clone https://github.com/Microsoft/vcpkg.git "%VCPKG_ROOT%" >> "%LOG_FILE%"
             git clone https://github.com/Microsoft/vcpkg.git "%VCPKG_ROOT%"
-            if !ERRORLEVEL! NEQ 0 (
+            set CLONE_EXIT_CODE=!ERRORLEVEL!
+            echo DEBUG: git clone exited with code: !CLONE_EXIT_CODE!
+            echo DEBUG: git clone exited with code: !CLONE_EXIT_CODE! >> "%LOG_FILE%"
+            if !CLONE_EXIT_CODE! NEQ 0 (
                 echo/
                 echo %RED%ERROR: Failed to clone vcpkg repository%RESET%
                 echo ERROR: Failed to clone vcpkg repository >> "%LOG_FILE%"
                 echo Make sure git is installed and you have internet connection
                 echo Make sure git is installed and you have internet connection >> "%LOG_FILE%"
+                echo/
                 pause
                 exit /b 1
             )
+        )
+        
+        REM Verify clone succeeded
+        if not exist "%VCPKG_ROOT%" (
+            echo/
+            echo %RED%ERROR: vcpkg directory was not created%RESET%
+            echo ERROR: vcpkg directory was not created >> "%LOG_FILE%"
+            echo Expected location: %VCPKG_ROOT% >> "%LOG_FILE%"
+            pause
+            exit /b 1
         )
         
         REM Bootstrap vcpkg
@@ -215,20 +248,39 @@ if exist "%VCPKG_ROOT%\vcpkg.exe" (
         echo Bootstrapping vcpkg...
         echo Bootstrapping vcpkg... >> "%LOG_FILE%"
         echo %YELLOW%Downloading and bootstrapping vcpkg. Progress will be shown below.%RESET%
+        echo %YELLOW%This may take several minutes. Press any key to start...%RESET%
+        pause
         echo/
+        echo DEBUG: Current directory: %CD%
+        echo DEBUG: Current directory: %CD% >> "%LOG_FILE%"
+        echo DEBUG: Changing to vcpkg directory: %VCPKG_ROOT%
+        echo DEBUG: Changing to vcpkg directory: %VCPKG_ROOT% >> "%LOG_FILE%"
         cd /d "%VCPKG_ROOT%"
-        if !ERRORLEVEL! NEQ 0 (
+        set CD_EXIT_CODE=!ERRORLEVEL!
+        echo DEBUG: cd exited with code: !CD_EXIT_CODE!
+        echo DEBUG: cd exited with code: !CD_EXIT_CODE! >> "%LOG_FILE%"
+        echo DEBUG: New current directory: %CD%
+        echo DEBUG: New current directory: %CD% >> "%LOG_FILE%"
+        if !CD_EXIT_CODE! NEQ 0 (
             echo %RED%ERROR: Failed to change to vcpkg directory%RESET%
             echo ERROR: Failed to change to vcpkg directory >> "%LOG_FILE%"
             echo Expected: %VCPKG_ROOT% >> "%LOG_FILE%"
             pause
             exit /b 1
         )
+        
+        echo Running: bootstrap-vcpkg.bat
+        echo Running: bootstrap-vcpkg.bat >> "%LOG_FILE%"
         call bootstrap-vcpkg.bat
-        if !ERRORLEVEL! NEQ 0 (
+        set BOOTSTRAP_EXIT_CODE=!ERRORLEVEL!
+        echo/
+        echo DEBUG: bootstrap-vcpkg.bat exited with code: !BOOTSTRAP_EXIT_CODE!
+        echo DEBUG: bootstrap-vcpkg.bat exited with code: !BOOTSTRAP_EXIT_CODE! >> "%LOG_FILE%"
+        if !BOOTSTRAP_EXIT_CODE! NEQ 0 (
             echo/
             echo %RED%ERROR: Failed to bootstrap vcpkg%RESET%
             echo ERROR: Failed to bootstrap vcpkg >> "%LOG_FILE%"
+            echo/
             pause
             exit /b 1
         )
@@ -241,6 +293,10 @@ if exist "%VCPKG_ROOT%\vcpkg.exe" (
             echo Expected location: %VCPKG_ROOT%\vcpkg.exe >> "%LOG_FILE%"
             echo This could be due to antivirus, permissions, or bootstrap failure.
             echo This could be due to antivirus, permissions, or bootstrap failure. >> "%LOG_FILE%"
+            echo/
+            echo DEBUG: Listing vcpkg directory contents:
+            echo DEBUG: Listing vcpkg directory contents: >> "%LOG_FILE%"
+            dir "%VCPKG_ROOT%" >> "%LOG_FILE%" 2>&1
             cd /d "%REPO_ROOT%"
             pause
             exit /b 1
@@ -281,6 +337,8 @@ if exist "%VCPKG_ROOT%\vcpkg.exe" (
             echo vcpkg integrated with Visual Studio >> "%LOG_FILE%"
         )
         
+        echo DEBUG: Returning to repository root: %REPO_ROOT%
+        echo DEBUG: Returning to repository root: %REPO_ROOT% >> "%LOG_FILE%"
         cd /d "%REPO_ROOT%"
         if !ERRORLEVEL! NEQ 0 (
             echo %RED%ERROR: Failed to return to repository root%RESET%
@@ -290,6 +348,8 @@ if exist "%VCPKG_ROOT%\vcpkg.exe" (
             pause
             exit /b 1
         )
+        echo DEBUG: Successfully returned to: %CD%
+        echo DEBUG: Successfully returned to: %CD% >> "%LOG_FILE%"
         echo/
         echo %GREEN%✓ vcpkg installed successfully!%RESET%
         echo vcpkg installed successfully! >> "%LOG_FILE%"
@@ -301,6 +361,8 @@ if exist "%VCPKG_ROOT%\vcpkg.exe" (
     )
 )
 
+echo/
+echo %YELLOW%Step 2 completed. Press any key to continue to Step 3...%RESET%
 echo/
 echo/ >> "%LOG_FILE%"
 pause
@@ -316,18 +378,31 @@ echo/ >> "%LOG_FILE%"
 REM Check if vcpkg executable exists
 echo Checking for vcpkg executable...
 echo Checking for vcpkg executable... >> "%LOG_FILE%"
-echo Checking path: %VCPKG_ROOT%\vcpkg.exe >> "%LOG_FILE%"
-echo/
-echo/ >> "%LOG_FILE%"
 
 REM Use a more robust existence check
 REM Defensive check in case VCPKG_ROOT was somehow not set (should never happen, but good practice)
 if not defined VCPKG_ROOT (
     echo %RED%ERROR: VCPKG_ROOT variable is not set%RESET%
     echo ERROR: VCPKG_ROOT variable is not set >> "%LOG_FILE%"
+    echo/
+    echo DEBUG: Current directory is: %CD%
+    echo DEBUG: Repository root is: %REPO_ROOT%
+    echo/
+    echo DEBUG: Current directory is: %CD% >> "%LOG_FILE%"
+    echo DEBUG: Repository root is: %REPO_ROOT% >> "%LOG_FILE%"
+    echo/
     pause
     exit /b 1
 )
+
+echo Checking path: %VCPKG_ROOT%\vcpkg.exe
+echo Checking path: %VCPKG_ROOT%\vcpkg.exe >> "%LOG_FILE%"
+echo/
+echo/ >> "%LOG_FILE%"
+
+REM Additional debug output to help diagnose issues
+echo DEBUG: Attempting to check if file exists...
+echo DEBUG: Attempting to check if file exists... >> "%LOG_FILE%"
 
 if exist "%VCPKG_ROOT%\vcpkg.exe" (
     echo %GREEN%✓ vcpkg found at: %VCPKG_ROOT%\vcpkg.exe%RESET%
@@ -365,6 +440,20 @@ if exist "%VCPKG_ROOT%\vcpkg.exe" (
     echo Dependencies must be installed manually. >> "%LOG_FILE%"
     echo/ >> "%LOG_FILE%"
     
+    REM Additional debug - check if directory exists
+    if exist "%VCPKG_ROOT%" (
+        echo DEBUG: vcpkg directory exists but vcpkg.exe is missing
+        echo DEBUG: vcpkg directory exists but vcpkg.exe is missing >> "%LOG_FILE%"
+        echo DEBUG: Listing contents of %VCPKG_ROOT%:
+        echo DEBUG: Listing contents of %VCPKG_ROOT%: >> "%LOG_FILE%"
+        dir "%VCPKG_ROOT%" >> "%LOG_FILE%" 2>&1
+    ) else (
+        echo DEBUG: vcpkg directory does not exist at %VCPKG_ROOT%
+        echo DEBUG: vcpkg directory does not exist at %VCPKG_ROOT% >> "%LOG_FILE%"
+    )
+    echo/
+    echo/ >> "%LOG_FILE%"
+    
     echo The following libraries are required:
     echo   - GLFW 3.3+
     echo   - GLM
@@ -383,9 +472,13 @@ if exist "%VCPKG_ROOT%\vcpkg.exe" (
 )
 
 echo vcpkg check completed >> "%LOG_FILE%"
-echo %YELLOW%Press any key to continue to CMake configuration...%RESET%
-echo User prompted to continue... >> "%LOG_FILE%"
-pause >nul
+echo/
+echo %YELLOW%Step 3 completed. Press any key to continue to Step 4 (CMake configuration)...%RESET%
+echo %YELLOW%Or press Ctrl+C to stop and review the log file.%RESET%
+echo/
+echo User prompted to continue to Step 4... >> "%LOG_FILE%"
+pause
+echo User chose to continue to Step 4 >> "%LOG_FILE%"
 echo Continuing to Step 4... >> "%LOG_FILE%"
 echo/
 echo/ >> "%LOG_FILE%"
@@ -408,44 +501,108 @@ echo       if vcpkg is available. This may take several minutes on first run. >>
 echo/ >> "%LOG_FILE%"
 
 REM Create build directory if it doesn't exist
-if not exist "build" mkdir build
+echo DEBUG: Creating build directory if needed...
+echo DEBUG: Creating build directory if needed... >> "%LOG_FILE%"
+if not exist "build" (
+    mkdir build
+    if !ERRORLEVEL! NEQ 0 (
+        echo %RED%ERROR: Failed to create build directory%RESET%
+        echo ERROR: Failed to create build directory >> "%LOG_FILE%"
+        echo/
+        pause
+        exit /b 1
+    )
+    echo DEBUG: Build directory created successfully
+    echo DEBUG: Build directory created successfully >> "%LOG_FILE%"
+) else (
+    echo DEBUG: Build directory already exists
+    echo DEBUG: Build directory already exists >> "%LOG_FILE%"
+)
+
+echo DEBUG: Current directory before cd: %CD%
+echo DEBUG: Current directory before cd: %CD% >> "%LOG_FILE%"
 
 cd /d build
+if !ERRORLEVEL! NEQ 0 (
+    echo %RED%ERROR: Failed to change to build directory%RESET%
+    echo ERROR: Failed to change to build directory >> "%LOG_FILE%"
+    echo/
+    pause
+    exit /b 1
+)
+
+echo DEBUG: Current directory after cd: %CD%
+echo DEBUG: Current directory after cd: %CD% >> "%LOG_FILE%"
 
 REM Generate project files
+echo/
 echo Running CMake...
 echo Running CMake... >> "%LOG_FILE%"
+echo/
+
 if exist "%VCPKG_ROOT%\scripts\buildsystems\vcpkg.cmake" (
     echo Using vcpkg toolchain file (manifest mode)...
     echo Dependencies will be installed automatically from vcpkg.json...
     echo/
     echo Using vcpkg toolchain file (manifest mode)... >> "%LOG_FILE%"
     echo Dependencies will be installed automatically from vcpkg.json... >> "%LOG_FILE%"
+    echo Toolchain file: %VCPKG_ROOT%\scripts\buildsystems\vcpkg.cmake >> "%LOG_FILE%"
     echo/ >> "%LOG_FILE%"
     echo %YELLOW%NOTE: vcpkg will now install dependencies. This may take 10-15 minutes on first run.%RESET%
     echo %YELLOW%      You will see download and build progress below. Please be patient.%RESET%
     echo/
+    echo %YELLOW%Press any key to start CMake generation...%RESET%
+    pause
+    echo/
+    echo Starting CMake...
+    echo Starting CMake... >> "%LOG_FILE%"
     cmake -G "Visual Studio 17 2022" -A x64 -DCMAKE_TOOLCHAIN_FILE="%VCPKG_ROOT%\scripts\buildsystems\vcpkg.cmake" ..
 ) else (
     echo Using system-installed dependencies...
     echo Using system-installed dependencies... >> "%LOG_FILE%"
+    echo WARNING: vcpkg toolchain not found at: %VCPKG_ROOT%\scripts\buildsystems\vcpkg.cmake >> "%LOG_FILE%"
+    echo/
+    echo %YELLOW%Press any key to start CMake generation...%RESET%
+    pause
+    echo/
+    echo Starting CMake...
+    echo Starting CMake... >> "%LOG_FILE%"
     cmake -G "Visual Studio 17 2022" -A x64 ..
 )
 
-if !ERRORLEVEL! NEQ 0 (
+set CMAKE_EXIT_CODE=!ERRORLEVEL!
+echo/
+echo DEBUG: CMake exited with code: !CMAKE_EXIT_CODE!
+echo DEBUG: CMake exited with code: !CMAKE_EXIT_CODE! >> "%LOG_FILE%"
+
+if !CMAKE_EXIT_CODE! NEQ 0 (
     echo/
     echo %RED%ERROR: CMake project generation failed%RESET%
-    echo ERROR: CMake project generation failed with exit code !ERRORLEVEL! >> "%LOG_FILE%"
+    echo ERROR: CMake project generation failed with exit code !CMAKE_EXIT_CODE! >> "%LOG_FILE%"
     echo Please check the error messages above
     echo/
     echo Full CMake output has been saved to: %LOG_FILE%
+    echo/
+    echo Troubleshooting:
+    echo   1. Check that vcpkg.json is valid
+    echo   2. Verify internet connection for dependency downloads
+    echo   3. Check CMakeLists.txt for syntax errors
+    echo   4. Review the log file: %LOG_FILE%
     echo/
     cd /d "%REPO_ROOT%"
     pause
     exit /b 1
 )
 
+echo DEBUG: Returning to repository root...
+echo DEBUG: Returning to repository root... >> "%LOG_FILE%"
 cd /d "%REPO_ROOT%"
+if !ERRORLEVEL! NEQ 0 (
+    echo %RED%ERROR: Failed to return to repository root%RESET%
+    echo ERROR: Failed to return to repository root >> "%LOG_FILE%"
+    pause
+    exit /b 1
+)
 
 echo/
 echo %GREEN%✓ Visual Studio project files generated successfully!%RESET%
@@ -454,11 +611,17 @@ echo/
 echo Visual Studio project files generated successfully! >> "%LOG_FILE%"
 echo Location: %REPO_ROOT%\build\FreshVoxelEngine.sln >> "%LOG_FILE%"
 echo/ >> "%LOG_FILE%"
+echo/
+echo %YELLOW%Step 4 completed. Press any key to continue to Step 5 (Build)...%RESET%
+echo %YELLOW%Or press Ctrl+C to stop here and manually open Visual Studio.%RESET%
+echo/
 pause
 
 REM ============================================================================
 REM Step 5: Build the Project
 REM ============================================================================
+echo/
+echo/ >> "%LOG_FILE%"
 echo %BLUE%[Step 5/6] Building the project...%RESET%
 echo [Step 5/6] Building the project... >> "%LOG_FILE%"
 echo/
@@ -467,27 +630,59 @@ echo/
 echo This may take several minutes depending on your system... >> "%LOG_FILE%"
 echo/ >> "%LOG_FILE%"
 
+echo %YELLOW%This step will compile the engine. You can skip this and build manually in Visual Studio.%RESET%
+echo/
+set /p DO_BUILD="Would you like to build now? (Y/N): "
+echo User response to build prompt: !DO_BUILD! >> "%LOG_FILE%"
+
+if /i "!DO_BUILD!" NEQ "Y" (
+    echo/
+    echo %YELLOW%Skipping build step.%RESET%
+    echo %YELLOW%You can build manually by opening build\FreshVoxelEngine.sln in Visual Studio.%RESET%
+    echo/
+    echo Skipping build step. >> "%LOG_FILE%"
+    echo User chose to skip build and build manually in Visual Studio. >> "%LOG_FILE%"
+    echo/ >> "%LOG_FILE%"
+    goto skip_build
+)
+
 REM Build in Release mode
+echo/
 echo Building Release configuration...
 echo Building Release configuration... >> "%LOG_FILE%"
 echo/ >> "%LOG_FILE%"
 echo %YELLOW%Building... This may take several minutes. Progress will be shown below.%RESET%
 echo/
+echo DEBUG: About to run: cmake --build build --config Release
+echo DEBUG: About to run: cmake --build build --config Release >> "%LOG_FILE%"
+echo/
+
 cmake --build build --config Release
 
-if !ERRORLEVEL! NEQ 0 (
+set BUILD_EXIT_CODE=!ERRORLEVEL!
+echo/
+echo DEBUG: Build exited with code: !BUILD_EXIT_CODE!
+echo DEBUG: Build exited with code: !BUILD_EXIT_CODE! >> "%LOG_FILE%"
+
+if !BUILD_EXIT_CODE! NEQ 0 (
     echo/
     echo %RED%ERROR: Build failed%RESET%
-    echo ERROR: Build failed with exit code !ERRORLEVEL! >> "%LOG_FILE%"
+    echo ERROR: Build failed with exit code !BUILD_EXIT_CODE! >> "%LOG_FILE%"
     echo Please check the error messages above
     echo/
     echo Full build output has been saved to: %LOG_FILE%
+    echo/
+    echo Troubleshooting:
+    echo   1. Check for compiler errors in the output above
+    echo   2. Try building manually in Visual Studio for better error messages
+    echo   3. Review the log file: %LOG_FILE%
     echo/
     echo You can try building manually by opening:
     echo   %REPO_ROOT%\build\FreshVoxelEngine.sln
     echo/ >> "%LOG_FILE%"
     echo You can try building manually by opening: >> "%LOG_FILE%"
     echo   %REPO_ROOT%\build\FreshVoxelEngine.sln >> "%LOG_FILE%"
+    echo/
     pause
     exit /b 1
 )
@@ -497,21 +692,34 @@ echo %GREEN%✓ Build completed successfully!%RESET%
 echo/
 echo Build completed successfully! >> "%LOG_FILE%"
 echo/ >> "%LOG_FILE%"
+
+:skip_build
+echo/
+echo %YELLOW%Step 5 completed. Press any key to continue to Step 6 (Shortcuts)...%RESET%
+echo/
 pause
 
 REM ============================================================================
 REM Step 6: Create Shortcuts (Optional)
 REM ============================================================================
+echo/
+echo/ >> "%LOG_FILE%"
 echo %BLUE%[Step 6/6] Creating shortcuts...%RESET%
 echo [Step 6/6] Creating shortcuts... >> "%LOG_FILE%"
 echo/
 echo/ >> "%LOG_FILE%"
+
+echo Creating convenient batch file shortcuts will make it easier to:
+echo   - Open the Visual Studio solution
+echo   - Run the engine after building
+echo/
 
 set /p CREATE_SHORTCUTS="Would you like to create desktop shortcuts? (Y/N): "
 echo User response: !CREATE_SHORTCUTS! >> "%LOG_FILE%"
 
 if /i "!CREATE_SHORTCUTS!"=="Y" (
     REM Create a shortcut script
+    echo/
     echo Creating shortcuts...
     echo Creating shortcuts... >> "%LOG_FILE%"
     
@@ -521,6 +729,8 @@ if /i "!CREATE_SHORTCUTS!"=="Y" (
     REM Shortcut to open Visual Studio solution
     echo @echo off > "%REPO_ROOT%\Open_Solution.bat"
     echo start "" "build\FreshVoxelEngine.sln" >> "%REPO_ROOT%\Open_Solution.bat"
+    echo %GREEN%✓ Created Open_Solution.bat%RESET%
+    echo Created Open_Solution.bat >> "%LOG_FILE%"
     
     REM Shortcut to run the engine
     if exist "build\Release\FreshVoxelEngine.exe" (
@@ -529,10 +739,13 @@ if /i "!CREATE_SHORTCUTS!"=="Y" (
         echo start "" "build\Release\FreshVoxelEngine.exe" >> "%REPO_ROOT%\Run_Engine.bat"
         echo %GREEN%✓ Created Run_Engine.bat%RESET%
         echo Created Run_Engine.bat >> "%LOG_FILE%"
+    ) else (
+        echo %YELLOW%Note: Run_Engine.bat not created (executable not found)%RESET%
+        echo Note: Run_Engine.bat not created (executable not found) >> "%LOG_FILE%"
     )
-    
-    echo %GREEN%✓ Created Open_Solution.bat%RESET%
-    echo Created Open_Solution.bat >> "%LOG_FILE%"
+) else (
+    echo Skipping shortcuts.
+    echo Skipping shortcuts. >> "%LOG_FILE%"
 )
 
 echo/
