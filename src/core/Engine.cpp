@@ -555,7 +555,7 @@ void Engine::setupInputCallbacks() {
     GLFWwindow* window = m_window->getHandle();
     
     // Create user data for callbacks
-    m_callbackUserData = std::make_unique<CallbackUserData>(CallbackUserData{m_inputManager.get(), m_window.get()});
+    m_callbackUserData = std::make_unique<CallbackUserData>(m_inputManager.get(), m_window.get());
     glfwSetWindowUserPointer(window, m_callbackUserData.get());
     
     // Keyboard callback
