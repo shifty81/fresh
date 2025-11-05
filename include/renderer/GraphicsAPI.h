@@ -52,6 +52,10 @@ inline const char* getGraphicsAPIName(GraphicsAPI api) {
  * @brief Select the best graphics API for the platform
  * Windows: DirectX 12 -> DirectX 11 -> OpenGL (if GLEW available)
  * Linux/Mac: OpenGL (if GLEW available)
+ * 
+ * Note: On Linux/Mac, if GLEW is not available, OpenGL will be returned
+ * as the best option, but it will fail at runtime. This should not happen
+ * if dependencies are properly installed.
  */
 inline GraphicsAPI selectBestGraphicsAPI() {
 #ifdef _WIN32
@@ -60,13 +64,9 @@ inline GraphicsAPI selectBestGraphicsAPI() {
     return GraphicsAPI::DirectX12;
 #else
     // Linux, Mac, and other platforms use OpenGL
-#if defined(FRESH_OPENGL_SUPPORT) && defined(FRESH_GLEW_AVAILABLE)
+    // If GLEW is not available, this will still return OpenGL
+    // but runtime initialization will fail with proper error message
     return GraphicsAPI::OpenGL;
-#else
-    // If OpenGL is not available, we have a problem
-    // This should not happen in practice on Linux/Mac
-    return GraphicsAPI::OpenGL;
-#endif
 #endif
 }
 
