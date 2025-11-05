@@ -74,6 +74,9 @@ void EditorGUI::renderTerraformingPanel() {
         case TerraformTool::FilledCube:
             std::cout << "Filled Cube (Size: " << terraform->getToolSize() << ")\n";
             break;
+        case TerraformTool::Line:
+            std::cout << "Line\n";
+            break;
         case TerraformTool::Flatten:
             std::cout << "Flatten (Radius: " << terraform->getToolSize() << ")\n";
             break;

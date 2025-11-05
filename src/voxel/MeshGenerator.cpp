@@ -134,7 +134,7 @@ void MeshGenerator::addFace(const Face& face,
     
     uint32_t startIndex = static_cast<uint32_t>(vertices.size() / 6); // 6 floats per vertex (pos + normal)
     
-    // Color based on block type
+    // Color based on block type (not currently used in vertex data, but may be used for texturing/lighting)
     float r = 0.5f, g = 0.5f, b = 0.5f;
     switch (face.type) {
         case VoxelType::Grass:
@@ -149,6 +149,8 @@ void MeshGenerator::addFace(const Face& face,
         default:
             break;
     }
+    // Suppress warnings - colors reserved for future use
+    (void)r; (void)g; (void)b;
     
     // Add vertices based on face direction
     switch (face.direction) {
