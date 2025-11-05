@@ -21,7 +21,7 @@ MainMenu::MainMenu()
     std::memset(m_seedBuffer, 0, sizeof(m_seedBuffer));
     
     // Default world name
-    strncpy_s(m_worldNameBuffer, sizeof(m_worldNameBuffer), "New World", _TRUNCATE);
+    std::strncpy(m_worldNameBuffer, "New World", sizeof(m_worldNameBuffer) - 1);
     
     // Random seed by default
     m_worldSeed = static_cast<int>(std::time(nullptr));
