@@ -5,6 +5,11 @@
 The Fresh Voxel Engine uses **batch files exclusively** for installation. PowerShell is no longer required.
 
 **New in Latest Version:**
+- ✨ **Manual step-by-step control** with pauses between each step
+- ✨ **Enhanced debugging output** to trace execution and identify issues
+- ✨ **Clear confirmation prompts** before each major operation
+- ✨ **Optional build step** - skip automated build and use Visual Studio instead
+- ✨ **Detailed error logging** with exit codes for all operations
 - ✨ **Clear next steps** displayed after installation completes
 - ✨ **Option to open Visual Studio** automatically after installation
 - ✨ **Better error messages** with troubleshooting guidance
@@ -51,6 +56,14 @@ fresh/
 2. **Main installer** (`tools\build_tools\install.bat`) performs installation
 3. **Root `install.bat`** displays completion summary and next steps
 
+### Manual Control
+
+The installer now provides **manual control** at each step:
+- You'll be prompted to continue after each major step
+- Each step shows debug information to help identify issues
+- Press Ctrl+C at any prompt to stop the installation
+- Review the log file at any time in the `logs/` directory
+
 ---
 
 ## What the Installer Does
@@ -59,33 +72,85 @@ fresh/
 - Verifies CMake is installed
 - Checks for Visual Studio 2022
 - Logs all findings
+- **Pauses for confirmation before proceeding**
 
 ### Step 2: vcpkg Setup
 - Checks if vcpkg is already installed
 - Offers to install vcpkg if not found
-- Clones vcpkg from GitHub
-- Runs bootstrap script
+- Clones vcpkg from GitHub (with confirmation prompt)
+- Runs bootstrap script (with confirmation prompt)
 - Integrates with Visual Studio
+- Logs all exit codes and directory changes
+- **Pauses for confirmation before proceeding**
 
 ### Step 3: Configure Dependencies
 - Verifies vcpkg manifest mode setup
 - Lists required dependencies (GLFW, GLM, ImGui)
 - Explains auto-installation during CMake
+- Shows debug output if vcpkg is not found
+- **Pauses for confirmation before proceeding**
 
 ### Step 4: Generate Visual Studio Project
 - Creates `build/` directory
+- Asks for confirmation before running CMake
 - Runs CMake with vcpkg toolchain
 - Automatically downloads and builds dependencies
 - Generates `.sln` file
+- Logs CMake exit codes
+- **Pauses for confirmation before proceeding**
 
 ### Step 5: Build the Engine
-- Compiles in Release mode
+- **Asks if you want to build now or skip this step**
+- If yes: Compiles in Release mode
+- If no: You can build manually in Visual Studio
 - Shows build progress
-- Reports success/failure
+- Reports success/failure with exit codes
+- **Pauses for confirmation before proceeding**
 
 ### Step 6: Create Shortcuts
-- Creates desktop shortcut to .sln file
-- Creates shortcut to documentation
+- Asks if you want shortcuts
+- Creates batch file shortcuts to .sln file
+- Creates shortcut to run the engine
+
+---
+
+## Recent Improvements (v2.2 - Manual/Debug Mode)
+
+### Manual Step-by-Step Control (November 2025)
+The installer now provides enhanced manual control and debugging:
+
+1. **Explicit Pauses Between Steps**: After each major step completes, the installer pauses and shows a message like "Step X completed. Press any key to continue to Step Y..." This prevents the window from closing unexpectedly and gives you time to review the output.
+
+2. **No Silent Pauses**: Changed `pause >nul` (silent) to `pause` (visible) so you can see when the installer is waiting for input instead of appearing frozen.
+
+3. **Debug Output**: Added "DEBUG:" prefixed messages throughout showing:
+   - Current directory before and after directory changes
+   - Exit codes from all major operations (git clone, cmake, build)
+   - File existence checks before attempting operations
+   - Directory listings when files are missing
+
+4. **Optional Build Step**: The build step (Step 5) now asks if you want to build automatically or skip it. This lets you:
+   - Generate the Visual Studio solution without waiting for a full build
+   - Open the solution in Visual Studio to build manually with better error messages
+   - Debug build issues more easily in the IDE
+
+5. **Manual Confirmation Prompts**: Several operations now ask for confirmation before proceeding:
+   - vcpkg git clone (gives you a chance to verify git is working)
+   - vcpkg bootstrap (can take several minutes, confirms before starting)
+   - CMake generation (can take 10-15 minutes on first run with dependency downloads)
+   - Build (optional, can be skipped entirely)
+
+6. **Enhanced Error Messages**: All error messages now include:
+   - The exact command that failed
+   - The exit code returned
+   - Troubleshooting suggestions
+   - Path to the log file for detailed analysis
+
+These improvements help you:
+- See exactly where the installer is in the process
+- Identify the exact point of failure if something goes wrong
+- Review log files between steps
+- Skip problematic steps and continue manually
 
 ---
 
