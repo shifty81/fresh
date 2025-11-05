@@ -5,10 +5,10 @@ REM Builds both native C++ engine and .NET 9 managed wrapper
 echo ================================================
 echo Fresh Voxel Engine - Complete Build
 echo ================================================
-echo.
+echo/
 
 echo Step 1: Checking prerequisites...
-echo.
+echo/
 
 REM Check CMake
 where cmake >nul 2>nul
@@ -44,9 +44,9 @@ if %VS2022_FOUND%==1 (
     echo WARNING: Visual Studio 2022 not found in default location
 )
 
-echo.
+echo/
 echo Step 2: Generating Visual Studio 2022 solution...
-echo.
+echo/
 
 call generate_vs2022.bat
 if %ERRORLEVEL% NEQ 0 (
@@ -55,9 +55,9 @@ if %ERRORLEVEL% NEQ 0 (
     exit /b 1
 )
 
-echo.
+echo/
 echo Step 3: Building native C++ engine...
-echo.
+echo/
 
 cmake --build build --config Release
 if %ERRORLEVEL% NEQ 0 (
@@ -67,9 +67,9 @@ if %ERRORLEVEL% NEQ 0 (
 )
 
 if %BUILD_DOTNET%==1 (
-    echo.
+    echo/
     echo Step 4: Building .NET managed wrapper...
-    echo.
+    echo/
     
     cd dotnet
     dotnet build -c Release
@@ -81,23 +81,23 @@ if %BUILD_DOTNET%==1 (
     )
     cd ..
     
-    echo.
+    echo/
     echo ================================================
     echo Build completed successfully!
     echo ================================================
-    echo.
+    echo/
     echo Native engine: build\Release\FreshVoxelEngine.exe
     echo .NET wrapper: dotnet\bin\Release\net9.0-windows\FreshEngine.Managed.dll
 ) else (
-    echo.
+    echo/
     echo ================================================
     echo Build completed successfully!
     echo ================================================
-    echo.
+    echo/
     echo Native engine: build\Release\FreshVoxelEngine.exe
-    echo.
+    echo/
     echo Note: .NET wrapper was not built (SDK not found)
 )
 
-echo.
+echo/
 pause
