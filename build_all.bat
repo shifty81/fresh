@@ -1,14 +1,49 @@
 @echo off
+setlocal enabledelayedexpansion
 REM Fresh Voxel Engine - Complete Build Script
-REM Builds both native C++ engine and .NET 9 managed wrapper
+REM Builds both .NET 9 managed wrapper (primary) and native C++ engine
 
 echo ================================================
 echo Fresh Voxel Engine - Complete Build
 echo ================================================
 echo/
+echo This script builds the engine using the recommended
+echo .NET-first approach:
+echo   1. .NET 9 managed wrapper (C# bindings)
+echo   2. Native C++ engine (backend)
+echo/
 
 echo Step 1: Checking prerequisites...
 echo/
+
+REM Check .NET SDK first (primary build method)
+where dotnet >nul 2>nul
+if %ERRORLEVEL% NEQ 0 (
+    echo ERROR: .NET SDK is not found in PATH
+    echo/
+    echo .NET 9 is the primary build method for Fresh Voxel Engine.
+    echo Install from: https://dotnet.microsoft.com/download/dotnet/9.0
+    echo/
+    pause
+    exit /b 1
+)
+echo [OK] .NET SDK found
+
+REM Check if .NET 9 is available
+dotnet --list-sdks | findstr "^9\." >nul 2>nul
+if %ERRORLEVEL% NEQ 0 (
+    echo ERROR: .NET 9 SDK is not installed
+    echo/
+    echo Installed SDKs:
+    dotnet --list-sdks
+    echo/
+    echo Install .NET 9 SDK from:
+    echo https://dotnet.microsoft.com/download/dotnet/9.0
+    echo/
+    pause
+    exit /b 1
+)
+echo [OK] .NET 9 SDK found
 
 REM Check CMake
 where cmake >nul 2>nul
@@ -19,18 +54,6 @@ if %ERRORLEVEL% NEQ 0 (
     exit /b 1
 )
 echo [OK] CMake found
-
-REM Check .NET SDK
-where dotnet >nul 2>nul
-if %ERRORLEVEL% NEQ 0 (
-    echo WARNING: .NET SDK is not found in PATH
-    echo .NET bindings will not be built
-    echo Install from: https://dotnet.microsoft.com/download/dotnet/9.0
-    set BUILD_DOTNET=0
-) else (
-    echo [OK] .NET SDK found
-    set BUILD_DOTNET=1
-)
 
 REM Check Visual Studio 2022
 set VS2022_FOUND=0
@@ -45,7 +68,25 @@ if %VS2022_FOUND%==1 (
 )
 
 echo/
-echo Step 2: Generating Visual Studio 2022 solution...
+echo Step 2: Building .NET 9 managed wrapper...
+echo/
+
+cd dotnet
+dotnet build -c Release
+if %ERRORLEVEL% NEQ 0 (
+    echo ERROR: Failed to build .NET wrapper
+    cd ..
+    pause
+    exit /b 1
+)
+cd ..
+
+echo/
+echo [OK] .NET managed wrapper built successfully!
+echo      Output: dotnet\bin\Release\net9.0-windows\FreshEngine.Managed.dll
+echo/
+
+echo Step 3: Generating Visual Studio 2022 solution...
 echo/
 
 call generate_vs2022.bat
@@ -56,7 +97,7 @@ if %ERRORLEVEL% NEQ 0 (
 )
 
 echo/
-echo Step 3: Building native C++ engine...
+echo Step 4: Building native C++ engine...
 echo/
 
 cmake --build build --config Release
@@ -66,38 +107,17 @@ if %ERRORLEVEL% NEQ 0 (
     exit /b 1
 )
 
-if %BUILD_DOTNET%==1 (
-    echo/
-    echo Step 4: Building .NET managed wrapper...
-    echo/
-    
-    cd dotnet
-    dotnet build -c Release
-    if %ERRORLEVEL% NEQ 0 (
-        echo ERROR: Failed to build .NET wrapper
-        cd ..
-        pause
-        exit /b 1
-    )
-    cd ..
-    
-    echo/
-    echo ================================================
-    echo Build completed successfully!
-    echo ================================================
-    echo/
-    echo Native engine: build\Release\FreshVoxelEngine.exe
-    echo .NET wrapper: dotnet\bin\Release\net9.0-windows\FreshEngine.Managed.dll
-) else (
-    echo/
-    echo ================================================
-    echo Build completed successfully!
-    echo ================================================
-    echo/
-    echo Native engine: build\Release\FreshVoxelEngine.exe
-    echo/
-    echo Note: .NET wrapper was not built (SDK not found)
-)
-
+echo/
+echo ================================================
+echo Build completed successfully!
+echo ================================================
+echo/
+echo .NET wrapper:    dotnet\bin\Release\net9.0-windows\FreshEngine.Managed.dll
+echo Native engine:   build\Release\FreshVoxelEngine.exe
+echo/
+echo You can now:
+echo   1. Use the managed wrapper in C# applications
+echo   2. Run the native engine: build\Release\FreshVoxelEngine.exe
+echo   3. Open Visual Studio: build\FreshVoxelEngine.sln
 echo/
 pause

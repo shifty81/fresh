@@ -1,38 +1,74 @@
 # Fresh Engine .NET 9 Bindings
 
-This directory contains the managed .NET 9 wrapper for the Fresh Voxel Engine, allowing C# and other .NET languages to interact with the native C++ engine.
+This directory contains the managed .NET 9 wrapper for the Fresh Voxel Engine, which is the **primary and recommended development method** for the project.
 
 ## Overview
 
-The .NET 9 bindings provide a managed API layer on top of the native Fresh Voxel Engine. This allows:
+The .NET 9 bindings provide a managed API layer on top of the native Fresh Voxel Engine. This is the recommended way to develop with Fresh Engine because it offers:
 
-- **C# Game Development**: Write game logic in C# while leveraging the high-performance native engine
-- **Cross-Language Integration**: Use any .NET language (C#, F#, VB.NET) with the engine
+- **C# Game Development**: Write game logic in C# while leveraging the high-performance native engine (Primary method)
 - **Modern .NET Features**: Take advantage of .NET 9's latest features and performance improvements
+- **Easier Development**: Faster iteration, better debugging, and memory safety
+- **Rich Ecosystem**: Access to NuGet packages and .NET libraries
+- **Cross-Language Integration**: Use any .NET language (C#, F#, VB.NET) with the engine
 - **Seamless Interop**: P/Invoke-based communication with the native engine
+
+## Why .NET 9 First?
+
+1. **Modern Development** - C# 12 with latest language features
+2. **Safety First** - Memory safety and automatic garbage collection
+3. **Rapid Prototyping** - Faster iteration and hot reload capabilities
+4. **Better Tooling** - Superior IDE support in Visual Studio and VS Code
+5. **Easier Debugging** - Managed code debugging is more straightforward
+6. **Lower Barrier** - More approachable for developers new to game engines
 
 ## Requirements
 
+- **.NET 9 SDK** (Required - Primary development platform)
+  - Download: https://dotnet.microsoft.com/download/dotnet/9.0
+  - Verify: `dotnet --version` (should show 9.0.x)
 - **Visual Studio 2022** (version 17.8 or later)
-- **.NET 9 SDK** (https://dotnet.microsoft.com/download/dotnet/9.0)
+  - ".NET desktop development" workload (required)
+  - "Desktop development with C++" workload (for native backend)
 - **Windows 10/11** (x64)
 - **Fresh Voxel Engine** (native C++ component)
 
 ## Building
 
-### From Visual Studio 2022
+### Recommended: Use the Installer
 
-1. Open the main `FreshVoxelEngine.sln` solution
-2. The .NET project will be included automatically
-3. Build the solution (F7)
-4. The managed DLL will be output to `dotnet/bin/x64/Release/`
+The simplest way to get started:
 
-### From Command Line
+```batch
+# From repository root
+install.bat
+```
 
-```bash
+This will:
+1. Check for .NET 9 SDK (required)
+2. Build the managed wrapper automatically
+3. Set up the native engine backend
+4. Configure all dependencies
+
+### Alternative: Build Manually
+
+```batch
+# Build the managed wrapper
 cd dotnet
 dotnet build -c Release
+
+# Output: bin\Release\net9.0-windows\FreshEngine.Managed.dll
 ```
+
+### From Visual Studio 2022
+
+The .NET project can be built from the main solution:
+
+1. Run `install.bat` to set up the solution
+2. Open `FreshVoxelEngine.sln`
+3. The .NET project will be included
+4. Build the solution (F7)
+5. Output: `dotnet/bin/Release/net9.0-windows/`
 
 ## Usage
 
