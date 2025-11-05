@@ -80,3 +80,4 @@ logs/Environment/**/*.txt
 # Temporary files
 tmp/
 temp/
+*.backup
