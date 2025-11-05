@@ -42,7 +42,9 @@ cd fresh
 
 ### Step 2: Set Up vcpkg for Dependencies
 
-Fresh Engine uses vcpkg to manage C++ dependencies (GLFW, GLM, ImGui). We'll install vcpkg in the parent directory to allow sharing across projects.
+Fresh Engine uses vcpkg to manage C++ dependencies (GLFW, GLM, ImGui). We recommend installing vcpkg in the parent directory to allow sharing across projects.
+
+**Option A: Install vcpkg in Parent Directory (Recommended)**
 
 ```batch
 # Navigate to parent directory
@@ -61,9 +63,25 @@ cd ..\fresh
 
 **Expected result:** vcpkg is now installed at `..\vcpkg\vcpkg.exe`
 
+**Option B: Install vcpkg in Project Directory (Alternative)**
+
+If you prefer to keep vcpkg within the project:
+
+```batch
+# From project root
+git clone https://github.com/microsoft/vcpkg.git
+cd vcpkg
+bootstrap-vcpkg.bat
+cd ..
+```
+
+**Expected result:** vcpkg is now installed at `.\vcpkg\vcpkg.exe`
+
 ### Step 3: Generate Visual Studio Solution
 
 Now we'll use CMake to generate the Visual Studio 2022 solution. The vcpkg toolchain will automatically install all required dependencies.
+
+**If you installed vcpkg in parent directory:**
 
 ```batch
 # Create build directory
@@ -74,6 +92,17 @@ cd build
 cmake -G "Visual Studio 17 2022" -A x64 -DCMAKE_TOOLCHAIN_FILE=..\..\vcpkg\scripts\buildsystems\vcpkg.cmake ..
 ```
 
+**If you installed vcpkg in project directory:**
+
+```batch
+# Create build directory
+mkdir build
+cd build
+
+# Generate Visual Studio 2022 solution with vcpkg
+cmake -G "Visual Studio 17 2022" -A x64 -DCMAKE_TOOLCHAIN_FILE=..\vcpkg\scripts\buildsystems\vcpkg.cmake ..
+```
+
 **What happens during this step:**
 - CMake configures the project for Visual Studio 2022
 - vcpkg automatically downloads and builds dependencies (GLFW, GLM, ImGui, GLEW)
@@ -81,7 +110,9 @@ cmake -G "Visual Studio 17 2022" -A x64 -DCMAKE_TOOLCHAIN_FILE=..\..\vcpkg\scrip
 - A Visual Studio solution file is created: `build\FreshVoxelEngine.sln`
 
 **Troubleshooting:**
-- If you get "vcpkg not found", verify the path: `..\..\vcpkg\scripts\buildsystems\vcpkg.cmake`
+- If you get "vcpkg not found", verify the path matches your installation location
+- For parent directory: `..\..\vcpkg\scripts\buildsystems\vcpkg.cmake`
+- For project directory: `..\vcpkg\scripts\buildsystems\vcpkg.cmake`
 - If CMake fails, check that all prerequisites are installed and in your PATH
 
 ### Step 4: Build the Engine
@@ -320,13 +351,13 @@ After successfully building:
 
 ## Summary
 
-**Quick Build from Scratch:**
+**Quick Build from Scratch (Parent Directory vcpkg):**
 ```batch
 # 1. Clone repository
 git clone https://github.com/shifty81/fresh.git
 cd fresh
 
-# 2. Set up vcpkg (one-time setup)
+# 2. Set up vcpkg (one-time setup) - Parent directory
 cd ..
 git clone https://github.com/microsoft/vcpkg.git
 cd vcpkg
@@ -342,5 +373,16 @@ cmake --build . --config Release
 # 4. Run
 Release\FreshVoxelEngine.exe
 ```
+
+**Alternative: Using generate_vs2022.bat (Recommended)**
+```batch
+# After setting up vcpkg (either in parent or project directory)
+generate_vs2022.bat
+cd build
+cmake --build . --config Release
+Release\FreshVoxelEngine.exe
+```
+
+The `generate_vs2022.bat` script automatically detects vcpkg in either the parent or project directory.
 
 That's it! You now have a fully built Fresh Voxel Engine ready for development.

@@ -43,7 +43,16 @@ if exist "%VCPKG_PARENT%\scripts\buildsystems\vcpkg.cmake" (
     echo [WARNING] vcpkg not found
     echo/
     echo vcpkg is required for automatic dependency management.
-    echo Please see BUILD.md for setup instructions.
+    echo/
+    echo To set up vcpkg, run these commands:
+    echo   cd ..
+    echo   git clone https://github.com/microsoft/vcpkg.git
+    echo   cd vcpkg
+    echo   bootstrap-vcpkg.bat
+    echo   cd ..\fresh
+    echo   generate_vs2022.bat
+    echo/
+    echo Or see BUILD.md for detailed setup instructions.
     echo/
     pause
     cd ..

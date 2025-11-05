@@ -18,6 +18,8 @@ For step-by-step build instructions, see [BUILD.md](../BUILD.md) in the reposito
 ### Quick Build Reference
 
 ```batch
+# Starting from the project root directory (fresh/)
+
 # 1. Set up vcpkg (one-time)
 cd ..
 git clone https://github.com/microsoft/vcpkg.git
