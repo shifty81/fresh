@@ -102,12 +102,69 @@ if !ERRORLEVEL! NEQ 0 (
 )
 
 echo/
+echo Step 3.5: Verifying dependencies...
+echo/
+
+REM Check if vcpkg is available (in parent or project directory)
+set "VCPKG_FOUND=0"
+set "VCPKG_PARENT=%~dp0..\vcpkg"
+set "VCPKG_LOCAL=%~dp0vcpkg"
+
+if exist "%VCPKG_PARENT%\vcpkg.exe" (
+    set "VCPKG_FOUND=1"
+    echo [OK] vcpkg found in parent directory: %VCPKG_PARENT%
+) else if exist "%VCPKG_LOCAL%\vcpkg.exe" (
+    set "VCPKG_FOUND=1"
+    echo [OK] vcpkg found in project directory: %VCPKG_LOCAL%
+) else (
+    echo [WARNING] vcpkg not found in parent or project directory
+)
+
+REM Check if CMake found the required dependencies
+if !VCPKG_FOUND!==0 (
+    echo/
+    echo WARNING: vcpkg is not installed, which may cause build failures.
+    echo/
+    echo The build may fail due to missing dependencies:
+    echo   - GLFW3 (window management)
+    echo   - GLM (math library)
+    echo   - ImGui (editor UI)
+    echo/
+    echo To fix this:
+    echo   1. Run install.bat to set up vcpkg and dependencies (RECOMMENDED)
+    echo   2. Or manually install the dependencies
+    echo/
+    set /p CONTINUE_BUILD="Continue anyway? (Y/N): "
+    if /i "!CONTINUE_BUILD!" NEQ "Y" (
+        echo/
+        echo Build cancelled. Please run install.bat to set up dependencies.
+        pause
+        exit /b 1
+    )
+)
+
+echo/
 echo Step 4: Building native C++ engine...
 echo/
 
 cmake --build build --config Release
 if !ERRORLEVEL! NEQ 0 (
+    echo/
+    echo ================================================
     echo ERROR: Failed to build native engine
+    echo ================================================
+    echo/
+    echo The build failed. Common causes:
+    echo   1. Missing dependencies (GLFW, GLM, ImGui)
+    echo   2. vcpkg not installed or not in PATH
+    echo   3. Compiler errors in source code
+    echo/
+    echo To fix missing dependencies:
+    echo   - Run install.bat to set up vcpkg and install dependencies
+    echo   - Or re-run generate_vs2022.bat after installing vcpkg
+    echo/
+    echo Check the error messages above for specific issues.
+    echo/
     pause
     exit /b 1
 )
