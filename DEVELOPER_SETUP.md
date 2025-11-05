@@ -46,40 +46,33 @@ This guide will help you set up a development environment for Fresh Voxel Engine
 3. **Git for Windows**
    - Download from: https://git-scm.com/download/win
 
-### Option 1: Automated Setup (Recommended)
+### Direct Build Instructions
 
-**Easy Installation (Choose Your Method)**
+**For complete step-by-step instructions, see [BUILD.md](BUILD.md).**
+
+Fresh Voxel Engine uses a straightforward build process with Visual Studio 2022:
 
 ```batch
 # Clone the repository
 git clone https://github.com/shifty81/fresh.git
 cd fresh
 
-# Option A: Run the launcher (lets you choose between PowerShell and Batch)
-install.bat
+# Set up vcpkg (one-time)
+cd ..
+git clone https://github.com/microsoft/vcpkg.git
+cd vcpkg
+bootstrap-vcpkg.bat
+cd ..\fresh
 
-# Option B: Run PowerShell installer directly (Recommended)
-powershell -ExecutionPolicy Bypass -File tools\build_tools\install.ps1
+# Generate Visual Studio solution
+generate_vs2022.bat
 
-# Option C: Run Batch installer directly (Classic method)
-tools\build_tools\install.bat
+# Build
+cd build
+cmake --build . --config Release
 ```
 
-**Why PowerShell is Recommended:**
-- Better progress visibility during long operations (vcpkg installation, CMake configuration)
-- More reliable error handling and reporting
-- Real-time output from CMake and build processes
-- Clearer status messages and colored output
-- Less likely to appear frozen during dependency installation
-
-The installer (both versions) will:
-- Check for required software (CMake, Visual Studio 2022)
-- Install vcpkg package manager (optional, but recommended)
-- Configure vcpkg in manifest mode
-- Generate Visual Studio 2022 solution files
-- Automatically install dependencies (GLFW, GLM, ImGui) during CMake
-- Build the project in Release configuration
-- Create convenient shortcut scripts
+See [BUILD.md](BUILD.md) for detailed instructions with troubleshooting.
 
 ### Understanding vcpkg Setup
 
@@ -96,7 +89,7 @@ Fresh Voxel Engine uses vcpkg for dependency management. The build system suppor
    - Useful for isolated builds
    - Each project has its own vcpkg installation
 
-**The build scripts automatically detect and use vcpkg in either location**, with parent directory taking precedence.
+The `generate_vs2022.bat` script automatically detects and uses vcpkg in either location, with parent directory taking precedence.
 
 **Verify Your Setup**: Run `verify_vcpkg.bat` to check if vcpkg is properly installed and configured.
 
