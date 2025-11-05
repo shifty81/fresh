@@ -216,7 +216,14 @@ if exist "%VCPKG_ROOT%\vcpkg.exe" (
         echo Bootstrapping vcpkg... >> "%LOG_FILE%"
         echo %YELLOW%Downloading and bootstrapping vcpkg. Progress will be shown below.%RESET%
         echo.
-        cd "%VCPKG_ROOT%"
+        cd /d "%VCPKG_ROOT%"
+        if !ERRORLEVEL! NEQ 0 (
+            echo %RED%ERROR: Failed to change to vcpkg directory%RESET%
+            echo ERROR: Failed to change to vcpkg directory >> "%LOG_FILE%"
+            echo Expected: %VCPKG_ROOT% >> "%LOG_FILE%"
+            pause
+            exit /b 1
+        )
         call bootstrap-vcpkg.bat
         if !ERRORLEVEL! NEQ 0 (
             echo.
@@ -234,7 +241,7 @@ if exist "%VCPKG_ROOT%\vcpkg.exe" (
             echo Expected location: %VCPKG_ROOT%\vcpkg.exe >> "%LOG_FILE%"
             echo This could be due to antivirus, permissions, or bootstrap failure.
             echo This could be due to antivirus, permissions, or bootstrap failure. >> "%LOG_FILE%"
-            cd "%REPO_ROOT%"
+            cd /d "%REPO_ROOT%"
             pause
             exit /b 1
         )
@@ -274,7 +281,15 @@ if exist "%VCPKG_ROOT%\vcpkg.exe" (
             echo vcpkg integrated with Visual Studio >> "%LOG_FILE%"
         )
         
-        cd "%REPO_ROOT%"
+        cd /d "%REPO_ROOT%"
+        if !ERRORLEVEL! NEQ 0 (
+            echo %RED%ERROR: Failed to return to repository root%RESET%
+            echo ERROR: Failed to return to repository root >> "%LOG_FILE%"
+            echo Expected: %REPO_ROOT% >> "%LOG_FILE%"
+            echo Current: %CD% >> "%LOG_FILE%"
+            pause
+            exit /b 1
+        )
         echo.
         echo %GREEN%✓ vcpkg installed successfully!%RESET%
         echo vcpkg installed successfully! >> "%LOG_FILE%"
@@ -301,6 +316,18 @@ echo. >> "%LOG_FILE%"
 REM Check if vcpkg executable exists
 echo Checking for vcpkg executable...
 echo Checking for vcpkg executable... >> "%LOG_FILE%"
+echo Checking path: %VCPKG_ROOT%\vcpkg.exe >> "%LOG_FILE%"
+echo.
+echo. >> "%LOG_FILE%"
+
+REM Use a more robust existence check
+REM Defensive check in case VCPKG_ROOT was somehow not set (should never happen, but good practice)
+if not defined VCPKG_ROOT (
+    echo %RED%ERROR: VCPKG_ROOT variable is not set%RESET%
+    echo ERROR: VCPKG_ROOT variable is not set >> "%LOG_FILE%"
+    pause
+    exit /b 1
+)
 
 if exist "%VCPKG_ROOT%\vcpkg.exe" (
     echo %GREEN%✓ vcpkg found at: %VCPKG_ROOT%\vcpkg.exe%RESET%
@@ -355,6 +382,7 @@ if exist "%VCPKG_ROOT%\vcpkg.exe" (
     echo. >> "%LOG_FILE%"
 )
 
+echo vcpkg check completed >> "%LOG_FILE%"
 echo %YELLOW%Press any key to continue to CMake configuration...%RESET%
 echo User prompted to continue... >> "%LOG_FILE%"
 pause >nul
@@ -382,7 +410,7 @@ echo. >> "%LOG_FILE%"
 REM Create build directory if it doesn't exist
 if not exist "build" mkdir build
 
-cd build
+cd /d build
 
 REM Generate project files
 echo Running CMake...
@@ -412,12 +440,12 @@ if !ERRORLEVEL! NEQ 0 (
     echo.
     echo Full CMake output has been saved to: %LOG_FILE%
     echo.
-    cd "%REPO_ROOT%"
+    cd /d "%REPO_ROOT%"
     pause
     exit /b 1
 )
 
-cd "%REPO_ROOT%"
+cd /d "%REPO_ROOT%"
 
 echo.
 echo %GREEN%✓ Visual Studio project files generated successfully!%RESET%

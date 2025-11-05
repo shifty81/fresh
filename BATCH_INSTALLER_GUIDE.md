@@ -91,6 +91,22 @@ fresh/
 
 ## Recent Improvements (v2.1)
 
+### Directory Change Robustness (November 2025)
+The installer now includes comprehensive error checking for directory operations:
+
+1. **Robust Directory Changes**: All `cd` commands now use `cd /d` flag to ensure both directory and drive letter are changed, preventing issues when vcpkg or build directories are on different drives.
+
+2. **Directory Change Verification**: After critical directory changes (especially after vcpkg installation), the script verifies the change succeeded and displays clear error messages if it fails.
+
+3. **VCPKG_ROOT Validation**: Before checking for vcpkg.exe, the script explicitly validates that the VCPKG_ROOT environment variable is set, preventing silent failures.
+
+4. **Enhanced Diagnostic Logging**: The script now logs the exact paths being checked and confirms when critical operations complete, making debugging much easier.
+
+These improvements address issues where:
+- The installer could exit silently if directory changes failed
+- Scripts would continue in unexpected directories leading to confusing errors
+- Path issues on multi-drive systems were hard to diagnose
+
 ### vcpkg Installation Robustness (November 2025)
 The installer now includes enhanced error checking for vcpkg installation:
 
