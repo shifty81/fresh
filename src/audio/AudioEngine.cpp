@@ -56,6 +56,7 @@ void AudioEngine::update(float deltaTime) {
             if (muted) effectiveVolume = 0.0f;
             
             // TODO: Set platform-specific audio source volume
+            (void)effectiveVolume; // Suppress warning until TODO is implemented
         }
     }
     

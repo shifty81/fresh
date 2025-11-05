@@ -104,8 +104,8 @@ TEST_F(NoiseGeneratorTest, PerlinNoise_AdjacentSamples_AreSimilar) {
  * Test fractal noise has more detail than single octave
  */
 TEST_F(NoiseGeneratorTest, FractalNoise_MultipleOctaves_HasMoreDetail) {
-    // Arrange
-    float x = 10.0f, y = 20.0f;
+    // Arrange - use non-integer coordinates to avoid zero values at grid points
+    float x = 10.5f, y = 20.5f;
     int octaves = 4;
     float persistence = 0.5f;
     float lacunarity = 2.0f;
@@ -155,9 +155,9 @@ TEST_F(NoiseGeneratorTest, PerlinNoise3D_ValidInput_ReturnsValue) {
  * Test 3D noise differs along all axes
  */
 TEST_F(NoiseGeneratorTest, PerlinNoise3D_DifferentAxes_ProducesDifferentResults) {
-    // Arrange
-    float base = 10.0f;
-    float offset = 5.0f;
+    // Arrange - use non-integer coordinates to avoid zero values at grid points
+    float base = 10.5f;
+    float offset = 5.3f;
     
     // Act
     float value1 = noise->perlin3D(base, base, base);
@@ -175,8 +175,8 @@ TEST_F(NoiseGeneratorTest, PerlinNoise3D_DifferentAxes_ProducesDifferentResults)
  * Test octaves affect detail level
  */
 TEST_F(NoiseGeneratorTest, FractalNoise_MoreOctaves_MoreDetail) {
-    // Arrange
-    float x = 10.0f, y = 20.0f;
+    // Arrange - use non-integer coordinates to avoid zero values at grid points
+    float x = 10.5f, y = 20.5f;
     
     // Act
     float noise1Octave = noise->fractalNoise2D(x, y, 1, 0.5f, 2.0f);
@@ -190,8 +190,8 @@ TEST_F(NoiseGeneratorTest, FractalNoise_MoreOctaves_MoreDetail) {
  * Test persistence affects amplitude
  */
 TEST_F(NoiseGeneratorTest, FractalNoise_DifferentPersistence_AffectsAmplitude) {
-    // Arrange
-    float x = 10.0f, y = 20.0f;
+    // Arrange - use non-integer coordinates to avoid zero values at grid points
+    float x = 10.5f, y = 20.5f;
     
     // Act
     float lowPersistence = noise->fractalNoise2D(x, y, 4, 0.1f, 2.0f);
