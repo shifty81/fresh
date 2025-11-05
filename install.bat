@@ -14,11 +14,14 @@ echo/
 echo This installer will:
 echo   1. Check prerequisites (.NET 9 SDK, CMake, Visual Studio 2022)
 echo   2. Build .NET 9 managed wrapper (primary method)
-echo   3. Install vcpkg package manager (if needed)
-echo   4. Install dependencies (GLFW, GLM, ImGui)
+echo   3. Install vcpkg package manager in parent directory (shared, if needed)
+echo   4. Install dependencies (GLFW, GLM, ImGui) automatically via vcpkg.json
 echo   5. Generate Visual Studio 2022 solution
 echo   6. Build the native engine
 echo   7. Create convenient shortcuts
+echo/
+echo NOTE: vcpkg will be installed in the parent directory to allow
+echo       sharing across multiple projects, saving disk space and time.
 echo/
 echo Estimated time: 10-20 minutes (depending on your system and internet speed)
 echo/

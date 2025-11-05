@@ -41,8 +41,22 @@ echo Configuration: Windows x64 with DirectX 11/12
 echo/
 
 REM Check if vcpkg is available for dependency management
-set "VCPKG_ROOT=%~dp0vcpkg"
-if exist "%VCPKG_ROOT%\scripts\buildsystems\vcpkg.cmake" (
+REM First check parent directory (shared location), then project directory
+set "VCPKG_ROOT="
+set "VCPKG_PARENT=%~dp0..\vcpkg"
+set "VCPKG_LOCAL=%~dp0vcpkg"
+
+if exist "%VCPKG_PARENT%\scripts\buildsystems\vcpkg.cmake" (
+    set "VCPKG_ROOT=%VCPKG_PARENT%"
+    echo Found vcpkg in parent directory: %VCPKG_PARENT%
+) else (
+    if exist "%VCPKG_LOCAL%\scripts\buildsystems\vcpkg.cmake" (
+        set "VCPKG_ROOT=%VCPKG_LOCAL%"
+        echo Found vcpkg in project directory: %VCPKG_LOCAL%
+    )
+)
+
+if defined VCPKG_ROOT (
     echo Using vcpkg toolchain for dependency management...
     echo Dependencies will be installed automatically from vcpkg.json
     echo This may take several minutes on first run.
@@ -50,12 +64,12 @@ if exist "%VCPKG_ROOT%\scripts\buildsystems\vcpkg.cmake" (
     REM Generate Visual Studio 2022 project files with vcpkg
     cmake -G "Visual Studio 17 2022" -A x64 -DCMAKE_TOOLCHAIN_FILE="%VCPKG_ROOT%\scripts\buildsystems\vcpkg.cmake" ..
 ) else (
-    echo WARNING: vcpkg not found at: %VCPKG_ROOT%
+    echo WARNING: vcpkg not found in parent directory (%VCPKG_PARENT%) or project directory (%VCPKG_LOCAL%)
     echo/
     echo Generating without vcpkg (dependencies must be installed manually)
     echo/
     echo To use vcpkg for automatic dependency management:
-    echo   1. Run install.bat (recommended)
+    echo   1. Run install.bat (recommended - will install in parent directory)
     echo   2. Or manually install vcpkg and re-run this script
     echo/
     REM Generate Visual Studio 2022 project files without vcpkg
@@ -80,13 +94,13 @@ echo Solution file: build\FreshVoxelEngine.sln
 echo/
 
 REM Check if vcpkg was used
-if not exist "%VCPKG_ROOT%\scripts\buildsystems\vcpkg.cmake" (
+if not defined VCPKG_ROOT (
     echo NOTE: This project was generated WITHOUT vcpkg.
     echo       If you see warnings about missing dependencies above,
     echo       the build may fail. Please review the CMake output.
     echo/
     echo To install dependencies automatically:
-    echo   - Run install.bat (recommended)
+    echo   - Run install.bat (recommended - will install vcpkg in parent directory)
     echo   - Or see DEVELOPER_SETUP.md for manual installation
     echo/
 )
