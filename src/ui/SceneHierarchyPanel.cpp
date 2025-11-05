@@ -14,7 +14,7 @@ SceneHierarchyPanel::SceneHierarchyPanel()
     , m_showRenameDialog(false)
     , m_showDeleteDialog(false)
 {
-    m_rootNode = std::make_shared<SceneNode>("Scene Root");
+    m_rootNode = std::make_shared<HierarchyNode>("Scene Root");
     m_renameBuffer[0] = '\0';
 }
 
@@ -111,7 +111,7 @@ void SceneHierarchyPanel::render() {
     ImGui::End();
 }
 
-void SceneHierarchyPanel::renderNode(SceneNode* node) {
+void SceneHierarchyPanel::renderNode(HierarchyNode* node) {
     if (!node) {
         return;
     }
@@ -191,23 +191,23 @@ void SceneHierarchyPanel::buildHierarchyFromWorld() {
     m_rootNode->children.clear();
 
     // Create "World" node
-    auto worldNode = std::make_shared<SceneNode>("Voxel World");
+    auto worldNode = std::make_shared<HierarchyNode>("Voxel World");
     
     // Add chunks as children
-    auto chunksNode = std::make_shared<SceneNode>("Chunks (" + std::to_string(m_world->getChunks().size()) + ")");
+    auto chunksNode = std::make_shared<HierarchyNode>("Chunks (" + std::to_string(m_world->getChunks().size()) + ")");
     
     // Add a few sample chunks (limited to avoid performance issues)
     int chunkCount = 0;
     for (const auto& pair : m_world->getChunks()) {
         if (chunkCount >= 100) {  // Limit to first 100 chunks
-            auto moreNode = std::make_shared<SceneNode>("... and " + 
+            auto moreNode = std::make_shared<HierarchyNode>("... and " + 
                 std::to_string(m_world->getChunks().size() - 100) + " more");
             chunksNode->children.push_back(moreNode);
             break;
         }
         
         const ChunkPos& pos = pair.first;
-        auto chunkNode = std::make_shared<SceneNode>(
+        auto chunkNode = std::make_shared<HierarchyNode>(
             "Chunk (" + std::to_string(pos.x) + ", " + std::to_string(pos.z) + ")"
         );
         chunksNode->children.push_back(chunkNode);
@@ -217,11 +217,11 @@ void SceneHierarchyPanel::buildHierarchyFromWorld() {
     worldNode->children.push_back(chunksNode);
     
     // Add entities node (placeholder for future)
-    auto entitiesNode = std::make_shared<SceneNode>("Entities (0)");
+    auto entitiesNode = std::make_shared<HierarchyNode>("Entities (0)");
     worldNode->children.push_back(entitiesNode);
     
     // Add lights node (placeholder for future)
-    auto lightsNode = std::make_shared<SceneNode>("Lights (0)");
+    auto lightsNode = std::make_shared<HierarchyNode>("Lights (0)");
     worldNode->children.push_back(lightsNode);
 
     m_rootNode->children.push_back(worldNode);
@@ -279,7 +279,7 @@ bool SceneHierarchyPanel::deleteSelectedNode() {
     return removed;
 }
 
-bool SceneHierarchyPanel::findAndRemoveNode(std::shared_ptr<SceneNode>& parent, SceneNode* target) {
+bool SceneHierarchyPanel::findAndRemoveNode(std::shared_ptr<HierarchyNode>& parent, HierarchyNode* target) {
     if (!parent || !target) {
         return false;
     }
@@ -302,12 +302,12 @@ bool SceneHierarchyPanel::findAndRemoveNode(std::shared_ptr<SceneNode>& parent, 
     return false;
 }
 
-std::shared_ptr<SceneNode> SceneHierarchyPanel::duplicateNode(SceneNode* node) {
+std::shared_ptr<HierarchyNode> SceneHierarchyPanel::duplicateNode(HierarchyNode* node) {
     if (!node) {
         return nullptr;
     }
     
-    auto duplicate = std::make_shared<SceneNode>(node->name + " (Copy)");
+    auto duplicate = std::make_shared<HierarchyNode>(node->name + " (Copy)");
     duplicate->visible = node->visible;
     duplicate->userData = node->userData;
     

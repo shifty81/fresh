@@ -11,14 +11,14 @@ class VoxelWorld;
 /**
  * @brief Represents a node in the scene hierarchy
  */
-struct SceneNode {
+struct HierarchyNode {
     std::string name;
     bool visible;
     bool selected;
-    std::vector<std::shared_ptr<SceneNode>> children;
+    std::vector<std::shared_ptr<HierarchyNode>> children;
     void* userData;  // Can be entity, chunk, or other game object
 
-    SceneNode(const std::string& nodeName = "Object")
+    HierarchyNode(const std::string& nodeName = "Object")
         : name(nodeName), visible(true), selected(false), userData(nullptr) {}
 };
 
@@ -61,7 +61,7 @@ public:
      * @brief Get the currently selected node
      * @return Pointer to selected node or nullptr
      */
-    SceneNode* getSelectedNode() { return m_selectedNode; }
+    HierarchyNode* getSelectedNode() { return m_selectedNode; }
 
     /**
      * @brief Refresh the scene hierarchy from world data
@@ -88,16 +88,16 @@ public:
     bool deleteSelectedNode();
 
 private:
-    void renderNode(SceneNode* node);
+    void renderNode(HierarchyNode* node);
     void buildHierarchyFromWorld();
-    bool findAndRemoveNode(std::shared_ptr<SceneNode>& parent, SceneNode* target);
-    std::shared_ptr<SceneNode> duplicateNode(SceneNode* node);
+    bool findAndRemoveNode(std::shared_ptr<HierarchyNode>& parent, HierarchyNode* target);
+    std::shared_ptr<HierarchyNode> duplicateNode(HierarchyNode* node);
 
 private:
     bool m_visible;
     VoxelWorld* m_world;
-    std::shared_ptr<SceneNode> m_rootNode;
-    SceneNode* m_selectedNode;
+    std::shared_ptr<HierarchyNode> m_rootNode;
+    HierarchyNode* m_selectedNode;
     
     // Dialog state
     bool m_showRenameDialog;
