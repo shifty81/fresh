@@ -80,6 +80,10 @@ VoxelType TerrainGenerator::getBlockType(int x, int y, int z, int surfaceHeight)
 }
 
 void TerrainGenerator::generateChunk(Chunk* chunk) {
+    if (!chunk) {
+        return; // Gracefully handle null pointer
+    }
+    
     const ChunkPos& chunkPos = chunk->getPosition();
     
     // Generate terrain for each column in the chunk
