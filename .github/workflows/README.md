@@ -79,7 +79,7 @@ When adding new workflows:
 1. Use GitHub Actions v4 syntax
 2. Use `actions/checkout@v4` and `actions/upload-artifact@v4`
 3. Document dependencies and purpose
-4. Test YAML syntax: `python3 -c "import yaml; yaml.safe_load(open('.github/workflows/new.yml'))"`
+4. Test YAML syntax: `python3 -c "import yaml; f = open('.github/workflows/new.yml'); yaml.safe_load(f); f.close(); print('Valid')"`
 5. Update this README
 
 ## Future Workflows
