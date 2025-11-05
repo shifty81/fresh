@@ -352,10 +352,7 @@ void Engine::shutdown() {
     }
     
     // Clean up GLFW callback user data
-    if (m_callbackUserData) {
-        delete m_callbackUserData;
-        m_callbackUserData = nullptr;
-    }
+    m_callbackUserData.reset();
     
     m_player.reset();
     m_inputManager.reset();
@@ -557,14 +554,9 @@ void Engine::setupInputCallbacks() {
     
     GLFWwindow* window = m_window->getHandle();
     
-    // Clean up old user data if it exists
-    if (m_callbackUserData) {
-        delete m_callbackUserData;
-    }
-    
-    // Allocate user data for callbacks
-    m_callbackUserData = new CallbackUserData{m_inputManager.get(), m_window.get()};
-    glfwSetWindowUserPointer(window, m_callbackUserData);
+    // Create user data for callbacks
+    m_callbackUserData = std::make_unique<CallbackUserData>(CallbackUserData{m_inputManager.get(), m_window.get()});
+    glfwSetWindowUserPointer(window, m_callbackUserData.get());
     
     // Keyboard callback
     glfwSetKeyCallback(window, [](GLFWwindow* win, int key, int scancode, int action, int mods) {

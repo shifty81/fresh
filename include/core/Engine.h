@@ -86,7 +86,7 @@ private:
         InputManager* inputManager;
         Window* window;
     };
-    CallbackUserData* m_callbackUserData = nullptr;
+    std::unique_ptr<CallbackUserData> m_callbackUserData;
 };
 
 } // namespace fresh
