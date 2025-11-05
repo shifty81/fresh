@@ -7,9 +7,10 @@ This guide helps you find the right documentation for your needs.
 If you're new to Fresh Voxel Engine, follow this path:
 
 1. **[README.md](README.md)** - Project overview and feature list
-2. **[QUICKSTART_VISUAL.md](QUICKSTART_VISUAL.md)** - Step-by-step installation with screenshots (Recommended for VS2022 users)
-3. **[GETTING_STARTED.md](GETTING_STARTED.md)** - Detailed setup guide for all platforms
-4. **[BATCH_INSTALLER_GUIDE.md](BATCH_INSTALLER_GUIDE.md)** - Understanding the automated installer
+2. **[DOTNET_FIRST_GUIDE.md](DOTNET_FIRST_GUIDE.md)** - Understanding the .NET first approach (NEW!)
+3. **[QUICKSTART_VISUAL.md](QUICKSTART_VISUAL.md)** - Step-by-step installation with screenshots (Recommended for VS2022 users)
+4. **[GETTING_STARTED.md](GETTING_STARTED.md)** - Detailed setup guide for all platforms
+5. **[BATCH_INSTALLER_GUIDE.md](BATCH_INSTALLER_GUIDE.md)** - Understanding the automated installer
 
 ## 📦 Installation & Setup
 
@@ -34,7 +35,9 @@ If you're new to Fresh Voxel Engine, follow this path:
 - **[textures/USAGE.md](textures/USAGE.md)** - Using textures and assets
 
 ### Advanced Topics
-- **[DOTNET_INTEGRATION.md](DOTNET_INTEGRATION.md)** - .NET 9 bindings
+- **[DOTNET_FIRST_GUIDE.md](DOTNET_FIRST_GUIDE.md)** - .NET first approach and migration guide (NEW!)
+- **[DOTNET_INTEGRATION.md](DOTNET_INTEGRATION.md)** - .NET 9 bindings and C# development
+- **[dotnet/README.md](dotnet/README.md)** - Managed wrapper documentation
 - **[LUA_INTEGRATION_GUIDE.md](LUA_INTEGRATION_GUIDE.md)** - Lua scripting integration
 
 ## 🏗️ Architecture & Design
@@ -90,7 +93,10 @@ If you're new to Fresh Voxel Engine, follow this path:
 → Start with **[CONTRIBUTING.md](CONTRIBUTING.md)**
 
 ### "How do I use .NET bindings?"
-→ See **[DOTNET_INTEGRATION.md](DOTNET_INTEGRATION.md)** and **[dotnet/README.md](dotnet/README.md)**
+→ Start with **[DOTNET_FIRST_GUIDE.md](DOTNET_FIRST_GUIDE.md)** for overview, then **[DOTNET_INTEGRATION.md](DOTNET_INTEGRATION.md)** and **[dotnet/README.md](dotnet/README.md)** for details
+
+### "What changed with the .NET first approach?"
+→ Read **[DOTNET_FIRST_GUIDE.md](DOTNET_FIRST_GUIDE.md)** for the complete explanation
 
 ### "What's the project architecture?"
 → Read **[ARCHITECTURE.md](ARCHITECTURE.md)**
