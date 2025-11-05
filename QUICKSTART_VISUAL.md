@@ -6,11 +6,15 @@ This guide provides step-by-step visual instructions for building and running th
 
 Before you begin, make sure you have:
 
+- ✅ **.NET 9 SDK** (Required - Primary development method)
+  - Download: https://dotnet.microsoft.com/download/dotnet/9.0
+  - Verify: `dotnet --version` (should show 9.0.x)
 - ✅ **Visual Studio 2022** (version 17.8 or later)
   - With "Desktop development with C++" workload
+  - With ".NET desktop development" workload
   - Windows SDK 10.0.19041.0 or higher
 - ✅ **CMake 3.20+** (added to system PATH)
-- ✅ **.NET 9 SDK** (for managed bindings)
+- ✅ **Git** (for version control and vcpkg)
 
 ## 🚀 Quick Setup (Automated - Recommended)
 
