@@ -42,26 +42,26 @@ echo ===========================================================================
 echo Fresh Voxel Engine - Installation Log >> "%LOG_FILE%"
 echo Started: %date% %time% >> "%LOG_FILE%"
 echo ============================================================================ >> "%LOG_FILE%"
-echo/ >> "%LOG_FILE%"
+echo. >> "%LOG_FILE%"
 
 REM Function to log both to console and file
 REM We'll use echo for both and redirect when needed
 
-echo/
+echo.
 echo %BLUE%============================================================================%RESET%
 echo %BLUE%       Fresh Voxel Engine - Automated Installation%RESET%
 echo %BLUE%============================================================================%RESET%
-echo/
+echo.
 echo Log file: %LOG_FILE%
-echo/
+echo.
 
 REM Log to file
 echo ============================================================================ >> "%LOG_FILE%"
 echo        Fresh Voxel Engine - Automated Installation >> "%LOG_FILE%"
 echo ============================================================================ >> "%LOG_FILE%"
-echo/ >> "%LOG_FILE%"
+echo. >> "%LOG_FILE%"
 echo Log file: %LOG_FILE% >> "%LOG_FILE%"
-echo/ >> "%LOG_FILE%"
+echo. >> "%LOG_FILE%"
 
 echo This script will:
 echo   1. Check for prerequisites (CMake, Visual Studio)
@@ -69,7 +69,7 @@ echo   2. Install vcpkg package manager (optional)
 echo   3. Verify vcpkg manifest mode configuration
 echo   4. Generate Visual Studio project files
 echo   5. Build the engine (dependencies installed during CMake)
-echo/
+echo.
 
 REM Log to file
 echo This script will: >> "%LOG_FILE%"
@@ -78,20 +78,20 @@ echo   2. Install vcpkg package manager (optional) >> "%LOG_FILE%"
 echo   3. Verify vcpkg manifest mode configuration >> "%LOG_FILE%"
 echo   4. Generate Visual Studio project files >> "%LOG_FILE%"
 echo   5. Build the engine (dependencies installed during CMake) >> "%LOG_FILE%"
-echo/ >> "%LOG_FILE%"
+echo. >> "%LOG_FILE%"
 
 echo %YELLOW%Press any key to continue or Ctrl+C to cancel...%RESET%
 echo Press any key to continue or Ctrl+C to cancel... >> "%LOG_FILE%"
 pause >nul
-echo/
+echo.
 
 REM ============================================================================
 REM Step 1: Check Prerequisites
 REM ============================================================================
 echo %BLUE%[Step 1/6] Checking prerequisites...%RESET%
 echo [Step 1/6] Checking prerequisites... >> "%LOG_FILE%"
-echo/
-echo/ >> "%LOG_FILE%"
+echo.
+echo. >> "%LOG_FILE%"
 
 REM Check CMake
 echo Checking for CMake...
@@ -100,12 +100,12 @@ where cmake >nul 2>nul
 if !ERRORLEVEL! NEQ 0 (
     echo %RED%ERROR: CMake is not installed or not in PATH%RESET%
     echo ERROR: CMake is not installed or not in PATH >> "%LOG_FILE%"
-    echo/
+    echo.
     echo Please install CMake from: https://cmake.org/download/
     echo Make sure to add CMake to system PATH during installation
-    echo/ >> "%LOG_FILE%"
+    echo. >> "%LOG_FILE%"
     echo Please install CMake from: https://cmake.org/download/ >> "%LOG_FILE%"
-    echo/ >> "%LOG_FILE%"
+    echo. >> "%LOG_FILE%"
     pause
     exit /b 1
 ) else (
@@ -140,12 +140,12 @@ if %VS2022_FOUND%==1 (
     echo %YELLOW%WARNING: Visual Studio 2022 not found in default locations%RESET%
     echo WARNING: Visual Studio 2022 not found in default locations >> "%LOG_FILE%"
     echo The installation will continue, but you may need VS 2022 to build
-    echo/
+    echo.
     echo Download from: https://visualstudio.microsoft.com/downloads/
-    echo/
+    echo.
     echo The installation will continue, but you may need VS 2022 to build >> "%LOG_FILE%"
     echo Download from: https://visualstudio.microsoft.com/downloads/ >> "%LOG_FILE%"
-    echo/ >> "%LOG_FILE%"
+    echo. >> "%LOG_FILE%"
     set /p CONTINUE="Continue anyway? (Y/N): "
     echo User response: !CONTINUE! >> "%LOG_FILE%"
     if /i "!CONTINUE!" NEQ "Y" (
@@ -156,11 +156,11 @@ if %VS2022_FOUND%==1 (
     )
 )
 
-echo/
+echo.
 echo %GREEN%Prerequisites check completed!%RESET%
-echo/
+echo.
 echo Prerequisites check completed! >> "%LOG_FILE%"
-echo/ >> "%LOG_FILE%"
+echo. >> "%LOG_FILE%"
 pause
 
 REM ============================================================================
@@ -168,8 +168,8 @@ REM Step 2: vcpkg Setup (Optional)
 REM ============================================================================
 echo %BLUE%[Step 2/6] Setting up vcpkg package manager...%RESET%
 echo [Step 2/6] Setting up vcpkg package manager... >> "%LOG_FILE%"
-echo/
-echo/ >> "%LOG_FILE%"
+echo.
+echo. >> "%LOG_FILE%"
 
 set "VCPKG_ROOT=%REPO_ROOT%\vcpkg"
 
@@ -179,16 +179,16 @@ if exist "%VCPKG_ROOT%\vcpkg.exe" (
 ) else (
     echo vcpkg not found. Would you like to install it?
     echo vcpkg is a package manager for C++ that makes dependency management easier.
-    echo/
+    echo.
     echo vcpkg not found. >> "%LOG_FILE%"
     echo Would you like to install it? >> "%LOG_FILE%"
     echo vcpkg is a package manager for C++ that makes dependency management easier. >> "%LOG_FILE%"
-    echo/ >> "%LOG_FILE%"
+    echo. >> "%LOG_FILE%"
     set /p INSTALL_VCPKG="Install vcpkg? (Y/N): "
     echo User response: !INSTALL_VCPKG! >> "%LOG_FILE%"
     
     if /i "!INSTALL_VCPKG!"=="Y" (
-        echo/
+        echo.
         echo Installing vcpkg...
         echo Installing vcpkg... >> "%LOG_FILE%"
         
@@ -197,10 +197,10 @@ if exist "%VCPKG_ROOT%\vcpkg.exe" (
             echo Cloning vcpkg repository...
             echo Cloning vcpkg repository... >> "%LOG_FILE%"
             echo %YELLOW%This will download vcpkg. Progress will be shown below.%RESET%
-            echo/
+            echo.
             git clone https://github.com/Microsoft/vcpkg.git "%VCPKG_ROOT%"
             if !ERRORLEVEL! NEQ 0 (
-                echo/
+                echo.
                 echo %RED%ERROR: Failed to clone vcpkg repository%RESET%
                 echo ERROR: Failed to clone vcpkg repository >> "%LOG_FILE%"
                 echo Make sure git is installed and you have internet connection
@@ -211,11 +211,11 @@ if exist "%VCPKG_ROOT%\vcpkg.exe" (
         )
         
         REM Bootstrap vcpkg
-        echo/
+        echo.
         echo Bootstrapping vcpkg...
         echo Bootstrapping vcpkg... >> "%LOG_FILE%"
         echo %YELLOW%Downloading and bootstrapping vcpkg. Progress will be shown below.%RESET%
-        echo/
+        echo.
         cd /d "%VCPKG_ROOT%"
         if !ERRORLEVEL! NEQ 0 (
             echo %RED%ERROR: Failed to change to vcpkg directory%RESET%
@@ -226,7 +226,7 @@ if exist "%VCPKG_ROOT%\vcpkg.exe" (
         )
         call bootstrap-vcpkg.bat
         if !ERRORLEVEL! NEQ 0 (
-            echo/
+            echo.
             echo %RED%ERROR: Failed to bootstrap vcpkg%RESET%
             echo ERROR: Failed to bootstrap vcpkg >> "%LOG_FILE%"
             pause
@@ -235,7 +235,7 @@ if exist "%VCPKG_ROOT%\vcpkg.exe" (
         
         REM Verify vcpkg.exe was created
         if not exist "%VCPKG_ROOT%\vcpkg.exe" (
-            echo/
+            echo.
             echo %RED%ERROR: vcpkg.exe not found after bootstrapping%RESET%
             echo ERROR: vcpkg.exe not found after bootstrapping >> "%LOG_FILE%"
             echo Expected location: %VCPKG_ROOT%\vcpkg.exe >> "%LOG_FILE%"
@@ -249,12 +249,12 @@ if exist "%VCPKG_ROOT%\vcpkg.exe" (
         echo vcpkg.exe created successfully at: %VCPKG_ROOT%\vcpkg.exe >> "%LOG_FILE%"
         
         REM Update vcpkg repository to get latest baseline commits
-        echo/
+        echo.
         echo Updating vcpkg repository...
         echo Updating vcpkg repository... >> "%LOG_FILE%"
         git pull origin master
         if !ERRORLEVEL! NEQ 0 (
-            echo/
+            echo.
             echo %YELLOW%WARNING: Failed to update vcpkg repository%RESET%
             echo WARNING: Failed to update vcpkg repository >> "%LOG_FILE%"
             echo This may cause issues if the baseline commit is not available.
@@ -265,13 +265,13 @@ if exist "%VCPKG_ROOT%\vcpkg.exe" (
         )
         
         REM Integrate vcpkg with Visual Studio
-        echo/
+        echo.
         echo Integrating vcpkg with Visual Studio...
         echo Integrating vcpkg with Visual Studio... >> "%LOG_FILE%"
-        echo/
+        echo.
         "%VCPKG_ROOT%\vcpkg.exe" integrate install
         if !ERRORLEVEL! NEQ 0 (
-            echo/
+            echo.
             echo %YELLOW%WARNING: vcpkg integrate install returned error code !ERRORLEVEL!%RESET%
             echo WARNING: vcpkg integrate install returned error code !ERRORLEVEL! >> "%LOG_FILE%"
             echo This is not critical - you can integrate manually later if needed.
@@ -290,7 +290,7 @@ if exist "%VCPKG_ROOT%\vcpkg.exe" (
             pause
             exit /b 1
         )
-        echo/
+        echo.
         echo %GREEN%✓ vcpkg installed successfully!%RESET%
         echo vcpkg installed successfully! >> "%LOG_FILE%"
     ) else (
@@ -301,8 +301,8 @@ if exist "%VCPKG_ROOT%\vcpkg.exe" (
     )
 )
 
-echo/
-echo/ >> "%LOG_FILE%"
+echo.
+echo. >> "%LOG_FILE%"
 pause
 
 REM ============================================================================
@@ -310,15 +310,15 @@ REM Step 3: Install Dependencies (Manifest Mode)
 REM ============================================================================
 echo %BLUE%[Step 3/6] Configuring dependencies...%RESET%
 echo [Step 3/6] Configuring dependencies... >> "%LOG_FILE%"
-echo/
-echo/ >> "%LOG_FILE%"
+echo.
+echo. >> "%LOG_FILE%"
 
 REM Check if vcpkg executable exists
 echo Checking for vcpkg executable...
 echo Checking for vcpkg executable... >> "%LOG_FILE%"
 echo Checking path: %VCPKG_ROOT%\vcpkg.exe >> "%LOG_FILE%"
-echo/
-echo/ >> "%LOG_FILE%"
+echo.
+echo. >> "%LOG_FILE%"
 
 REM Use a more robust existence check
 REM Defensive check in case VCPKG_ROOT was somehow not set (should never happen, but good practice)
@@ -332,54 +332,54 @@ if not defined VCPKG_ROOT (
 if exist "%VCPKG_ROOT%\vcpkg.exe" (
     echo %GREEN%✓ vcpkg found at: %VCPKG_ROOT%\vcpkg.exe%RESET%
     echo vcpkg found at: %VCPKG_ROOT%\vcpkg.exe >> "%LOG_FILE%"
-    echo/
+    echo.
     echo This project uses vcpkg manifest mode (vcpkg.json).
     echo Dependencies will be installed automatically during CMake configuration.
-    echo/
+    echo.
     echo This project uses vcpkg manifest mode (vcpkg.json). >> "%LOG_FILE%"
     echo Dependencies will be installed automatically during CMake configuration. >> "%LOG_FILE%"
-    echo/ >> "%LOG_FILE%"
+    echo. >> "%LOG_FILE%"
     
     echo Dependencies defined in vcpkg.json:
     echo   - GLFW3 (window management)
     echo   - GLM (math library)
     echo   - ImGui (editor UI)
-    echo/
+    echo.
     echo Dependencies defined in vcpkg.json: >> "%LOG_FILE%"
     echo   - GLFW3 (window management) >> "%LOG_FILE%"
     echo   - GLM (math library) >> "%LOG_FILE%"
     echo   - ImGui (editor UI) >> "%LOG_FILE%"
-    echo/ >> "%LOG_FILE%"
+    echo. >> "%LOG_FILE%"
     
     echo %GREEN%✓ vcpkg is configured for manifest mode%RESET%
     echo   Dependencies will be installed in the next step during CMake configuration.
-    echo/
+    echo.
     echo vcpkg is configured for manifest mode >> "%LOG_FILE%"
     echo Dependencies will be installed in the next step during CMake configuration. >> "%LOG_FILE%"
-    echo/ >> "%LOG_FILE%"
+    echo. >> "%LOG_FILE%"
 ) else (
     echo %YELLOW%WARNING: vcpkg not available at: %VCPKG_ROOT%\vcpkg.exe%RESET%
     echo %YELLOW%Dependencies must be installed manually.%RESET%
-    echo/
+    echo.
     echo WARNING: vcpkg not available at: %VCPKG_ROOT%\vcpkg.exe >> "%LOG_FILE%"
     echo Dependencies must be installed manually. >> "%LOG_FILE%"
-    echo/ >> "%LOG_FILE%"
+    echo. >> "%LOG_FILE%"
     
     echo The following libraries are required:
     echo   - GLFW 3.3+
     echo   - GLM
     echo   - ImGui (optional, for editor UI)
-    echo/
+    echo.
     echo The following libraries are required: >> "%LOG_FILE%"
     echo   - GLFW 3.3+ >> "%LOG_FILE%"
     echo   - GLM >> "%LOG_FILE%"
     echo   - ImGui (optional, for editor UI) >> "%LOG_FILE%"
-    echo/ >> "%LOG_FILE%"
+    echo. >> "%LOG_FILE%"
     
     echo See %REPO_ROOT%\DEVELOPER_SETUP.md for manual installation instructions.
-    echo/
+    echo.
     echo See DEVELOPER_SETUP.md for manual installation instructions. >> "%LOG_FILE%"
-    echo/ >> "%LOG_FILE%"
+    echo. >> "%LOG_FILE%"
 )
 
 echo vcpkg check completed >> "%LOG_FILE%"
@@ -387,25 +387,25 @@ echo %YELLOW%Press any key to continue to CMake configuration...%RESET%
 echo User prompted to continue... >> "%LOG_FILE%"
 pause >nul
 echo Continuing to Step 4... >> "%LOG_FILE%"
-echo/
-echo/ >> "%LOG_FILE%"
+echo.
+echo. >> "%LOG_FILE%"
 
 REM ============================================================================
 REM Step 4: Generate Visual Studio Project Files
 REM ============================================================================
-echo/
-echo/ >> "%LOG_FILE%"
+echo.
+echo. >> "%LOG_FILE%"
 echo %BLUE%[Step 4/6] Generating Visual Studio project files...%RESET%
 echo [Step 4/6] Generating Visual Studio project files... >> "%LOG_FILE%"
-echo/
-echo/ >> "%LOG_FILE%"
+echo.
+echo. >> "%LOG_FILE%"
 
 echo %YELLOW%NOTE: This step will automatically install dependencies from vcpkg.json%RESET%
 echo %YELLOW%      if vcpkg is available. This may take several minutes on first run.%RESET%
-echo/
+echo.
 echo NOTE: This step will automatically install dependencies from vcpkg.json >> "%LOG_FILE%"
 echo       if vcpkg is available. This may take several minutes on first run. >> "%LOG_FILE%"
-echo/ >> "%LOG_FILE%"
+echo. >> "%LOG_FILE%"
 
 REM Create build directory if it doesn't exist
 if not exist "build" mkdir build
@@ -418,13 +418,13 @@ echo Running CMake... >> "%LOG_FILE%"
 if exist "%VCPKG_ROOT%\scripts\buildsystems\vcpkg.cmake" (
     echo Using vcpkg toolchain file (manifest mode)...
     echo Dependencies will be installed automatically from vcpkg.json...
-    echo/
+    echo.
     echo Using vcpkg toolchain file (manifest mode)... >> "%LOG_FILE%"
     echo Dependencies will be installed automatically from vcpkg.json... >> "%LOG_FILE%"
-    echo/ >> "%LOG_FILE%"
+    echo. >> "%LOG_FILE%"
     echo %YELLOW%NOTE: vcpkg will now install dependencies. This may take 10-15 minutes on first run.%RESET%
     echo %YELLOW%      You will see download and build progress below. Please be patient.%RESET%
-    echo/
+    echo.
     cmake -G "Visual Studio 17 2022" -A x64 -DCMAKE_TOOLCHAIN_FILE="%VCPKG_ROOT%\scripts\buildsystems\vcpkg.cmake" ..
 ) else (
     echo Using system-installed dependencies...
@@ -433,13 +433,13 @@ if exist "%VCPKG_ROOT%\scripts\buildsystems\vcpkg.cmake" (
 )
 
 if !ERRORLEVEL! NEQ 0 (
-    echo/
+    echo.
     echo %RED%ERROR: CMake project generation failed%RESET%
     echo ERROR: CMake project generation failed with exit code !ERRORLEVEL! >> "%LOG_FILE%"
     echo Please check the error messages above
-    echo/
+    echo.
     echo Full CMake output has been saved to: %LOG_FILE%
-    echo/
+    echo.
     cd /d "%REPO_ROOT%"
     pause
     exit /b 1
@@ -447,13 +447,13 @@ if !ERRORLEVEL! NEQ 0 (
 
 cd /d "%REPO_ROOT%"
 
-echo/
+echo.
 echo %GREEN%✓ Visual Studio project files generated successfully!%RESET%
 echo   Location: %REPO_ROOT%\build\FreshVoxelEngine.sln
-echo/
+echo.
 echo Visual Studio project files generated successfully! >> "%LOG_FILE%"
 echo Location: %REPO_ROOT%\build\FreshVoxelEngine.sln >> "%LOG_FILE%"
-echo/ >> "%LOG_FILE%"
+echo. >> "%LOG_FILE%"
 pause
 
 REM ============================================================================
@@ -461,42 +461,42 @@ REM Step 5: Build the Project
 REM ============================================================================
 echo %BLUE%[Step 5/6] Building the project...%RESET%
 echo [Step 5/6] Building the project... >> "%LOG_FILE%"
-echo/
+echo.
 echo This may take several minutes depending on your system...
-echo/
+echo.
 echo This may take several minutes depending on your system... >> "%LOG_FILE%"
-echo/ >> "%LOG_FILE%"
+echo. >> "%LOG_FILE%"
 
 REM Build in Release mode
 echo Building Release configuration...
 echo Building Release configuration... >> "%LOG_FILE%"
-echo/ >> "%LOG_FILE%"
+echo. >> "%LOG_FILE%"
 echo %YELLOW%Building... This may take several minutes. Progress will be shown below.%RESET%
-echo/
+echo.
 cmake --build build --config Release
 
 if !ERRORLEVEL! NEQ 0 (
-    echo/
+    echo.
     echo %RED%ERROR: Build failed%RESET%
     echo ERROR: Build failed with exit code !ERRORLEVEL! >> "%LOG_FILE%"
     echo Please check the error messages above
-    echo/
+    echo.
     echo Full build output has been saved to: %LOG_FILE%
-    echo/
+    echo.
     echo You can try building manually by opening:
     echo   %REPO_ROOT%\build\FreshVoxelEngine.sln
-    echo/ >> "%LOG_FILE%"
+    echo. >> "%LOG_FILE%"
     echo You can try building manually by opening: >> "%LOG_FILE%"
     echo   %REPO_ROOT%\build\FreshVoxelEngine.sln >> "%LOG_FILE%"
     pause
     exit /b 1
 )
 
-echo/
+echo.
 echo %GREEN%✓ Build completed successfully!%RESET%
-echo/
+echo.
 echo Build completed successfully! >> "%LOG_FILE%"
-echo/ >> "%LOG_FILE%"
+echo. >> "%LOG_FILE%"
 pause
 
 REM ============================================================================
@@ -504,8 +504,8 @@ REM Step 6: Create Shortcuts (Optional)
 REM ============================================================================
 echo %BLUE%[Step 6/6] Creating shortcuts...%RESET%
 echo [Step 6/6] Creating shortcuts... >> "%LOG_FILE%"
-echo/
-echo/ >> "%LOG_FILE%"
+echo.
+echo. >> "%LOG_FILE%"
 
 set /p CREATE_SHORTCUTS="Would you like to create desktop shortcuts? (Y/N): "
 echo User response: !CREATE_SHORTCUTS! >> "%LOG_FILE%"
@@ -535,38 +535,38 @@ if /i "!CREATE_SHORTCUTS!"=="Y" (
     echo Created Open_Solution.bat >> "%LOG_FILE%"
 )
 
-echo/
-echo/ >> "%LOG_FILE%"
+echo.
+echo. >> "%LOG_FILE%"
 
 REM ============================================================================
 REM Installation Complete
 REM ============================================================================
-echo/
+echo.
 echo %GREEN%============================================================================%RESET%
 echo %GREEN%                   Installation Completed Successfully!%RESET%
 echo %GREEN%============================================================================%RESET%
-echo/
+echo.
 echo ============================================================================ >> "%LOG_FILE%"
 echo                   Installation Completed Successfully! >> "%LOG_FILE%"
 echo ============================================================================ >> "%LOG_FILE%"
-echo/ >> "%LOG_FILE%"
+echo. >> "%LOG_FILE%"
 echo Installation finished: %date% %time% >> "%LOG_FILE%"
-echo/ >> "%LOG_FILE%"
+echo. >> "%LOG_FILE%"
 echo %BLUE%Installation Summary:%RESET%
 echo   - Visual Studio solution: build\FreshVoxelEngine.sln
 if exist "build\Release\FreshVoxelEngine.exe" (
     echo   - Engine executable: build\Release\FreshVoxelEngine.exe
 )
 echo   - Installation log: %LOG_FILE%
-echo/
+echo.
 echo Installation Summary: >> "%LOG_FILE%"
 echo   - Visual Studio solution: build\FreshVoxelEngine.sln >> "%LOG_FILE%"
 if exist "build\Release\FreshVoxelEngine.exe" (
     echo   - Engine executable: build\Release\FreshVoxelEngine.exe >> "%LOG_FILE%"
 )
 echo   - Installation log: %LOG_FILE% >> "%LOG_FILE%"
-echo/ >> "%LOG_FILE%"
+echo. >> "%LOG_FILE%"
 echo %YELLOW%The root install.bat will show next steps.%RESET%
 echo %YELLOW%Press any key to return to the main installer...%RESET%
-echo/
+echo.
 pause
