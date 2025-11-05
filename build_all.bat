@@ -113,11 +113,13 @@ set "VCPKG_LOCAL=%~dp0vcpkg"
 if exist "%VCPKG_PARENT%\vcpkg.exe" (
     set "VCPKG_FOUND=1"
     echo [OK] vcpkg found in parent directory: %VCPKG_PARENT%
-) else if exist "%VCPKG_LOCAL%\vcpkg.exe" (
-    set "VCPKG_FOUND=1"
-    echo [OK] vcpkg found in project directory: %VCPKG_LOCAL%
 ) else (
-    echo [WARNING] vcpkg not found in parent or project directory
+    if exist "%VCPKG_LOCAL%\vcpkg.exe" (
+        set "VCPKG_FOUND=1"
+        echo [OK] vcpkg found in project directory: %VCPKG_LOCAL%
+    ) else (
+        echo [WARNING] vcpkg not found in parent or project directory
+    )
 )
 
 REM Check if CMake found the required dependencies

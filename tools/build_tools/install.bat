@@ -196,66 +196,67 @@ if exist "%VCPKG_PARENT%\vcpkg.exe" (
     echo Verifying vcpkg installation... >> "%LOG_FILE%"
     "%VCPKG_ROOT%\vcpkg.exe" version >> "%LOG_FILE%" 2>&1
     echo/
-) else if exist "%VCPKG_LOCAL%\vcpkg.exe" (
-    set "VCPKG_ROOT=%VCPKG_LOCAL%"
-    echo %GREEN%✓ vcpkg already installed in project directory: %VCPKG_ROOT%%RESET%
-    echo vcpkg already installed in project directory: %VCPKG_ROOT% >> "%LOG_FILE%"
-    echo/
-    echo Verifying vcpkg installation...
-    echo Verifying vcpkg installation... >> "%LOG_FILE%"
-    "%VCPKG_ROOT%\vcpkg.exe" version >> "%LOG_FILE%" 2>&1
-    echo/
 ) else (
-    echo vcpkg not found in parent directory or project directory
-    echo vcpkg not found in parent directory (%VCPKG_PARENT%) or project directory (%VCPKG_LOCAL%) >> "%LOG_FILE%"
-    echo/
-    echo vcpkg is a package manager for C++ that makes dependency management easier.
-    echo It is recommended but not required for this project.
-    echo/
-    echo Installing vcpkg in the parent directory allows it to be shared
-    echo across multiple projects, saving disk space and download time.
-    echo/
-    echo vcpkg not found. >> "%LOG_FILE%"
-    echo Would you like to install it? >> "%LOG_FILE%"
-    echo vcpkg is a package manager for C++ that makes dependency management easier. >> "%LOG_FILE%"
-    echo/ >> "%LOG_FILE%"
-    set /p INSTALL_VCPKG="Install vcpkg? (Y/N): "
-    echo User response: !INSTALL_VCPKG! >> "%LOG_FILE%"
-    
-    if /i "!INSTALL_VCPKG!"=="Y" (
+    if exist "%VCPKG_LOCAL%\vcpkg.exe" (
+        set "VCPKG_ROOT=%VCPKG_LOCAL%"
+        echo %GREEN%✓ vcpkg already installed in project directory: %VCPKG_ROOT%%RESET%
+        echo vcpkg already installed in project directory: %VCPKG_ROOT% >> "%LOG_FILE%"
         echo/
-        echo Installing vcpkg...
-        echo Installing vcpkg... >> "%LOG_FILE%"
-        
-        REM Determine installation location - prefer parent directory
+        echo Verifying vcpkg installation...
+        echo Verifying vcpkg installation... >> "%LOG_FILE%"
+        "%VCPKG_ROOT%\vcpkg.exe" version >> "%LOG_FILE%" 2>&1
         echo/
-        echo Where would you like to install vcpkg?
-        echo   1. Parent directory (recommended - shared across projects): %VCPKG_PARENT%
-        echo   2. Project directory (local to this project): %VCPKG_LOCAL%
+    ) else (
+        echo vcpkg not found in parent directory or project directory
+        echo vcpkg not found in parent directory (%VCPKG_PARENT%) or project directory (%VCPKG_LOCAL%) >> "%LOG_FILE%"
         echo/
-        set /p VCPKG_LOCATION="Enter choice (1 or 2, default is 1): "
-        if "!VCPKG_LOCATION!"=="" set VCPKG_LOCATION=1
-        echo User chose vcpkg location: !VCPKG_LOCATION! >> "%LOG_FILE%"
+        echo vcpkg is a package manager for C++ that makes dependency management easier.
+        echo It is recommended but not required for this project.
+        echo/
+        echo Installing vcpkg in the parent directory allows it to be shared
+        echo across multiple projects, saving disk space and download time.
+        echo/
+        echo vcpkg not found. >> "%LOG_FILE%"
+        echo Would you like to install it? >> "%LOG_FILE%"
+        echo vcpkg is a package manager for C++ that makes dependency management easier. >> "%LOG_FILE%"
+        echo/ >> "%LOG_FILE%"
+        set /p INSTALL_VCPKG="Install vcpkg? (Y/N): "
+        echo User response: !INSTALL_VCPKG! >> "%LOG_FILE%"
         
-        if "!VCPKG_LOCATION!"=="2" (
-            set "VCPKG_ROOT=%VCPKG_LOCAL%"
-            echo Installing in project directory: %VCPKG_ROOT%
-            echo Installing in project directory: %VCPKG_ROOT% >> "%LOG_FILE%"
-        ) else (
-            set "VCPKG_ROOT=%VCPKG_PARENT%"
-            echo Installing in parent directory: %VCPKG_ROOT%
-            echo Installing in parent directory: %VCPKG_ROOT% >> "%LOG_FILE%"
-        )
-        
-        REM Clone vcpkg
-        if not exist "%VCPKG_ROOT%" (
+        if /i "!INSTALL_VCPKG!"=="Y" (
             echo/
-            echo Cloning vcpkg repository to %VCPKG_ROOT%...
-            echo Cloning vcpkg repository to %VCPKG_ROOT%... >> "%LOG_FILE%"
-            echo %YELLOW%This will download vcpkg. Progress will be shown below.%RESET%
-            echo %YELLOW%Press any key to start the download...%RESET%
-            pause
+            echo Installing vcpkg...
+            echo Installing vcpkg... >> "%LOG_FILE%"
+            
+            REM Determine installation location - prefer parent directory
             echo/
+            echo Where would you like to install vcpkg?
+            echo   1. Parent directory (recommended - shared across projects): %VCPKG_PARENT%
+            echo   2. Project directory (local to this project): %VCPKG_LOCAL%
+            echo/
+            set /p VCPKG_LOCATION="Enter choice (1 or 2, default is 1): "
+            if "!VCPKG_LOCATION!"=="" set VCPKG_LOCATION=1
+            echo User chose vcpkg location: !VCPKG_LOCATION! >> "%LOG_FILE%"
+            
+            if "!VCPKG_LOCATION!"=="2" (
+                set "VCPKG_ROOT=%VCPKG_LOCAL%"
+                echo Installing in project directory: %VCPKG_ROOT%
+                echo Installing in project directory: %VCPKG_ROOT% >> "%LOG_FILE%"
+            ) else (
+                set "VCPKG_ROOT=%VCPKG_PARENT%"
+                echo Installing in parent directory: %VCPKG_ROOT%
+                echo Installing in parent directory: %VCPKG_ROOT% >> "%LOG_FILE%"
+            )
+            
+            REM Clone vcpkg
+            if not exist "%VCPKG_ROOT%" (
+                echo/
+                echo Cloning vcpkg repository to %VCPKG_ROOT%...
+                echo Cloning vcpkg repository to %VCPKG_ROOT%... >> "%LOG_FILE%"
+                echo %YELLOW%This will download vcpkg. Progress will be shown below.%RESET%
+                echo %YELLOW%Press any key to start the download...%RESET%
+                pause
+                echo/
             echo Running: git clone https://github.com/Microsoft/vcpkg.git "%VCPKG_ROOT%"
             echo Running: git clone https://github.com/Microsoft/vcpkg.git "%VCPKG_ROOT%" >> "%LOG_FILE%"
             git clone https://github.com/Microsoft/vcpkg.git "%VCPKG_ROOT%"
@@ -429,13 +430,15 @@ if not defined VCPKG_ROOT (
         set "VCPKG_ROOT=%VCPKG_PARENT%"
         echo Found vcpkg in parent directory: %VCPKG_ROOT%
         echo Found vcpkg in parent directory: %VCPKG_ROOT% >> "%LOG_FILE%"
-    ) else if exist "%VCPKG_LOCAL%\vcpkg.exe" (
-        set "VCPKG_ROOT=%VCPKG_LOCAL%"
-        echo Found vcpkg in project directory: %VCPKG_ROOT%
-        echo Found vcpkg in project directory: %VCPKG_ROOT% >> "%LOG_FILE%"
     ) else (
-        echo WARNING: vcpkg not found in either location
-        echo WARNING: vcpkg not found in either location >> "%LOG_FILE%"
+        if exist "%VCPKG_LOCAL%\vcpkg.exe" (
+            set "VCPKG_ROOT=%VCPKG_LOCAL%"
+            echo Found vcpkg in project directory: %VCPKG_ROOT%
+            echo Found vcpkg in project directory: %VCPKG_ROOT% >> "%LOG_FILE%"
+        ) else (
+            echo WARNING: vcpkg not found in either location
+            echo WARNING: vcpkg not found in either location >> "%LOG_FILE%"
+        )
     )
 )
 

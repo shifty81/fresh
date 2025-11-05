@@ -1,4 +1,5 @@
 @echo off
+setlocal enabledelayedexpansion
 REM ============================================================================
 REM Fresh Voxel Engine - vcpkg Verification Script
 REM ============================================================================
@@ -31,7 +32,7 @@ if exist "%VCPKG_PARENT%\vcpkg.exe" (
 echo/
 
 if exist "%VCPKG_LOCAL%\vcpkg.exe" (
-    if !VCPKG_FOUND!==0 (
+    if "!VCPKG_FOUND!"=="0" (
         set "VCPKG_FOUND=1"
         set "VCPKG_LOCATION=%VCPKG_LOCAL%"
         echo [OK] vcpkg found in project directory
@@ -46,19 +47,19 @@ if exist "%VCPKG_LOCAL%\vcpkg.exe" (
 echo/
 echo ================================================
 
-if !VCPKG_FOUND!==1 (
+if "!VCPKG_FOUND!"=="1" (
     echo Status: vcpkg is installed
-    echo Using: %VCPKG_LOCATION%
+    echo Using: !VCPKG_LOCATION!
     echo/
     
     REM Show vcpkg version
     echo vcpkg version:
-    "%VCPKG_LOCATION%\vcpkg.exe" version
+    "!VCPKG_LOCATION!\vcpkg.exe" version
     echo/
     
     REM Check if dependencies are installed
     echo Checking installed packages...
-    "%VCPKG_LOCATION%\vcpkg.exe" list
+    "!VCPKG_LOCATION!\vcpkg.exe" list
     echo/
     
     echo Recommendation: vcpkg is ready to use

@@ -49,9 +49,11 @@ set "VCPKG_LOCAL=%~dp0vcpkg"
 if exist "%VCPKG_PARENT%\scripts\buildsystems\vcpkg.cmake" (
     set "VCPKG_ROOT=%VCPKG_PARENT%"
     echo Found vcpkg in parent directory: %VCPKG_PARENT%
-) else if exist "%VCPKG_LOCAL%\scripts\buildsystems\vcpkg.cmake" (
-    set "VCPKG_ROOT=%VCPKG_LOCAL%"
-    echo Found vcpkg in project directory: %VCPKG_LOCAL%
+) else (
+    if exist "%VCPKG_LOCAL%\scripts\buildsystems\vcpkg.cmake" (
+        set "VCPKG_ROOT=%VCPKG_LOCAL%"
+        echo Found vcpkg in project directory: %VCPKG_LOCAL%
+    )
 )
 
 if defined VCPKG_ROOT (
