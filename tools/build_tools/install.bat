@@ -400,10 +400,6 @@ echo Checking path: %VCPKG_ROOT%\vcpkg.exe >> "%LOG_FILE%"
 echo/
 echo/ >> "%LOG_FILE%"
 
-REM Additional debug output to help diagnose issues
-echo DEBUG: Attempting to check if file exists...
-echo DEBUG: Attempting to check if file exists... >> "%LOG_FILE%"
-
 if exist "%VCPKG_ROOT%\vcpkg.exe" (
     echo %GREEN%✓ vcpkg found at: %VCPKG_ROOT%\vcpkg.exe%RESET%
     echo vcpkg found at: %VCPKG_ROOT%\vcpkg.exe >> "%LOG_FILE%"

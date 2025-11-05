@@ -117,7 +117,7 @@ The installer now provides **manual control** at each step:
 ## Recent Improvements (v2.2 - Manual/Debug Mode)
 
 ### Manual Step-by-Step Control (November 2025)
-The installer now provides enhanced manual control and debugging:
+The installer now provides enhanced manual control and debugging capabilities to help diagnose installation issues:
 
 1. **Explicit Pauses Between Steps**: After each major step completes, the installer pauses and shows a message like "Step X completed. Press any key to continue to Step Y..." This prevents the window from closing unexpectedly and gives you time to review the output.
 
