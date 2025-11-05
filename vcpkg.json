@@ -11,6 +11,10 @@
       "platform": "windows"
     },
     {
+      "name": "glew",
+      "platform": "windows"
+    },
+    {
       "name": "glm",
       "platform": "windows"
     },
