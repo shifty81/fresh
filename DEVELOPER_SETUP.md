@@ -57,12 +57,11 @@ Fresh Voxel Engine uses a straightforward build process with Visual Studio 2022:
 git clone https://github.com/shifty81/fresh.git
 cd fresh
 
-# Set up vcpkg (one-time)
-cd ..
+# Set up vcpkg in project directory (one-time)
 git clone https://github.com/microsoft/vcpkg.git
 cd vcpkg
 bootstrap-vcpkg.bat
-cd ..\fresh
+cd ..
 
 # Generate Visual Studio solution
 generate_vs2022.bat
@@ -78,26 +77,47 @@ See [BUILD.md](BUILD.md) for detailed instructions with troubleshooting.
 
 Fresh Voxel Engine uses vcpkg for dependency management. The build system supports two vcpkg installation locations:
 
-1. **Parent Directory (Recommended)**: `../vcpkg` 
+1. **Project Directory (Recommended)**: `./vcpkg` 
+   - Self-contained within the project
+   - Simplest setup with no path confusion
+   - Each project has its own vcpkg installation
+   - Example: If Fresh is in `C:\Projects\fresh`, vcpkg is in `C:\Projects\fresh\vcpkg`
+
+2. **Parent Directory (Alternative)**: `../vcpkg`
    - Shared across multiple projects
    - Saves disk space (dependencies are cached once)
    - Avoids re-downloading packages for each project
    - Example: If Fresh is in `C:\Projects\fresh`, vcpkg is in `C:\Projects\vcpkg`
 
-2. **Project Directory**: `./vcpkg`
-   - Self-contained within the project
-   - Useful for isolated builds
-   - Each project has its own vcpkg installation
-
-The `generate_vs2022.bat` script automatically detects and uses vcpkg in either location, with parent directory taking precedence.
+The `generate_vs2022.bat` script automatically detects and uses vcpkg in either location, with project directory taking precedence.
 
 **Verify Your Setup**: Run `verify_vcpkg.bat` to check if vcpkg is properly installed and configured.
 
 ### Option 2: Manual Setup with vcpkg
 
-**Recommended Approach (Shared vcpkg in Parent Directory)**
+**Recommended Approach (Project-Local vcpkg)**
 
-This approach installs vcpkg once in a parent directory, allowing it to be shared across multiple projects:
+This approach keeps vcpkg within the project directory for simplicity:
+
+```batch
+# Clone Fresh
+git clone https://github.com/shifty81/fresh.git
+cd fresh
+
+# Install vcpkg locally in the project
+git clone https://github.com/Microsoft/vcpkg.git
+cd vcpkg
+bootstrap-vcpkg.bat
+vcpkg integrate install
+cd ..
+
+# Generate Visual Studio solution
+generate_vs2022.bat
+```
+
+**Alternative: Shared vcpkg in Parent Directory**
+
+If you prefer to share vcpkg across multiple projects:
 
 ```batch
 # Navigate to parent directory (one level above where you'll clone fresh)
@@ -119,30 +139,10 @@ cd fresh
 generate_vs2022.bat
 ```
 
-**Alternative: Project-Local vcpkg**
-
-If you prefer to keep vcpkg within the project directory:
-
-```batch
-# Clone Fresh
-git clone https://github.com/shifty81/fresh.git
-cd fresh
-
-# Install vcpkg locally in the project
-git clone https://github.com/Microsoft/vcpkg.git
-cd vcpkg
-bootstrap-vcpkg.bat
-vcpkg integrate install
-cd ..
-
-# Generate Visual Studio solution
-generate_vs2022.bat
-```
-
 **Note**: 
 - The project now includes a `vcpkg.json` manifest file that automatically manages dependencies
-- Build scripts check for vcpkg in the parent directory first (`../vcpkg`), then the project directory (`./vcpkg`)
-- Using a shared vcpkg installation saves disk space and avoids re-downloading packages for multiple projects
+- Build scripts check for vcpkg in the project directory first (`./vcpkg`), then the parent directory (`../vcpkg`)
+- The project directory approach is recommended for simplicity and avoiding path-related issues
 - When using vcpkg with the toolchain file, dependencies (GLFW, GLM, ImGui) will be automatically installed during CMake configuration
 
 ## Building from Source

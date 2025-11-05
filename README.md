@@ -53,11 +53,10 @@ git clone https://github.com/shifty81/fresh.git
 cd fresh
 
 # 2. Set up vcpkg for dependencies (one-time setup)
-cd ..
 git clone https://github.com/microsoft/vcpkg.git
 cd vcpkg
 bootstrap-vcpkg.bat
-cd ..\fresh
+cd ..
 
 # 3. Generate Visual Studio 2022 solution
 generate_vs2022.bat

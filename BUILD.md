@@ -42,9 +42,23 @@ cd fresh
 
 ### Step 2: Set Up vcpkg for Dependencies
 
-Fresh Engine uses vcpkg to manage C++ dependencies (GLFW, GLM, ImGui). We recommend installing vcpkg in the parent directory to allow sharing across projects.
+Fresh Engine uses vcpkg to manage C++ dependencies (GLFW, GLM, ImGui). We recommend installing vcpkg in the project root directory for simplicity.
 
-**Option A: Install vcpkg in Parent Directory (Recommended)**
+**Option A: Install vcpkg in Project Directory (Recommended)**
+
+```batch
+# From project root (fresh directory)
+git clone https://github.com/microsoft/vcpkg.git
+cd vcpkg
+bootstrap-vcpkg.bat
+cd ..
+```
+
+**Expected result:** vcpkg is now installed at `.\vcpkg\vcpkg.exe`
+
+**Option B: Install vcpkg in Parent Directory (Alternative)**
+
+If you prefer to share vcpkg across multiple projects:
 
 ```batch
 # Navigate to parent directory
@@ -58,39 +72,25 @@ cd vcpkg
 bootstrap-vcpkg.bat
 
 # Return to project directory
-cd ..\fresh
+cd fresh
 ```
 
 **Expected result:** vcpkg is now installed at `..\vcpkg\vcpkg.exe`
-
-**Option B: Install vcpkg in Project Directory (Alternative)**
-
-If you prefer to keep vcpkg within the project:
-
-```batch
-# From project root
-git clone https://github.com/microsoft/vcpkg.git
-cd vcpkg
-bootstrap-vcpkg.bat
-cd ..
-```
-
-**Expected result:** vcpkg is now installed at `.\vcpkg\vcpkg.exe`
 
 ### Step 3: Generate Visual Studio Solution
 
 Now we'll use CMake to generate the Visual Studio 2022 solution. The vcpkg toolchain will automatically install all required dependencies.
 
-**If you installed vcpkg in parent directory:**
+**Using the automated script (Easiest):**
 
 ```batch
-# Create build directory
-mkdir build
-cd build
-
-# Generate Visual Studio 2022 solution with vcpkg
-cmake -G "Visual Studio 17 2022" -A x64 -DCMAKE_TOOLCHAIN_FILE=..\..\vcpkg\scripts\buildsystems\vcpkg.cmake ..
+# Run the generation script
+generate_vs2022.bat
 ```
+
+The script will automatically detect vcpkg in either the project or parent directory.
+
+**Manual CMake configuration:**
 
 **If you installed vcpkg in project directory:**
 
@@ -103,6 +103,17 @@ cd build
 cmake -G "Visual Studio 17 2022" -A x64 -DCMAKE_TOOLCHAIN_FILE=..\vcpkg\scripts\buildsystems\vcpkg.cmake ..
 ```
 
+**If you installed vcpkg in parent directory:**
+
+```batch
+# Create build directory
+mkdir build
+cd build
+
+# Generate Visual Studio 2022 solution with vcpkg
+cmake -G "Visual Studio 17 2022" -A x64 -DCMAKE_TOOLCHAIN_FILE=..\..\vcpkg\scripts\buildsystems\vcpkg.cmake ..
+```
+
 **What happens during this step:**
 - CMake configures the project for Visual Studio 2022
 - vcpkg automatically downloads and builds dependencies (GLFW, GLM, ImGui, GLEW)
@@ -111,8 +122,8 @@ cmake -G "Visual Studio 17 2022" -A x64 -DCMAKE_TOOLCHAIN_FILE=..\vcpkg\scripts\
 
 **Troubleshooting:**
 - If you get "vcpkg not found", verify the path matches your installation location
-- For parent directory: `..\..\vcpkg\scripts\buildsystems\vcpkg.cmake`
 - For project directory: `..\vcpkg\scripts\buildsystems\vcpkg.cmake`
+- For parent directory: `..\..\vcpkg\scripts\buildsystems\vcpkg.cmake`
 - If CMake fails, check that all prerequisites are installed and in your PATH
 
 ### Step 4: Build the Engine
