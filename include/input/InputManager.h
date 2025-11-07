@@ -7,6 +7,15 @@
 namespace fresh {
 
 /**
+ * @brief Input mode - determines how input is processed
+ */
+enum class InputMode {
+    GameMode,      // Standard in-game mode: cursor captured, movement controls active
+    UIMode,        // UI/Menu mode: cursor free, UI elements interactive
+    BuildMode      // Build menu mode: specialized controls for building/ship editor
+};
+
+/**
  * @brief Input actions that can be mapped to keys
  */
 enum class InputAction {
@@ -162,6 +171,31 @@ public:
      */
     void setGamepadVibration(int gamepadID, float leftMotor, float rightMotor);
     
+    /**
+     * @brief Set input mode (GameMode, UIMode, BuildMode)
+     * @param mode New input mode
+     * @param temporary If true, mode can be overridden by Hold Alt feature
+     */
+    void setInputMode(InputMode mode, bool temporary = false);
+    
+    /**
+     * @brief Get current input mode
+     * @return Current input mode
+     */
+    InputMode getInputMode() const { return currentMode; }
+    
+    /**
+     * @brief Check if Alt key is being held down
+     * @return true if Alt is held
+     */
+    bool isAltHeld() const;
+    
+    /**
+     * @brief Check if cursor is in UI mode (either explicit or via Alt hold)
+     * @return true if cursor should be visible and free
+     */
+    bool isInUIMode() const;
+    
 private:
     void initializeDefaultBindings();
     float applyDeadzone(float value) const;
@@ -189,6 +223,11 @@ private:
     };
     GamepadState gamepads[MAX_GAMEPADS];
     float gamepadDeadzone = 0.15f;
+    
+    // Input mode management
+    InputMode currentMode = InputMode::GameMode;
+    InputMode baseMode = InputMode::GameMode;  // Mode before Alt hold
+    bool temporaryModeSet = false;
 };
 
 } // namespace fresh

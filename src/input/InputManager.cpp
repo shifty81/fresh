@@ -18,6 +18,23 @@ void InputManager::update() {
     
     // Update gamepads
     updateGamepads();
+    
+    // Handle "Hold Alt" feature for temporary UI mode switching
+    bool altHeld = isAltHeld();
+    if (altHeld && currentMode == InputMode::GameMode) {
+        // Temporarily switch to UI mode while Alt is held
+        baseMode = currentMode;
+        currentMode = InputMode::UIMode;
+        temporaryModeSet = true;
+        setCursorMode(false);  // Show cursor
+    } else if (!altHeld && temporaryModeSet) {
+        // Release Alt, return to base mode
+        currentMode = baseMode;
+        temporaryModeSet = false;
+        if (currentMode == InputMode::GameMode) {
+            setCursorMode(true);  // Hide and capture cursor
+        }
+    }
 }
 
 void InputManager::updateGamepads() {
@@ -201,6 +218,35 @@ void InputManager::initializeDefaultBindings() {
     keyBindings[InputAction::OpenMenu] = GLFW_KEY_ESCAPE;
     keyBindings[InputAction::ToggleEditor] = GLFW_KEY_T;
     keyBindings[InputAction::OpenChat] = GLFW_KEY_ENTER;
+}
+
+void InputManager::setInputMode(InputMode mode, bool temporary) {
+    baseMode = mode;
+    currentMode = mode;
+    temporaryModeSet = temporary;
+    
+    // Update cursor mode based on input mode
+    if (mode == InputMode::GameMode) {
+        setCursorMode(true);  // Capture and hide cursor
+    } else {
+        setCursorMode(false);  // Free and show cursor
+    }
+}
+
+bool InputManager::isAltHeld() const {
+    // Check both left and right Alt keys
+    auto leftAlt = keyStates.find(GLFW_KEY_LEFT_ALT);
+    auto rightAlt = keyStates.find(GLFW_KEY_RIGHT_ALT);
+    
+    bool leftAltPressed = (leftAlt != keyStates.end() && leftAlt->second);
+    bool rightAltPressed = (rightAlt != keyStates.end() && rightAlt->second);
+    
+    return leftAltPressed || rightAltPressed;
+}
+
+bool InputManager::isInUIMode() const {
+    // UI mode is active if explicitly set or if Alt is held (temporary mode)
+    return (currentMode == InputMode::UIMode || currentMode == InputMode::BuildMode);
 }
 
 } // namespace fresh
