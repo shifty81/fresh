@@ -20,7 +20,7 @@
     },
     {
       "name": "imgui",
-      "features": ["glfw-binding", "dx11-binding", "dx12-binding", "docking-experimental"],
+      "features": ["glfw-binding", "dx11-binding", "dx12-binding", "opengl3-binding", "docking-experimental"],
       "platform": "windows"
     }
   ],

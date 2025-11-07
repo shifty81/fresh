@@ -187,7 +187,7 @@ If ImGui is available, you'll see:
 ```batch
 # Reinstall ImGui with docking support
 vcpkg remove imgui
-vcpkg install imgui[docking-experimental,glfw-binding,dx11-binding,dx12-binding]:x64-windows
+vcpkg install imgui[docking-experimental,glfw-binding,dx11-binding,dx12-binding,opengl3-binding]:x64-windows
 
 # Regenerate the solution
 cd build

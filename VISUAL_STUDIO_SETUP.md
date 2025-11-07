@@ -201,7 +201,7 @@ build\Release\FreshVoxelEngine.exe
 **Solution**:
 - If using vcpkg: Dependencies are declared in `vcpkg.json` and will be automatically installed when using the vcpkg toolchain
 - Configure CMake with vcpkg: `cmake -B build -DCMAKE_TOOLCHAIN_FILE=path/to/vcpkg/scripts/buildsystems/vcpkg.cmake`
-- Alternatively, manually install: `vcpkg install glfw3:x64-windows glm:x64-windows imgui[glfw-binding,dx11-binding,dx12-binding]:x64-windows`
+- Alternatively, manually install: `vcpkg install glfw3:x64-windows glm:x64-windows imgui[glfw-binding,dx11-binding,dx12-binding,opengl3-binding]:x64-windows`
 
 ### Issue: "Link error LNK2019"
 **Solution**:
@@ -296,7 +296,7 @@ cmake --build . --config Release
 **Solution**:
 1. Make sure ImGui is installed with docking support: 
    ```batch
-   vcpkg install imgui[docking-experimental,glfw-binding,dx11-binding,dx12-binding]:x64-windows
+   vcpkg install imgui[docking-experimental,glfw-binding,dx11-binding,dx12-binding,opengl3-binding]:x64-windows
    ```
 2. Regenerate the solution after updating vcpkg packages
 3. The engine now automatically guards these features with `#ifdef IMGUI_HAS_DOCK`
@@ -362,7 +362,7 @@ Solution Explorer
    ```batch
    vcpkg install glfw3:x64-windows
    vcpkg install glm:x64-windows
-   vcpkg install imgui[docking-experimental,glfw-binding,dx11-binding,dx12-binding]:x64-windows
+   vcpkg install imgui[docking-experimental,glfw-binding,dx11-binding,dx12-binding,opengl3-binding]:x64-windows
    ```
 
 ## Additional Resources

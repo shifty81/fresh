@@ -169,7 +169,7 @@ install.bat
 git pull origin main
 # If using vcpkg:
 vcpkg remove imgui
-vcpkg install imgui[docking-experimental,glfw-binding,dx11-binding,dx12-binding]:x64-windows
+vcpkg install imgui[docking-experimental,glfw-binding,dx11-binding,dx12-binding,opengl3-binding]:x64-windows
 # Regenerate solution:
 generate_vs2022.bat
 ```
