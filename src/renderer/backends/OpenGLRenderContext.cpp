@@ -218,8 +218,9 @@ bool OpenGLRenderContext::beginFrame() {
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     checkGLErrors("Bind default framebuffer");
     
-    // Clear the framebuffer
+    // Set clear values and clear the framebuffer
     glClearColor(clearColorValue.r, clearColorValue.g, clearColorValue.b, clearColorValue.a);
+    glClearDepth(clearDepthValue);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     checkGLErrors("Clear framebuffer");
     
