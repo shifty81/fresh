@@ -155,6 +155,18 @@ if(NOT OpenAL_FOUND)
     endif()
 endif()
 
+# Lua for scripting
+find_package(Lua QUIET)
+if(NOT Lua_FOUND)
+    message(WARNING "Lua not found. Asset management Lua integration will be disabled.")
+    if(WIN32)
+        message(WARNING "  vcpkg install lua:x64-windows")
+    else()
+        message(WARNING "  Linux: sudo apt-get install liblua5.4-dev")
+        message(WARNING "  macOS: brew install lua")
+    endif()
+endif()
+
 # ==============================================================================
 # Dependency Check Summary
 # ==============================================================================
@@ -265,6 +277,8 @@ set(ENGINE_SOURCES
     src/gameplay/Camera.cpp
     src/gameplay/Player.cpp
     src/assets/ModularAssetSystem.cpp
+    src/assets/AssetManager.cpp
+    src/assets/AssetManagerExports.cpp
     src/ecs/EntityManager.cpp
     src/voxelship/VoxelBlock.cpp
     src/voxelship/VoxelStructureComponent.cpp
@@ -437,6 +451,14 @@ if(OpenAL_FOUND)
     target_link_libraries(${PROJECT_NAME} PRIVATE OpenAL::OpenAL)
     add_definitions(-DFRESH_OPENAL_AVAILABLE)
     message(STATUS "OpenAL enabled for audio support")
+endif()
+
+# Link Lua (Scripting)
+if(Lua_FOUND)
+    target_link_libraries(${PROJECT_NAME} PRIVATE ${LUA_LIBRARIES})
+    target_include_directories(${PROJECT_NAME} PRIVATE ${LUA_INCLUDE_DIR})
+    add_definitions(-DFRESH_LUA_AVAILABLE)
+    message(STATUS "Lua enabled for asset management scripting")
 endif()
 
 # Link OpenGL (if enabled)
