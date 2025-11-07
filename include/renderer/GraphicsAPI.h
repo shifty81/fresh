@@ -59,9 +59,14 @@ inline const char* getGraphicsAPIName(GraphicsAPI api) {
  */
 inline GraphicsAPI selectBestGraphicsAPI() {
 #ifdef _WIN32
-    // On Windows, prefer DirectX 12, fallback to DirectX 11
-    // OpenGL is optional if GLEW is available
+    // On Windows, prefer OpenGL if available (has complete rendering implementation)
+    // DirectX backends are stub implementations and don't render geometry yet
+#if defined(FRESH_OPENGL_SUPPORT) && defined(FRESH_GLEW_AVAILABLE)
+    return GraphicsAPI::OpenGL;
+#else
+    // Fall back to DirectX 12 if OpenGL not available
     return GraphicsAPI::DirectX12;
+#endif
 #else
     // Linux, Mac, and other platforms use OpenGL
     // If GLEW is not available, this will still return OpenGL
