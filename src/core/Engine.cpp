@@ -16,19 +16,39 @@
 #include "serialization/WorldSerializer.h"
 #include "gameplay/Player.h"
 #include "input/InputManager.h"
+#include "interaction/VoxelInteraction.h"
 #include <iostream>
 #include <chrono>
 #include <thread>
+#include <fstream>
+#include <sstream>
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+#if defined(FRESH_OPENGL_SUPPORT) && defined(FRESH_GLEW_AVAILABLE)
+#include <GL/glew.h>
+#endif
+
 namespace fresh {
+
+// Rendering constants
+namespace {
+    constexpr float MAX_INTERACTION_DISTANCE = 5.0f;
+    constexpr float CROSSHAIR_SIZE = 0.02f;
+    constexpr float CROSSHAIR_LINE_WIDTH = 2.0f;
+    constexpr int SHADER_INFO_LOG_SIZE = 512;
+    const char* VOXEL_VERTEX_SHADER = "shaders/voxel.vert";
+    const char* VOXEL_FRAGMENT_SHADER = "shaders/voxel.frag";
+    const char* CROSSHAIR_VERTEX_SHADER = "shaders/crosshair.vert";
+    const char* CROSSHAIR_FRAGMENT_SHADER = "shaders/crosshair.frag";
+}
 
 Engine::Engine()
     : m_running(false)
     , m_inGame(false)
+    , m_selectedBlockType(VoxelType::Stone)
 {
 }
 
@@ -163,6 +183,19 @@ bool Engine::initialize() {
     m_editor->setVisible(true); // Show editor UI by default
     std::cout << "Editor GUI initialized" << std::endl;
     LOG_INFO_C("Editor GUI initialized", "Engine");
+    
+    // Initialize OpenGL rendering (shaders, buffers, etc.)
+#if defined(FRESH_OPENGL_SUPPORT) && defined(FRESH_GLEW_AVAILABLE)
+    if (m_renderer->getAPI() == GraphicsAPI::OpenGL) {
+        initializeRendering();
+    }
+#endif
+    
+    // Create voxel interaction system
+    m_voxelInteraction = std::make_unique<VoxelInteraction>();
+    m_voxelInteraction->initialize(m_world.get());
+    std::cout << "Voxel interaction initialized" << std::endl;
+    LOG_INFO_C("Voxel interaction initialized", "Engine");
     
     // Create player
     m_player = std::make_unique<Player>();
@@ -347,6 +380,13 @@ void Engine::run() {
 }
 
 void Engine::shutdown() {
+#if defined(FRESH_OPENGL_SUPPORT) && defined(FRESH_GLEW_AVAILABLE)
+    // Cleanup OpenGL rendering resources
+    if (m_renderer && m_renderer->getAPI() == GraphicsAPI::OpenGL) {
+        shutdownRendering();
+    }
+#endif
+    
     if (m_renderer) {
         m_renderer->waitIdle();
     }
@@ -428,6 +468,22 @@ void Engine::update(float deltaTime) {
         if (glm::length(mouseDelta) > 0.0f) {
             m_player->handleMouseMovement(mouseDelta.x, mouseDelta.y);
         }
+        
+        // Handle block placement/breaking
+        if (m_voxelInteraction) {
+            // Perform raycast to find targeted block
+            RayHit hit = m_voxelInteraction->performRaycast(m_player->getCamera(), MAX_INTERACTION_DISTANCE);
+            
+            // Left click to break block
+            if (m_inputManager->isMouseButtonPressed(GLFW_MOUSE_BUTTON_LEFT) && hit.hit) {
+                m_voxelInteraction->breakBlock(hit);
+            }
+            
+            // Right click to place block
+            if (m_inputManager->isMouseButtonPressed(GLFW_MOUSE_BUTTON_RIGHT) && hit.hit) {
+                m_voxelInteraction->placeBlock(hit, m_selectedBlockType);
+            }
+        }
     }
     
     // Update player (physics, collision)
@@ -479,12 +535,20 @@ void Engine::render() {
     // Set viewport to match window size
     m_renderer->setViewport(0, 0, m_renderer->getSwapchainWidth(), m_renderer->getSwapchainHeight());
     
-    // Render voxel world with DirectX
-    if (m_world) {
-        // TODO: Implement DirectX-based voxel rendering
-        // For now, we'll keep the immediate mode OpenGL as a reference
-        // This needs to be replaced with proper DirectX draw calls
+#if defined(FRESH_OPENGL_SUPPORT) && defined(FRESH_GLEW_AVAILABLE)
+    // Clear depth buffer
+    if (m_renderer->getAPI() == GraphicsAPI::OpenGL) {
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        
+        // Render voxel world
+        if (m_world) {
+            renderVoxelWorld();
+        }
+        
+        // Render crosshair overlay
+        renderCrosshair();
     }
+#endif
     
 #ifdef FRESH_IMGUI_AVAILABLE
     // Begin editor frame (ImGui) before rendering editor UI
@@ -504,8 +568,6 @@ void Engine::render() {
 #endif // FRESH_IMGUI_AVAILABLE
     
     m_renderer->endFrame();
-    
-    // DirectX handles buffer swapping in endFrame()
 }
 
 void Engine::initializeGameSystems() {
@@ -596,5 +658,301 @@ void Engine::setupInputCallbacks() {
         }
     });
 }
+
+#if defined(FRESH_OPENGL_SUPPORT) && defined(FRESH_GLEW_AVAILABLE)
+
+std::string Engine::loadShaderFile(const std::string& filepath) {
+    std::ifstream file(filepath);
+    if (!file.is_open()) {
+        LOG_ERROR_C("Failed to open shader file: " + filepath, "Engine");
+        return "";
+    }
+    
+    std::stringstream buffer;
+    buffer << file.rdbuf();
+    return buffer.str();
+}
+
+GLuint Engine::compileShader(const std::string& source, GLenum shaderType) {
+    GLuint shader = glCreateShader(shaderType);
+    const char* src = source.c_str();
+    glShaderSource(shader, 1, &src, nullptr);
+    glCompileShader(shader);
+    
+    // Check compilation
+    GLint success;
+    glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
+    if (!success) {
+        char infoLog[SHADER_INFO_LOG_SIZE];
+        glGetShaderInfoLog(shader, SHADER_INFO_LOG_SIZE, nullptr, infoLog);
+        LOG_ERROR_C(std::string("Shader compilation failed: ") + infoLog, "Engine");
+        glDeleteShader(shader);
+        return 0;
+    }
+    
+    return shader;
+}
+
+GLuint Engine::createShaderProgram(const std::string& vertPath, const std::string& fragPath) {
+    std::string vertSource = loadShaderFile(vertPath);
+    std::string fragSource = loadShaderFile(fragPath);
+    
+    if (vertSource.empty() || fragSource.empty()) {
+        return 0;
+    }
+    
+    GLuint vertShader = compileShader(vertSource, GL_VERTEX_SHADER);
+    GLuint fragShader = compileShader(fragSource, GL_FRAGMENT_SHADER);
+    
+    if (vertShader == 0 || fragShader == 0) {
+        if (vertShader) glDeleteShader(vertShader);
+        if (fragShader) glDeleteShader(fragShader);
+        return 0;
+    }
+    
+    GLuint program = glCreateProgram();
+    glAttachShader(program, vertShader);
+    glAttachShader(program, fragShader);
+    glLinkProgram(program);
+    
+    // Check linking
+    GLint success;
+    glGetProgramiv(program, GL_LINK_STATUS, &success);
+    if (!success) {
+        char infoLog[SHADER_INFO_LOG_SIZE];
+        glGetProgramInfoLog(program, SHADER_INFO_LOG_SIZE, nullptr, infoLog);
+        LOG_ERROR_C(std::string("Shader program linking failed: ") + infoLog, "Engine");
+        glDeleteProgram(program);
+        program = 0;
+    }
+    
+    glDeleteShader(vertShader);
+    glDeleteShader(fragShader);
+    
+    return program;
+}
+
+void Engine::initializeRendering() {
+    if (m_renderer->getAPI() != GraphicsAPI::OpenGL) {
+        LOG_INFO_C("Rendering initialization skipped - not using OpenGL", "Engine");
+        return;
+    }
+    
+    // Create shader program
+    m_shaderProgram = createShaderProgram(VOXEL_VERTEX_SHADER, VOXEL_FRAGMENT_SHADER);
+    if (m_shaderProgram == 0) {
+        LOG_ERROR_C("Failed to create voxel shader program", "Engine");
+        return;
+    }
+    
+    // Create crosshair shader program
+    m_crosshairShader = createShaderProgram(CROSSHAIR_VERTEX_SHADER, CROSSHAIR_FRAGMENT_SHADER);
+    if (m_crosshairShader == 0) {
+        LOG_ERROR_C("Failed to create crosshair shader program", "Engine");
+        // Continue without crosshair
+    }
+    
+    LOG_INFO_C("OpenGL voxel rendering initialized", "Engine");
+    
+    // Enable depth testing
+    glEnable(GL_DEPTH_TEST);
+    glDepthFunc(GL_LESS);
+    
+    // Enable back-face culling for performance
+    glEnable(GL_CULL_FACE);
+    glCullFace(GL_BACK);
+    glFrontFace(GL_CCW);
+    
+    // Create crosshair geometry (simple cross)
+    float crosshairVertices[] = {
+        // Horizontal line
+        -CROSSHAIR_SIZE, 0.0f,
+         CROSSHAIR_SIZE, 0.0f,
+        // Vertical line
+         0.0f, -CROSSHAIR_SIZE,
+         0.0f,  CROSSHAIR_SIZE
+    };
+    
+    glGenVertexArrays(1, &m_crosshairVAO);
+    glGenBuffers(1, &m_crosshairVBO);
+    
+    glBindVertexArray(m_crosshairVAO);
+    glBindBuffer(GL_ARRAY_BUFFER, m_crosshairVBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(crosshairVertices), crosshairVertices, GL_STATIC_DRAW);
+    
+    // Position attribute
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0);
+    
+    glBindVertexArray(0);
+}
+
+void Engine::shutdownRendering() {
+    if (m_renderer->getAPI() != GraphicsAPI::OpenGL) {
+        return;
+    }
+    
+    // Delete crosshair buffers
+    if (m_crosshairVAO) {
+        glDeleteVertexArrays(1, &m_crosshairVAO);
+        m_crosshairVAO = 0;
+    }
+    if (m_crosshairVBO) {
+        glDeleteBuffers(1, &m_crosshairVBO);
+        m_crosshairVBO = 0;
+    }
+    
+    // Delete all VAOs/VBOs/EBOs
+    for (auto& pair : m_chunkVAOs) {
+        glDeleteVertexArrays(1, &pair.second);
+    }
+    for (auto& pair : m_chunkVBOs) {
+        glDeleteBuffers(1, &pair.second);
+    }
+    for (auto& pair : m_chunkEBOs) {
+        glDeleteBuffers(1, &pair.second);
+    }
+    
+    m_chunkVAOs.clear();
+    m_chunkVBOs.clear();
+    m_chunkEBOs.clear();
+    m_chunkIndexCounts.clear();
+    
+    if (m_shaderProgram) {
+        glDeleteProgram(m_shaderProgram);
+        m_shaderProgram = 0;
+    }
+    if (m_crosshairShader) {
+        glDeleteProgram(m_crosshairShader);
+        m_crosshairShader = 0;
+    }
+}
+
+void Engine::renderVoxelWorld() {
+    if (!m_world || !m_player || m_shaderProgram == 0) {
+        return;
+    }
+    
+    glUseProgram(m_shaderProgram);
+    
+    // Calculate matrices
+    glm::mat4 view = m_player->getCamera().getViewMatrix();
+    float aspectRatio = static_cast<float>(m_renderer->getSwapchainWidth()) / 
+                        static_cast<float>(m_renderer->getSwapchainHeight());
+    glm::mat4 projection = m_player->getCamera().getProjectionMatrix(aspectRatio);
+    
+    // Render each chunk
+    for (const auto& chunkPair : m_world->getChunks()) {
+        const ChunkPos& chunkPos = chunkPair.first;
+        Chunk* chunk = chunkPair.second.get();
+        
+        if (!chunk) continue;
+        
+        // Generate mesh if needed
+        if (chunk->isDirty()) {
+            chunk->generateMesh();
+            chunk->clearDirty();
+            
+            // Update OpenGL buffers
+            const auto& vertices = chunk->getMeshVertices();
+            const auto& indices = chunk->getMeshIndices();
+            
+            if (vertices.empty() || indices.empty()) {
+                continue;
+            }
+            
+            // Create or get VAO/VBO/EBO
+            GLuint& vao = m_chunkVAOs[chunkPos];
+            GLuint& vbo = m_chunkVBOs[chunkPos];
+            GLuint& ebo = m_chunkEBOs[chunkPos];
+            
+            if (vao == 0) {
+                glGenVertexArrays(1, &vao);
+                glGenBuffers(1, &vbo);
+                glGenBuffers(1, &ebo);
+            }
+            
+            glBindVertexArray(vao);
+            
+            // Upload vertex data
+            glBindBuffer(GL_ARRAY_BUFFER, vbo);
+            glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(float), 
+                        vertices.data(), GL_STATIC_DRAW);
+            
+            // Upload index data
+            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
+            glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(uint32_t), 
+                        indices.data(), GL_STATIC_DRAW);
+            
+            // Set up vertex attributes
+            // Position (vec3)
+            glEnableVertexAttribArray(0);
+            glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
+            
+            // Normal (vec3)
+            glEnableVertexAttribArray(1);
+            glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
+            
+            glBindVertexArray(0);
+            
+            m_chunkIndexCounts[chunkPos] = indices.size();
+        }
+        
+        // Render the chunk if it has a VAO
+        if (m_chunkVAOs.find(chunkPos) != m_chunkVAOs.end()) {
+            GLuint vao = m_chunkVAOs[chunkPos];
+            size_t indexCount = m_chunkIndexCounts[chunkPos];
+            
+            if (indexCount == 0) continue;
+            
+            // Calculate model matrix (chunk position)
+            glm::mat4 model = glm::mat4(1.0f);
+            model = glm::translate(model, glm::vec3(
+                chunkPos.x * CHUNK_SIZE,
+                0,
+                chunkPos.z * CHUNK_SIZE
+            ));
+            
+            // Calculate MVP matrix
+            glm::mat4 mvp = projection * view * model;
+            
+            // Set uniform
+            GLint mvpLoc = glGetUniformLocation(m_shaderProgram, "modelViewProj");
+            glUniformMatrix4fv(mvpLoc, 1, GL_FALSE, glm::value_ptr(mvp));
+            
+            // Draw
+            glBindVertexArray(vao);
+            glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(indexCount), GL_UNSIGNED_INT, 0);
+            glBindVertexArray(0);
+        }
+    }
+    
+    glUseProgram(0);
+}
+
+void Engine::renderCrosshair() {
+    if (m_crosshairVAO == 0 || m_crosshairShader == 0) {
+        return;
+    }
+    
+    // Disable depth test for 2D overlay
+    glDisable(GL_DEPTH_TEST);
+    
+    // Use crosshair shader
+    glUseProgram(m_crosshairShader);
+    
+    // Draw crosshair
+    glBindVertexArray(m_crosshairVAO);
+    glLineWidth(CROSSHAIR_LINE_WIDTH);
+    glDrawArrays(GL_LINES, 0, 4);
+    glBindVertexArray(0);
+    
+    glUseProgram(0);
+    
+    // Re-enable depth test
+    glEnable(GL_DEPTH_TEST);
+}
+
+#endif // FRESH_OPENGL_SUPPORT && FRESH_GLEW_AVAILABLE
 
 } // namespace fresh
