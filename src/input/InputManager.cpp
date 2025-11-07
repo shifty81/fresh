@@ -21,8 +21,9 @@ void InputManager::update() {
     
     // Handle "Hold Alt" feature for temporary UI mode switching
     bool altHeld = isAltHeld();
-    if (altHeld && currentMode == InputMode::GameMode) {
+    if (altHeld && !temporaryModeSet && currentMode == InputMode::GameMode) {
         // Temporarily switch to UI mode while Alt is held
+        // Only save baseMode if not already in temporary mode
         baseMode = currentMode;
         currentMode = InputMode::UIMode;
         temporaryModeSet = true;
@@ -221,7 +222,12 @@ void InputManager::initializeDefaultBindings() {
 }
 
 void InputManager::setInputMode(InputMode mode, bool temporary) {
-    baseMode = mode;
+    // Don't update baseMode if we're currently in a temporary Alt-hold mode
+    // This prevents overwriting the return-to mode when Alt is released
+    if (!temporaryModeSet || !isAltHeld()) {
+        baseMode = mode;
+    }
+    
     currentMode = mode;
     temporaryModeSet = temporary;
     
@@ -246,7 +252,9 @@ bool InputManager::isAltHeld() const {
 
 bool InputManager::isInUIMode() const {
     // UI mode is active if explicitly set or if Alt is held (temporary mode)
-    return (currentMode == InputMode::UIMode || currentMode == InputMode::BuildMode);
+    // Check both the current mode and if we're temporarily in UI mode via Alt hold
+    return (currentMode == InputMode::UIMode || currentMode == InputMode::BuildMode || 
+            (temporaryModeSet && isAltHeld()));
 }
 
 } // namespace fresh
