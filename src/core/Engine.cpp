@@ -33,6 +33,18 @@
 
 namespace fresh {
 
+// Rendering constants
+namespace {
+    constexpr float MAX_INTERACTION_DISTANCE = 5.0f;
+    constexpr float CROSSHAIR_SIZE = 0.02f;
+    constexpr float CROSSHAIR_LINE_WIDTH = 2.0f;
+    constexpr int SHADER_INFO_LOG_SIZE = 512;
+    const char* VOXEL_VERTEX_SHADER = "shaders/voxel.vert";
+    const char* VOXEL_FRAGMENT_SHADER = "shaders/voxel.frag";
+    const char* CROSSHAIR_VERTEX_SHADER = "shaders/crosshair.vert";
+    const char* CROSSHAIR_FRAGMENT_SHADER = "shaders/crosshair.frag";
+}
+
 Engine::Engine()
     : m_running(false)
     , m_inGame(false)
@@ -460,7 +472,7 @@ void Engine::update(float deltaTime) {
         // Handle block placement/breaking
         if (m_voxelInteraction) {
             // Perform raycast to find targeted block
-            RayHit hit = m_voxelInteraction->performRaycast(m_player->getCamera(), 5.0f);
+            RayHit hit = m_voxelInteraction->performRaycast(m_player->getCamera(), MAX_INTERACTION_DISTANCE);
             
             // Left click to break block
             if (m_inputManager->isMouseButtonPressed(GLFW_MOUSE_BUTTON_LEFT) && hit.hit) {
@@ -671,8 +683,8 @@ GLuint Engine::compileShader(const std::string& source, GLenum shaderType) {
     GLint success;
     glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
     if (!success) {
-        char infoLog[512];
-        glGetShaderInfoLog(shader, 512, nullptr, infoLog);
+        char infoLog[SHADER_INFO_LOG_SIZE];
+        glGetShaderInfoLog(shader, SHADER_INFO_LOG_SIZE, nullptr, infoLog);
         LOG_ERROR_C(std::string("Shader compilation failed: ") + infoLog, "Engine");
         glDeleteShader(shader);
         return 0;
@@ -707,8 +719,8 @@ GLuint Engine::createShaderProgram(const std::string& vertPath, const std::strin
     GLint success;
     glGetProgramiv(program, GL_LINK_STATUS, &success);
     if (!success) {
-        char infoLog[512];
-        glGetProgramInfoLog(program, 512, nullptr, infoLog);
+        char infoLog[SHADER_INFO_LOG_SIZE];
+        glGetProgramInfoLog(program, SHADER_INFO_LOG_SIZE, nullptr, infoLog);
         LOG_ERROR_C(std::string("Shader program linking failed: ") + infoLog, "Engine");
         glDeleteProgram(program);
         program = 0;
@@ -727,14 +739,14 @@ void Engine::initializeRendering() {
     }
     
     // Create shader program
-    m_shaderProgram = createShaderProgram("shaders/voxel.vert", "shaders/voxel.frag");
+    m_shaderProgram = createShaderProgram(VOXEL_VERTEX_SHADER, VOXEL_FRAGMENT_SHADER);
     if (m_shaderProgram == 0) {
         LOG_ERROR_C("Failed to create voxel shader program", "Engine");
         return;
     }
     
     // Create crosshair shader program
-    m_crosshairShader = createShaderProgram("shaders/crosshair.vert", "shaders/crosshair.frag");
+    m_crosshairShader = createShaderProgram(CROSSHAIR_VERTEX_SHADER, CROSSHAIR_FRAGMENT_SHADER);
     if (m_crosshairShader == 0) {
         LOG_ERROR_C("Failed to create crosshair shader program", "Engine");
         // Continue without crosshair
@@ -752,14 +764,13 @@ void Engine::initializeRendering() {
     glFrontFace(GL_CCW);
     
     // Create crosshair geometry (simple cross)
-    float crosshairSize = 0.02f;  // Size in normalized device coordinates
     float crosshairVertices[] = {
         // Horizontal line
-        -crosshairSize, 0.0f,
-         crosshairSize, 0.0f,
+        -CROSSHAIR_SIZE, 0.0f,
+         CROSSHAIR_SIZE, 0.0f,
         // Vertical line
-         0.0f, -crosshairSize,
-         0.0f,  crosshairSize
+         0.0f, -CROSSHAIR_SIZE,
+         0.0f,  CROSSHAIR_SIZE
     };
     
     glGenVertexArrays(1, &m_crosshairVAO);
@@ -932,7 +943,7 @@ void Engine::renderCrosshair() {
     
     // Draw crosshair
     glBindVertexArray(m_crosshairVAO);
-    glLineWidth(2.0f);
+    glLineWidth(CROSSHAIR_LINE_WIDTH);
     glDrawArrays(GL_LINES, 0, 4);
     glBindVertexArray(0);
     

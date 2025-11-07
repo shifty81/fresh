@@ -67,7 +67,7 @@ private:
     void update(float deltaTime);
     void render();
     
-    // Rendering helpers
+    // Rendering helpers (private implementation details)
     void initializeRendering();
     void shutdownRendering();
     void renderVoxelWorld();
