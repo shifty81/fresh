@@ -491,7 +491,7 @@ install(DIRECTORY shaders/ DESTINATION bin/shaders)
 # ==============================================================================
 
 # Option to enable/disable tests
-option(BUILD_TESTS "Build unit tests" OFF)
+option(BUILD_TESTS "Build unit tests" ON)
 
 if(BUILD_TESTS)
     message(STATUS "Building tests enabled")
@@ -520,6 +520,7 @@ if(BUILD_TESTS)
         tests/voxel/ChunkTests.cpp
         tests/generation/NoiseTests.cpp
         tests/generation/TerrainGeneratorTests.cpp
+        tests/input/InputManagerTests.cpp
         # tests/core/MemoryManagerTests.cpp  # Disabled - tests don't match implementation
         tests/scripting/EventSystemTests.cpp
     )
@@ -533,6 +534,7 @@ if(BUILD_TESTS)
         src/core/MemoryManager.cpp
         src/core/Logger.cpp
         src/scripting/EventSystem.cpp
+        src/input/InputManager.cpp
     )
     
     # Create test executable
