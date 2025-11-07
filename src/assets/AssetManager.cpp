@@ -15,6 +15,11 @@ namespace fs = std::filesystem;
 
 namespace fresh {
 
+// Constants for Lua configuration formatting
+constexpr const char* LUA_NEWLINE_INDENT = "\n";
+constexpr const char* LUA_TABLE_INDENT = "    ";
+constexpr const char* LUA_ENTRY_INDENT = "        ";
+
 // Initialize static instance
 AssetManager* AssetManager::instance_ = nullptr;
 
@@ -208,7 +213,7 @@ bool AssetManager::UpdateLuaConfiguration(const std::string& assetPath,
     }
     
     // Create new entry
-    std::string newEntry = "        {\"" + assetName + "\", \"" + assetPath + "\"},\n";
+    std::string newEntry = std::string(LUA_ENTRY_INDENT) + "{\"" + assetName + "\", \"" + assetPath + "\"},\n";
     
     // Check if table is empty (only whitespace between braces)
     size_t contentStart = tablePos + searchPattern.length();
@@ -218,7 +223,7 @@ bool AssetManager::UpdateLuaConfiguration(const std::string& assetPath,
     // Insert the new entry
     if (isEmpty) {
         // Insert after the opening brace with proper indentation
-        fileContent.insert(contentStart, "\n" + newEntry + "    ");
+        fileContent.insert(contentStart, std::string(LUA_NEWLINE_INDENT) + newEntry + LUA_TABLE_INDENT);
     } else {
         // Insert before the closing brace
         fileContent.insert(bracePos, newEntry);

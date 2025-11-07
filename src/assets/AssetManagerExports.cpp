@@ -39,8 +39,11 @@ EXPORT_API const char* AssetManager_GetAssetTypeFolder(AssetManager* instance,
     }
     
     std::string folder = instance->GetAssetTypeFolder(std::string(assetType));
-    strncpy(g_assetTypeFolderBuffer, folder.c_str(), sizeof(g_assetTypeFolderBuffer) - 1);
-    g_assetTypeFolderBuffer[sizeof(g_assetTypeFolderBuffer) - 1] = '\0';
+    
+    // Ensure we don't overflow the buffer
+    size_t copyLen = std::min(folder.length(), sizeof(g_assetTypeFolderBuffer) - 1);
+    memcpy(g_assetTypeFolderBuffer, folder.c_str(), copyLen);
+    g_assetTypeFolderBuffer[copyLen] = '\0';
     
     return g_assetTypeFolderBuffer;
 }
