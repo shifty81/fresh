@@ -214,9 +214,14 @@ void OpenGLRenderContext::shutdown() {
 }
 
 bool OpenGLRenderContext::beginFrame() {
+    // Bind the default framebuffer (required in core profile)
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    checkGLErrors("Bind default framebuffer");
+    
     // Clear the framebuffer
     glClearColor(clearColorValue.r, clearColorValue.g, clearColorValue.b, clearColorValue.a);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    checkGLErrors("Clear framebuffer");
     
     return true;
 }
@@ -245,15 +250,13 @@ void OpenGLRenderContext::setScissor(int x, int y, int w, int h) {
 }
 
 void OpenGLRenderContext::clearColor(float r, float g, float b, float a) {
+    // Store the clear color value for use in beginFrame()
     clearColorValue = glm::vec4(r, g, b, a);
-    glClearColor(r, g, b, a);
-    checkGLErrors("Clear color");
 }
 
 void OpenGLRenderContext::clearDepth(float depth) {
+    // Store the clear depth value for use when clearing
     clearDepthValue = depth;
-    glClearDepth(depth);
-    checkGLErrors("Clear depth");
 }
 
 std::shared_ptr<RenderBuffer> OpenGLRenderContext::createVertexBuffer(const void* data, size_t size) {
