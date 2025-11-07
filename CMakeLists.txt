@@ -553,6 +553,7 @@ if(BUILD_TESTS)
     
     # Test source files
     set(TEST_SOURCES
+        tests/test_main.cpp                 # Custom main with better error handling
         tests/voxel/ChunkTests.cpp
         tests/generation/NoiseTests.cpp
         tests/generation/TerrainGeneratorTests.cpp
@@ -582,9 +583,9 @@ if(BUILD_TESTS)
     )
     
     # Link test executable with Google Test and engine libraries
+    # Note: Using GTest::gtest without gtest_main since we provide our own main
     target_link_libraries(${PROJECT_NAME}Tests PRIVATE
         GTest::gtest
-        GTest::gtest_main
     )
     
     # Link GLFW if needed for tests

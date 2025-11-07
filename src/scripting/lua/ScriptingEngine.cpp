@@ -1,3 +1,19 @@
+/**
+ * @file ScriptingEngine.cpp
+ * @brief Lua scripting engine implementation (STUB VERSION)
+ * 
+ * NOTE: This is a stub implementation. Lua library is detected and linked by CMake,
+ *       but the actual integration code is not implemented yet.
+ * 
+ * The engine builds successfully with Lua support, but scripting features are disabled.
+ * To implement full Lua scripting support, see LUA_INTEGRATION_GUIDE.md
+ * 
+ * Current status:
+ * - Lua library: Linked and available
+ * - Binding library: Not yet integrated (LuaBridge3 or sol2 recommended)  
+ * - Implementation: Stub methods that silently fail
+ */
+
 #include "scripting/lua/ScriptingEngine.h"
 #include <fstream>
 #include <sstream>
@@ -19,14 +35,9 @@ bool ScriptingEngine::initialize() {
     // luaState = luaL_newstate();
     // luaL_openlibs(luaState);
     
-    std::cout << "NOTE: Lua scripting engine is a stub implementation.\n";
-    std::cout << "To enable Lua scripting:\n";
-    std::cout << "  1. Install Lua library (lua5.3-dev or lua5.4-dev)\n";
-    std::cout << "  2. Choose binding library (LuaBridge3 or sol2)\n";
-    std::cout << "  3. Add to CMakeLists.txt:\n";
-    std::cout << "     find_package(Lua REQUIRED)\n";
-    std::cout << "     target_link_libraries(${PROJECT_NAME} PRIVATE ${LUA_LIBRARIES})\n";
-    std::cout << "  4. Implement the TODOs in ScriptingEngine.cpp\n\n";
+    // Note: Lua library is linked but implementation is stubbed
+    // This is intentional - the integration is ready but not implemented
+    // See LUA_INTEGRATION_GUIDE.md for implementation details
     
     return true;
 }
@@ -64,7 +75,8 @@ bool ScriptingEngine::executeScript(const std::string& code) {
     //     return false;
     // }
     
-    reportError("Lua scripting not implemented (stub only)");
+    // Silent stub - returns false to indicate not implemented
+    // See LUA_INTEGRATION_GUIDE.md for implementation details
     return false;
 }
 
@@ -84,7 +96,8 @@ bool ScriptingEngine::callFunction(const std::string& functionName) {
     //     return false;
     // }
     
-    reportError("Lua scripting not implemented (stub only)");
+    // Silent stub - returns false to indicate not implemented
+    // See LUA_INTEGRATION_GUIDE.md for implementation details
     return false;
 }
 
