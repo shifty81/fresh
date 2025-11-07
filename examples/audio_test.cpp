@@ -20,6 +20,12 @@ int main() {
     std::cout << "  Fresh Voxel Engine - Audio Test" << std::endl;
     std::cout << "====================================" << std::endl;
     std::cout << std::endl;
+    std::cout << "⚠️  NOTE: This test demonstrates the audio API." << std::endl;
+    std::cout << "    Audio file loading is not yet implemented," << std::endl;
+    std::cout << "    so actual audio playback will not occur." << std::endl;
+    std::cout << "    The test verifies system initialization," << std::endl;
+    std::cout << "    API calls, and OpenAL integration." << std::endl;
+    std::cout << std::endl;
     
     // Get the audio engine singleton
     fresh::AudioEngine& audio = fresh::AudioEngine::getInstance();
@@ -102,10 +108,6 @@ int main() {
     std::cout << "====================================" << std::endl;
     std::cout << "  All audio tests completed!" << std::endl;
     std::cout << "====================================" << std::endl;
-    std::cout << std::endl;
-    std::cout << "Note: Audio file loading not yet implemented." << std::endl;
-    std::cout << "      The system demonstrates proper API usage" << std::endl;
-    std::cout << "      and OpenAL integration structure." << std::endl;
     
     return 0;
 }

@@ -201,12 +201,20 @@ int AudioEngine::play2D(const std::string& path, float volume, bool loop) {
     ALuint buffer = loadWAVFile(path);
     if (buffer == 0) {
         std::cerr << "  Failed to load audio file: " << path << std::endl;
-        // Continue anyway to demonstrate the system works
+        std::cerr << "  Note: Audio file loading not yet implemented" << std::endl;
+        // Return -1 since we can't actually play without a buffer
+        return -1;
     }
     
     // Generate OpenAL source
     ALuint alSource;
     alGenSources(1, &alSource);
+    
+    // Validate that source was created successfully
+    if (alGetError() != AL_NO_ERROR) {
+        std::cerr << "  Failed to generate OpenAL source" << std::endl;
+        return -1;
+    }
     
     // Set source properties for 2D audio
     alSourcei(alSource, AL_BUFFER, buffer);
@@ -225,6 +233,7 @@ int AudioEngine::play2D(const std::string& path, float volume, bool loop) {
     source.loop = loop;
     source.is3D = false;
     source.isPlaying = true;
+    // Store ALuint as int - safe because OpenAL IDs are small positive integers
     source.sourceID = static_cast<int>(alSource);
     
     activeSources[id] = source;
@@ -258,12 +267,20 @@ int AudioEngine::play3D(const std::string& path, const glm::vec3& position,
     ALuint buffer = loadWAVFile(path);
     if (buffer == 0) {
         std::cerr << "  Failed to load audio file: " << path << std::endl;
-        // Continue anyway to demonstrate the system works
+        std::cerr << "  Note: Audio file loading not yet implemented" << std::endl;
+        // Return -1 since we can't actually play without a buffer
+        return -1;
     }
     
     // Generate OpenAL source
     ALuint alSource;
     alGenSources(1, &alSource);
+    
+    // Validate that source was created successfully
+    if (alGetError() != AL_NO_ERROR) {
+        std::cerr << "  Failed to generate OpenAL source" << std::endl;
+        return -1;
+    }
     
     // Set source properties for 3D audio
     alSourcei(alSource, AL_BUFFER, buffer);
@@ -286,6 +303,7 @@ int AudioEngine::play3D(const std::string& path, const glm::vec3& position,
     source.loop = loop;
     source.is3D = true;
     source.isPlaying = true;
+    // Store ALuint as int - safe because OpenAL IDs are small positive integers
     source.sourceID = static_cast<int>(alSource);
     
     activeSources[id] = source;
@@ -397,11 +415,20 @@ void AudioEngine::playMusic(const std::string& path, float volume, bool loop) {
     ALuint buffer = loadWAVFile(path);
     if (buffer == 0) {
         std::cerr << "  Failed to load music file: " << path << std::endl;
+        std::cerr << "  Note: Audio file loading not yet implemented" << std::endl;
+        // Can't play music without a valid buffer
+        return;
     }
     
     // Generate OpenAL source for music
     ALuint alSource;
     alGenSources(1, &alSource);
+    
+    // Validate that source was created successfully
+    if (alGetError() != AL_NO_ERROR) {
+        std::cerr << "  Failed to generate OpenAL source for music" << std::endl;
+        return;
+    }
     
     // Set source properties
     alSourcei(alSource, AL_BUFFER, buffer);
@@ -417,6 +444,7 @@ void AudioEngine::playMusic(const std::string& path, float volume, bool loop) {
     musicSource.volume = volume;
     musicSource.loop = loop;
     musicSource.isPlaying = true;
+    // Store ALuint as int - safe because OpenAL IDs are small positive integers
     musicSource.sourceID = static_cast<int>(alSource);
     musicVolume = volume;
     
