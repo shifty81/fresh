@@ -71,6 +71,7 @@ private:
     void initializeRendering();
     void shutdownRendering();
     void renderVoxelWorld();
+    void renderCrosshair();
     std::string loadShaderFile(const std::string& filepath);
     GLuint compileShader(const std::string& source, GLenum shaderType);
     GLuint createShaderProgram(const std::string& vertPath, const std::string& fragPath);
@@ -96,6 +97,9 @@ private:
     
     // OpenGL rendering state
     GLuint m_shaderProgram = 0;
+    GLuint m_crosshairShader = 0;
+    GLuint m_crosshairVAO = 0;
+    GLuint m_crosshairVBO = 0;
     std::unordered_map<ChunkPos, GLuint> m_chunkVAOs;
     std::unordered_map<ChunkPos, GLuint> m_chunkVBOs;
     std::unordered_map<ChunkPos, GLuint> m_chunkEBOs;

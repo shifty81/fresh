@@ -532,6 +532,9 @@ void Engine::render() {
         if (m_world) {
             renderVoxelWorld();
         }
+        
+        // Render crosshair overlay
+        renderCrosshair();
     }
 #endif
     
@@ -730,6 +733,13 @@ void Engine::initializeRendering() {
         return;
     }
     
+    // Create crosshair shader program
+    m_crosshairShader = createShaderProgram("shaders/crosshair.vert", "shaders/crosshair.frag");
+    if (m_crosshairShader == 0) {
+        LOG_ERROR_C("Failed to create crosshair shader program", "Engine");
+        // Continue without crosshair
+    }
+    
     LOG_INFO_C("OpenGL voxel rendering initialized", "Engine");
     
     // Enable depth testing
@@ -740,11 +750,45 @@ void Engine::initializeRendering() {
     glEnable(GL_CULL_FACE);
     glCullFace(GL_BACK);
     glFrontFace(GL_CCW);
+    
+    // Create crosshair geometry (simple cross)
+    float crosshairSize = 0.02f;  // Size in normalized device coordinates
+    float crosshairVertices[] = {
+        // Horizontal line
+        -crosshairSize, 0.0f,
+         crosshairSize, 0.0f,
+        // Vertical line
+         0.0f, -crosshairSize,
+         0.0f,  crosshairSize
+    };
+    
+    glGenVertexArrays(1, &m_crosshairVAO);
+    glGenBuffers(1, &m_crosshairVBO);
+    
+    glBindVertexArray(m_crosshairVAO);
+    glBindBuffer(GL_ARRAY_BUFFER, m_crosshairVBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(crosshairVertices), crosshairVertices, GL_STATIC_DRAW);
+    
+    // Position attribute
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0);
+    
+    glBindVertexArray(0);
 }
 
 void Engine::shutdownRendering() {
     if (m_renderer->getAPI() != GraphicsAPI::OpenGL) {
         return;
+    }
+    
+    // Delete crosshair buffers
+    if (m_crosshairVAO) {
+        glDeleteVertexArrays(1, &m_crosshairVAO);
+        m_crosshairVAO = 0;
+    }
+    if (m_crosshairVBO) {
+        glDeleteBuffers(1, &m_crosshairVBO);
+        m_crosshairVBO = 0;
     }
     
     // Delete all VAOs/VBOs/EBOs
@@ -766,6 +810,10 @@ void Engine::shutdownRendering() {
     if (m_shaderProgram) {
         glDeleteProgram(m_shaderProgram);
         m_shaderProgram = 0;
+    }
+    if (m_crosshairShader) {
+        glDeleteProgram(m_crosshairShader);
+        m_crosshairShader = 0;
     }
 }
 
@@ -869,6 +917,29 @@ void Engine::renderVoxelWorld() {
     }
     
     glUseProgram(0);
+}
+
+void Engine::renderCrosshair() {
+    if (m_crosshairVAO == 0 || m_crosshairShader == 0) {
+        return;
+    }
+    
+    // Disable depth test for 2D overlay
+    glDisable(GL_DEPTH_TEST);
+    
+    // Use crosshair shader
+    glUseProgram(m_crosshairShader);
+    
+    // Draw crosshair
+    glBindVertexArray(m_crosshairVAO);
+    glLineWidth(2.0f);
+    glDrawArrays(GL_LINES, 0, 4);
+    glBindVertexArray(0);
+    
+    glUseProgram(0);
+    
+    // Re-enable depth test
+    glEnable(GL_DEPTH_TEST);
 }
 
 #endif // FRESH_OPENGL_SUPPORT && FRESH_GLEW_AVAILABLE

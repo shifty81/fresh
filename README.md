@@ -39,6 +39,41 @@ The engine **automatically detects and selects** the best available graphics API
 
 ---
 
+## 🎮 How to Play
+
+The Fresh Voxel Engine now includes a **playable demo** with basic voxel world exploration and building!
+
+### Quick Start
+
+1. **Build and Run** (see build instructions below)
+2. **Main Menu** - Choose "Create New World" or "Load Existing World"
+3. **Enter World** - The engine generates a procedurally generated voxel terrain
+4. **Explore and Build!**
+
+### Controls
+
+- **WASD** - Move around (standard FPS controls)
+- **Mouse** - Look around
+- **Space** - Jump
+- **Shift** - Sprint (move faster)
+- **Ctrl** - Crouch
+- **Left Click** - Break/remove blocks
+- **Right Click** - Place blocks (Stone by default)
+- **ESC** - Exit game
+
+**Full Controls:** See [CONTROLS.md](CONTROLS.md) for complete control documentation.
+
+### Features in Playable Demo
+
+✅ **Procedural World Generation** - Infinite terrain with hills, valleys, caves  
+✅ **First-Person Movement** - Smooth WASD + mouse controls with physics  
+✅ **Block Interaction** - Place and break blocks with mouse  
+✅ **Collision Detection** - Walk on terrain, can't pass through blocks  
+✅ **Chunk Streaming** - World loads around you as you explore  
+✅ **Crosshair** - Visual aim indicator for building  
+
+---
+
 ## 🚀 Quick Start
 
 ### 📖 Building on Windows with Visual Studio 2022
