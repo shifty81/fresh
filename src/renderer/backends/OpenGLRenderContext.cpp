@@ -385,7 +385,7 @@ bool OpenGLRenderContext::initializeGLEW() {
     // glewInit() can cause GL_INVALID_ENUM on some drivers, which is a known issue
     glGetError();
     
-    // Check for required OpenGL version (4.5+)
+    // Check for required OpenGL version (4.5+ preferred, 4.0+ minimum)
     if (!GLEW_VERSION_4_5) {
         LOG_WARNING_C("OpenGL 4.5 not supported, trying 4.0+", "OpenGLRenderContext");
         if (!GLEW_VERSION_4_0) {
