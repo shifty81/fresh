@@ -97,8 +97,8 @@ bool Engine::initialize() {
     std::cout << "Render context created: " << getGraphicsAPIName(m_renderer->getAPI()) << std::endl;
     LOG_INFO_C("Render context created: " + std::string(getGraphicsAPIName(m_renderer->getAPI())), "Engine");
     
-    // Determine if we need OpenGL context for the window
-    bool useOpenGL = false; // DirectX only, no OpenGL needed
+    // Determine if we need OpenGL context for the window based on selected API
+    bool useOpenGL = (m_renderer->getAPI() == GraphicsAPI::OpenGL);
     
     // Create window
     m_window = std::make_unique<Window>(1280, 720, "Fresh Voxel Engine");
@@ -591,7 +591,8 @@ void Engine::initializeGameSystems() {
         std::cout << "Render context created: " << getGraphicsAPIName(m_renderer->getAPI()) << std::endl;
     }
     
-    bool useOpenGL = false; // DirectX only
+    // Determine if we need OpenGL context based on selected API
+    bool useOpenGL = (m_renderer && m_renderer->getAPI() == GraphicsAPI::OpenGL);
     
     if (!m_window) {
         m_window = std::make_unique<Window>(1280, 720, "Fresh Voxel Engine");
