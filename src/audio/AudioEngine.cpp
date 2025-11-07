@@ -2,6 +2,9 @@
 #include "core/ResourceManager.h"
 #include <algorithm>
 #include <iostream>
+#include <vector>
+#include <cstdio>
+#include <cstring>
 
 #ifdef FRESH_OPENAL_AVAILABLE
 #include <AL/al.h>
@@ -181,13 +184,108 @@ void AudioEngine::update(float deltaTime) {
 }
 
 #ifdef FRESH_OPENAL_AVAILABLE
+// Simple WAV file header structure
+struct WAVHeader {
+    char riff[4];           // "RIFF"
+    uint32_t fileSize;      // File size - 8
+    char wave[4];           // "WAVE"
+    char fmt[4];            // "fmt "
+    uint32_t fmtSize;       // Format chunk size (16 for PCM)
+    uint16_t audioFormat;   // Audio format (1 = PCM)
+    uint16_t numChannels;   // Number of channels
+    uint32_t sampleRate;    // Sample rate
+    uint32_t byteRate;      // Byte rate
+    uint16_t blockAlign;    // Block align
+    uint16_t bitsPerSample; // Bits per sample
+    char data[4];           // "data"
+    uint32_t dataSize;      // Data size
+};
+
 // Helper function to load WAV file into OpenAL buffer
 static ALuint loadWAVFile(const std::string& path) {
-    // For now, return 0 if file loading fails
-    // A proper implementation would parse WAV file headers
-    // This is a minimal stub that would need a proper WAV loader
-    std::cout << "  Note: WAV loading not yet implemented for: " << path << std::endl;
-    return 0;
+    // Open the file in binary mode
+    FILE* file = fopen(path.c_str(), "rb");
+    if (!file) {
+        std::cerr << "  Failed to open audio file: " << path << std::endl;
+        return 0;
+    }
+    
+    // Read WAV header
+    WAVHeader header;
+    size_t bytesRead = fread(&header, sizeof(WAVHeader), 1, file);
+    if (bytesRead != 1) {
+        std::cerr << "  Failed to read WAV header from: " << path << std::endl;
+        fclose(file);
+        return 0;
+    }
+    
+    // Verify RIFF header
+    if (header.riff[0] != 'R' || header.riff[1] != 'I' || 
+        header.riff[2] != 'F' || header.riff[3] != 'F') {
+        std::cerr << "  Not a valid RIFF file: " << path << std::endl;
+        fclose(file);
+        return 0;
+    }
+    
+    // Verify WAVE format
+    if (header.wave[0] != 'W' || header.wave[1] != 'A' || 
+        header.wave[2] != 'V' || header.wave[3] != 'E') {
+        std::cerr << "  Not a valid WAVE file: " << path << std::endl;
+        fclose(file);
+        return 0;
+    }
+    
+    // Only support PCM format
+    if (header.audioFormat != 1) {
+        std::cerr << "  Only PCM format is supported (format: " << header.audioFormat << ")" << std::endl;
+        fclose(file);
+        return 0;
+    }
+    
+    // Allocate buffer for audio data
+    std::vector<char> audioData(header.dataSize);
+    bytesRead = fread(audioData.data(), 1, header.dataSize, file);
+    fclose(file);
+    
+    if (bytesRead != header.dataSize) {
+        std::cerr << "  Failed to read audio data (expected " << header.dataSize 
+                  << ", got " << bytesRead << ")" << std::endl;
+        return 0;
+    }
+    
+    // Determine OpenAL format
+    ALenum format = 0;
+    if (header.numChannels == 1) {
+        format = (header.bitsPerSample == 8) ? AL_FORMAT_MONO8 : AL_FORMAT_MONO16;
+    } else if (header.numChannels == 2) {
+        format = (header.bitsPerSample == 8) ? AL_FORMAT_STEREO8 : AL_FORMAT_STEREO16;
+    } else {
+        std::cerr << "  Unsupported number of channels: " << header.numChannels << std::endl;
+        return 0;
+    }
+    
+    // Create OpenAL buffer
+    ALuint buffer;
+    alGenBuffers(1, &buffer);
+    if (alGetError() != AL_NO_ERROR) {
+        std::cerr << "  Failed to generate OpenAL buffer" << std::endl;
+        return 0;
+    }
+    
+    // Upload audio data to buffer
+    alBufferData(buffer, format, audioData.data(), header.dataSize, header.sampleRate);
+    if (alGetError() != AL_NO_ERROR) {
+        std::cerr << "  Failed to upload audio data to buffer" << std::endl;
+        alDeleteBuffers(1, &buffer);
+        return 0;
+    }
+    
+    std::cout << "  Loaded WAV file: " << path 
+              << " (" << header.sampleRate << " Hz, "
+              << header.numChannels << " channel(s), "
+              << header.bitsPerSample << " bits)" << std::endl;
+    
+    return buffer;
 }
 #endif
 

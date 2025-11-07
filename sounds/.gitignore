@@ -1,0 +1,7 @@
+# Test audio files - can be regenerated with tools/generate_test_sounds.py
+test_tone.wav
+beep.wav
+thud.wav
+
+# Keep the README
+!README.md

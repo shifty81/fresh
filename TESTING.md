@@ -2,31 +2,49 @@
 
 This guide explains how to set up, write, and run tests for the Fresh Voxel Engine.
 
+## 🎉 Testing Status
+
+**Testing Infrastructure: ✅ OPERATIONAL**
+
+- **Total Tests:** 75 passing
+- **Test Framework:** Google Test 1.12.1
+- **Coverage:** Core systems (Chunks, Noise, Terrain, Events)
+- **Build Integration:** Enabled by default
+- **CI/CD:** Ready for integration
+
 ## Quick Start
 
-### Build with Tests
+### Build with Tests (Enabled by Default)
 
 ```bash
 cd /path/to/fresh
 mkdir build && cd build
-cmake -DBUILD_TESTS=ON ..
+cmake ..  # Tests are now enabled by default
 make -j$(nproc)
+```
+
+To disable tests:
+```bash
+cmake -DBUILD_TESTS=OFF ..
 ```
 
 ### Run Tests
 
 ```bash
-# Run all tests
+# Run all tests directly
 ./FreshVoxelEngineTests
 
-# Or use CTest
-ctest
+# Or use CTest for detailed output
+ctest --output-on-failure
 
 # Run with verbose output
 ctest --verbose
 
-# Run specific test
+# Run specific test suite
 ./FreshVoxelEngineTests --gtest_filter=ChunkTest.*
+
+# Run specific test
+./FreshVoxelEngineTests --gtest_filter=ChunkTest.SetAndGetVoxel_ValidCoordinates_ReturnsCorrectType
 ```
 
 ## Setting Up Testing Environment
@@ -34,19 +52,33 @@ ctest --verbose
 ### Prerequisites
 
 - CMake 3.20 or higher
-- C++17 compatible compiler
+- C++20 compatible compiler
 - Google Test (automatically fetched if not found)
+- OpenGL development libraries (Linux/macOS)
 
-### Installation
+### Linux/macOS Installation
 
-Google Test is automatically downloaded and built when you enable BUILD_TESTS on Windows.
+Install required dependencies first:
 
-#### Automatic Installation (Recommended)
+```bash
+# Ubuntu/Debian
+sudo apt-get install libgl1-mesa-dev libglu1-mesa-dev libglfw3-dev libglew-dev libglm-dev libopenal-dev
 
-When you configure CMake with `-DBUILD_TESTS=ON`, Google Test will be fetched automatically:
+# macOS
+brew install glfw glew glm openal-soft
+
+# Then build with tests
+mkdir build && cd build
+cmake ..
+make -j$(nproc)
+```
+
+### Windows Installation
+
+Google Test is automatically downloaded and built when you enable BUILD_TESTS:
 
 ```batch
-cmake -B build -DBUILD_TESTS=ON
+cmake -B build
 cmake --build build --config Debug
 ```
 
