@@ -6,6 +6,7 @@
 #include <gtest/gtest.h>
 #include "voxel/Chunk.h"
 #include "voxel/VoxelTypes.h"
+#include <chrono>
 
 using namespace fresh;
 
