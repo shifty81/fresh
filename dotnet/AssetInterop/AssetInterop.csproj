@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0-windows</TargetFramework>
+    <OutputType>WinExe</OutputType>
+    <Platforms>x64</Platforms>
+    <PlatformTarget>x64</PlatformTarget>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UseWindowsForms>true</UseWindowsForms>
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
+    <Description>Asset Management System for Fresh Engine with drag-and-drop support</Description>
+    <Authors>Fresh Engine Team</Authors>
+    <Company>Fresh Engine</Company>
+    <Product>Fresh Voxel Engine</Product>
+    <Copyright>Copyright © 2024</Copyright>
+    <Version>0.1.0</Version>
+    <EnableComHosting>false</EnableComHosting>
+  </PropertyGroup>
+
+</Project>

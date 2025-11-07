@@ -26,6 +26,10 @@
     {
       "name": "openal-soft",
       "platform": "windows"
+    },
+    {
+      "name": "lua",
+      "platform": "windows"
     }
   ],
   "builtin-baseline": "b27f6bfad367d64f8f0f3296351c5d246e182bb4"
