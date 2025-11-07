@@ -3,7 +3,18 @@
 #include <algorithm>
 #include <iostream>
 
+#ifdef FRESH_OPENAL_AVAILABLE
+#include <AL/al.h>
+#include <AL/alc.h>
+#endif
+
 namespace fresh {
+
+#ifdef FRESH_OPENAL_AVAILABLE
+// OpenAL context variables
+static ALCdevice* g_audioDevice = nullptr;
+static ALCcontext* g_audioContext = nullptr;
+#endif
 
 AudioEngine& AudioEngine::getInstance() {
     static AudioEngine instance;
@@ -15,12 +26,47 @@ bool AudioEngine::initialize() {
     
     std::cout << "Initializing AudioEngine..." << std::endl;
     
-    // TODO: Initialize audio library (OpenAL, FMOD, etc.)
-    // For now, this is a stub implementation
+#ifdef FRESH_OPENAL_AVAILABLE
+    // Open the default audio device
+    g_audioDevice = alcOpenDevice(nullptr);
+    if (!g_audioDevice) {
+        std::cerr << "Failed to open OpenAL audio device" << std::endl;
+        return false;
+    }
+    
+    // Create audio context
+    g_audioContext = alcCreateContext(g_audioDevice, nullptr);
+    if (!g_audioContext) {
+        std::cerr << "Failed to create OpenAL context" << std::endl;
+        alcCloseDevice(g_audioDevice);
+        g_audioDevice = nullptr;
+        return false;
+    }
+    
+    // Make the context current
+    if (!alcMakeContextCurrent(g_audioContext)) {
+        std::cerr << "Failed to make OpenAL context current" << std::endl;
+        alcDestroyContext(g_audioContext);
+        alcCloseDevice(g_audioDevice);
+        g_audioContext = nullptr;
+        g_audioDevice = nullptr;
+        return false;
+    }
+    
+    // Set default listener properties
+    alListener3f(AL_POSITION, 0.0f, 0.0f, 0.0f);
+    alListener3f(AL_VELOCITY, 0.0f, 0.0f, 0.0f);
+    ALfloat listenerOri[] = { 0.0f, 0.0f, -1.0f, 0.0f, 1.0f, 0.0f };
+    alListenerfv(AL_ORIENTATION, listenerOri);
     
     initialized = true;
-    std::cout << "AudioEngine initialized successfully" << std::endl;
+    std::cout << "AudioEngine initialized successfully with OpenAL" << std::endl;
     return true;
+#else
+    std::cout << "AudioEngine: OpenAL not available, running in stub mode" << std::endl;
+    initialized = true;
+    return true;
+#endif
 }
 
 void AudioEngine::shutdown() {
@@ -31,7 +77,19 @@ void AudioEngine::shutdown() {
     stopAll();
     stopMusic();
     
-    // TODO: Cleanup audio library resources
+#ifdef FRESH_OPENAL_AVAILABLE
+    // Cleanup OpenAL resources
+    if (g_audioContext) {
+        alcMakeContextCurrent(nullptr);
+        alcDestroyContext(g_audioContext);
+        g_audioContext = nullptr;
+    }
+    
+    if (g_audioDevice) {
+        alcCloseDevice(g_audioDevice);
+        g_audioDevice = nullptr;
+    }
+#endif
     
     initialized = false;
 }
@@ -39,10 +97,11 @@ void AudioEngine::shutdown() {
 void AudioEngine::update(float deltaTime) {
     if (!initialized) return;
     
+#ifdef FRESH_OPENAL_AVAILABLE
     // Update 3D audio based on listener position
     for (auto& [id, source] : activeSources) {
-        if (source.is3D && source.isPlaying) {
-            // TODO: Update 3D audio attenuation based on distance
+        if (source.is3D && source.isPlaying && source.sourceID != -1) {
+            // Calculate distance-based attenuation
             float distance = glm::distance(listener.position, source.position);
             float attenuation = 1.0f;
             
@@ -55,10 +114,51 @@ void AudioEngine::update(float deltaTime) {
             float effectiveVolume = source.volume * attenuation * effectsVolume * masterVolume;
             if (muted) effectiveVolume = 0.0f;
             
-            // TODO: Set platform-specific audio source volume
-            (void)effectiveVolume; // Suppress warning until TODO is implemented
+            // Update OpenAL source properties
+            ALuint alSource = static_cast<ALuint>(source.sourceID);
+            alSourcef(alSource, AL_GAIN, effectiveVolume);
+            alSource3f(alSource, AL_POSITION, source.position.x, source.position.y, source.position.z);
+            
+            // Check if source is still playing
+            ALint state;
+            alGetSourcei(alSource, AL_SOURCE_STATE, &state);
+            if (state != AL_PLAYING) {
+                source.isPlaying = false;
+            }
+        } else if (!source.is3D && source.isPlaying && source.sourceID != -1) {
+            // Update 2D audio volume
+            float effectiveVolume = source.volume * effectsVolume * masterVolume;
+            if (muted) effectiveVolume = 0.0f;
+            
+            ALuint alSource = static_cast<ALuint>(source.sourceID);
+            alSourcef(alSource, AL_GAIN, effectiveVolume);
+            
+            // Check if source is still playing
+            ALint state;
+            alGetSourcei(alSource, AL_SOURCE_STATE, &state);
+            if (state != AL_PLAYING) {
+                source.isPlaying = false;
+            }
         }
     }
+#else
+    // Stub implementation for non-OpenAL builds
+    for (auto& [id, source] : activeSources) {
+        if (source.is3D && source.isPlaying) {
+            float distance = glm::distance(listener.position, source.position);
+            float attenuation = 1.0f;
+            
+            if (distance > source.minDistance) {
+                attenuation = source.minDistance / 
+                    std::min(distance, source.maxDistance);
+            }
+            
+            float effectiveVolume = source.volume * attenuation * effectsVolume * masterVolume;
+            if (muted) effectiveVolume = 0.0f;
+            (void)effectiveVolume;
+        }
+    }
+#endif
     
     // Handle music fading
     if (fadingMusic) {
@@ -80,14 +180,69 @@ void AudioEngine::update(float deltaTime) {
     cleanupFinishedSources();
 }
 
+#ifdef FRESH_OPENAL_AVAILABLE
+// Helper function to load WAV file into OpenAL buffer
+static ALuint loadWAVFile(const std::string& path) {
+    // For now, return 0 if file loading fails
+    // A proper implementation would parse WAV file headers
+    // This is a minimal stub that would need a proper WAV loader
+    std::cout << "  Note: WAV loading not yet implemented for: " << path << std::endl;
+    return 0;
+}
+#endif
+
 int AudioEngine::play2D(const std::string& path, float volume, bool loop) {
     if (!initialized) return -1;
     
     std::cout << "Playing 2D audio: " << path << std::endl;
     
+#ifdef FRESH_OPENAL_AVAILABLE
+    // Load audio buffer (stub for now - would need proper WAV loader)
+    ALuint buffer = loadWAVFile(path);
+    if (buffer == 0) {
+        std::cerr << "  Failed to load audio file: " << path << std::endl;
+        std::cerr << "  Note: Audio file loading not yet implemented" << std::endl;
+        // Return -1 since we can't actually play without a buffer
+        return -1;
+    }
+    
+    // Generate OpenAL source
+    ALuint alSource;
+    alGenSources(1, &alSource);
+    
+    // Validate that source was created successfully
+    if (alGetError() != AL_NO_ERROR) {
+        std::cerr << "  Failed to generate OpenAL source" << std::endl;
+        return -1;
+    }
+    
+    // Set source properties for 2D audio
+    alSourcei(alSource, AL_BUFFER, buffer);
+    alSourcef(alSource, AL_GAIN, volume * effectsVolume * masterVolume);
+    alSourcef(alSource, AL_PITCH, 1.0f);
+    alSourcei(alSource, AL_LOOPING, loop ? AL_TRUE : AL_FALSE);
+    alSourcei(alSource, AL_SOURCE_RELATIVE, AL_TRUE);  // 2D audio
+    alSource3f(alSource, AL_POSITION, 0.0f, 0.0f, 0.0f);
+    
+    // Play the source
+    alSourcePlay(alSource);
+    
     int id = getNextSourceID();
     AudioSource source;
-    // source.clip = ResourceManager::getInstance().load<AudioClipResource>(path);
+    source.volume = volume;
+    source.loop = loop;
+    source.is3D = false;
+    source.isPlaying = true;
+    // Store ALuint as int - safe because OpenAL IDs are small positive integers
+    source.sourceID = static_cast<int>(alSource);
+    
+    activeSources[id] = source;
+    
+    std::cout << "  Started 2D audio source (ID: " << id << ", AL source: " << alSource << ")" << std::endl;
+    return id;
+#else
+    int id = getNextSourceID();
+    AudioSource source;
     source.volume = volume;
     source.loop = loop;
     source.is3D = false;
@@ -95,10 +250,9 @@ int AudioEngine::play2D(const std::string& path, float volume, bool loop) {
     source.sourceID = id;
     
     activeSources[id] = source;
-    
-    // TODO: Actually play the audio using audio library
-    
+    std::cout << "  (Stub mode - OpenAL not available)" << std::endl;
     return id;
+#endif
 }
 
 int AudioEngine::play3D(const std::string& path, const glm::vec3& position,
@@ -108,9 +262,57 @@ int AudioEngine::play3D(const std::string& path, const glm::vec3& position,
     std::cout << "Playing 3D audio: " << path << " at (" 
               << position.x << ", " << position.y << ", " << position.z << ")" << std::endl;
     
+#ifdef FRESH_OPENAL_AVAILABLE
+    // Load audio buffer (stub for now - would need proper WAV loader)
+    ALuint buffer = loadWAVFile(path);
+    if (buffer == 0) {
+        std::cerr << "  Failed to load audio file: " << path << std::endl;
+        std::cerr << "  Note: Audio file loading not yet implemented" << std::endl;
+        // Return -1 since we can't actually play without a buffer
+        return -1;
+    }
+    
+    // Generate OpenAL source
+    ALuint alSource;
+    alGenSources(1, &alSource);
+    
+    // Validate that source was created successfully
+    if (alGetError() != AL_NO_ERROR) {
+        std::cerr << "  Failed to generate OpenAL source" << std::endl;
+        return -1;
+    }
+    
+    // Set source properties for 3D audio
+    alSourcei(alSource, AL_BUFFER, buffer);
+    alSourcef(alSource, AL_GAIN, volume * effectsVolume * masterVolume);
+    alSourcef(alSource, AL_PITCH, 1.0f);
+    alSourcei(alSource, AL_LOOPING, loop ? AL_TRUE : AL_FALSE);
+    alSourcei(alSource, AL_SOURCE_RELATIVE, AL_FALSE);  // 3D audio
+    alSource3f(alSource, AL_POSITION, position.x, position.y, position.z);
+    alSourcef(alSource, AL_REFERENCE_DISTANCE, 1.0f);
+    alSourcef(alSource, AL_MAX_DISTANCE, 100.0f);
+    alSourcef(alSource, AL_ROLLOFF_FACTOR, 1.0f);
+    
+    // Play the source
+    alSourcePlay(alSource);
+    
     int id = getNextSourceID();
     AudioSource source;
-    // source.clip = ResourceManager::getInstance().load<AudioClipResource>(path);
+    source.position = position;
+    source.volume = volume;
+    source.loop = loop;
+    source.is3D = true;
+    source.isPlaying = true;
+    // Store ALuint as int - safe because OpenAL IDs are small positive integers
+    source.sourceID = static_cast<int>(alSource);
+    
+    activeSources[id] = source;
+    
+    std::cout << "  Started 3D audio source (ID: " << id << ", AL source: " << alSource << ")" << std::endl;
+    return id;
+#else
+    int id = getNextSourceID();
+    AudioSource source;
     source.position = position;
     source.volume = volume;
     source.loop = loop;
@@ -119,42 +321,67 @@ int AudioEngine::play3D(const std::string& path, const glm::vec3& position,
     source.sourceID = id;
     
     activeSources[id] = source;
-    
-    // TODO: Actually play the audio using audio library with 3D positioning
-    
+    std::cout << "  (Stub mode - OpenAL not available)" << std::endl;
     return id;
+#endif
 }
 
 void AudioEngine::stop(int soundID) {
     auto it = activeSources.find(soundID);
     if (it != activeSources.end()) {
+#ifdef FRESH_OPENAL_AVAILABLE
+        if (it->second.sourceID != -1) {
+            ALuint alSource = static_cast<ALuint>(it->second.sourceID);
+            alSourceStop(alSource);
+            alDeleteSources(1, &alSource);
+        }
+#endif
         it->second.isPlaying = false;
-        // TODO: Stop platform-specific audio source
         activeSources.erase(it);
     }
 }
 
 void AudioEngine::stopAll() {
+#ifdef FRESH_OPENAL_AVAILABLE
+    for (auto& [id, source] : activeSources) {
+        if (source.sourceID != -1) {
+            ALuint alSource = static_cast<ALuint>(source.sourceID);
+            alSourceStop(alSource);
+            alDeleteSources(1, &alSource);
+        }
+        source.isPlaying = false;
+    }
+#else
     for (auto& [id, source] : activeSources) {
         source.isPlaying = false;
-        // TODO: Stop platform-specific audio source
     }
+#endif
     activeSources.clear();
 }
 
 void AudioEngine::pause(int soundID) {
     auto it = activeSources.find(soundID);
     if (it != activeSources.end()) {
+#ifdef FRESH_OPENAL_AVAILABLE
+        if (it->second.sourceID != -1) {
+            ALuint alSource = static_cast<ALuint>(it->second.sourceID);
+            alSourcePause(alSource);
+        }
+#endif
         it->second.isPlaying = false;
-        // TODO: Pause platform-specific audio source
     }
 }
 
 void AudioEngine::resume(int soundID) {
     auto it = activeSources.find(soundID);
     if (it != activeSources.end()) {
+#ifdef FRESH_OPENAL_AVAILABLE
+        if (it->second.sourceID != -1) {
+            ALuint alSource = static_cast<ALuint>(it->second.sourceID);
+            alSourcePlay(alSource);
+        }
+#endif
         it->second.isPlaying = true;
-        // TODO: Resume platform-specific audio source
     }
 }
 
@@ -162,7 +389,14 @@ void AudioEngine::setVolume(int soundID, float volume) {
     auto it = activeSources.find(soundID);
     if (it != activeSources.end()) {
         it->second.volume = volume;
-        // TODO: Update platform-specific audio source volume
+#ifdef FRESH_OPENAL_AVAILABLE
+        if (it->second.sourceID != -1) {
+            ALuint alSource = static_cast<ALuint>(it->second.sourceID);
+            float effectiveVolume = volume * effectsVolume * masterVolume;
+            if (muted) effectiveVolume = 0.0f;
+            alSourcef(alSource, AL_GAIN, effectiveVolume);
+        }
+#endif
     }
 }
 
@@ -176,24 +410,78 @@ void AudioEngine::playMusic(const std::string& path, float volume, bool loop) {
     
     std::cout << "Playing music: " << path << std::endl;
     
+#ifdef FRESH_OPENAL_AVAILABLE
+    // Load audio buffer for music
+    ALuint buffer = loadWAVFile(path);
+    if (buffer == 0) {
+        std::cerr << "  Failed to load music file: " << path << std::endl;
+        std::cerr << "  Note: Audio file loading not yet implemented" << std::endl;
+        // Can't play music without a valid buffer
+        return;
+    }
+    
+    // Generate OpenAL source for music
+    ALuint alSource;
+    alGenSources(1, &alSource);
+    
+    // Validate that source was created successfully
+    if (alGetError() != AL_NO_ERROR) {
+        std::cerr << "  Failed to generate OpenAL source for music" << std::endl;
+        return;
+    }
+    
+    // Set source properties
+    alSourcei(alSource, AL_BUFFER, buffer);
+    alSourcef(alSource, AL_GAIN, volume * musicVolume * masterVolume);
+    alSourcef(alSource, AL_PITCH, 1.0f);
+    alSourcei(alSource, AL_LOOPING, loop ? AL_TRUE : AL_FALSE);
+    alSourcei(alSource, AL_SOURCE_RELATIVE, AL_TRUE);  // Music is 2D
+    alSource3f(alSource, AL_POSITION, 0.0f, 0.0f, 0.0f);
+    
+    // Play the music
+    alSourcePlay(alSource);
+    
+    musicSource.volume = volume;
+    musicSource.loop = loop;
+    musicSource.isPlaying = true;
+    // Store ALuint as int - safe because OpenAL IDs are small positive integers
+    musicSource.sourceID = static_cast<int>(alSource);
+    musicVolume = volume;
+    
+    std::cout << "  Started music source (AL source: " << alSource << ")" << std::endl;
+#else
     musicSource.volume = volume;
     musicSource.loop = loop;
     musicSource.isPlaying = true;
     musicVolume = volume;
-    
-    // TODO: Load and play music file
+    std::cout << "  (Stub mode - OpenAL not available)" << std::endl;
+#endif
 }
 
 void AudioEngine::stopMusic() {
     if (musicSource.isPlaying) {
+#ifdef FRESH_OPENAL_AVAILABLE
+        if (musicSource.sourceID != -1) {
+            ALuint alSource = static_cast<ALuint>(musicSource.sourceID);
+            alSourceStop(alSource);
+            alDeleteSources(1, &alSource);
+        }
+#endif
         musicSource.isPlaying = false;
-        // TODO: Stop music playback
+        musicSource.sourceID = -1;
     }
 }
 
 void AudioEngine::setMusicVolume(float volume) {
     musicVolume = volume;
-    // TODO: Update music volume
+#ifdef FRESH_OPENAL_AVAILABLE
+    if (musicSource.isPlaying && musicSource.sourceID != -1) {
+        ALuint alSource = static_cast<ALuint>(musicSource.sourceID);
+        float effectiveVolume = volume * masterVolume;
+        if (muted) effectiveVolume = 0.0f;
+        alSourcef(alSource, AL_GAIN, effectiveVolume);
+    }
+#endif
 }
 
 void AudioEngine::fadeMusicIn(float duration) {
@@ -212,28 +500,68 @@ void AudioEngine::fadeMusicOut(float duration) {
 
 void AudioEngine::setListenerPosition(const glm::vec3& position) {
     listener.position = position;
-    // TODO: Update platform-specific listener position
+#ifdef FRESH_OPENAL_AVAILABLE
+    alListener3f(AL_POSITION, position.x, position.y, position.z);
+#endif
 }
 
 void AudioEngine::setListenerVelocity(const glm::vec3& velocity) {
     listener.velocity = velocity;
-    // TODO: Update platform-specific listener velocity (for doppler effect)
+#ifdef FRESH_OPENAL_AVAILABLE
+    alListener3f(AL_VELOCITY, velocity.x, velocity.y, velocity.z);
+#endif
 }
 
 void AudioEngine::setListenerOrientation(const glm::vec3& forward, const glm::vec3& up) {
     listener.forward = forward;
     listener.up = up;
-    // TODO: Update platform-specific listener orientation
+#ifdef FRESH_OPENAL_AVAILABLE
+    ALfloat orientation[] = { forward.x, forward.y, forward.z, up.x, up.y, up.z };
+    alListenerfv(AL_ORIENTATION, orientation);
+#endif
 }
 
 void AudioEngine::setMasterVolume(float volume) {
     masterVolume = std::clamp(volume, 0.0f, 1.0f);
-    // TODO: Update all active sources
+#ifdef FRESH_OPENAL_AVAILABLE
+    // Update all active sources
+    for (auto& [id, source] : activeSources) {
+        if (source.sourceID != -1) {
+            ALuint alSource = static_cast<ALuint>(source.sourceID);
+            float effectiveVolume = source.volume * effectsVolume * masterVolume;
+            if (muted) effectiveVolume = 0.0f;
+            alSourcef(alSource, AL_GAIN, effectiveVolume);
+        }
+    }
+    // Update music
+    if (musicSource.isPlaying && musicSource.sourceID != -1) {
+        ALuint alSource = static_cast<ALuint>(musicSource.sourceID);
+        float effectiveVolume = musicVolume * masterVolume;
+        if (muted) effectiveVolume = 0.0f;
+        alSourcef(alSource, AL_GAIN, effectiveVolume);
+    }
+#endif
 }
 
 void AudioEngine::setMuted(bool isMuted) {
     muted = isMuted;
-    // TODO: Mute/unmute all audio sources
+#ifdef FRESH_OPENAL_AVAILABLE
+    float volumeMultiplier = muted ? 0.0f : 1.0f;
+    // Update all active sources
+    for (auto& [id, source] : activeSources) {
+        if (source.sourceID != -1) {
+            ALuint alSource = static_cast<ALuint>(source.sourceID);
+            float effectiveVolume = source.volume * effectsVolume * masterVolume * volumeMultiplier;
+            alSourcef(alSource, AL_GAIN, effectiveVolume);
+        }
+    }
+    // Update music
+    if (musicSource.isPlaying && musicSource.sourceID != -1) {
+        ALuint alSource = static_cast<ALuint>(musicSource.sourceID);
+        float effectiveVolume = musicVolume * masterVolume * volumeMultiplier;
+        alSourcef(alSource, AL_GAIN, effectiveVolume);
+    }
+#endif
 }
 
 int AudioEngine::getNextSourceID() {
@@ -245,6 +573,12 @@ void AudioEngine::cleanupFinishedSources() {
     auto it = activeSources.begin();
     while (it != activeSources.end()) {
         if (!it->second.loop && !it->second.isPlaying) {
+#ifdef FRESH_OPENAL_AVAILABLE
+            if (it->second.sourceID != -1) {
+                ALuint alSource = static_cast<ALuint>(it->second.sourceID);
+                alDeleteSources(1, &alSource);
+            }
+#endif
             it = activeSources.erase(it);
         } else {
             ++it;

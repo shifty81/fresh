@@ -143,6 +143,18 @@ if(NOT imgui_FOUND)
     endif()
 endif()
 
+# OpenAL for audio
+find_package(OpenAL QUIET)
+if(NOT OpenAL_FOUND)
+    message(WARNING "OpenAL not found. Audio features will be disabled.")
+    if(WIN32)
+        message(WARNING "  vcpkg install openal-soft:x64-windows")
+    else()
+        message(WARNING "  Linux: sudo apt-get install libopenal-dev")
+        message(WARNING "  macOS: brew install openal-soft")
+    endif()
+endif()
+
 # ==============================================================================
 # Dependency Check Summary
 # ==============================================================================
@@ -418,6 +430,13 @@ if(imgui_FOUND)
     add_definitions(-DIMGUI_HAS_DOCK)
     add_definitions(-DIMGUI_HAS_VIEWPORT)
     message(STATUS "ImGui enabled with docking and viewport support")
+endif()
+
+# Link OpenAL (Audio)
+if(OpenAL_FOUND)
+    target_link_libraries(${PROJECT_NAME} PRIVATE OpenAL::OpenAL)
+    add_definitions(-DFRESH_OPENAL_AVAILABLE)
+    message(STATUS "OpenAL enabled for audio support")
 endif()
 
 # Link OpenGL (if enabled)
