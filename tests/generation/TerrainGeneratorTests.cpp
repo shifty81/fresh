@@ -7,6 +7,7 @@
 #include "generation/TerrainGenerator.h"
 #include "voxel/Chunk.h"
 #include "voxel/VoxelTypes.h"
+#include <chrono>
 
 using namespace fresh;
 

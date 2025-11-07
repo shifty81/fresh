@@ -6,6 +6,7 @@
 #include <gtest/gtest.h>
 #include "generation/NoiseGenerator.h"
 #include <cmath>
+#include <chrono>
 
 using namespace fresh;
 
