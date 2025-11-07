@@ -32,6 +32,8 @@ Run_Engine.bat
 # .NET build artifacts
 dotnet/bin/
 dotnet/obj/
+dotnet/*/bin/
+dotnet/*/obj/
 dotnet/*.user
 dotnet/*.DotSettings.user
 
