@@ -572,17 +572,30 @@ terraform->undo();
 - **Right Click**: Apply tool (remove mode)
 - **Ctrl+Z/Y**: Undo/Redo
 - **T**: Toggle editor UI
+- **Hold Alt**: Temporarily show cursor for UI interaction (in-game)
 
 ## Controls
 
-(To be implemented)
-- WASD: Move
-- Mouse: Look around
-- Space: Jump
-- Left Click: Break block
-- Right Click: Place block
-- E: Open editor
-- ESC: Exit
+The engine features an advanced input system with multiple modes and seamless mode switching:
+
+### Standard Controls (Game Mode)
+- **WASD**: Move
+- **Mouse**: Look around (camera control)
+- **Space**: Jump
+- **Left Shift**: Sprint
+- **Left Ctrl**: Crouch
+- **Left Click**: Break block
+- **Right Click**: Place block
+- **E**: Use/Interact
+- **T**: Toggle editor
+- **ESC**: Open menu / Exit
+
+### Advanced Input System
+- **Hold Alt**: Temporarily switch to UI mode - cursor becomes visible and you can interact with UI elements while still in-game
+- **Input Modes**: GameMode (default), UIMode (menus/editor), BuildMode (ship builder)
+- **Automatic Mode Switching**: Engine automatically switches modes when opening menus or editor
+
+For complete input system documentation, see [docs/INPUT_SYSTEM.md](docs/INPUT_SYSTEM.md).
 
 ## Contributing
 
@@ -606,8 +619,9 @@ Please read our [Code of Conduct](CODE_OF_CONDUCT.md) before contributing.
 - 📚 [Tutorials](docs/tutorials/) - Step-by-step guides
 - 🔨 [Examples](examples/) - Sample code and usage
 - 🌍 [Terraforming Guide](docs/TERRAFORMING.md) - World editing system
-- 🎨 [Editor Integration Guide](docs/EDITOR_INTEGRATION.md) - Comprehensive editor documentation (NEW!)
-- 📋 [Editor Implementation Summary](docs/EDITOR_IMPLEMENTATION_SUMMARY.md) - Technical implementation details (NEW!)
+- 🎨 [Editor Integration Guide](docs/EDITOR_INTEGRATION.md) - Comprehensive editor documentation
+- 📋 [Editor Implementation Summary](docs/EDITOR_IMPLEMENTATION_SUMMARY.md) - Technical implementation details
+- 🎮 [Input System Guide](docs/INPUT_SYSTEM.md) - Input modes, Hold Alt feature, and controls (NEW!)
 - 📝 [Logging System](docs/LOGGING.md) - Error tracking and debugging
 - 🎨 [Texture System](textures/USAGE.md) - Using placeholder textures and assets
 - ⚙️ [GitHub Workflows](WORKFLOWS.md) - CI/CD and automation

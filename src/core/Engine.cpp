@@ -113,6 +113,7 @@ bool Engine::initialize() {
     // Create input manager and set up callbacks
     m_inputManager = std::make_unique<InputManager>();
     m_inputManager->initialize(m_window->getHandle());
+    m_inputManager->setInputMode(InputMode::GameMode);  // Start in game mode with captured cursor
     setupInputCallbacks();
     std::cout << "Input manager initialized" << std::endl;
     LOG_INFO_C("Input manager initialized", "Engine");
@@ -411,7 +412,7 @@ void Engine::processInput() {
         m_window->pollEvents();
     }
     
-    // Update input manager state
+    // Update input manager state (handles Alt-hold mode switching)
     if (m_inputManager) {
         m_inputManager->update();
         
@@ -431,6 +432,12 @@ void Engine::processInput() {
 #ifdef FRESH_IMGUI_AVAILABLE
             if (m_editorManager) {
                 m_editorManager->toggle();
+                // Switch to UI mode when editor is visible, game mode when hidden
+                if (m_editorManager->isVisible()) {
+                    m_inputManager->setInputMode(InputMode::UIMode);
+                } else {
+                    m_inputManager->setInputMode(InputMode::GameMode);
+                }
                 LOG_INFO_C("Editor toggled", "Engine");
             }
 #else
@@ -440,6 +447,8 @@ void Engine::processInput() {
         
         // Allow ESC to close the window (only if GUI doesn't want keyboard)
         if (!guiCapturesKeyboard && m_inputManager->isActionJustPressed(InputAction::OpenMenu)) {
+            // TODO: In future, show pause menu instead of exiting
+            // For now, switch to UI mode when menu would open
             m_running = false;
         }
     }
@@ -459,8 +468,11 @@ void Engine::update(float deltaTime) {
     bool guiCapturesKeyboard = false;
 #endif
     
-    // Handle player input (only if GUI doesn't capture input)
-    if (m_player && m_inputManager && !guiCapturesMouse && !guiCapturesKeyboard) {
+    // Check if we're in game mode (not UI/menu mode)
+    bool inGameMode = (m_inputManager->getInputMode() == InputMode::GameMode);
+    
+    // Handle player input (only if GUI doesn't capture input and we're in game mode)
+    if (m_player && m_inputManager && !guiCapturesMouse && !guiCapturesKeyboard && inGameMode) {
         m_player->handleInput(*m_inputManager, deltaTime);
         
         // Handle mouse movement for camera
