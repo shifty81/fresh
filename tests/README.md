@@ -6,20 +6,34 @@ This directory contains unit tests and integration tests for the Fresh Voxel Eng
 
 We use [Google Test](https://github.com/google/googletest) as our testing framework.
 
-## Building Tests
-
-Tests are built automatically when you build the project with testing enabled:
-
-```bash
-mkdir build && cd build
-cmake -DBUILD_TESTS=ON ..
-make
-```
-
 ## Running Tests
 
-After building, run the test suite:
+### Windows
 
+After building, the test executable is located at:
+```
+build\Debug\FreshVoxelEngineTests.exe
+build\Release\FreshVoxelEngineTests.exe
+```
+
+**Important for Windows users:** The test executable includes console window retention,
+so it will wait for a key press before closing. This makes it easy to see test results
+when running directly from Explorer or a temporary command prompt.
+
+To run tests:
+
+1. **From Visual Studio**: Set `FreshVoxelEngineTests` as startup project and press F5
+2. **From command line**: Navigate to the build directory and run `FreshVoxelEngineTests.exe`
+3. **From PowerShell**: `.\FreshVoxelEngineTests.exe`
+
+### Linux/macOS
+
+After building, the test executable is located at:
+```
+build/FreshVoxelEngineTests
+```
+
+Run tests with:
 ```bash
 # Run all tests
 ./FreshVoxelEngineTests
@@ -34,30 +48,70 @@ After building, run the test suite:
 ./FreshVoxelEngineTests --gtest_list_tests
 ```
 
+## Building Tests
+
+Tests are built automatically when you build the project with testing enabled:
+
+### Windows with CMake
+```bash
+mkdir build && cd build
+cmake -G "Visual Studio 17 2022" -A x64 -DBUILD_TESTS=ON ..
+cmake --build . --config Release
+```
+
+### Linux/macOS
+```bash
+mkdir build && cd build
+cmake -DBUILD_TESTS=ON ..
+cmake --build . -j$(nproc)
+```
+
+## Troubleshooting
+
+### Test executable closes immediately (Windows)
+
+If the test window closes before you can see the results:
+
+1. **Solution 1 (Recommended)**: Run from a persistent command prompt or PowerShell
+   - Open Command Prompt or PowerShell
+   - Navigate to the build directory: `cd build\Release` or `cd build\Debug`
+   - Run: `.\FreshVoxelEngineTests.exe`
+
+2. **Solution 2**: The test executable now includes automatic pause on Windows when not
+   run from Visual Studio or a persistent terminal
+
+3. **Solution 3**: Run with output redirection:
+   ```batch
+   FreshVoxelEngineTests.exe > test_results.txt 2>&1
+   ```
+
+### Missing DLL errors (Windows)
+
+If you get errors about missing DLLs (e.g., glfw3.dll, lua54.dll):
+
+1. Ensure you built with vcpkg toolchain (it copies DLLs automatically)
+2. If using manual dependency installation, copy required DLLs to the executable directory
+3. Or add dependency directories to your PATH
+
+### Tests fail to compile
+
+Common issues:
+- Missing dependencies (GLFW, GLM, etc.)
+- Incorrect CMake configuration
+- See BUILD.md for detailed build instructions
+
 ## Test Organization
 
 Tests are organized by system/module:
 
 ```
 tests/
-├── core/               # Core engine tests
-│   ├── EngineTests.cpp
-│   ├── WindowTests.cpp
-│   └── MemoryManagerTests.cpp
-├── voxel/             # Voxel system tests
-│   ├── ChunkTests.cpp
-│   ├── VoxelWorldTests.cpp
-│   └── MeshGeneratorTests.cpp
-├── generation/        # Procedural generation tests
-│   ├── NoiseTests.cpp
-│   └── TerrainGeneratorTests.cpp
-├── physics/           # Physics system tests
-│   └── CollisionTests.cpp
-├── gameplay/          # Gameplay tests
-│   ├── PlayerTests.cpp
-│   └── CameraTests.cpp
-└── assets/            # Asset system tests
-    └── ModularAssetSystemTests.cpp
+├── test_main.cpp          # Custom main with error handling and diagnostics
+├── core/                  # Core engine tests
+├── voxel/                 # Voxel system tests
+├── generation/            # Procedural generation tests
+├── input/                 # Input system tests
+└── scripting/             # Scripting and event tests
 ```
 
 ## Writing Tests
