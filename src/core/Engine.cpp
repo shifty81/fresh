@@ -16,6 +16,7 @@
 #include "serialization/WorldSerializer.h"
 #include "gameplay/Player.h"
 #include "input/InputManager.h"
+#include "interaction/VoxelInteraction.h"
 #include <iostream>
 #include <chrono>
 #include <thread>
@@ -35,6 +36,7 @@ namespace fresh {
 Engine::Engine()
     : m_running(false)
     , m_inGame(false)
+    , m_selectedBlockType(VoxelType::Stone)
 {
 }
 
@@ -176,6 +178,12 @@ bool Engine::initialize() {
         initializeRendering();
     }
 #endif
+    
+    // Create voxel interaction system
+    m_voxelInteraction = std::make_unique<VoxelInteraction>();
+    m_voxelInteraction->initialize(m_world.get());
+    std::cout << "Voxel interaction initialized" << std::endl;
+    LOG_INFO_C("Voxel interaction initialized", "Engine");
     
     // Create player
     m_player = std::make_unique<Player>();
@@ -447,6 +455,22 @@ void Engine::update(float deltaTime) {
         glm::vec2 mouseDelta = m_inputManager->getMouseDelta();
         if (glm::length(mouseDelta) > 0.0f) {
             m_player->handleMouseMovement(mouseDelta.x, mouseDelta.y);
+        }
+        
+        // Handle block placement/breaking
+        if (m_voxelInteraction) {
+            // Perform raycast to find targeted block
+            RayHit hit = m_voxelInteraction->performRaycast(m_player->getCamera(), 5.0f);
+            
+            // Left click to break block
+            if (m_inputManager->isMouseButtonPressed(GLFW_MOUSE_BUTTON_LEFT) && hit.hit) {
+                m_voxelInteraction->breakBlock(hit);
+            }
+            
+            // Right click to place block
+            if (m_inputManager->isMouseButtonPressed(GLFW_MOUSE_BUTTON_RIGHT) && hit.hit) {
+                m_voxelInteraction->placeBlock(hit, m_selectedBlockType);
+            }
         }
     }
     

@@ -23,6 +23,7 @@ class MainMenu;
 class WorldEditor;
 class Player;
 class InputManager;
+class VoxelInteraction;
 
 /**
  * @brief Main engine class that orchestrates all subsystems
@@ -90,6 +91,8 @@ private:
     std::unique_ptr<WorldEditor> m_worldEditor;
     std::unique_ptr<Player> m_player;
     std::unique_ptr<InputManager> m_inputManager;
+    std::unique_ptr<VoxelInteraction> m_voxelInteraction;
+    VoxelType m_selectedBlockType;
     
     // OpenGL rendering state
     GLuint m_shaderProgram = 0;
