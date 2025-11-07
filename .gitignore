@@ -12,6 +12,9 @@ build_tests_only.sh
 # vcpkg package manager (downloaded by install.bat)
 vcpkg/
 
+# External libraries (downloaded during build)
+external/
+
 # Generated shortcuts
 Open_Solution.bat
 Run_Engine.bat

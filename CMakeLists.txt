@@ -469,10 +469,26 @@ if(Lua_FOUND)
     target_include_directories(${PROJECT_NAME} PRIVATE ${LUA_INCLUDE_DIR})
     target_link_libraries(${PROJECT_NAME} PRIVATE ${LUA_LIBRARIES})
     add_definitions(-DFRESH_LUA_AVAILABLE)
-    message(STATUS "Lua enabled for asset management scripting")
+    
+    # Add Sol2 header-only library for modern C++ Lua binding
+    if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/external/sol2/include")
+        target_include_directories(${PROJECT_NAME} PRIVATE 
+            ${CMAKE_CURRENT_SOURCE_DIR}/external/sol2/include)
+        message(STATUS "Sol2 found - using production Lua integration")
+        set(LUA_IMPLEMENTATION_FILE src/scripting/lua/ScriptingEngineImpl.cpp)
+    else()
+        message(STATUS "Sol2 not found - using stub Lua implementation")
+        message(STATUS "  To enable full Lua support: git clone https://github.com/ThePhD/sol2.git external/sol2")
+        set(LUA_IMPLEMENTATION_FILE src/scripting/lua/ScriptingEngine.cpp)
+    endif()
+    
+    message(STATUS "Lua enabled for scripting and modding")
     message(STATUS "  LUA_INCLUDE_DIR: ${LUA_INCLUDE_DIR}")
     message(STATUS "  LUA_LIBRARIES: ${LUA_LIBRARIES}")
     message(STATUS "  LUA_VERSION_STRING: ${LUA_VERSION_STRING}")
+else()
+    # No Lua available, use stub implementation
+    set(LUA_IMPLEMENTATION_FILE src/scripting/lua/ScriptingEngine.cpp)
 endif()
 
 # Link OpenGL (if enabled)
