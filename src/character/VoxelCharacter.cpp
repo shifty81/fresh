@@ -38,6 +38,9 @@ void VoxelCharacter::assembleFromParts(const std::vector<BodyPartTemplate>& part
 }
 
 void VoxelCharacter::update(float deltaTime) {
+    // Suppress unused parameter warning
+    (void)deltaTime;
+    
     // Update bone transforms based on current rotations
     updateBoneTransforms(0, glm::mat4(1.0f));
 }
@@ -57,9 +60,9 @@ std::vector<CharacterVoxel> VoxelCharacter::getTransformedVoxels() const {
     return transformed;
 }
 
-void VoxelCharacter::setBoneRotation(int boneIndex, const glm::vec3& rotation) {
+void VoxelCharacter::setBoneRotation(int boneIndex, const glm::vec3& boneRotation) {
     if (boneIndex >= 0 && boneIndex < static_cast<int>(skeleton.size())) {
-        skeleton[boneIndex].localRotation = rotation;
+        skeleton[boneIndex].localRotation = boneRotation;
         updateBoneTransforms(0, glm::mat4(1.0f));
     }
 }
@@ -238,7 +241,7 @@ void VoxelCharacter::generateVoxelsAlgorithmic(const CharacterGenerationParams& 
         for (int y = 0; y < headSize; ++y) {
             for (int z = -headSize/2; z < headSize/2; ++z) {
                 // Spherical head shape
-                float dist = std::sqrt(x*x + y*y + z*z);
+                float dist = std::sqrtf(static_cast<float>(x*x + y*y + z*z));
                 if (dist < headSize / 2.0f) {
                     CharacterVoxel voxel;
                     voxel.position = {x, headHeight + y, z};

@@ -21,7 +21,12 @@ MainMenu::MainMenu()
     std::memset(m_seedBuffer, 0, sizeof(m_seedBuffer));
     
     // Default world name
+#ifdef _WIN32
+    // Use strncpy_s on Windows to avoid C4996 warning
+    strncpy_s(m_worldNameBuffer, sizeof(m_worldNameBuffer), "New World", _TRUNCATE);
+#else
     std::strncpy(m_worldNameBuffer, "New World", sizeof(m_worldNameBuffer) - 1);
+#endif
     m_worldNameBuffer[sizeof(m_worldNameBuffer) - 1] = '\0'; // Ensure null termination
     
     // Random seed by default

@@ -204,8 +204,15 @@ struct WAVHeader {
 // Helper function to load WAV file into OpenAL buffer
 static ALuint loadWAVFile(const std::string& path) {
     // Open the file in binary mode
-    FILE* file = fopen(path.c_str(), "rb");
+    FILE* file = nullptr;
+#ifdef _WIN32
+    // Use fopen_s on Windows to avoid C4996 warning
+    errno_t err = fopen_s(&file, path.c_str(), "rb");
+    if (err != 0 || !file) {
+#else
+    file = fopen(path.c_str(), "rb");
     if (!file) {
+#endif
         std::cerr << "  Failed to open audio file: " << path << std::endl;
         return 0;
     }

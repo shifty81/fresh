@@ -129,9 +129,9 @@ public:
     /**
      * @brief Set bone transform (for animation)
      * @param boneIndex Index of bone to modify
-     * @param rotation Euler angles in radians
+     * @param boneRotation Euler angles in radians
      */
-    void setBoneRotation(int boneIndex, const glm::vec3& rotation);
+    void setBoneRotation(int boneIndex, const glm::vec3& boneRotation);
     
     /**
      * @brief Get bone by name
