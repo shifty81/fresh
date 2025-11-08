@@ -630,7 +630,11 @@ if(BUILD_TESTS)
     
     # Register tests with CTest
     include(GoogleTest)
-    gtest_discover_tests(${PROJECT_NAME}Tests)
+    # Use PRE_TEST discovery mode to avoid running test executable at build time
+    # This prevents failures on Windows when vcpkg DLLs aren't in PATH during build
+    gtest_discover_tests(${PROJECT_NAME}Tests
+        DISCOVERY_MODE PRE_TEST
+    )
     
     message(STATUS "Tests configured successfully")
     message(STATUS "Run tests with: ctest or ./FreshVoxelEngineTests")
