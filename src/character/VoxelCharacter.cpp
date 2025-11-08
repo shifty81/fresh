@@ -241,7 +241,7 @@ void VoxelCharacter::generateVoxelsAlgorithmic(const CharacterGenerationParams& 
         for (int y = 0; y < headSize; ++y) {
             for (int z = -headSize/2; z < headSize/2; ++z) {
                 // Spherical head shape
-                float dist = std::sqrtf(static_cast<float>(x*x + y*y + z*z));
+                float dist = std::sqrt(static_cast<float>(x*x + y*y + z*z));
                 if (dist < headSize / 2.0f) {
                     CharacterVoxel voxel;
                     voxel.position = {x, headHeight + y, z};
