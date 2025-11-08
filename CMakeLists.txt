@@ -164,6 +164,7 @@ if(NOT Lua_FOUND)
     find_package(lua CONFIG QUIET)
     if(lua_FOUND)
         set(Lua_FOUND TRUE)
+        set(LUA_FOUND_VIA_CONFIG TRUE)
     endif()
 endif()
 
@@ -467,10 +468,21 @@ endif()
 
 # Link Lua (Scripting)
 if(Lua_FOUND)
-    # Use the standard FindLua module variables (works with vcpkg and system installations)
-    target_include_directories(${PROJECT_NAME} PRIVATE ${LUA_INCLUDE_DIR})
-    target_link_libraries(${PROJECT_NAME} PRIVATE ${LUA_LIBRARIES})
     add_definitions(-DFRESH_LUA_AVAILABLE)
+    
+    if(LUA_FOUND_VIA_CONFIG)
+        # Using vcpkg's Lua config - link against the lua target
+        target_link_libraries(${PROJECT_NAME} PRIVATE lua)
+        message(STATUS "Lua enabled via CONFIG mode (vcpkg)")
+    else()
+        # Using standard FindLua module variables
+        target_include_directories(${PROJECT_NAME} PRIVATE ${LUA_INCLUDE_DIR})
+        target_link_libraries(${PROJECT_NAME} PRIVATE ${LUA_LIBRARIES})
+        message(STATUS "Lua enabled via FindLua module")
+        message(STATUS "  LUA_INCLUDE_DIR: ${LUA_INCLUDE_DIR}")
+        message(STATUS "  LUA_LIBRARIES: ${LUA_LIBRARIES}")
+        message(STATUS "  LUA_VERSION_STRING: ${LUA_VERSION_STRING}")
+    endif()
     
     # Add Sol2 header-only library for modern C++ Lua binding
     if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/external/sol2/include")
@@ -485,9 +497,6 @@ if(Lua_FOUND)
     endif()
     
     message(STATUS "Lua enabled for scripting and modding")
-    message(STATUS "  LUA_INCLUDE_DIR: ${LUA_INCLUDE_DIR}")
-    message(STATUS "  LUA_LIBRARIES: ${LUA_LIBRARIES}")
-    message(STATUS "  LUA_VERSION_STRING: ${LUA_VERSION_STRING}")
 else()
     # No Lua available, use stub implementation
     set(LUA_IMPLEMENTATION_FILE src/scripting/lua/ScriptingEngine.cpp)
