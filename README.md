@@ -597,6 +597,50 @@ The engine features an advanced input system with multiple modes and seamless mo
 
 For complete input system documentation, see [docs/INPUT_SYSTEM.md](docs/INPUT_SYSTEM.md).
 
+---
+
+## ⚠️ Known Limitations
+
+### Graphics APIs
+- **DirectX 11/12** - Incomplete implementation (~40% complete)
+  - Window handle integration missing
+  - Cannot be used as primary renderer yet
+  - **Workaround:** Use OpenGL backend (fully functional)
+- **OpenGL** - Fully functional on all platforms ✅
+
+### Platform Support
+- **Linux** - Fully tested and working ✅
+- **Windows** - Should build but DirectX renderers not functional ⚠️
+  - OpenGL backend works on Windows
+- **macOS** - Expected to work but not tested ⚠️
+  - OpenGL deprecated by Apple (still functional)
+
+### Features
+- **ImGui Integration** - Not included by default
+  - Editor UI limited to console mode
+  - **Installation:** `vcpkg install imgui[glfw-binding,opengl3-binding]`
+- **Lua Scripting** - Framework exists but incomplete (~40%)
+  - Need Sol2 library integration
+  - **Setup:** Clone sol2 to `external/sol2/`
+- **Audio** - Only WAV files supported
+  - OGG/Vorbis support planned
+  - OpenAL integration complete ✅
+- **Networking** - Stub implementation only (~10%)
+  - Multiplayer not yet functional
+
+### Testing
+- **Code Coverage** - ~30% (target: 50%+)
+- **Platform Testing** - Only verified on Linux
+  - Windows/macOS builds expected but not verified
+
+### Performance
+- **Memory Usage** - Not yet optimized for large worlds
+- **Shader Hot-Reload** - Needs improvement
+
+For the most up-to-date status, see [THIS_STATUS.md](THIS_STATUS.md).
+
+---
+
 ## Contributing
 
 We welcome contributions! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
