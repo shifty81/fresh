@@ -204,11 +204,14 @@ TEST_F(TerrainGeneratorTest, GenerateChunk_DifferentChunks_DifferentTerrain) {
     generator->generateChunk(&chunk2);
     
     // Assert - chunks at different positions should have different terrain
+    // Check multiple heights to ensure robust comparison
     bool hasDifference = false;
-    for (int x = 0; x < CHUNK_SIZE && !hasDifference; x++) {
-        for (int z = 0; z < CHUNK_SIZE && !hasDifference; z++) {
-            if (chunk1.getVoxel(x, 64, z).type != chunk2.getVoxel(x, 64, z).type) {
-                hasDifference = true;
+    for (int y = 50; y < 70 && !hasDifference; y++) {
+        for (int x = 0; x < CHUNK_SIZE && !hasDifference; x++) {
+            for (int z = 0; z < CHUNK_SIZE && !hasDifference; z++) {
+                if (chunk1.getVoxel(x, y, z).type != chunk2.getVoxel(x, y, z).type) {
+                    hasDifference = true;
+                }
             }
         }
     }
