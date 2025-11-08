@@ -1,0 +1,148 @@
+---
+# Fresh Voxel Engine - Clang Format Configuration
+# Based on modern C++20 best practices and consistency with existing codebase
+
+# Use LLVM style as base with customizations
+BasedOnStyle: LLVM
+
+# Language and standard
+Language: Cpp
+Standard: c++20
+
+# Indentation
+IndentWidth: 4
+TabWidth: 4
+UseTab: Never
+ColumnLimit: 100
+
+# Braces (K&R style - opening brace on same line)
+BreakBeforeBraces: Linux
+BraceWrapping:
+  AfterClass: false
+  AfterControlStatement: Never
+  AfterEnum: false
+  AfterFunction: true
+  AfterNamespace: false
+  AfterStruct: false
+  AfterUnion: false
+  AfterExternBlock: false
+  BeforeCatch: false
+  BeforeElse: false
+  BeforeLambdaBody: false
+  BeforeWhile: false
+  IndentBraces: false
+  SplitEmptyFunction: true
+  SplitEmptyRecord: true
+  SplitEmptyNamespace: true
+
+# Naming (note: clang-format doesn't enforce naming, just for reference)
+# Classes/Structs: PascalCase (e.g., VoxelWorld)
+# Functions/Methods: camelCase (e.g., generateChunk)
+# Variables: camelCase (e.g., chunkSize)
+# Constants: UPPER_SNAKE_CASE (e.g., MAX_CHUNK_SIZE)
+# Private members: m_ prefix (e.g., m_vertexBuffer)
+
+# Alignment
+AlignAfterOpenBracket: Align
+AlignConsecutiveAssignments: None
+AlignConsecutiveDeclarations: None
+AlignConsecutiveMacros: Consecutive
+AlignEscapedNewlines: Right
+AlignOperands: Align
+AlignTrailingComments: true
+
+# Spacing
+SpaceAfterCStyleCast: false
+SpaceAfterLogicalNot: false
+SpaceAfterTemplateKeyword: true
+SpaceBeforeAssignmentOperators: true
+SpaceBeforeCpp11BracedList: false
+SpaceBeforeCtorInitializerColon: true
+SpaceBeforeInheritanceColon: true
+SpaceBeforeParens: ControlStatements
+SpaceBeforeRangeBasedForLoopColon: true
+SpaceInEmptyBlock: false
+SpaceInEmptyParentheses: false
+SpacesBeforeTrailingComments: 1
+SpacesInAngles: Never
+SpacesInConditionalStatement: false
+SpacesInContainerLiterals: false
+SpacesInCStyleCastParentheses: false
+SpacesInParentheses: false
+SpacesInSquareBrackets: false
+
+# Breaking
+AllowShortBlocksOnASingleLine: Empty
+AllowShortCaseLabelsOnASingleLine: false
+AllowShortEnumsOnASingleLine: true
+AllowShortFunctionsOnASingleLine: Empty
+AllowShortIfStatementsOnASingleLine: Never
+AllowShortLambdasOnASingleLine: All
+AllowShortLoopsOnASingleLine: false
+AlwaysBreakAfterReturnType: None
+AlwaysBreakBeforeMultilineStrings: false
+AlwaysBreakTemplateDeclarations: Yes
+BreakBeforeBinaryOperators: None
+BreakBeforeTernaryOperators: true
+BreakConstructorInitializers: BeforeColon
+BreakInheritanceList: BeforeColon
+BreakStringLiterals: true
+
+# Includes
+IncludeBlocks: Regroup
+IncludeCategories:
+  # Standard library headers
+  - Regex:           '<[[:alnum:]_]+>'
+    Priority:        1
+  # Third-party library headers
+  - Regex:           '<.*/.*>'
+    Priority:        2
+  # Project headers (with full path)
+  - Regex:           '".*/"'
+    Priority:        3
+  # Local headers
+  - Regex:           '".*"'
+    Priority:        4
+SortIncludes: CaseInsensitive
+SortUsingDeclarations: true
+
+# Pointer and reference alignment
+DerivePointerAlignment: false
+PointerAlignment: Left
+ReferenceAlignment: Left
+
+# Constructor initializers
+ConstructorInitializerIndentWidth: 4
+ContinuationIndentWidth: 4
+
+# Comments
+ReflowComments: true
+
+# Namespaces
+CompactNamespaces: false
+FixNamespaceComments: true
+NamespaceIndentation: None
+
+# Preprocessor
+IndentPPDirectives: BeforeHash
+IncludeBlocks: Regroup
+
+# Access modifiers
+AccessModifierOffset: -4
+IndentAccessModifiers: false
+
+# Empty lines
+EmptyLineAfterAccessModifier: Never
+EmptyLineBeforeAccessModifier: LogicalBlock
+KeepEmptyLinesAtTheStartOfBlocks: false
+MaxEmptyLinesToKeep: 1
+
+# Other
+Cpp11BracedListStyle: true
+InsertTrailingCommas: None
+PackConstructorInitializers: NextLine
+PPIndentWidth: -1
+RequiresClausePosition: OwnLine
+SeparateDefinitionBlocks: Leave
+ShortNamespaceLines: 1
+...

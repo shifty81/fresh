@@ -1,0 +1,89 @@
+# EditorConfig is awesome: https://EditorConfig.org
+# Fresh Voxel Engine - Editor Configuration
+# Ensures consistent coding styles across different editors and IDEs
+
+# Top-most EditorConfig file
+root = true
+
+# Default settings for all files
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+indent_style = space
+indent_size = 4
+
+# C++ source and header files
+[*.{cpp,h,hpp,cc,cxx,c}]
+indent_style = space
+indent_size = 4
+max_line_length = 100
+
+# CMake files
+[{CMakeLists.txt,*.cmake}]
+indent_style = space
+indent_size = 4
+
+# Batch/PowerShell scripts
+[*.{bat,ps1}]
+end_of_line = crlf
+indent_style = space
+indent_size = 2
+
+# Shell scripts
+[*.sh]
+end_of_line = lf
+indent_style = space
+indent_size = 2
+
+# Python scripts (for tools/utilities)
+[*.py]
+indent_style = space
+indent_size = 4
+max_line_length = 100
+
+# C# files (.NET bindings)
+[*.cs]
+indent_style = space
+indent_size = 4
+max_line_length = 120
+
+# JSON files
+[*.json]
+indent_style = space
+indent_size = 2
+
+# YAML files (GitHub Actions, configs)
+[*.{yml,yaml}]
+indent_style = space
+indent_size = 2
+
+# XML files
+[*.xml]
+indent_style = space
+indent_size = 2
+
+# Markdown files
+[*.md]
+trim_trailing_whitespace = false
+max_line_length = off
+
+# GLSL shaders
+[*.{vert,frag,geom,tesc,tese,comp,glsl}]
+indent_style = space
+indent_size = 4
+
+# HLSL shaders
+[*.{hlsl,fx}]
+indent_style = space
+indent_size = 4
+
+# Makefiles must use tabs
+[Makefile]
+indent_style = tab
+
+# Lua scripts
+[*.lua]
+indent_style = space
+indent_size = 2
