@@ -266,12 +266,14 @@ TEST_F(InputManagerTest, ProcessMouseMovement_MultipleCallsWithUpdate_TracksMove
     
     // First movement establishes baseline
     glm::vec2 delta1 = inputManager->getMouseDelta();
+    (void)delta1; // Used to establish baseline
     
     inputManager->processMouseMovement(x2, y2);
     inputManager->update();
     
     // Second movement should show delta
     glm::vec2 delta2 = inputManager->getMouseDelta();
+    (void)delta2; // Used to verify delta calculation
     
     // Assert - delta should be calculated (implementation dependent)
     // At minimum, these calls should not crash

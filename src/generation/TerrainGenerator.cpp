@@ -25,7 +25,11 @@ void TerrainGenerator::setSeed(int seed) {
 }
 
 int TerrainGenerator::getHeight(int x, int z) const {
-    // Use noise to generate height
+    // Generate terrain height using multi-octave Perlin noise (fractal Brownian motion)
+    // Scale factor (0.01f): Controls terrain frequency - lower = larger features
+    // Octaves (4): Number of noise layers combined - more = finer detail
+    // Persistence (0.5f): Amplitude decay per octave - lower = smoother terrain
+    // Lacunarity (2.0f): Frequency multiplier per octave - higher = more detail variation
     float noiseValue = m_noiseGenerator.fractalNoise2D(
         x * 0.01f,
         z * 0.01f,
@@ -35,12 +39,15 @@ int TerrainGenerator::getHeight(int x, int z) const {
     );
     
     // Map noise from [-1, 1] to height range [40, 80]
+    // This creates terrain between y=40 (valleys) and y=80 (peaks)
     int height = 40 + static_cast<int>((noiseValue + 1.0f) * 20.0f);
     
     return height;
 }
 
 VoxelType TerrainGenerator::getBlockType(int x, int y, int z, int surfaceHeight) const {
+    // Determine block type based on height and position
+    // Creates natural terrain layers: grass/dirt on top, stone below, bedrock at bottom
     if (y > surfaceHeight) {
         return VoxelType::Air;
     }

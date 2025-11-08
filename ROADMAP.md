@@ -1,5 +1,8 @@
 # Fresh Voxel Engine - Development Roadmap
 
+> **Last Updated:** 2025-11-08  
+> **Note:** This roadmap shows the historical development plan. For accurate current implementation status, see [ACTUAL_STATUS.md](ACTUAL_STATUS.md) which provides code-verified status of all systems.
+
 ## Project Vision
 A high-performance C++ voxel game engine with multiplayer support, featuring procedural terrain generation, comprehensive gameplay systems, and modular architecture for easy extensibility.
 
