@@ -116,6 +116,45 @@ public:
     bool isMouseButtonPressed(int button) const;
     
     /**
+     * @brief Check if mouse button was just pressed this frame
+     * @param button GLFW mouse button code
+     * @return true if just pressed
+     */
+    bool isMouseButtonJustPressed(int button) const;
+    
+    /**
+     * @brief Check if a specific key is pressed (by GLFW key code)
+     * @param key GLFW key code
+     * @return true if pressed
+     */
+    bool isKeyPressed(int key) const;
+    
+    /**
+     * @brief Check if a specific key was just pressed this frame
+     * @param key GLFW key code
+     * @return true if just pressed
+     */
+    bool isKeyJustPressed(int key) const;
+    
+    /**
+     * @brief Get current mouse position
+     * @return Mouse position as vec2 (x, y)
+     */
+    glm::vec2 getMousePosition() const;
+    
+    /**
+     * @brief Get mouse X coordinate
+     * @return Mouse X position
+     */
+    float getMouseX() const { return static_cast<float>(lastMouseX); }
+    
+    /**
+     * @brief Get mouse Y coordinate
+     * @return Mouse Y position
+     */
+    float getMouseY() const { return static_cast<float>(lastMouseY); }
+    
+    /**
      * @brief Bind key to action
      * @param action Action to bind
      * @param key GLFW key code
@@ -205,6 +244,7 @@ private:
     std::map<int, bool> keyStates;
     std::map<int, bool> keyPressedThisFrame;
     std::map<int, bool> mouseButtonStates;
+    std::map<int, bool> mouseButtonPressedThisFrame;
     
     glm::vec2 mouseDelta{0.0f};
     double lastMouseX = 0.0;
