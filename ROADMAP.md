@@ -60,9 +60,11 @@ A high-performance C++ voxel game engine with multiplayer support, featuring pro
 
 ---
 
-## 🚧 IN PROGRESS (Phase 6)
+---
 
-### Priority 1: Core Gameplay Systems
+## 🚧 IN PROGRESS (Phase 6 & 7 - Parallel Development)
+
+### Phase 6: Core Gameplay Systems (Partial Completion)
 
 #### 1. Player Controller & Camera System ✅ COMPLETE
 - [x] First-person camera implementation
@@ -87,7 +89,7 @@ A high-performance C++ voxel game engine with multiplayer support, featuring pro
 - [x] Input buffering for network
 - [x] Hold Alt feature for UI mode switching
 
-#### 3. Complete DirectX/OpenGL Rendering Pipeline
+#### 3. Complete DirectX/OpenGL Rendering Pipeline (In Progress)
 - [x] OpenGL backend (95% complete)
 - [ ] DirectX 11 backend (40% complete - needs window handle integration)
 - [ ] DirectX 12 backend (30% complete - partial implementation)
@@ -98,9 +100,9 @@ A high-performance C++ voxel game engine with multiplayer support, featuring pro
 
 ---
 
-## 📋 PLANNED FEATURES
+## 🚀 STARTING (Phase 7)
 
-### Phase 7: Procedural Voxel Character System (NEW - 14 weeks)
+### Phase 7: Procedural Voxel Character System (14 weeks)
 
 #### Character Generation System (Weeks 1-4)
 - [ ] VoxelCharacter class with voxel-based model
@@ -846,5 +848,5 @@ This roadmap is a living document. As development progresses:
 ---
 
 **Last Updated**: 2025-11-08
-**Version**: 1.1.0
-**Status**: In Active Development (Phase 6 - Core Systems Complete, Rendering Backends In Progress)
+**Version**: 1.2.0
+**Status**: In Active Development (Phase 6 Ongoing: Rendering Backends | Phase 7 Starting: Procedural Voxel Character System)

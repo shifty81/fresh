@@ -415,7 +415,7 @@ fresh/
 
 ## Development Roadmap
 
-### Completed (Phase 1-4)
+### Completed (Phase 1-5)
 - [x] Project structure and build system
 - [x] **Multi-API rendering system** (OpenGL, DirectX 11/12)
 - [x] **Visual Studio 2022 support**
@@ -423,21 +423,28 @@ fresh/
 - [x] Procedural terrain generation
 - [x] Noise functions (Perlin, fractal)
 - [x] Basic mesh generation
+- [x] Player controller and camera system
+- [x] Enhanced input system with action mapping
 
-### In Progress (Phase 5-6)
-- [ ] Complete rendering pipeline for all APIs
-- [ ] Camera and player controller
-- [ ] Physics collision detection
-- [ ] Block placement/destruction
-- [ ] AI NPC behavior
-- [ ] ImGui integration
+### In Progress (Phase 6)
+- [x] OpenGL rendering backend (95% complete)
+- [ ] DirectX 11 backend (40% - needs window handle integration)
+- [ ] DirectX 12 backend (30% - partial implementation)
+- [ ] Multi-API rendering abstraction refinement
 
-### Future (Phase 7-8)
+### Starting (Phase 7)
+- [ ] Procedural voxel character system
+- [ ] Character generation and customization
+- [ ] Animation system
+- [ ] IK (Inverse Kinematics) system
+- [ ] Dynamic weapon/tool handling
+
+### Future (Phase 8+)
+- [ ] Advanced terrain generation (3D density, caves, overhangs)
+- [ ] Enhanced biome system
 - [ ] Advanced lighting and shadows
 - [ ] Water rendering with transparency
-- [ ] Advanced shader effects
 - [ ] Multiplayer support
-- [ ] Advanced AI behaviors
 - [ ] Performance optimizations
 - [ ] Comprehensive testing
 
