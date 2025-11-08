@@ -1,6 +1,6 @@
 # Fresh Voxel Engine - Project Status Dashboard
 
-> Last Updated: 2025-11-03
+> Last Updated: 2025-11-08
 
 ## 📊 Overall Progress
 
@@ -8,8 +8,11 @@
 ███████████████████████████████████░░░░░░░░░░░░░░  70% Complete
 ```
 
-**Current Phase**: Phase 6 - Core Gameplay Systems  
-**Next Milestone**: Inventory & Resource Systems (v0.3.0)
+**Current Phases**: Phase 6 (Ongoing) & Phase 7 (Starting)
+- **Phase 6**: DirectX Rendering Backends (In Progress)
+- **Phase 7**: Procedural Voxel Character System (Starting)
+
+**Next Milestone**: Character Generation & Rendering Backend Completion (v0.3.0)
 
 ---
 
