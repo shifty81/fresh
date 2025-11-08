@@ -619,9 +619,14 @@ For complete input system documentation, see [docs/INPUT_SYSTEM.md](docs/INPUT_S
 - **ImGui Integration** - Not included by default
   - Editor UI limited to console mode
   - **Installation:** `vcpkg install imgui[glfw-binding,opengl3-binding]`
-- **Lua Scripting** - Framework exists but incomplete (~40%)
-  - Need Sol2 library integration
-  - **Setup:** Clone sol2 to `external/sol2/`
+- **Lua Scripting** - Optional feature, framework exists but incomplete (~40%)
+  - **Engine builds and runs without Lua** - Lua-dependent features use stub implementations
+  - Need Sol2 library integration for full functionality
+  - **Installation:** 
+    - Windows: `vcpkg install luajit:x64-windows` or `vcpkg install lua:x64-windows`
+    - Linux: `sudo apt-get install liblua5.4-dev`
+    - macOS: `brew install lua`
+  - **Setup:** Clone sol2 to `external/sol2/` for advanced features
 - **Audio** - Only WAV files supported
   - OGG/Vorbis support planned
   - OpenAL integration complete ✅

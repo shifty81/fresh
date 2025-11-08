@@ -4,6 +4,8 @@
 
 The Fresh Voxel Engine includes a prepared scripting framework that requires Lua library integration to be functional. This guide explains how to complete the integration.
 
+**Note:** Lua integration is **optional**. The engine will build and run without Lua installed - Lua-dependent features like asset management Lua configurations will simply use stub implementations. This allows developers to build and test the engine locally without needing to set up the Lua environment.
+
 ## Current Status
 
 ✅ **Implemented:**
