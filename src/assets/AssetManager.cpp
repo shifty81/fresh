@@ -4,12 +4,14 @@
 #include <filesystem>
 #include <algorithm>
 
-// Include Lua headers - using extern "C" to ensure C linkage
+// Include Lua headers only if available - using extern "C" to ensure C linkage
+#ifdef FRESH_LUA_AVAILABLE
 extern "C" {
 #include <lua.h>
 #include <lualib.h>
 #include <lauxlib.h>
 }
+#endif // FRESH_LUA_AVAILABLE
 
 namespace fs = std::filesystem;
 
@@ -246,6 +248,7 @@ bool AssetManager::UpdateLuaConfiguration(const std::string& assetPath,
 }
 
 bool AssetManager::LoadAssetsFromLua(const std::string& configPath) {
+#ifdef FRESH_LUA_AVAILABLE
     if (!luaState_) {
         std::cerr << "[AssetManager] Lua state not initialized" << std::endl;
         return false;
@@ -278,6 +281,11 @@ bool AssetManager::LoadAssetsFromLua(const std::string& configPath) {
     lua_pop(luaState_, 1); // pop Assets
     
     return true;
+#else
+    // Lua not available - return success but don't actually load from Lua
+    std::cout << "[AssetManager] Lua not available - skipping Lua config load: " << configPath << std::endl;
+    return true;
+#endif
 }
 
 bool AssetManager::ValidateAsset(const std::string& filePath, const std::string& assetType) const {
@@ -325,6 +333,7 @@ void AssetManager::RegisterImportCallback(const std::string& callbackName, Asset
 }
 
 bool AssetManager::InitializeLua() {
+#ifdef FRESH_LUA_AVAILABLE
     luaState_ = luaL_newstate();
     if (!luaState_) {
         return false;
@@ -333,14 +342,24 @@ bool AssetManager::InitializeLua() {
     luaL_openlibs(luaState_);
     std::cout << "[AssetManager] Lua initialized" << std::endl;
     return true;
+#else
+    // Lua not available - use stub implementation
+    std::cout << "[AssetManager] Lua not available - using stub implementation" << std::endl;
+    return true;
+#endif
 }
 
 void AssetManager::CloseLua() {
+#ifdef FRESH_LUA_AVAILABLE
     if (luaState_) {
         lua_close(luaState_);
         luaState_ = nullptr;
         std::cout << "[AssetManager] Lua closed" << std::endl;
     }
+#else
+    // Lua not available - nothing to close
+    std::cout << "[AssetManager] Lua stub - nothing to close" << std::endl;
+#endif
 }
 
 void AssetManager::OnAssetImported(const std::string& path, const std::string& type) {

@@ -97,6 +97,7 @@ return Assets
 // Reading Lua Configuration in C++
 // ============================================================================
 
+#ifdef FRESH_LUA_AVAILABLE
 #include <lua.hpp>
 
 void ReadLuaConfigExample() {
@@ -150,6 +151,11 @@ void ReadLuaConfigExample() {
     lua_pop(L, 1);  // Pop Assets
     lua_close(L);
 }
+#else
+void ReadLuaConfigExample() {
+    std::cout << "Lua not available - skipping Lua config reading example" << std::endl;
+}
+#endif // FRESH_LUA_AVAILABLE
 
 // ============================================================================
 // C# Example - Asset Management Form with Drag-and-Drop
