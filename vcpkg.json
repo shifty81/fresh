@@ -28,7 +28,7 @@
       "platform": "windows"
     },
     {
-      "name": "lua",
+      "name": "luajit",
       "platform": "windows"
     },
     {
