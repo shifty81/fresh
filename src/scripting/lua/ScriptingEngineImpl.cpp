@@ -16,6 +16,7 @@
 #include <sol/sol.hpp>
 
 #include "scripting/lua/ScriptingEngine.h"
+#include "input/InputManager.h"
 #include "core/Logger.h"
 #include <fstream>
 #include <sstream>
@@ -264,6 +265,139 @@ void ScriptingEngine::registerEngineAPI() {
     Logger::getInstance().info("Registered Lua engine API");
 }
 
+void ScriptingEngine::registerInputManager(void* inputManager) {
+    if (!luaState || !inputManager) return;
+    
+    auto* state = static_cast<sol::state*>(luaState);
+    auto* manager = static_cast<InputManager*>(inputManager);
+    
+    // Create Input table in Lua
+    auto inputTable = state->create_table("Input");
+    
+    // Key state queries
+    inputTable["IsKeyPressed"] = [manager](int keyCode) {
+        return manager->isKeyPressed(keyCode);
+    };
+    
+    inputTable["IsKeyJustPressed"] = [manager](int keyCode) {
+        return manager->isKeyJustPressed(keyCode);
+    };
+    
+    // Mouse button queries
+    inputTable["IsMouseButtonPressed"] = [manager](int button) {
+        return manager->isMouseButtonPressed(button);
+    };
+    
+    inputTable["IsMouseButtonJustPressed"] = [manager](int button) {
+        return manager->isMouseButtonJustPressed(button);
+    };
+    
+    // Mouse position
+    inputTable["GetMouseX"] = [manager]() {
+        return manager->getMouseX();
+    };
+    
+    inputTable["GetMouseY"] = [manager]() {
+        return manager->getMouseY();
+    };
+    
+    inputTable["GetMousePosition"] = [manager]() {
+        auto pos = manager->getMousePosition();
+        return sol::as_table(std::vector<float>{pos.x, pos.y});
+    };
+    
+    // Mouse delta
+    inputTable["GetMouseDelta"] = [manager]() {
+        auto delta = manager->getMouseDelta();
+        return sol::as_table(std::vector<float>{delta.x, delta.y});
+    };
+    
+    // Action-based input
+    inputTable["IsActionActive"] = [manager](int action) {
+        return manager->isActionActive(static_cast<InputAction>(action));
+    };
+    
+    inputTable["IsActionJustPressed"] = [manager](int action) {
+        return manager->isActionJustPressed(static_cast<InputAction>(action));
+    };
+    
+    // Input configuration
+    inputTable["SetKeyBinding"] = [manager](int action, int keyCode) {
+        manager->setKeyBinding(static_cast<InputAction>(action), keyCode);
+    };
+    
+    inputTable["GetMouseSensitivity"] = [manager]() {
+        return manager->getMouseSensitivity();
+    };
+    
+    inputTable["SetMouseSensitivity"] = [manager](float sensitivity) {
+        manager->setMouseSensitivity(sensitivity);
+    };
+    
+    // Input modes
+    inputTable["GetInputMode"] = [manager]() {
+        return static_cast<int>(manager->getInputMode());
+    };
+    
+    inputTable["SetInputMode"] = [manager](int mode, sol::optional<bool> temporary) {
+        manager->setInputMode(static_cast<InputMode>(mode), temporary.value_or(false));
+    };
+    
+    // Key codes for convenience (matching GLFW key codes)
+    auto keysTable = state->create_table("Keys");
+    keysTable["Space"] = 32;
+    keysTable["W"] = 87;
+    keysTable["A"] = 65;
+    keysTable["S"] = 83;
+    keysTable["D"] = 68;
+    keysTable["E"] = 69;
+    keysTable["Q"] = 81;
+    keysTable["R"] = 82;
+    keysTable["F"] = 70;
+    keysTable["Escape"] = 256;
+    keysTable["Enter"] = 257;
+    keysTable["Tab"] = 258;
+    keysTable["Backspace"] = 259;
+    keysTable["LeftShift"] = 340;
+    keysTable["LeftControl"] = 341;
+    keysTable["LeftAlt"] = 342;
+    keysTable["RightShift"] = 344;
+    keysTable["RightControl"] = 345;
+    keysTable["RightAlt"] = 346;
+    
+    // Mouse button codes
+    auto mouseTable = state->create_table("Mouse");
+    mouseTable["Left"] = 0;
+    mouseTable["Right"] = 1;
+    mouseTable["Middle"] = 2;
+    
+    // Input actions enum
+    auto actionsTable = state->create_table("Actions");
+    actionsTable["MoveForward"] = 0;
+    actionsTable["MoveBackward"] = 1;
+    actionsTable["MoveLeft"] = 2;
+    actionsTable["MoveRight"] = 3;
+    actionsTable["Jump"] = 4;
+    actionsTable["Crouch"] = 5;
+    actionsTable["Sprint"] = 6;
+    actionsTable["Use"] = 7;
+    actionsTable["Attack"] = 8;
+    actionsTable["PlaceBlock"] = 9;
+    actionsTable["BreakBlock"] = 10;
+    actionsTable["OpenInventory"] = 11;
+    actionsTable["OpenMenu"] = 12;
+    actionsTable["ToggleEditor"] = 13;
+    actionsTable["OpenChat"] = 14;
+    
+    // Input modes enum
+    auto modesTable = state->create_table("InputModes");
+    modesTable["GameMode"] = 0;
+    modesTable["UIMode"] = 1;
+    modesTable["BuildMode"] = 2;
+    
+    Logger::getInstance().info("Registered InputManager Lua bindings");
+}
+
 } // namespace scripting
 } // namespace fresh
 
@@ -292,6 +426,7 @@ float ScriptingEngine::getGlobalFloat(const std::string&) { return 0.0f; }
 std::string ScriptingEngine::getGlobalString(const std::string&) { return ""; }
 bool ScriptingEngine::loadMod(const std::string&) { return false; }
 std::vector<std::string> ScriptingEngine::getLoadedMods() const { return {}; }
+void ScriptingEngine::registerInputManager(void*) {}
 
 void ScriptingEngine::reportError(const std::string& error) {
     lastError = error;

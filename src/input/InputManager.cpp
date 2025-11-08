@@ -12,6 +12,7 @@ void InputManager::initialize(GLFWwindow* win) {
 void InputManager::update() {
     // Clear just-pressed states from previous frame
     keyPressedThisFrame.clear();
+    mouseButtonPressedThisFrame.clear();
     
     // Reset mouse delta
     mouseDelta = glm::vec2(0.0f);
@@ -149,6 +150,7 @@ void InputManager::processMouseMovement(double xpos, double ypos) {
 void InputManager::processMouseButton(int button, int action) {
     if (action == GLFW_PRESS) {
         mouseButtonStates[button] = true;
+        mouseButtonPressedThisFrame[button] = true;
     } else if (action == GLFW_RELEASE) {
         mouseButtonStates[button] = false;
     }
@@ -190,6 +192,28 @@ bool InputManager::isMouseButtonPressed(int button) const {
     auto it = mouseButtonStates.find(button);
     if (it == mouseButtonStates.end()) return false;
     return it->second;
+}
+
+bool InputManager::isMouseButtonJustPressed(int button) const {
+    auto it = mouseButtonPressedThisFrame.find(button);
+    if (it == mouseButtonPressedThisFrame.end()) return false;
+    return it->second;
+}
+
+bool InputManager::isKeyPressed(int key) const {
+    auto it = keyStates.find(key);
+    if (it == keyStates.end()) return false;
+    return it->second;
+}
+
+bool InputManager::isKeyJustPressed(int key) const {
+    auto it = keyPressedThisFrame.find(key);
+    if (it == keyPressedThisFrame.end()) return false;
+    return it->second;
+}
+
+glm::vec2 InputManager::getMousePosition() const {
+    return glm::vec2(static_cast<float>(lastMouseX), static_cast<float>(lastMouseY));
 }
 
 void InputManager::setKeyBinding(InputAction action, int key) {

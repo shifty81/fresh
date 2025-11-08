@@ -58,6 +58,9 @@ public:
     bool loadMod(const std::string& modDirectory);
     std::vector<std::string> getLoadedMods() const;
     
+    // Input system registration
+    void registerInputManager(void* inputManager);
+    
     // Error handling
     std::string getLastError() const { return lastError; }
 
