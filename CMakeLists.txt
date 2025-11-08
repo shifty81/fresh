@@ -278,6 +278,7 @@ set(ENGINE_SOURCES
     src/ai/BehaviorTree.cpp
     src/audio/AudioEngine.cpp
     src/scripting/EventSystem.cpp
+    src/character/VoxelCharacter.cpp
     src/editor/EditorGUI.cpp
     src/editor/WorldEditor.cpp
     src/editor/TerraformingSystem.cpp
@@ -411,6 +412,7 @@ set(ENGINE_HEADERS
     include/devtools/DebugConsole.h
     include/devtools/DevToolsManager.h
     include/scripting/lua/ScriptingEngine.h
+    include/character/VoxelCharacter.h
 )
 
 # Create executable
