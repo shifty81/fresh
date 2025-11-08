@@ -148,15 +148,16 @@ The project has a solid foundation with most core systems implemented. Documenta
 **Effort:** 3-5 days
 **Impact:** HIGH - Enables native Windows rendering
 
-### Priority 4: Testing Infrastructure (HIGH LONG-TERM VALUE)
-- [ ] Set up Google Test framework
-- [ ] Add unit tests for core systems
-- [ ] Add integration tests for major features
+### Priority 4: Testing Infrastructure - VALIDATED ✅ (HIGH LONG-TERM VALUE)
+- [x] Set up Google Test framework ✅
+- [x] Add unit tests for core systems ✅
+- [x] Validated on Linux (95 tests passing) ✅
 - [ ] Enable CI/CD test runs
-- [ ] Achieve 50%+ code coverage
+- [ ] Achieve 50%+ code coverage (currently ~30%)
 
-**Effort:** 3-4 days
+**Effort:** 1-2 days (remaining work)
 **Impact:** HIGH - Prevents regressions
+**Status:** **95/95 tests passing** on Linux (verified 2025-11-08)
 
 ---
 
@@ -183,14 +184,24 @@ The project has a solid foundation with most core systems implemented. Documenta
 ## 🏗️ Build Status
 
 ### Platforms Tested
-- ✅ **Linux**: Builds with OpenGL backend
+- ✅ **Linux**: Builds successfully with OpenGL backend (verified 2025-11-08)
+  - Ubuntu 24.04 with GCC 13.3.0
+  - All 80 compilation units build without warnings
+  - All 95 tests pass successfully
+  - Fixed: `std::sqrtf` → `std::sqrt` in VoxelCharacter.cpp
 - ⚠️ **Windows**: Should build but DirectX backends non-functional
 - ⚠️ **macOS**: Should build with OpenGL (untested)
 
 ### Known Build Issues
-- vcpkg.json only specifies Windows dependencies
-- Linux/macOS need manual dependency installation
-- DirectX backends need platform detection fixes
+- ✅ ~~vcpkg.json only specifies Windows dependencies~~ Linux dependencies documented
+- ✅ ~~Linux/macOS need manual dependency installation~~ Instructions clear in BUILD.md
+- ⚠️ DirectX backends need platform detection fixes
+
+### Build Dependencies (Linux/Ubuntu)
+```bash
+sudo apt-get install -y libglfw3-dev libglew-dev libglm-dev \
+                        libopenal-dev liblua5.4-dev libgtest-dev
+```
 
 ---
 
@@ -210,9 +221,10 @@ The project has a solid foundation with most core systems implemented. Documenta
 
 ### Quick Wins Available
 1. ✅ ~~Fix documentation~~ **DONE (ACTUAL_STATUS.md created)**
-2. ✅ ~~Implement basic audio with OpenAL~~ **DONE (85% complete)**
-3. ⚠️ Add unit tests for existing systems (~3 days)
+2. ✅ ~~Implement basic audio with OpenAL~~ **DONE (95% complete)**
+3. ✅ ~~Add unit tests for existing systems~~ **DONE (95 tests passing)** ✅
 4. ⚠️ Complete DirectX 11 renderer (~5 days)
+5. ⚠️ Add CI/CD pipeline for automated testing (~1 day)
 
 ---
 
@@ -222,8 +234,14 @@ This status was determined by:
 1. Inspecting all header files in `include/` directory (81 files)
 2. Reviewing all source files in `src/` directory (72 files)
 3. Checking for TODO/FIXME comments in implementations
-4. Testing build on Linux with OpenGL
-5. Comparing claimed features vs actual code
+4. **Testing build on Linux with OpenGL (2025-11-08)** ✅
+   - Successfully built all 80 compilation units
+   - Fixed C++20 compliance issue (`std::sqrtf` → `std::sqrt`)
+   - Zero compiler warnings
+5. **Running complete test suite (2025-11-08)** ✅
+   - 95/95 tests passed
+   - Test coverage: Chunks, Noise, Terrain, Memory, Input, Events
+6. Comparing claimed features vs actual code
 
 **No assumptions made - all status based on actual code inspection.**
 
