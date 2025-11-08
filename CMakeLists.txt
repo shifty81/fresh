@@ -685,6 +685,8 @@ if(BUILD_TESTS)
         tests/input/InputManagerTests.cpp
         # tests/core/MemoryManagerTests.cpp  # Disabled - tests don't match implementation
         tests/scripting/EventSystemTests.cpp
+        tests/rpg/InventoryTests.cpp
+        tests/rpg/CraftingSystemTests.cpp
     )
     
     # Engine source files needed for tests (exclude main.cpp)
@@ -697,6 +699,8 @@ if(BUILD_TESTS)
         src/core/Logger.cpp
         src/scripting/EventSystem.cpp
         src/input/InputManager.cpp
+        src/rpg/Inventory.cpp
+        src/rpg/CraftingSystem.cpp
     )
     
     # Create test executable
