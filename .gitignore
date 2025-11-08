@@ -86,3 +86,10 @@ logs/Environment/**/*.txt
 tmp/
 temp/
 *.backup
+
+# Generated documentation (Doxygen output)
+docs/api/html/
+docs/api/latex/
+docs/api/xml/
+*.doxygen.log
+RELEASE_NOTES.md

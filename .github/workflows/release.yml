@@ -1,0 +1,212 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'  # Triggers on version tags like v0.1.0, v1.0.0, etc.
+
+permissions:
+  contents: write
+
+jobs:
+  create-release:
+    runs-on: ubuntu-latest
+    outputs:
+      upload_url: ${{ steps.create_release.outputs.upload_url }}
+      version: ${{ steps.get_version.outputs.version }}
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+    
+    - name: Get version from tag
+      id: get_version
+      run: echo "version=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+    
+    - name: Generate changelog
+      id: changelog
+      run: |
+        # Extract changelog for this version from CHANGELOG.md
+        VERSION="${{ steps.get_version.outputs.version }}"
+        if grep -q "## \[$VERSION\]" CHANGELOG.md; then
+          sed -n "/## \[$VERSION\]/,/## \[/p" CHANGELOG.md | sed '$d' > RELEASE_NOTES.md
+        else
+          echo "Release $VERSION" > RELEASE_NOTES.md
+          echo "" >> RELEASE_NOTES.md
+          echo "See CHANGELOG.md for details." >> RELEASE_NOTES.md
+        fi
+    
+    - name: Create Release
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ github.ref }}
+        release_name: Fresh Voxel Engine v${{ steps.get_version.outputs.version }}
+        body_path: RELEASE_NOTES.md
+        draft: false
+        prerelease: ${{ contains(github.ref, 'alpha') || contains(github.ref, 'beta') || contains(github.ref, 'rc') }}
+
+  build-linux:
+    needs: create-release
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Install Dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y \
+          libgl1-mesa-dev \
+          libglu1-mesa-dev \
+          libglew-dev \
+          libglfw3-dev \
+          libglm-dev \
+          libopenal-dev \
+          liblua5.4-dev \
+          cmake \
+          build-essential
+    
+    - name: Configure CMake
+      run: |
+        cmake -B build \
+          -DCMAKE_BUILD_TYPE=Release \
+          -DBUILD_TESTS=OFF
+    
+    - name: Build
+      run: cmake --build build -j$(nproc)
+    
+    - name: Package
+      run: |
+        cd build
+        mkdir -p fresh-linux-x64
+        cp FreshVoxelEngine fresh-linux-x64/
+        cp -r shaders fresh-linux-x64/
+        cp ../README.md fresh-linux-x64/
+        cp ../LICENSE fresh-linux-x64/
+        tar czf fresh-linux-x64-v${{ needs.create-release.outputs.version }}.tar.gz fresh-linux-x64/
+    
+    - name: Upload Release Asset
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ needs.create-release.outputs.upload_url }}
+        asset_path: build/fresh-linux-x64-v${{ needs.create-release.outputs.version }}.tar.gz
+        asset_name: fresh-linux-x64-v${{ needs.create-release.outputs.version }}.tar.gz
+        asset_content_type: application/gzip
+
+  build-windows:
+    needs: create-release
+    runs-on: windows-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup vcpkg
+      uses: lukka/run-vcpkg@v11
+      with:
+        vcpkgJsonGlob: '**/vcpkg.json'
+        runVcpkgInstall: true
+    
+    - name: Configure CMake
+      run: |
+        cmake -B build `
+          -DCMAKE_BUILD_TYPE=Release `
+          -DCMAKE_TOOLCHAIN_FILE=$env:VCPKG_INSTALLATION_ROOT\scripts\buildsystems\vcpkg.cmake `
+          -DBUILD_TESTS=OFF
+    
+    - name: Build
+      run: cmake --build build --config Release
+    
+    - name: Package
+      run: |
+        cd build
+        mkdir fresh-windows-x64
+        copy Release\FreshVoxelEngine.exe fresh-windows-x64\
+        xcopy /E /I shaders fresh-windows-x64\shaders
+        copy ..\README.md fresh-windows-x64\
+        copy ..\LICENSE fresh-windows-x64\
+        Compress-Archive -Path fresh-windows-x64 -DestinationPath fresh-windows-x64-v${{ needs.create-release.outputs.version }}.zip
+    
+    - name: Upload Release Asset
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ needs.create-release.outputs.upload_url }}
+        asset_path: build/fresh-windows-x64-v${{ needs.create-release.outputs.version }}.zip
+        asset_name: fresh-windows-x64-v${{ needs.create-release.outputs.version }}.zip
+        asset_content_type: application/zip
+
+  build-macos:
+    needs: create-release
+    runs-on: macos-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Install Dependencies
+      run: |
+        brew install glfw glew glm cmake openal-soft lua
+    
+    - name: Configure CMake
+      run: |
+        cmake -B build \
+          -DCMAKE_BUILD_TYPE=Release \
+          -DBUILD_TESTS=OFF
+    
+    - name: Build
+      run: cmake --build build -j$(sysctl -n hw.ncpu)
+    
+    - name: Package
+      run: |
+        cd build
+        mkdir -p fresh-macos-arm64
+        cp FreshVoxelEngine fresh-macos-arm64/
+        cp -r shaders fresh-macos-arm64/
+        cp ../README.md fresh-macos-arm64/
+        cp ../LICENSE fresh-macos-arm64/
+        tar czf fresh-macos-arm64-v${{ needs.create-release.outputs.version }}.tar.gz fresh-macos-arm64/
+    
+    - name: Upload Release Asset
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ needs.create-release.outputs.upload_url }}
+        asset_path: build/fresh-macos-arm64-v${{ needs.create-release.outputs.version }}.tar.gz
+        asset_name: fresh-macos-arm64-v${{ needs.create-release.outputs.version }}.tar.gz
+        asset_content_type: application/gzip
+
+  build-documentation:
+    needs: create-release
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Install Doxygen
+      run: sudo apt-get update && sudo apt-get install -y doxygen graphviz
+    
+    - name: Generate Documentation
+      run: doxygen Doxyfile
+    
+    - name: Package Documentation
+      run: |
+        cd docs/api/html
+        tar czf ../../../fresh-docs-v${{ needs.create-release.outputs.version }}.tar.gz .
+    
+    - name: Upload Documentation Asset
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ needs.create-release.outputs.upload_url }}
+        asset_path: fresh-docs-v${{ needs.create-release.outputs.version }}.tar.gz
+        asset_name: fresh-docs-v${{ needs.create-release.outputs.version }}.tar.gz
+        asset_content_type: application/gzip

@@ -660,12 +660,13 @@ Please read our [Code of Conduct](CODE_OF_CONDUCT.md) before contributing.
 - 📖 [Getting Started Guide](GETTING_STARTED.md) - Setup and first steps
 - 🏗️ [Architecture Overview](ARCHITECTURE.md) - System design and patterns
 - 🗺️ [Development Roadmap](ROADMAP.md) - Future plans and progress
+- 🛠️ [Development Tools](docs/DEVELOPMENT_TOOLS.md) - Code formatting, documentation generation, and release process (NEW!)
 - 📚 [Tutorials](docs/tutorials/) - Step-by-step guides
 - 🔨 [Examples](examples/) - Sample code and usage
 - 🌍 [Terraforming Guide](docs/TERRAFORMING.md) - World editing system
 - 🎨 [Editor Integration Guide](docs/EDITOR_INTEGRATION.md) - Comprehensive editor documentation
 - 📋 [Editor Implementation Summary](docs/EDITOR_IMPLEMENTATION_SUMMARY.md) - Technical implementation details
-- 🎮 [Input System Guide](docs/INPUT_SYSTEM.md) - Input modes, Hold Alt feature, and controls (NEW!)
+- 🎮 [Input System Guide](docs/INPUT_SYSTEM.md) - Input modes, Hold Alt feature, and controls
 - 📝 [Logging System](docs/LOGGING.md) - Error tracking and debugging
 - 🎨 [Texture System](textures/USAGE.md) - Using placeholder textures and assets
 - ⚙️ [GitHub Workflows](WORKFLOWS.md) - CI/CD and automation
