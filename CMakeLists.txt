@@ -699,3 +699,28 @@ if(BUILD_TESTS)
     message(STATUS "Tests configured successfully")
     message(STATUS "Run tests with: ctest or ./FreshVoxelEngineTests")
 endif()
+
+# ==============================================================================
+# Example Programs
+# ==============================================================================
+
+option(BUILD_EXAMPLES "Build example programs" ON)
+
+if(BUILD_EXAMPLES)
+    message(STATUS "Building example programs enabled")
+    
+    # Hello Fresh - Minimal console example (no graphics dependencies)
+    add_executable(hello_fresh
+        examples/hello_fresh.cpp
+        src/core/Logger.cpp
+    )
+    
+    target_include_directories(hello_fresh PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
+    target_compile_features(hello_fresh PRIVATE cxx_std_20)
+    
+    # Note: More complex examples that require graphics would go here
+    # For now we only build the simple console example to avoid graphics dependencies
+    
+    message(STATUS "Examples configured successfully")
+    message(STATUS "Run with: ./hello_fresh")
+endif()

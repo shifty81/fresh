@@ -1,0 +1,75 @@
+name: Code Quality
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  cppcheck:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Install cppcheck
+      run: sudo apt-get update && sudo apt-get install -y cppcheck
+    
+    - name: Run cppcheck
+      run: |
+        cppcheck --enable=all --std=c++20 --error-exitcode=0 \
+          --suppress=missingIncludeSystem \
+          --suppress=unusedFunction \
+          --inline-suppr \
+          -I include/ \
+          src/ 2>&1 | tee cppcheck-report.txt
+    
+    - name: Upload cppcheck report
+      uses: actions/upload-artifact@v4
+      with:
+        name: cppcheck-report
+        path: cppcheck-report.txt
+        retention-days: 7
+
+  clang-tidy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Install Dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y \
+          clang-tidy \
+          libgl1-mesa-dev \
+          libglu1-mesa-dev \
+          libglew-dev \
+          libglfw3-dev \
+          libglm-dev \
+          libopenal-dev \
+          liblua5.4-dev \
+          cmake \
+          build-essential
+    
+    - name: Configure CMake
+      run: |
+        cmake -B build \
+          -DCMAKE_BUILD_TYPE=Debug \
+          -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
+          -DBUILD_TESTS=ON
+    
+    - name: Run clang-tidy (advisory only)
+      continue-on-error: true
+      run: |
+        # Run clang-tidy on source files (advisory only, doesn't fail build)
+        find src/ -name "*.cpp" | head -20 | xargs -I {} \
+          clang-tidy {} -p build/ 2>&1 | tee clang-tidy-report.txt || true
+    
+    - name: Upload clang-tidy report
+      uses: actions/upload-artifact@v4
+      with:
+        name: clang-tidy-report
+        path: clang-tidy-report.txt
+        retention-days: 7
