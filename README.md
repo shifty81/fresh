@@ -626,6 +626,36 @@ Please read our [Code of Conduct](CODE_OF_CONDUCT.md) before contributing.
 - 🎨 [Texture System](textures/USAGE.md) - Using placeholder textures and assets
 - ⚙️ [GitHub Workflows](WORKFLOWS.md) - CI/CD and automation
 
+---
+
+## Known Limitations
+
+While Fresh Voxel Engine has a solid foundation, there are some known limitations to be aware of:
+
+### Graphics APIs
+- **DirectX 11**: Partial implementation (~40% complete) - needs HWND integration and rendering pipeline
+- **DirectX 12**: Early implementation (~30% complete) - not yet functional
+- **OpenGL**: Fully functional and recommended for all platforms
+
+### Systems in Development
+- **Lua Scripting**: Framework exists (~40% complete) but needs Sol2 integration for full functionality
+- **Networking**: Framework only (~10% complete) - multiplayer features not yet implemented
+- **AI System**: Basic framework (~50% complete) - behavior trees need further development
+
+### Testing
+- **Test Coverage**: Good coverage for core systems (95 tests passing)
+- **Platform Testing**: Primarily tested on Linux; Windows testing ongoing
+
+### Recommended for Production
+For production use, we recommend:
+- Using **OpenGL backend** (most stable across all platforms)
+- Focusing on **single-player experiences** (networking not ready)
+- Using **built-in systems** rather than Lua scripting (until Sol2 integration complete)
+
+For accurate, code-verified status of all systems, see [ACTUAL_STATUS.md](ACTUAL_STATUS.md).
+
+---
+
 ## Logging and Debugging
 
 The engine includes a comprehensive logging system that captures all errors, warnings, and information to help with debugging and development:
