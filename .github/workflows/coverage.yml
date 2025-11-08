@@ -1,0 +1,61 @@
+name: Code Coverage
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  coverage:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Install Dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y \
+          libgl1-mesa-dev \
+          libglu1-mesa-dev \
+          libglew-dev \
+          libglfw3-dev \
+          libglm-dev \
+          libopenal-dev \
+          liblua5.4-dev \
+          libgtest-dev \
+          cmake \
+          build-essential \
+          gcovr \
+          lcov
+    
+    - name: Configure CMake with Coverage
+      run: |
+        cmake -B build \
+          -DCMAKE_BUILD_TYPE=Debug \
+          -DCMAKE_CXX_FLAGS="--coverage -fprofile-arcs -ftest-coverage" \
+          -DCMAKE_EXE_LINKER_FLAGS="--coverage" \
+          -DBUILD_TESTS=ON
+    
+    - name: Build
+      run: cmake --build build -j$(nproc)
+    
+    - name: Run Tests
+      working-directory: build
+      run: ./FreshVoxelEngineTests
+    
+    - name: Generate Coverage Report
+      run: |
+        gcovr -r . --xml --xml-pretty -o coverage.xml \
+          --exclude='.*external/.*' \
+          --exclude='.*tests/.*' \
+          --exclude='.*build/.*'
+    
+    - name: Upload Coverage to Codecov
+      uses: codecov/codecov-action@v4
+      with:
+        files: ./coverage.xml
+        flags: unittests
+        name: codecov-umbrella
+        fail_ci_if_error: false
