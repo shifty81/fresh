@@ -68,6 +68,12 @@ public:
      */
     void swapBuffers();
 
+    /**
+     * @brief Get native window handle (HWND on Windows, etc.)
+     * @return Pointer to the native window handle, or nullptr if not available
+     */
+    void* getNativeWindowHandle() const;
+
 private:
     static void framebufferResizeCallback(GLFWwindow* window, int width, int height);
 

@@ -15,7 +15,8 @@ namespace fresh {
 // Helper classes for DirectX 11 resources
 class D3D11Buffer : public RenderBuffer {
 public:
-    D3D11Buffer(ComPtr<ID3D11Buffer> buf, size_t sz) : buffer(buf), size(sz) {}
+    D3D11Buffer(ComPtr<ID3D11Buffer> buf, ComPtr<ID3D11DeviceContext> ctx, size_t sz) 
+        : buffer(buf), context(ctx), size(sz) {}
     
     void bind() override {
         // Binding is done through device context based on buffer type
@@ -26,8 +27,22 @@ public:
     }
     
     void updateData(const void* data, size_t dataSize, size_t offset) override {
-        (void)data; (void)dataSize; (void)offset; // Unused - stub implementation
-        // D3D11 context->UpdateSubresource would be called here
+        if (!context || !buffer || !data) return;
+        
+        // For simple case with no offset, use UpdateSubresource
+        if (offset == 0 && dataSize <= size) {
+            context->UpdateSubresource(buffer.Get(), 0, nullptr, data, 0, 0);
+        } else {
+            // For partial updates, need to map/unmap the buffer
+            D3D11_MAPPED_SUBRESOURCE mappedResource;
+            HRESULT hr = context->Map(buffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
+            if (SUCCEEDED(hr)) {
+                if (offset + dataSize <= size) {
+                    memcpy(static_cast<char*>(mappedResource.pData) + offset, data, dataSize);
+                }
+                context->Unmap(buffer.Get(), 0);
+            }
+        }
     }
     
     size_t getSize() const override { return size; }
@@ -35,6 +50,7 @@ public:
     
 private:
     ComPtr<ID3D11Buffer> buffer;
+    ComPtr<ID3D11DeviceContext> context;
     size_t size;
 };
 
@@ -130,8 +146,8 @@ bool DirectX11RenderContext::initialize(Window* win) {
     }
     
     window = win;
-    width = 1280;  // TODO: Get from window
-    height = 720;
+    width = static_cast<int>(window->getWidth());
+    height = static_cast<int>(window->getHeight());
     
     if (!createDevice()) {
         std::cerr << "[DirectX 11] Failed to create device" << std::endl;
@@ -259,7 +275,7 @@ std::shared_ptr<RenderBuffer> DirectX11RenderContext::createVertexBuffer(const v
         return nullptr;
     }
     
-    return std::make_shared<D3D11Buffer>(buffer, size);
+    return std::make_shared<D3D11Buffer>(buffer, deviceContext, size);
 }
 
 std::shared_ptr<RenderBuffer> DirectX11RenderContext::createIndexBuffer(const void* data, size_t size) {
@@ -281,7 +297,7 @@ std::shared_ptr<RenderBuffer> DirectX11RenderContext::createIndexBuffer(const vo
         return nullptr;
     }
     
-    return std::make_shared<D3D11Buffer>(buffer, size);
+    return std::make_shared<D3D11Buffer>(buffer, deviceContext, size);
 }
 
 std::shared_ptr<RenderBuffer> DirectX11RenderContext::createUniformBuffer(size_t size) {
@@ -301,7 +317,7 @@ std::shared_ptr<RenderBuffer> DirectX11RenderContext::createUniformBuffer(size_t
         return nullptr;
     }
     
-    return std::make_shared<D3D11Buffer>(buffer, size);
+    return std::make_shared<D3D11Buffer>(buffer, deviceContext, size);
 }
 
 std::shared_ptr<RenderTexture> DirectX11RenderContext::createTexture(int w, int h, const void* data) {
@@ -348,18 +364,91 @@ std::shared_ptr<RenderTexture> DirectX11RenderContext::createTexture(int w, int 
 }
 
 std::shared_ptr<RenderShader> DirectX11RenderContext::createShader(const std::string& vertexCode, const std::string& fragmentCode) {
-    (void)vertexCode; (void)fragmentCode; // Unused - stub implementation
     if (!device) return nullptr;
-    
-    // In real implementation, would compile HLSL shaders
-    // For stub, just return dummy shader
     
     ComPtr<ID3D11VertexShader> vertexShader;
     ComPtr<ID3D11PixelShader> pixelShader;
     
-    // Stub implementation - would actually compile shaders here
-    std::cout << "[DirectX 11] Creating shader (stub)" << std::endl;
+    // Compile vertex shader
+    ComPtr<ID3DBlob> vsBlob;
+    ComPtr<ID3DBlob> errorBlob;
     
+    HRESULT hr = D3DCompile(
+        vertexCode.c_str(),
+        vertexCode.size(),
+        nullptr,
+        nullptr,
+        nullptr,
+        "main",
+        "vs_5_0",
+        D3DCOMPILE_ENABLE_STRICTNESS,
+        0,
+        &vsBlob,
+        &errorBlob
+    );
+    
+    if (FAILED(hr)) {
+        if (errorBlob) {
+            std::cerr << "[DirectX 11] Vertex shader compilation error: " 
+                      << static_cast<const char*>(errorBlob->GetBufferPointer()) << std::endl;
+        } else {
+            std::cerr << "[DirectX 11] Vertex shader compilation failed" << std::endl;
+        }
+        return nullptr;
+    }
+    
+    hr = device->CreateVertexShader(
+        vsBlob->GetBufferPointer(),
+        vsBlob->GetBufferSize(),
+        nullptr,
+        &vertexShader
+    );
+    
+    if (FAILED(hr)) {
+        std::cerr << "[DirectX 11] Failed to create vertex shader" << std::endl;
+        return nullptr;
+    }
+    
+    // Compile pixel shader
+    ComPtr<ID3DBlob> psBlob;
+    
+    hr = D3DCompile(
+        fragmentCode.c_str(),
+        fragmentCode.size(),
+        nullptr,
+        nullptr,
+        nullptr,
+        "main",
+        "ps_5_0",
+        D3DCOMPILE_ENABLE_STRICTNESS,
+        0,
+        &psBlob,
+        &errorBlob
+    );
+    
+    if (FAILED(hr)) {
+        if (errorBlob) {
+            std::cerr << "[DirectX 11] Pixel shader compilation error: " 
+                      << static_cast<const char*>(errorBlob->GetBufferPointer()) << std::endl;
+        } else {
+            std::cerr << "[DirectX 11] Pixel shader compilation failed" << std::endl;
+        }
+        return nullptr;
+    }
+    
+    hr = device->CreatePixelShader(
+        psBlob->GetBufferPointer(),
+        psBlob->GetBufferSize(),
+        nullptr,
+        &pixelShader
+    );
+    
+    if (FAILED(hr)) {
+        std::cerr << "[DirectX 11] Failed to create pixel shader" << std::endl;
+        return nullptr;
+    }
+    
+    std::cout << "[DirectX 11] Shaders compiled and created successfully" << std::endl;
     return std::make_shared<D3D11Shader>(vertexShader, pixelShader);
 }
 
@@ -399,18 +488,34 @@ bool DirectX11RenderContext::createDevice() {
 }
 
 bool DirectX11RenderContext::createSwapchain() {
+    // Get native window handle
+    HWND hwnd = static_cast<HWND>(window->getNativeWindowHandle());
+    if (!hwnd) {
+        std::cerr << "[DirectX 11] Failed to get native window handle" << std::endl;
+        return false;
+    }
+    
     // Get DXGI factory from device
     ComPtr<IDXGIDevice> dxgiDevice;
     HRESULT hr = device.As(&dxgiDevice);
-    if (FAILED(hr)) return false;
+    if (FAILED(hr)) {
+        std::cerr << "[DirectX 11] Failed to get DXGI device" << std::endl;
+        return false;
+    }
     
     ComPtr<IDXGIAdapter> adapter;
     hr = dxgiDevice->GetAdapter(&adapter);
-    if (FAILED(hr)) return false;
+    if (FAILED(hr)) {
+        std::cerr << "[DirectX 11] Failed to get DXGI adapter" << std::endl;
+        return false;
+    }
     
     ComPtr<IDXGIFactory> factory;
     hr = adapter->GetParent(__uuidof(IDXGIFactory), &factory);
-    if (FAILED(hr)) return false;
+    if (FAILED(hr)) {
+        std::cerr << "[DirectX 11] Failed to get DXGI factory" << std::endl;
+        return false;
+    }
     
     // Create swapchain description
     DXGI_SWAP_CHAIN_DESC swapchainDesc = {};
@@ -421,25 +526,92 @@ bool DirectX11RenderContext::createSwapchain() {
     swapchainDesc.BufferDesc.RefreshRate.Numerator = 60;
     swapchainDesc.BufferDesc.RefreshRate.Denominator = 1;
     swapchainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
-    swapchainDesc.OutputWindow = nullptr; // TODO: Get HWND from window
+    swapchainDesc.OutputWindow = hwnd;
     swapchainDesc.SampleDesc.Count = 1;
+    swapchainDesc.SampleDesc.Quality = 0;
     swapchainDesc.Windowed = TRUE;
     swapchainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
+    swapchainDesc.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
     
-    // Stub - would actually create swapchain with window handle
-    std::cout << "[DirectX 11] Swapchain created (stub)" << std::endl;
+    // Create the swapchain
+    hr = factory->CreateSwapChain(device.Get(), &swapchainDesc, &swapchain);
+    if (FAILED(hr)) {
+        std::cerr << "[DirectX 11] Failed to create swapchain" << std::endl;
+        return false;
+    }
+    
+    // Disable Alt+Enter fullscreen toggle (can be re-enabled if needed)
+    factory->MakeWindowAssociation(hwnd, DXGI_MWA_NO_ALT_ENTER);
+    
+    std::cout << "[DirectX 11] Swapchain created successfully" << std::endl;
     return true;
 }
 
 bool DirectX11RenderContext::createRenderTargetView() {
-    // Would get back buffer from swapchain and create RTV
-    std::cout << "[DirectX 11] Render target view created (stub)" << std::endl;
+    if (!swapchain) {
+        std::cerr << "[DirectX 11] Swapchain not initialized" << std::endl;
+        return false;
+    }
+    
+    // Get back buffer from swapchain
+    ComPtr<ID3D11Texture2D> backBuffer;
+    HRESULT hr = swapchain->GetBuffer(0, __uuidof(ID3D11Texture2D), 
+        reinterpret_cast<void**>(backBuffer.GetAddressOf()));
+    
+    if (FAILED(hr)) {
+        std::cerr << "[DirectX 11] Failed to get back buffer from swapchain" << std::endl;
+        return false;
+    }
+    
+    // Create render target view
+    hr = device->CreateRenderTargetView(backBuffer.Get(), nullptr, &renderTargetView);
+    
+    if (FAILED(hr)) {
+        std::cerr << "[DirectX 11] Failed to create render target view" << std::endl;
+        return false;
+    }
+    
+    std::cout << "[DirectX 11] Render target view created successfully" << std::endl;
     return true;
 }
 
 bool DirectX11RenderContext::createDepthStencilView() {
-    // Create depth stencil buffer and view
-    std::cout << "[DirectX 11] Depth stencil view created (stub)" << std::endl;
+    // Create depth stencil texture
+    D3D11_TEXTURE2D_DESC depthStencilDesc = {};
+    depthStencilDesc.Width = width;
+    depthStencilDesc.Height = height;
+    depthStencilDesc.MipLevels = 1;
+    depthStencilDesc.ArraySize = 1;
+    depthStencilDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+    depthStencilDesc.SampleDesc.Count = 1;
+    depthStencilDesc.SampleDesc.Quality = 0;
+    depthStencilDesc.Usage = D3D11_USAGE_DEFAULT;
+    depthStencilDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL;
+    depthStencilDesc.CPUAccessFlags = 0;
+    depthStencilDesc.MiscFlags = 0;
+    
+    HRESULT hr = device->CreateTexture2D(&depthStencilDesc, nullptr, &depthStencilBuffer);
+    if (FAILED(hr)) {
+        std::cerr << "[DirectX 11] Failed to create depth stencil buffer" << std::endl;
+        return false;
+    }
+    
+    // Create depth stencil view
+    D3D11_DEPTH_STENCIL_VIEW_DESC dsvDesc = {};
+    dsvDesc.Format = depthStencilDesc.Format;
+    dsvDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
+    dsvDesc.Texture2D.MipSlice = 0;
+    
+    hr = device->CreateDepthStencilView(depthStencilBuffer.Get(), &dsvDesc, &depthStencilView);
+    if (FAILED(hr)) {
+        std::cerr << "[DirectX 11] Failed to create depth stencil view" << std::endl;
+        return false;
+    }
+    
+    // Bind render targets
+    deviceContext->OMSetRenderTargets(1, renderTargetView.GetAddressOf(), depthStencilView.Get());
+    
+    std::cout << "[DirectX 11] Depth stencil view created successfully" << std::endl;
     return true;
 }
 

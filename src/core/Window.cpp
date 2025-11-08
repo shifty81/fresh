@@ -2,6 +2,12 @@
 #include <GLFW/glfw3.h>
 #include <iostream>
 
+// Platform-specific includes for native window handle
+#ifdef _WIN32
+#define GLFW_EXPOSE_NATIVE_WIN32
+#include <GLFW/glfw3native.h>
+#endif
+
 namespace fresh {
 
 Window::Window(uint32_t width, uint32_t height, const std::string& title)
@@ -78,6 +84,15 @@ void Window::swapBuffers() {
     if (m_window) {
         glfwSwapBuffers(m_window);
     }
+}
+
+void* Window::getNativeWindowHandle() const {
+#ifdef _WIN32
+    if (m_window) {
+        return (void*)glfwGetWin32Window(m_window);
+    }
+#endif
+    return nullptr;
 }
 
 } // namespace fresh
