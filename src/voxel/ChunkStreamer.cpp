@@ -19,24 +19,29 @@ ChunkStreamer::~ChunkStreamer() {
 void ChunkStreamer::update(const glm::vec3& playerPosition) {
     if (!world) return;
     
+    // Convert world position to chunk coordinates (16 blocks per chunk)
     glm::ivec2 playerChunk = worldToChunk(playerPosition);
     
-    // Only update if player moved to a different chunk
+    // Optimization: Only recalculate chunks when player crosses chunk boundary
+    // This prevents unnecessary updates when player moves within same chunk
     if (playerChunk != lastPlayerChunk) {
         lastPlayerChunk = playerChunk;
         determineChunksToLoad(playerPosition);
         determineChunksToUnload(playerPosition);
     }
     
-    // Process some chunks from load queue
+    // Process some chunks from load queue each frame
+    // This spreads generation over multiple frames to avoid stuttering
     processLoadQueue();
 }
 
 void ChunkStreamer::setViewDistance(int chunks) {
+    // Clamp view distance to prevent excessive memory usage or too small range
     viewDistance = std::max(1, std::min(chunks, 32)); // Clamp to reasonable range
 }
 
 void ChunkStreamer::shutdown() {
+    // Signal background thread to stop and wait for it to finish
     shouldRun = false;
     if (generationThread.joinable()) {
         generationThread.join();
@@ -55,16 +60,20 @@ bool ChunkStreamer::isChunkLoaded(const glm::ivec2& chunkPos) const {
 }
 
 void ChunkStreamer::determineChunksToLoad(const glm::vec3& playerPos) {
+    // Determine which chunks should be loaded based on player position
+    // Uses circular loading pattern expanding outward from player
     glm::ivec2 playerChunk = worldToChunk(playerPos);
     
     std::lock_guard<std::mutex> lock(queueMutex);
     
-    // Load chunks in circular pattern around player
+    // Load chunks in expanding circular rings around player
+    // This ensures chunks closest to player load first (better user experience)
     for (int radius = 0; radius <= viewDistance; ++radius) {
         // Only process chunks at current radius (forms expanding circles)
         for (int x = -radius; x <= radius; ++x) {
             for (int z = -radius; z <= radius; ++z) {
                 // Check if this is on the current radius ring
+                // Uses Chebyshev distance (max of abs differences)
                 int dist = std::max(std::abs(x), std::abs(z));
                 if (dist != radius) continue;
                 

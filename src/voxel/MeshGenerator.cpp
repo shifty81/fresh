@@ -13,20 +13,24 @@ MeshGenerator::~MeshGenerator() {
 void MeshGenerator::generateChunkMesh(const Chunk* chunk, 
                                      std::vector<float>& vertices,
                                      std::vector<uint32_t>& indices) {
-    // Greedy meshing would be implemented here
-    // For now, fall back to simple meshing
+    // Entry point for chunk mesh generation
+    // Future: Implement greedy meshing optimization for reduced triangle count
+    // Current: Uses simple face-by-face meshing with basic culling
     generateSimpleMesh(chunk, vertices, indices);
 }
 
 void MeshGenerator::generateSimpleMesh(const Chunk* chunk,
                                       std::vector<float>& vertices,
                                       std::vector<uint32_t>& indices) {
+    // Simple mesh generation with face culling
+    // Iterates through all voxels and generates faces for solid blocks
+    // Only adds faces that are adjacent to transparent/air blocks (culling optimization)
     vertices.clear();
     indices.clear();
     
     uint32_t vertexCount = 0;
     
-    // Generate faces for each solid voxel
+    // Iterate in Y-Z-X order for better cache locality during rendering
     for (int y = 0; y < CHUNK_HEIGHT; ++y) {
         for (int z = 0; z < CHUNK_SIZE; ++z) {
             for (int x = 0; x < CHUNK_SIZE; ++x) {
