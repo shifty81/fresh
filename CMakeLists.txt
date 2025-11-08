@@ -156,15 +156,31 @@ if(NOT OpenAL_FOUND)
 endif()
 
 # Lua for scripting
-# Try standard FindLua module first (works with vcpkg and system installations)
-find_package(Lua QUIET)
-
-if(NOT Lua_FOUND)
-    # Fallback to lowercase package name for some vcpkg configurations
+# On Windows with vcpkg, prefer CONFIG mode to get proper target
+if(WIN32 AND USING_VCPKG)
+    # Try vcpkg's CONFIG mode first on Windows
     find_package(lua CONFIG QUIET)
     if(lua_FOUND)
         set(Lua_FOUND TRUE)
         set(LUA_FOUND_VIA_CONFIG TRUE)
+        message(STATUS "Lua found via vcpkg CONFIG mode")
+        
+        # Get Lua variables from the config
+        # Some vcpkg versions set these, some don't
+        if(NOT DEFINED LUA_INCLUDE_DIR AND DEFINED lua_INCLUDE_DIR)
+            set(LUA_INCLUDE_DIR ${lua_INCLUDE_DIR})
+        endif()
+        if(NOT DEFINED LUA_LIBRARIES AND DEFINED lua_LIBRARIES)
+            set(LUA_LIBRARIES ${lua_LIBRARIES})
+        endif()
+    endif()
+endif()
+
+if(NOT Lua_FOUND)
+    # Try standard FindLua module (works with system installations)
+    find_package(Lua QUIET)
+    if(Lua_FOUND)
+        message(STATUS "Lua found via FindLua module")
     endif()
 endif()
 
@@ -471,17 +487,52 @@ if(Lua_FOUND)
     add_definitions(-DFRESH_LUA_AVAILABLE)
     
     if(LUA_FOUND_VIA_CONFIG)
-        # Using vcpkg's Lua config - link against the lua target
-        target_link_libraries(${PROJECT_NAME} PRIVATE lua)
-        message(STATUS "Lua enabled via CONFIG mode (vcpkg)")
+        # Using vcpkg's Lua config - check for different possible target names
+        # vcpkg on Windows creates the 'lua' target
+        if(TARGET lua)
+            target_link_libraries(${PROJECT_NAME} PRIVATE lua)
+            message(STATUS "Lua enabled via CONFIG mode - linked target 'lua'")
+            # Also explicitly add include dirs if available (redundant but safe)
+            if(DEFINED LUA_INCLUDE_DIR)
+                target_include_directories(${PROJECT_NAME} PRIVATE ${LUA_INCLUDE_DIR})
+                message(STATUS "  LUA_INCLUDE_DIR: ${LUA_INCLUDE_DIR}")
+            endif()
+        elseif(TARGET lua::lua)
+            target_link_libraries(${PROJECT_NAME} PRIVATE lua::lua)
+            message(STATUS "Lua enabled via CONFIG mode - linked target 'lua::lua'")
+            if(DEFINED LUA_INCLUDE_DIR)
+                target_include_directories(${PROJECT_NAME} PRIVATE ${LUA_INCLUDE_DIR})
+                message(STATUS "  LUA_INCLUDE_DIR: ${LUA_INCLUDE_DIR}")
+            endif()
+        else()
+            # Fallback: use variables if targets don't exist
+            if(DEFINED LUA_LIBRARIES)
+                if(DEFINED LUA_INCLUDE_DIR)
+                    target_include_directories(${PROJECT_NAME} PRIVATE ${LUA_INCLUDE_DIR})
+                endif()
+                target_link_libraries(${PROJECT_NAME} PRIVATE ${LUA_LIBRARIES})
+                message(STATUS "Lua enabled via CONFIG mode - using variables")
+                message(STATUS "  LUA_INCLUDE_DIR: ${LUA_INCLUDE_DIR}")
+                message(STATUS "  LUA_LIBRARIES: ${LUA_LIBRARIES}")
+            else()
+                message(WARNING "Lua found via CONFIG but no targets or variables available")
+                message(WARNING "This may cause linking errors!")
+            endif()
+        endif()
     else()
         # Using standard FindLua module variables
-        target_include_directories(${PROJECT_NAME} PRIVATE ${LUA_INCLUDE_DIR})
-        target_link_libraries(${PROJECT_NAME} PRIVATE ${LUA_LIBRARIES})
+        if(DEFINED LUA_INCLUDE_DIR)
+            target_include_directories(${PROJECT_NAME} PRIVATE ${LUA_INCLUDE_DIR})
+        endif()
+        if(DEFINED LUA_LIBRARIES)
+            target_link_libraries(${PROJECT_NAME} PRIVATE ${LUA_LIBRARIES})
+        endif()
         message(STATUS "Lua enabled via FindLua module")
         message(STATUS "  LUA_INCLUDE_DIR: ${LUA_INCLUDE_DIR}")
         message(STATUS "  LUA_LIBRARIES: ${LUA_LIBRARIES}")
-        message(STATUS "  LUA_VERSION_STRING: ${LUA_VERSION_STRING}")
+        if(DEFINED LUA_VERSION_STRING)
+            message(STATUS "  LUA_VERSION_STRING: ${LUA_VERSION_STRING}")
+        endif()
     endif()
     
     # Add Sol2 header-only library for modern C++ Lua binding
