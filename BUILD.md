@@ -290,6 +290,17 @@ No configuration required - the engine detects capabilities at runtime.
 - Ensure "Desktop development with C++" workload is installed
 - This includes the Windows 10/11 SDK with DirectX headers
 
+### "Cannot open include file: 'lua.h'" or Lua-related errors
+**Solution:**
+- **Lua is optional** - The engine can build and run without it
+- If you see warnings about "Lua not found" during CMake configuration, this is expected and safe to ignore
+- Asset management Lua configuration features will use stub implementations when Lua is not installed
+- **To enable Lua support:**
+  - Windows: `vcpkg install luajit:x64-windows` or `vcpkg install lua:x64-windows`
+  - Linux: `sudo apt-get install liblua5.4-dev`
+  - macOS: `brew install lua`
+- After installing Lua, reconfigure with CMake to enable Lua features
+
 ### Build succeeds but "ALL_BUILD cannot be started" when pressing F5
 **Solution:**
 - In Visual Studio Solution Explorer, right-click **FreshVoxelEngine** project
