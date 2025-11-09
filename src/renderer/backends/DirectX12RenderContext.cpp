@@ -270,8 +270,7 @@ bool DirectX12RenderContext::beginFrame() {
     }
     
     // Clear render target
-    float clearColor[4] = { 0.0f, 0.2f, 0.4f, 1.0f };
-    clearColor(clearColor[0], clearColor[1], clearColor[2], clearColor[3]);
+    clearColor(0.0f, 0.2f, 0.4f, 1.0f);
     
     // Clear depth stencil
     clearDepth(1.0f);
