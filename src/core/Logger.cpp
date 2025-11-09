@@ -142,13 +142,13 @@ void Logger::log(LogLevel level, const std::string& message, const std::string& 
     writeToFile(m_applicationLog, logMessage);
     
     // Write errors and fatal messages to environment log
-    if (level == LogLevel::ERROR || level == LogLevel::FATAL) {
+    if (level == LogLevel::ERR || level == LogLevel::FATAL) {
         writeToFile(m_environmentLog, logMessage);
     }
     
     // Output to console if enabled
     if (m_consoleOutput) {
-        if (level == LogLevel::ERROR || level == LogLevel::FATAL) {
+        if (level == LogLevel::ERR || level == LogLevel::FATAL) {
             std::cerr << logMessage;
         } else {
             std::cout << logMessage;
@@ -165,7 +165,7 @@ void Logger::warning(const std::string& message, const std::string& component) {
 }
 
 void Logger::error(const std::string& message, const std::string& component) {
-    log(LogLevel::ERROR, message, component);
+    log(LogLevel::ERR, message, component);
 }
 
 void Logger::fatal(const std::string& message, const std::string& component) {
@@ -196,7 +196,7 @@ std::string Logger::getLevelString(LogLevel level) const {
     switch (level) {
         case LogLevel::INFO:    return "INFO";
         case LogLevel::WARNING: return "WARNING";
-        case LogLevel::ERROR:   return "ERROR";
+        case LogLevel::ERR:     return "ERROR";
         case LogLevel::FATAL:   return "FATAL";
         default:                return "UNKNOWN";
     }

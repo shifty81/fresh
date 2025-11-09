@@ -16,8 +16,8 @@ CharacterRenderer::~CharacterRenderer() {
     shutdown();
 }
 
-void CharacterRenderer::initialize(RenderContext* renderContext) {
-    this->renderContext = renderContext;
+void CharacterRenderer::initialize(RenderContext* ctx) {
+    this->renderContext = ctx;
     initialized = true;
 }
 
@@ -192,8 +192,8 @@ CharacterRenderManager::~CharacterRenderManager() {
     clear();
 }
 
-void CharacterRenderManager::initialize(CharacterRenderer* renderer) {
-    this->renderer = renderer;
+void CharacterRenderManager::initialize(CharacterRenderer* charRenderer) {
+    this->renderer = charRenderer;
 }
 
 int CharacterRenderManager::registerCharacter(VoxelCharacter* character) {

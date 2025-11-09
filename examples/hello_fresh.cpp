@@ -38,7 +38,7 @@ int main() {
     // Log at different levels
     logger.log(fresh::LogLevel::INFO, "This is an info message");
     logger.log(fresh::LogLevel::WARNING, "This is a warning message");
-    logger.log(fresh::LogLevel::ERROR, "This is an error message (for testing)");
+    logger.log(fresh::LogLevel::ERR, "This is an error message (for testing)");
     
     std::cout << "   ✓ Logging works at all levels" << std::endl;
     std::cout << std::endl;
