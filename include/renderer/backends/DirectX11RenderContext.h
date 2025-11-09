@@ -1,6 +1,7 @@
 #pragma once
 
 #include "renderer/RenderContext.h"
+#include "voxel/VoxelTypes.h"
 #include <unordered_map>
 
 #ifdef _WIN32
@@ -10,9 +11,6 @@
 using Microsoft::WRL::ComPtr;
 
 namespace fresh {
-
-// Forward declarations
-struct ChunkPos;
 
 /**
  * @brief DirectX 11 implementation of render context
@@ -86,7 +84,7 @@ private:
         ComPtr<ID3D11Buffer> indexBuffer;
         size_t indexCount = 0;
     };
-    std::unordered_map<struct ChunkPos, ChunkRenderData> chunkRenderData;
+    std::unordered_map<ChunkPos, ChunkRenderData> chunkRenderData;
 };
 
 } // namespace fresh
