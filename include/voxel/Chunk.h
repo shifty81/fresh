@@ -43,13 +43,13 @@ public:
      * @brief Get chunk position
      * @return Chunk position
      */
-    const ChunkPos& getPosition() const noexcept { return m_position; }
+    [[nodiscard]] const ChunkPos& getPosition() const noexcept { return m_position; }
 
     /**
      * @brief Check if chunk needs mesh regeneration
      * @return true if mesh is dirty, false otherwise
      */
-    bool isDirty() const noexcept { return m_dirty; }
+    [[nodiscard]] bool isDirty() const noexcept { return m_dirty; }
 
     /**
      * @brief Mark chunk as needing mesh regeneration
@@ -70,13 +70,13 @@ public:
      * @brief Get the mesh data
      * @return Pointer to mesh vertices
      */
-    const std::vector<float>& getMeshVertices() const noexcept { return m_meshVertices; }
+    [[nodiscard]] const std::vector<float>& getMeshVertices() const noexcept { return m_meshVertices; }
 
     /**
      * @brief Get the mesh indices
      * @return Pointer to mesh indices
      */
-    const std::vector<uint32_t>& getMeshIndices() const noexcept { return m_meshIndices; }
+    [[nodiscard]] const std::vector<uint32_t>& getMeshIndices() const noexcept { return m_meshIndices; }
 
 private:
     inline int getIndex(int x, int y, int z) const noexcept {

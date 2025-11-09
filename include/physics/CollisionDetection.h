@@ -17,12 +17,12 @@ struct AABB {
     AABB() : min(0.0f), max(0.0f) {}
     AABB(const glm::vec3& min, const glm::vec3& max) : min(min), max(max) {}
     
-    glm::vec3 getCenter() const noexcept { return (min + max) * 0.5f; }
-    glm::vec3 getExtents() const noexcept { return (max - min) * 0.5f; }
-    glm::vec3 getSize() const noexcept { return max - min; }
+    [[nodiscard]] glm::vec3 getCenter() const noexcept { return (min + max) * 0.5f; }
+    [[nodiscard]] glm::vec3 getExtents() const noexcept { return (max - min) * 0.5f; }
+    [[nodiscard]] glm::vec3 getSize() const noexcept { return max - min; }
     
-    bool contains(const glm::vec3& point) const noexcept;
-    bool intersects(const AABB& other) const noexcept;
+    [[nodiscard]] bool contains(const glm::vec3& point) const noexcept;
+    [[nodiscard]] bool intersects(const AABB& other) const noexcept;
 };
 
 /**
@@ -36,9 +36,9 @@ struct BoundingSphere {
     BoundingSphere(const glm::vec3& center, float radius) 
         : center(center), radius(radius) {}
     
-    bool contains(const glm::vec3& point) const noexcept;
-    bool intersects(const BoundingSphere& other) const noexcept;
-    bool intersects(const AABB& aabb) const noexcept;
+    [[nodiscard]] bool contains(const glm::vec3& point) const noexcept;
+    [[nodiscard]] bool intersects(const BoundingSphere& other) const noexcept;
+    [[nodiscard]] bool intersects(const AABB& aabb) const noexcept;
 };
 
 /**
@@ -52,7 +52,7 @@ struct Ray {
     Ray(const glm::vec3& origin, const glm::vec3& direction)
         : origin(origin), direction(glm::normalize(direction)) {}
     
-    glm::vec3 getPoint(float distance) const noexcept {
+    [[nodiscard]] glm::vec3 getPoint(float distance) const noexcept {
         return origin + direction * distance;
     }
 };

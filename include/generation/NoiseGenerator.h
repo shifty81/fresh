@@ -27,7 +27,7 @@ public:
      * @param y Y coordinate
      * @return Noise value in range [-1, 1]
      */
-    float perlin2D(float x, float y) const;
+    [[nodiscard]] float perlin2D(float x, float y) const;
 
     /**
      * @brief Generate 3D Perlin noise
@@ -36,7 +36,7 @@ public:
      * @param z Z coordinate
      * @return Noise value in range [-1, 1]
      */
-    float perlin3D(float x, float y, float z) const;
+    [[nodiscard]] float perlin3D(float x, float y, float z) const;
 
     /**
      * @brief Generate fractal noise (multiple octaves)
@@ -47,13 +47,13 @@ public:
      * @param lacunarity Frequency multiplier per octave
      * @return Noise value
      */
-    float fractalNoise2D(float x, float y, int octaves = 4, 
+    [[nodiscard]] float fractalNoise2D(float x, float y, int octaves = 4, 
                         float persistence = 0.5f, float lacunarity = 2.0f) const;
 
     /**
      * @brief Generate 3D fractal noise
      */
-    float fractalNoise3D(float x, float y, float z, int octaves = 4,
+    [[nodiscard]] float fractalNoise3D(float x, float y, float z, int octaves = 4,
                         float persistence = 0.5f, float lacunarity = 2.0f) const;
 
 private:

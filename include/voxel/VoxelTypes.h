@@ -37,15 +37,15 @@ struct Voxel {
     Voxel() : type(VoxelType::Air), light(0) {}
     explicit Voxel(VoxelType t) : type(t), light(0) {}
     
-    bool isOpaque() const noexcept {
+    [[nodiscard]] bool isOpaque() const noexcept {
         return type != VoxelType::Air && type != VoxelType::Water && type != VoxelType::Glass;
     }
     
-    bool isTransparent() const noexcept {
+    [[nodiscard]] bool isTransparent() const noexcept {
         return type == VoxelType::Water || type == VoxelType::Glass || type == VoxelType::Ice;
     }
     
-    bool isSolid() const noexcept {
+    [[nodiscard]] bool isSolid() const noexcept {
         return type != VoxelType::Air;
     }
 };
