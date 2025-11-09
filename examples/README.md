@@ -1,108 +1,117 @@
-# Fresh Voxel Engine Examples
+# Fresh Voxel Engine - Examples
 
-This directory contains example code demonstrating various features of the Fresh Voxel Engine.
+This directory contains practical examples demonstrating the Fresh Voxel Engine's features.
 
-## Available Examples
+## 📚 Available Examples
 
-### 1. Basic Setup
-- [basic_setup.cpp](basic_setup.cpp) - Minimal engine initialization
+### 1. Getting Started
+- **[01_hello_engine.cpp](01_hello_engine.cpp)** - Minimal engine initialization
+- **[02_create_window.cpp](02_create_window.cpp)** - Open a window with DirectX
+- **[03_logging_demo.cpp](03_logging_demo.cpp)** - Using the logging system
 
 ### 2. Voxel World
-- [creating_chunks.cpp](creating_chunks.cpp) - Create and manage chunks
-- [terrain_generation.cpp](terrain_generation.cpp) - Procedural terrain generation
-- [voxel_interaction.cpp](voxel_interaction.cpp) - Place and remove voxels
+- **[04_create_world.cpp](04_create_world.cpp)** - Create a simple voxel world
+- **[05_terrain_generation.cpp](05_terrain_generation.cpp)** - Procedural terrain
+- **[06_chunk_system.cpp](06_chunk_system.cpp)** - Understanding chunks
 
-### 3. World Editing
-- [terraforming_tools.cpp](terraforming_tools.cpp) - Using terraforming system
-- [custom_structures.cpp](custom_structures.cpp) - Build custom structures
+### 3. Player & Interaction
+- **[07_player_movement.cpp](07_player_movement.cpp)** - First-person controls
+- **[08_place_remove_blocks.cpp](08_place_remove_blocks.cpp)** - Block interaction
+- **[09_raycasting.cpp](09_raycasting.cpp)** - Block selection with raycasting
 
-### 4. Asset System
-- [loading_assets.cpp](loading_assets.cpp) - Load custom asset packs
-- [creating_asset_pack.cpp](creating_asset_pack.cpp) - Create your own asset pack
+### 4. Advanced Features
+- **[10_editor_integration.cpp](10_editor_integration.cpp)** - Using the editor
+- **[11_terraforming.cpp](11_terraforming.cpp)** - Terraforming tools
+- **[12_save_load_world.cpp](12_save_load_world.cpp)** - World persistence
 
-### 5. Physics & Interaction
-- [raycasting.cpp](raycasting.cpp) - Raycast to interact with voxels
-- [collision_detection.cpp](collision_detection.cpp) - Detect collisions
+## 🚀 Using Examples
 
-### 6. Player & Camera
-- [player_controller.cpp](player_controller.cpp) - Implement player movement
-- [camera_system.cpp](camera_system.cpp) - Camera controls
+### Important Note
 
-## Building Examples
+**The examples directory contains documentation and code snippets demonstrating API usage patterns.** They are intended for learning and reference, not as standalone executables.
 
-Each example is a standalone program. To build an example:
+**To play the game**: Run the main `FreshVoxelEngine.exe` executable, which contains all features integrated into a complete playable demo.
 
-```bash
-# From the repository root
-mkdir build && cd build
-cmake ..
-make
+**To learn the APIs**: Study the example files to understand how each system works.
 
-# Run an example (they will be added to CMakeLists.txt)
-./examples/basic_setup
-```
+## 📖 Example Structure
 
-## Running Examples
-
-Most examples require:
-1. OpenGL/DirectX-capable GPU and drivers
-2. GLFW for window management
-3. Shader files in the `shaders/` directory
-
-## Contributing Examples
-
-Want to contribute an example? Great! Please:
-1. Create a new `.cpp` file in this directory
-2. Add clear comments explaining the code
-3. Update this README with a description
-4. Submit a pull request
-
-## Example Template
+Each example follows this pattern:
 
 ```cpp
 /**
  * @file example_name.cpp
- * @brief Brief description of what this example demonstrates
+ * @brief Brief description
  * 
- * Detailed explanation of the example, what concepts it covers,
- * and what the user should learn from it.
+ * This example demonstrates:
+ * - Feature A
+ * - Feature B
+ * - Feature C
  */
 
-#include <iostream>
 #include "core/Engine.h"
 // ... other includes
 
 int main() {
-    std::cout << "=== Example: [Name] ===" << std::endl;
+    // Initialize engine
+    fresh::Engine engine;
+    if (!engine.initialize()) {
+        return 1;
+    }
     
-    // Your example code here
+    // Example-specific code here
+    // ...
     
-    std::cout << "Example completed successfully!" << std::endl;
+    // Run engine
+    engine.run();
+    
+    // Cleanup
+    engine.shutdown();
+    
     return 0;
 }
 ```
 
-## Learning Path
+## 🎯 Learning Path
 
-Recommended order for learning:
+### Beginner (Start Here!)
+1. **01_hello_engine.cpp** - Understand basic initialization
+2. **02_create_window.cpp** - See graphics in action
+3. **03_logging_demo.cpp** - Learn debugging with logs
+4. **04_create_world.cpp** - Your first voxel world
 
-1. **Start Here**: `basic_setup.cpp`
-2. **Voxel Basics**: `creating_chunks.cpp` → `voxel_interaction.cpp`
-3. **World Generation**: `terrain_generation.cpp`
-4. **Player Control**: `player_controller.cpp` → `camera_system.cpp`
-5. **World Editing**: `terraforming_tools.cpp` → `custom_structures.cpp`
-6. **Advanced**: `loading_assets.cpp` → `collision_detection.cpp`
+### Intermediate
+5. **05_terrain_generation.cpp** - Procedural generation
+6. **07_player_movement.cpp** - Player controller
+7. **08_place_remove_blocks.cpp** - Interactive gameplay
+8. **09_raycasting.cpp** - Advanced selection
 
-## Additional Resources
+### Advanced
+9. **10_editor_integration.cpp** - Editor architecture
+10. **11_terraforming.cpp** - Advanced world editing
+11. **12_save_load_world.cpp** - Serialization patterns
 
-- [Getting Started Guide](../GETTING_STARTED.md)
-- [Architecture Documentation](../ARCHITECTURE.md)
-- [API Reference](../docs/) (coming soon)
-- [Video Tutorials](https://example.com) (coming soon)
+## 💡 Tips
 
-## Support
+- **Read the Comments** - Each example has detailed documentation
+- **Experiment** - Modify parameters and observe changes
+- **Build Incrementally** - Start simple, add complexity
+- **Check Main Docs** - See [../docs/](../docs/) for system details
 
-If you have questions about examples:
-- Open an issue with the `question` label
-- Check existing discussions
-- Refer to the main documentation
+## 🔗 Resources
+
+- **Main README** - [../README.md](../README.md)
+- **Documentation Index** - [../DOCUMENTATION_INDEX.md](../DOCUMENTATION_INDEX.md)
+- **Build Instructions** - [../BUILD.md](../BUILD.md)
+- **API Reference** - [../docs/api/](../docs/api/)
+- **Tutorials** - [../docs/tutorials/](../docs/tutorials/)
+
+## 🆘 Need Help?
+
+- 💬 [GitHub Discussions](https://github.com/shifty81/fresh/discussions)
+- 🐛 [Report Issues](https://github.com/shifty81/fresh/issues)
+- 📖 [Documentation](https://github.com/shifty81/fresh/tree/main/docs)
+
+---
+
+**Note**: These examples demonstrate the Fresh Voxel Engine API. For a complete playable demo with all features, run the main `FreshVoxelEngine.exe` executable.
