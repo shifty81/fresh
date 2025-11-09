@@ -3,8 +3,16 @@
 #ifdef _WIN32
 
 #include "core/Window.h"
+#include "voxel/VoxelWorld.h"
+#include "voxel/Chunk.h"
+#include "voxel/VoxelTypes.h"
+#include "gameplay/Player.h"
+#include "gameplay/Camera.h"
 #include <iostream>
 #include <d3dcompiler.h>
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 #pragma comment(lib, "d3d11.lib")
 #pragma comment(lib, "dxgi.lib")
@@ -169,12 +177,21 @@ bool DirectX11RenderContext::initialize(Window* win) {
         return false;
     }
     
+    // Initialize voxel rendering system
+    if (!initializeVoxelRendering()) {
+        std::cerr << "[DirectX 11] Failed to initialize voxel rendering" << std::endl;
+        return false;
+    }
+    
     std::cout << "[DirectX 11] DirectX 11 context initialized successfully" << std::endl;
     return true;
 }
 
 void DirectX11RenderContext::shutdown() {
     std::cout << "[DirectX 11] Shutting down DirectX 11 context..." << std::endl;
+    
+    // Shutdown voxel rendering first
+    shutdownVoxelRendering();
     
     // Release resources in reverse order
     depthStencilView.Reset();
@@ -613,6 +630,323 @@ bool DirectX11RenderContext::createDepthStencilView() {
     
     std::cout << "[DirectX 11] Depth stencil view created successfully" << std::endl;
     return true;
+}
+
+bool DirectX11RenderContext::initializeVoxelRendering() {
+    // Load and compile HLSL shader
+    std::string shaderCode = R"(
+        // Voxel Rendering Shader for DirectX 11
+        cbuffer MatrixBuffer : register(b0)
+        {
+            matrix modelViewProj;
+        };
+
+        struct VertexInput
+        {
+            float3 position : POSITION;
+            float3 normal : NORMAL;
+        };
+
+        struct PixelInput
+        {
+            float4 position : SV_POSITION;
+            float3 normal : NORMAL;
+            float3 worldPos : TEXCOORD0;
+        };
+
+        PixelInput VSMain(VertexInput input)
+        {
+            PixelInput output;
+            output.position = mul(float4(input.position, 1.0f), modelViewProj);
+            output.normal = input.normal;
+            output.worldPos = input.position;
+            return output;
+        }
+
+        float4 PSMain(PixelInput input) : SV_TARGET
+        {
+            // Simple directional lighting
+            float3 lightDir = normalize(float3(0.5f, 1.0f, 0.3f));
+            float3 normal = normalize(input.normal);
+            float diff = max(dot(normal, lightDir), 0.0f);
+            
+            // Ambient + diffuse
+            float3 ambient = float3(0.3f, 0.3f, 0.3f);
+            float3 diffuse = float3(0.7f, 0.7f, 0.7f) * diff;
+            
+            // Base voxel color
+            float3 color = float3(0.5f, 0.7f, 0.5f);
+            float3 result = (ambient + diffuse) * color;
+            
+            return float4(result, 1.0f);
+        }
+    )";
+    
+    // Compile vertex shader
+    ComPtr<ID3DBlob> vsBlob;
+    ComPtr<ID3DBlob> errorBlob;
+    
+    HRESULT hr = D3DCompile(
+        shaderCode.c_str(),
+        shaderCode.size(),
+        nullptr,
+        nullptr,
+        nullptr,
+        "VSMain",
+        "vs_5_0",
+        D3DCOMPILE_ENABLE_STRICTNESS,
+        0,
+        &vsBlob,
+        &errorBlob
+    );
+    
+    if (FAILED(hr)) {
+        if (errorBlob) {
+            std::cerr << "[DirectX 11] Vertex shader compilation error: " 
+                      << static_cast<const char*>(errorBlob->GetBufferPointer()) << std::endl;
+        }
+        return false;
+    }
+    
+    hr = device->CreateVertexShader(
+        vsBlob->GetBufferPointer(),
+        vsBlob->GetBufferSize(),
+        nullptr,
+        &voxelVertexShader
+    );
+    
+    if (FAILED(hr)) {
+        std::cerr << "[DirectX 11] Failed to create voxel vertex shader" << std::endl;
+        return false;
+    }
+    
+    // Compile pixel shader
+    ComPtr<ID3DBlob> psBlob;
+    
+    hr = D3DCompile(
+        shaderCode.c_str(),
+        shaderCode.size(),
+        nullptr,
+        nullptr,
+        nullptr,
+        "PSMain",
+        "ps_5_0",
+        D3DCOMPILE_ENABLE_STRICTNESS,
+        0,
+        &psBlob,
+        &errorBlob
+    );
+    
+    if (FAILED(hr)) {
+        if (errorBlob) {
+            std::cerr << "[DirectX 11] Pixel shader compilation error: " 
+                      << static_cast<const char*>(errorBlob->GetBufferPointer()) << std::endl;
+        }
+        return false;
+    }
+    
+    hr = device->CreatePixelShader(
+        psBlob->GetBufferPointer(),
+        psBlob->GetBufferSize(),
+        nullptr,
+        &voxelPixelShader
+    );
+    
+    if (FAILED(hr)) {
+        std::cerr << "[DirectX 11] Failed to create voxel pixel shader" << std::endl;
+        return false;
+    }
+    
+    // Create input layout
+    D3D11_INPUT_ELEMENT_DESC inputLayout[] = {
+        { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+        { "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 }
+    };
+    
+    hr = device->CreateInputLayout(
+        inputLayout,
+        ARRAYSIZE(inputLayout),
+        vsBlob->GetBufferPointer(),
+        vsBlob->GetBufferSize(),
+        &voxelInputLayout
+    );
+    
+    if (FAILED(hr)) {
+        std::cerr << "[DirectX 11] Failed to create input layout" << std::endl;
+        return false;
+    }
+    
+    // Create constant buffer for matrices
+    D3D11_BUFFER_DESC cbDesc = {};
+    cbDesc.ByteWidth = sizeof(float) * 16; // 4x4 matrix
+    cbDesc.Usage = D3D11_USAGE_DYNAMIC;
+    cbDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+    cbDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+    
+    hr = device->CreateBuffer(&cbDesc, nullptr, &matrixConstantBuffer);
+    if (FAILED(hr)) {
+        std::cerr << "[DirectX 11] Failed to create matrix constant buffer" << std::endl;
+        return false;
+    }
+    
+    // Create rasterizer state (backface culling enabled)
+    D3D11_RASTERIZER_DESC rasterizerDesc = {};
+    rasterizerDesc.FillMode = D3D11_FILL_SOLID;
+    rasterizerDesc.CullMode = D3D11_CULL_BACK;
+    rasterizerDesc.FrontCounterClockwise = FALSE;
+    rasterizerDesc.DepthClipEnable = TRUE;
+    
+    hr = device->CreateRasterizerState(&rasterizerDesc, &rasterizerState);
+    if (FAILED(hr)) {
+        std::cerr << "[DirectX 11] Failed to create rasterizer state" << std::endl;
+        return false;
+    }
+    
+    // Create depth stencil state
+    D3D11_DEPTH_STENCIL_DESC depthStencilDesc = {};
+    depthStencilDesc.DepthEnable = TRUE;
+    depthStencilDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
+    depthStencilDesc.DepthFunc = D3D11_COMPARISON_LESS;
+    depthStencilDesc.StencilEnable = FALSE;
+    
+    hr = device->CreateDepthStencilState(&depthStencilDesc, &depthStencilState);
+    if (FAILED(hr)) {
+        std::cerr << "[DirectX 11] Failed to create depth stencil state" << std::endl;
+        return false;
+    }
+    
+    std::cout << "[DirectX 11] Voxel rendering initialized successfully" << std::endl;
+    return true;
+}
+
+void DirectX11RenderContext::shutdownVoxelRendering() {
+    chunkRenderData.clear();
+    matrixConstantBuffer.Reset();
+    voxelInputLayout.Reset();
+    voxelPixelShader.Reset();
+    voxelVertexShader.Reset();
+    rasterizerState.Reset();
+    depthStencilState.Reset();
+}
+
+void DirectX11RenderContext::renderVoxelWorld(VoxelWorld* world, Player* player) {
+    if (!world || !player || !voxelVertexShader || !voxelPixelShader) {
+        return;
+    }
+    
+    // Set up rendering pipeline
+    deviceContext->IASetInputLayout(voxelInputLayout.Get());
+    deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+    deviceContext->VSSetShader(voxelVertexShader.Get(), nullptr, 0);
+    deviceContext->PSSetShader(voxelPixelShader.Get(), nullptr, 0);
+    deviceContext->RSSetState(rasterizerState.Get());
+    deviceContext->OMSetDepthStencilState(depthStencilState.Get(), 0);
+    
+    // Calculate view-projection matrix
+    glm::mat4 view = player->getCamera().getViewMatrix();
+    float aspectRatio = static_cast<float>(width) / static_cast<float>(height);
+    glm::mat4 projection = player->getCamera().getProjectionMatrix(aspectRatio);
+    
+    // Render each chunk
+    for (const auto& chunkPair : world->getChunks()) {
+        const ChunkPos& chunkPos = chunkPair.first;
+        Chunk* chunk = chunkPair.second.get();
+        
+        if (!chunk) continue;
+        
+        // Check if chunk needs mesh update
+        bool needsUpload = chunk->isDirty() || (chunkRenderData.find(chunkPos) == chunkRenderData.end());
+        
+        if (needsUpload) {
+            // Generate mesh if dirty
+            if (chunk->isDirty()) {
+                chunk->generateMesh();
+                chunk->clearDirty();
+            }
+            
+            // Get mesh data
+            const auto& vertices = chunk->getMeshVertices();
+            const auto& indices = chunk->getMeshIndices();
+            
+            if (vertices.empty() || indices.empty()) {
+                continue;
+            }
+            
+            // Create or update GPU buffers
+            ChunkRenderData& renderData = chunkRenderData[chunkPos];
+            
+            // Create vertex buffer
+            D3D11_BUFFER_DESC vbDesc = {};
+            vbDesc.ByteWidth = static_cast<UINT>(vertices.size() * sizeof(float));
+            vbDesc.Usage = D3D11_USAGE_DEFAULT;
+            vbDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+            
+            D3D11_SUBRESOURCE_DATA vbData = {};
+            vbData.pSysMem = vertices.data();
+            
+            renderData.vertexBuffer.Reset();
+            HRESULT hr = device->CreateBuffer(&vbDesc, &vbData, &renderData.vertexBuffer);
+            if (FAILED(hr)) {
+                continue;
+            }
+            
+            // Create index buffer
+            D3D11_BUFFER_DESC ibDesc = {};
+            ibDesc.ByteWidth = static_cast<UINT>(indices.size() * sizeof(uint32_t));
+            ibDesc.Usage = D3D11_USAGE_DEFAULT;
+            ibDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
+            
+            D3D11_SUBRESOURCE_DATA ibData = {};
+            ibData.pSysMem = indices.data();
+            
+            renderData.indexBuffer.Reset();
+            hr = device->CreateBuffer(&ibDesc, &ibData, &renderData.indexBuffer);
+            if (FAILED(hr)) {
+                continue;
+            }
+            
+            renderData.indexCount = indices.size();
+        }
+        
+        // Render the chunk if it has render data
+        auto it = chunkRenderData.find(chunkPos);
+        if (it != chunkRenderData.end() && it->second.indexCount > 0) {
+            const ChunkRenderData& renderData = it->second;
+            
+            // Calculate model matrix (chunk position)
+            glm::mat4 model = glm::mat4(1.0f);
+            model = glm::translate(model, glm::vec3(
+                chunkPos.x * 16, // CHUNK_SIZE
+                0,
+                chunkPos.z * 16  // CHUNK_SIZE
+            ));
+            
+            // Calculate MVP matrix
+            glm::mat4 mvp = projection * view * model;
+            
+            // Update constant buffer
+            D3D11_MAPPED_SUBRESOURCE mappedResource;
+            HRESULT hr = deviceContext->Map(matrixConstantBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
+            if (SUCCEEDED(hr)) {
+                memcpy(mappedResource.pData, glm::value_ptr(mvp), sizeof(float) * 16);
+                deviceContext->Unmap(matrixConstantBuffer.Get(), 0);
+            }
+            
+            // Bind constant buffer
+            deviceContext->VSSetConstantBuffers(0, 1, matrixConstantBuffer.GetAddressOf());
+            
+            // Bind vertex buffer
+            UINT stride = sizeof(float) * 6; // 3 pos + 3 normal
+            UINT offset = 0;
+            deviceContext->IASetVertexBuffers(0, 1, renderData.vertexBuffer.GetAddressOf(), &stride, &offset);
+            
+            // Bind index buffer
+            deviceContext->IASetIndexBuffer(renderData.indexBuffer.Get(), DXGI_FORMAT_R32_UINT, 0);
+            
+            // Draw
+            deviceContext->DrawIndexed(static_cast<UINT>(renderData.indexCount), 0, 0);
+        }
+    }
 }
 
 } // namespace fresh
