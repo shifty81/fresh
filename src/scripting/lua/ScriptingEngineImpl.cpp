@@ -25,6 +25,8 @@
 namespace fresh {
 namespace scripting {
 
+using fresh::Logger;
+
 ScriptingEngine::ScriptingEngine() : luaState(nullptr) {
 }
 
