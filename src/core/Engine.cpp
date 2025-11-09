@@ -861,10 +861,16 @@ void Engine::renderVoxelWorld() {
         
         if (!chunk) continue;
         
-        // Generate mesh if needed
-        if (chunk->isDirty()) {
-            chunk->generateMesh();
-            chunk->clearDirty();
+        // Check if we need to upload mesh data to GPU
+        // Upload if chunk is dirty (modified) OR if we haven't created GPU buffers yet
+        bool needsUpload = chunk->isDirty() || (m_chunkVAOs.find(chunkPos) == m_chunkVAOs.end());
+        
+        if (needsUpload) {
+            // Generate mesh if dirty
+            if (chunk->isDirty()) {
+                chunk->generateMesh();
+                chunk->clearDirty();
+            }
             
             // Update OpenGL buffers
             const auto& vertices = chunk->getMeshVertices();
