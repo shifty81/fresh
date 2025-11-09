@@ -6,35 +6,16 @@
   "homepage": "https://github.com/shifty81/fresh",
   "license": "MIT",
   "dependencies": [
-    {
-      "name": "glfw3",
-      "platform": "windows"
-    },
-    {
-      "name": "glew",
-      "platform": "windows"
-    },
-    {
-      "name": "glm",
-      "platform": "windows"
-    },
+    "glfw3",
+    "glew",
+    "glm",
     {
       "name": "imgui",
-      "features": ["glfw-binding", "dx11-binding", "dx12-binding", "opengl3-binding", "docking-experimental"],
-      "platform": "windows"
+      "features": ["glfw-binding", "dx11-binding", "dx12-binding", "docking-experimental"]
     },
-    {
-      "name": "openal-soft",
-      "platform": "windows"
-    },
-    {
-      "name": "luajit",
-      "platform": "windows"
-    },
-    {
-      "name": "gtest",
-      "platform": "windows"
-    }
+    "openal-soft",
+    "luajit",
+    "gtest"
   ],
   "builtin-baseline": "b27f6bfad367d64f8f0f3296351c5d246e182bb4"
 }
