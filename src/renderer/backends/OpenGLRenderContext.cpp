@@ -228,7 +228,10 @@ bool OpenGLRenderContext::beginFrame() {
 }
 
 void OpenGLRenderContext::endFrame() {
-    // Swap buffers is handled by GLFW in the Window class
+    // Swap the front and back buffers to display the rendered frame
+    if (window) {
+        window->swapBuffers();
+    }
     checkGLErrors("End frame");
 }
 
