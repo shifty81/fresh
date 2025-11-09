@@ -57,10 +57,17 @@ public:
                         float persistence = 0.5f, float lacunarity = 2.0f) const;
 
 private:
-    float fade(float t) const;
-    float lerp(float t, float a, float b) const;
-    float grad(int hash, float x, float y) const;
-    float grad(int hash, float x, float y, float z) const;
+    // Inline helper functions for better performance in hot paths
+    inline float fade(float t) const noexcept {
+        return t * t * t * (t * (t * 6.0f - 15.0f) + 10.0f);
+    }
+    
+    inline float lerp(float t, float a, float b) const noexcept {
+        return a + t * (b - a);
+    }
+    
+    float grad(int hash, float x, float y) const noexcept;
+    float grad(int hash, float x, float y, float z) const noexcept;
 
 private:
     std::vector<int> m_permutation;

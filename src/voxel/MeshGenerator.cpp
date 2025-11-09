@@ -28,6 +28,13 @@ void MeshGenerator::generateSimpleMesh(const Chunk* chunk,
     vertices.clear();
     indices.clear();
     
+    // Reserve capacity to reduce allocations (estimate ~6 faces per solid block on average)
+    // Each face has 4 vertices * 8 floats per vertex = 32 floats
+    constexpr size_t estimatedSolidBlocks = CHUNK_VOLUME / 4;
+    constexpr size_t estimatedFaces = estimatedSolidBlocks * 3; // ~half blocks are visible
+    vertices.reserve(estimatedFaces * 32);
+    indices.reserve(estimatedFaces * 6);
+    
     uint32_t vertexCount = 0;
     
     // Iterate in Y-Z-X order for better cache locality during rendering

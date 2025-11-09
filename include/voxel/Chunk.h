@@ -43,23 +43,23 @@ public:
      * @brief Get chunk position
      * @return Chunk position
      */
-    const ChunkPos& getPosition() const { return m_position; }
+    const ChunkPos& getPosition() const noexcept { return m_position; }
 
     /**
      * @brief Check if chunk needs mesh regeneration
      * @return true if mesh is dirty, false otherwise
      */
-    bool isDirty() const { return m_dirty; }
+    bool isDirty() const noexcept { return m_dirty; }
 
     /**
      * @brief Mark chunk as needing mesh regeneration
      */
-    void markDirty() { m_dirty = true; }
+    void markDirty() noexcept { m_dirty = true; }
 
     /**
      * @brief Clear dirty flag
      */
-    void clearDirty() { m_dirty = false; }
+    void clearDirty() noexcept { m_dirty = false; }
 
     /**
      * @brief Generate mesh for this chunk
@@ -70,16 +70,16 @@ public:
      * @brief Get the mesh data
      * @return Pointer to mesh vertices
      */
-    const std::vector<float>& getMeshVertices() const { return m_meshVertices; }
+    const std::vector<float>& getMeshVertices() const noexcept { return m_meshVertices; }
 
     /**
      * @brief Get the mesh indices
      * @return Pointer to mesh indices
      */
-    const std::vector<uint32_t>& getMeshIndices() const { return m_meshIndices; }
+    const std::vector<uint32_t>& getMeshIndices() const noexcept { return m_meshIndices; }
 
 private:
-    int getIndex(int x, int y, int z) const {
+    inline int getIndex(int x, int y, int z) const noexcept {
         return x + CHUNK_SIZE * (z + CHUNK_SIZE * y);
     }
 

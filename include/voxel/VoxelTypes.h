@@ -37,15 +37,15 @@ struct Voxel {
     Voxel() : type(VoxelType::Air), light(0) {}
     explicit Voxel(VoxelType t) : type(t), light(0) {}
     
-    bool isOpaque() const {
+    bool isOpaque() const noexcept {
         return type != VoxelType::Air && type != VoxelType::Water && type != VoxelType::Glass;
     }
     
-    bool isTransparent() const {
+    bool isTransparent() const noexcept {
         return type == VoxelType::Water || type == VoxelType::Glass || type == VoxelType::Ice;
     }
     
-    bool isSolid() const {
+    bool isSolid() const noexcept {
         return type != VoxelType::Air;
     }
 };
@@ -66,7 +66,7 @@ struct WorldPos {
     WorldPos() : x(0), y(0), z(0) {}
     WorldPos(int _x, int _y, int _z) : x(_x), y(_y), z(_z) {}
     
-    bool operator==(const WorldPos& other) const {
+    bool operator==(const WorldPos& other) const noexcept {
         return x == other.x && y == other.y && z == other.z;
     }
 };
@@ -80,11 +80,11 @@ struct ChunkPos {
     ChunkPos() : x(0), z(0) {}
     ChunkPos(int _x, int _z) : x(_x), z(_z) {}
     
-    bool operator==(const ChunkPos& other) const {
+    bool operator==(const ChunkPos& other) const noexcept {
         return x == other.x && z == other.z;
     }
     
-    static ChunkPos fromWorldPos(const WorldPos& pos) {
+    static ChunkPos fromWorldPos(const WorldPos& pos) noexcept {
         return ChunkPos(
             pos.x >= 0 ? pos.x / CHUNK_SIZE : (pos.x + 1) / CHUNK_SIZE - 1,
             pos.z >= 0 ? pos.z / CHUNK_SIZE : (pos.z + 1) / CHUNK_SIZE - 1
@@ -98,8 +98,8 @@ struct ChunkPos {
 namespace std {
     template<>
     struct hash<fresh::ChunkPos> {
-        std::size_t operator()(const fresh::ChunkPos& pos) const {
-            // Use FNV-1a hash
+        std::size_t operator()(const fresh::ChunkPos& pos) const noexcept {
+            // Use FNV-1a hash combining for better distribution
             std::size_t h1 = std::hash<int>{}(pos.x);
             std::size_t h2 = std::hash<int>{}(pos.z);
             return h1 ^ (h2 << 1);
