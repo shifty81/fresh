@@ -4,10 +4,23 @@
 
     #include <iostream>
 
+    #include <glm/glm.hpp>
+    #include <glm/gtc/matrix_transform.hpp>
+    #include <glm/gtc/type_ptr.hpp>
+
+    #include "core/Logger.h"
     #include "core/Window.h"
+    #include "gameplay/Camera.h"
+    #include "gameplay/Player.h"
+    #include "voxel/Chunk.h"
+    #include "voxel/VoxelTypes.h"
+    #include "voxel/VoxelWorld.h"
+
+    #include <d3dcompiler.h>
 
     #pragma comment(lib, "d3d12.lib")
     #pragma comment(lib, "dxgi.lib")
+    #pragma comment(lib, "d3dcompiler.lib")
 
 namespace fresh
 {
@@ -238,6 +251,12 @@ bool DirectX12RenderContext::initialize(Window* win)
         return false;
     }
 
+    // Initialize voxel rendering system
+    if (!initializeVoxelRendering()) {
+        std::cerr << "[DirectX 12] Failed to initialize voxel rendering" << std::endl;
+        return false;
+    }
+
     std::cout << "[DirectX 12] DirectX 12 context initialized successfully" << std::endl;
     return true;
 }
@@ -248,6 +267,9 @@ void DirectX12RenderContext::shutdown()
 
     // Wait for GPU to finish all work
     waitForGPU();
+
+    // Shutdown voxel rendering first
+    shutdownVoxelRendering();
 
     // Close fence event
     if (fenceEvent) {
@@ -863,6 +885,323 @@ void DirectX12RenderContext::moveToNextFrame()
 
     // Set fence value for next frame
     fenceValues[currentFrame] = currentFenceValue + 1;
+}
+
+bool DirectX12RenderContext::initializeVoxelRendering()
+{
+    // Create root signature for voxel rendering
+    // Root parameter for constant buffer (MVP matrix)
+    D3D12_ROOT_PARAMETER rootParameter = {};
+    rootParameter.ParameterType = D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS;
+    rootParameter.Constants.ShaderRegister = 0;
+    rootParameter.Constants.RegisterSpace = 0;
+    rootParameter.Constants.Num32BitValues = 16; // 4x4 matrix
+    rootParameter.ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX;
+
+    D3D12_ROOT_SIGNATURE_DESC rootSignatureDesc = {};
+    rootSignatureDesc.NumParameters = 1;
+    rootSignatureDesc.pParameters = &rootParameter;
+    rootSignatureDesc.NumStaticSamplers = 0;
+    rootSignatureDesc.pStaticSamplers = nullptr;
+    rootSignatureDesc.Flags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
+
+    ComPtr<ID3DBlob> signature;
+    ComPtr<ID3DBlob> error;
+    HRESULT hr = D3D12SerializeRootSignature(&rootSignatureDesc, D3D_ROOT_SIGNATURE_VERSION_1,
+                                             &signature, &error);
+
+    if (FAILED(hr)) {
+        if (error) {
+            std::cerr << "[DirectX 12] Root signature serialization error: "
+                      << static_cast<const char*>(error->GetBufferPointer()) << std::endl;
+        }
+        return false;
+    }
+
+    hr = device->CreateRootSignature(0, signature->GetBufferPointer(), signature->GetBufferSize(),
+                                     IID_PPV_ARGS(&voxelRootSignature));
+
+    if (FAILED(hr)) {
+        std::cerr << "[DirectX 12] Failed to create root signature" << std::endl;
+        return false;
+    }
+
+    // Compile shaders
+    std::string shaderCode = R"(
+        // Voxel Rendering Shader for DirectX 12
+        cbuffer MatrixBuffer : register(b0)
+        {
+            matrix modelViewProj;
+        };
+
+        struct VertexInput
+        {
+            float3 position : POSITION;
+            float3 normal : NORMAL;
+        };
+
+        struct PixelInput
+        {
+            float4 position : SV_POSITION;
+            float3 normal : NORMAL;
+            float3 worldPos : TEXCOORD0;
+        };
+
+        PixelInput VSMain(VertexInput input)
+        {
+            PixelInput output;
+            output.position = mul(float4(input.position, 1.0f), modelViewProj);
+            output.normal = input.normal;
+            output.worldPos = input.position;
+            return output;
+        }
+
+        float4 PSMain(PixelInput input) : SV_TARGET
+        {
+            // Simple directional lighting
+            float3 lightDir = normalize(float3(0.5f, 1.0f, 0.3f));
+            float3 normal = normalize(input.normal);
+            float diff = max(dot(normal, lightDir), 0.0f);
+            
+            // Ambient + diffuse
+            float3 ambient = float3(0.3f, 0.3f, 0.3f);
+            float3 diffuse = float3(0.7f, 0.7f, 0.7f) * diff;
+            
+            // Base voxel color
+            float3 color = float3(0.5f, 0.7f, 0.5f);
+            float3 result = (ambient + diffuse) * color;
+            
+            return float4(result, 1.0f);
+        }
+    )";
+
+    ComPtr<ID3DBlob> vsBlob;
+    ComPtr<ID3DBlob> psBlob;
+    ComPtr<ID3DBlob> errorBlob;
+
+    hr = D3DCompile(shaderCode.c_str(), shaderCode.size(), nullptr, nullptr, nullptr, "VSMain",
+                   "vs_5_0", D3DCOMPILE_ENABLE_STRICTNESS, 0, &vsBlob, &errorBlob);
+
+    if (FAILED(hr)) {
+        if (errorBlob) {
+            std::cerr << "[DirectX 12] Vertex shader compilation error: "
+                      << static_cast<const char*>(errorBlob->GetBufferPointer()) << std::endl;
+        }
+        return false;
+    }
+
+    hr = D3DCompile(shaderCode.c_str(), shaderCode.size(), nullptr, nullptr, nullptr, "PSMain",
+                   "ps_5_0", D3DCOMPILE_ENABLE_STRICTNESS, 0, &psBlob, &errorBlob);
+
+    if (FAILED(hr)) {
+        if (errorBlob) {
+            std::cerr << "[DirectX 12] Pixel shader compilation error: "
+                      << static_cast<const char*>(errorBlob->GetBufferPointer()) << std::endl;
+        }
+        return false;
+    }
+
+    // Create input layout
+    D3D12_INPUT_ELEMENT_DESC inputLayout[] = {
+        {"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0},
+        {"NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 12, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0}
+    };
+
+    // Create pipeline state object
+    D3D12_GRAPHICS_PIPELINE_STATE_DESC psoDesc = {};
+    psoDesc.InputLayout = {inputLayout, _countof(inputLayout)};
+    psoDesc.pRootSignature = voxelRootSignature.Get();
+    psoDesc.VS = {vsBlob->GetBufferPointer(), vsBlob->GetBufferSize()};
+    psoDesc.PS = {psBlob->GetBufferPointer(), psBlob->GetBufferSize()};
+    psoDesc.RasterizerState.FillMode = D3D12_FILL_MODE_SOLID;
+    psoDesc.RasterizerState.CullMode = D3D12_CULL_MODE_BACK;
+    psoDesc.RasterizerState.FrontCounterClockwise = FALSE;
+    psoDesc.RasterizerState.DepthClipEnable = TRUE;
+    psoDesc.BlendState.RenderTarget[0].RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL;
+    psoDesc.DepthStencilState.DepthEnable = TRUE;
+    psoDesc.DepthStencilState.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ALL;
+    psoDesc.DepthStencilState.DepthFunc = D3D12_COMPARISON_FUNC_LESS;
+    psoDesc.DepthStencilState.StencilEnable = FALSE;
+    psoDesc.SampleMask = UINT_MAX;
+    psoDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
+    psoDesc.NumRenderTargets = 1;
+    psoDesc.RTVFormats[0] = rtvFormat;
+    psoDesc.DSVFormat = DXGI_FORMAT_D24_UNORM_S8_UINT;
+    psoDesc.SampleDesc.Count = 1;
+
+    hr = device->CreateGraphicsPipelineState(&psoDesc, IID_PPV_ARGS(&voxelPipelineState));
+
+    if (FAILED(hr)) {
+        std::cerr << "[DirectX 12] Failed to create voxel pipeline state" << std::endl;
+        return false;
+    }
+
+    std::cout << "[DirectX 12] Voxel rendering initialized successfully" << std::endl;
+    return true;
+}
+
+void DirectX12RenderContext::shutdownVoxelRendering()
+{
+    chunkRenderData.clear();
+    voxelPipelineState.Reset();
+    voxelRootSignature.Reset();
+}
+
+void DirectX12RenderContext::renderVoxelWorld(VoxelWorld* world, Player* player)
+{
+    if (!world || !player || !voxelPipelineState || !commandList) {
+        return;
+    }
+
+    // Set pipeline state
+    commandList->SetPipelineState(voxelPipelineState.Get());
+    commandList->SetGraphicsRootSignature(voxelRootSignature.Get());
+    commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+    // Calculate view-projection matrix
+    glm::mat4 view = player->getCamera().getViewMatrix();
+    float aspectRatio = static_cast<float>(width) / static_cast<float>(height);
+    glm::mat4 projection = player->getCamera().getProjectionMatrix(aspectRatio);
+
+    // Render each chunk
+    for (const auto& chunkPair : world->getChunks()) {
+        const ChunkPos& chunkPos = chunkPair.first;
+        Chunk* chunk = chunkPair.second.get();
+
+        if (!chunk)
+            continue;
+
+        // Check if chunk needs mesh update
+        bool needsUpload =
+            chunk->isDirty() || (chunkRenderData.find(chunkPos) == chunkRenderData.end());
+
+        if (needsUpload) {
+            // Generate mesh if dirty
+            if (chunk->isDirty()) {
+                chunk->generateMesh();
+                chunk->clearDirty();
+            }
+
+            // Get mesh data
+            const auto& vertices = chunk->getMeshVertices();
+            const auto& indices = chunk->getMeshIndices();
+
+            if (vertices.empty() || indices.empty()) {
+                continue;
+            }
+
+            // Create or update GPU buffers
+            ChunkRenderData& renderData = chunkRenderData[chunkPos];
+
+            // Create vertex buffer in upload heap
+            size_t vertexBufferSize = vertices.size() * sizeof(float);
+            
+            D3D12_HEAP_PROPERTIES uploadHeapProps = {};
+            uploadHeapProps.Type = D3D12_HEAP_TYPE_UPLOAD;
+            uploadHeapProps.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_UNKNOWN;
+            uploadHeapProps.MemoryPoolPreference = D3D12_MEMORY_POOL_UNKNOWN;
+
+            D3D12_RESOURCE_DESC vertexBufferDesc = {};
+            vertexBufferDesc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
+            vertexBufferDesc.Width = vertexBufferSize;
+            vertexBufferDesc.Height = 1;
+            vertexBufferDesc.DepthOrArraySize = 1;
+            vertexBufferDesc.MipLevels = 1;
+            vertexBufferDesc.Format = DXGI_FORMAT_UNKNOWN;
+            vertexBufferDesc.SampleDesc.Count = 1;
+            vertexBufferDesc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
+
+            renderData.vertexBuffer.Reset();
+            HRESULT hr = device->CreateCommittedResource(
+                &uploadHeapProps,
+                D3D12_HEAP_FLAG_NONE,
+                &vertexBufferDesc,
+                D3D12_RESOURCE_STATE_GENERIC_READ,
+                nullptr,
+                IID_PPV_ARGS(&renderData.vertexBuffer));
+
+            if (FAILED(hr)) {
+                continue;
+            }
+
+            // Upload vertex data
+            void* vertexDataPtr = nullptr;
+            D3D12_RANGE readRange = {0, 0};
+            renderData.vertexBuffer->Map(0, &readRange, &vertexDataPtr);
+            memcpy(vertexDataPtr, vertices.data(), vertexBufferSize);
+            renderData.vertexBuffer->Unmap(0, nullptr);
+
+            // Create vertex buffer view
+            renderData.vertexBufferView.BufferLocation = renderData.vertexBuffer->GetGPUVirtualAddress();
+            renderData.vertexBufferView.StrideInBytes = sizeof(float) * 6; // 3 pos + 3 normal
+            renderData.vertexBufferView.SizeInBytes = static_cast<UINT>(vertexBufferSize);
+
+            // Create index buffer in upload heap
+            size_t indexBufferSize = indices.size() * sizeof(uint32_t);
+
+            D3D12_RESOURCE_DESC indexBufferDesc = {};
+            indexBufferDesc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
+            indexBufferDesc.Width = indexBufferSize;
+            indexBufferDesc.Height = 1;
+            indexBufferDesc.DepthOrArraySize = 1;
+            indexBufferDesc.MipLevels = 1;
+            indexBufferDesc.Format = DXGI_FORMAT_UNKNOWN;
+            indexBufferDesc.SampleDesc.Count = 1;
+            indexBufferDesc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
+
+            renderData.indexBuffer.Reset();
+            hr = device->CreateCommittedResource(
+                &uploadHeapProps,
+                D3D12_HEAP_FLAG_NONE,
+                &indexBufferDesc,
+                D3D12_RESOURCE_STATE_GENERIC_READ,
+                nullptr,
+                IID_PPV_ARGS(&renderData.indexBuffer));
+
+            if (FAILED(hr)) {
+                continue;
+            }
+
+            // Upload index data
+            void* indexDataPtr = nullptr;
+            renderData.indexBuffer->Map(0, &readRange, &indexDataPtr);
+            memcpy(indexDataPtr, indices.data(), indexBufferSize);
+            renderData.indexBuffer->Unmap(0, nullptr);
+
+            // Create index buffer view
+            renderData.indexBufferView.BufferLocation = renderData.indexBuffer->GetGPUVirtualAddress();
+            renderData.indexBufferView.Format = DXGI_FORMAT_R32_UINT;
+            renderData.indexBufferView.SizeInBytes = static_cast<UINT>(indexBufferSize);
+
+            renderData.indexCount = indices.size();
+        }
+
+        // Render the chunk if it has render data
+        auto it = chunkRenderData.find(chunkPos);
+        if (it != chunkRenderData.end() && it->second.indexCount > 0) {
+            const ChunkRenderData& renderData = it->second;
+
+            // Calculate model matrix (chunk position)
+            glm::mat4 model = glm::mat4(1.0f);
+            model = glm::translate(model, glm::vec3(chunkPos.x * 16, // CHUNK_SIZE
+                                                    0,
+                                                    chunkPos.z * 16 // CHUNK_SIZE
+                                                    ));
+
+            // Calculate MVP matrix
+            glm::mat4 mvp = projection * view * model;
+
+            // Set root constants (MVP matrix)
+            commandList->SetGraphicsRoot32BitConstants(0, 16, glm::value_ptr(mvp), 0);
+
+            // Set vertex and index buffers
+            commandList->IASetVertexBuffers(0, 1, &renderData.vertexBufferView);
+            commandList->IASetIndexBuffer(&renderData.indexBufferView);
+
+            // Draw
+            commandList->DrawIndexedInstanced(static_cast<UINT>(renderData.indexCount), 1, 0, 0, 0);
+        }
+    }
 }
 
 } // namespace fresh

@@ -36,6 +36,7 @@
 
 #ifdef _WIN32
     #include "renderer/backends/DirectX11RenderContext.h"
+    #include "renderer/backends/DirectX12RenderContext.h"
 #endif
 
 namespace fresh
@@ -609,6 +610,17 @@ void Engine::render()
             auto* dx11Context = dynamic_cast<DirectX11RenderContext*>(m_renderer.get());
             if (dx11Context) {
                 dx11Context->renderVoxelWorld(m_world.get(), m_player.get());
+            }
+        }
+    }
+
+    // DirectX 12 rendering path
+    if (m_renderer->getAPI() == GraphicsAPI::DirectX12) {
+        // Render voxel world using DirectX 12
+        if (m_world && m_player) {
+            auto* dx12Context = dynamic_cast<DirectX12RenderContext*>(m_renderer.get());
+            if (dx12Context) {
+                dx12Context->renderVoxelWorld(m_world.get(), m_player.get());
             }
         }
     }
