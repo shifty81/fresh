@@ -16,7 +16,7 @@ namespace fresh {
 enum class LogLevel {
     INFO,
     WARNING,
-    ERROR,
+    ERR,  // Renamed from ERROR to avoid Windows macro conflict
     FATAL
 };
 

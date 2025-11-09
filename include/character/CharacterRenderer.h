@@ -1,6 +1,8 @@
 #pragma once
 #include "character/VoxelCharacter.h"
 #include "voxel/MeshGenerator.h"
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 #include <memory>
 #include <vector>
 
@@ -38,9 +40,9 @@ public:
     
     /**
      * @brief Initialize the renderer with render context
-     * @param renderContext Rendering context for creating GPU resources
+     * @param ctx Rendering context for creating GPU resources
      */
-    void initialize(RenderContext* renderContext);
+    void initialize(RenderContext* ctx);
     
     /**
      * @brief Shutdown and cleanup resources
@@ -77,7 +79,7 @@ public:
     /**
      * @brief Enable/disable wireframe rendering
      */
-    void setWireframe(bool wireframe) { this->wireframe = wireframe; }
+    void setWireframe(bool enabled) { this->wireframe = enabled; }
     bool isWireframe() const { return wireframe; }
     
 private:
@@ -127,9 +129,9 @@ public:
     
     /**
      * @brief Initialize the manager
-     * @param renderer Character renderer to use
+     * @param charRenderer Character renderer to use
      */
-    void initialize(CharacterRenderer* renderer);
+    void initialize(CharacterRenderer* charRenderer);
     
     /**
      * @brief Register a character for rendering
