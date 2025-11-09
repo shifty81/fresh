@@ -235,6 +235,11 @@ set(ENGINE_SOURCES
     src/audio/AudioEngine.cpp
     src/scripting/EventSystem.cpp
     src/character/VoxelCharacter.cpp
+    src/character/BodyPartLibrary.cpp
+    src/character/AnimationClip.cpp
+    src/character/AnimationController.cpp
+    src/character/IKSolver.cpp
+    src/character/CharacterRenderer.cpp
     src/editor/EditorGUI.cpp
     src/editor/WorldEditor.cpp
     src/editor/TerraformingSystem.cpp
