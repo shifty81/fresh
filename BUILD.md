@@ -2,6 +2,29 @@
 
 This guide provides clear, step-by-step instructions for building Fresh Voxel Engine from source using Visual Studio 2022 on Windows.
 
+## 🚀 Quick Start: Automated Build
+
+**For the fastest and easiest setup, use the automated PowerShell script:**
+
+```powershell
+# Clone repository
+git clone https://github.com/shifty81/fresh.git
+cd fresh
+
+# Run automated setup and build
+.\setup-and-build.ps1
+```
+
+This single command handles everything: checking prerequisites, setting up vcpkg, generating the solution, building, and opening Visual Studio.
+
+**See [AUTOMATED_BUILD.md](AUTOMATED_BUILD.md) for complete documentation of the automated script.**
+
+---
+
+## Manual Build Instructions
+
+The rest of this guide covers the manual build process. Use this if you prefer manual control or need to troubleshoot specific steps.
+
 ## Prerequisites
 
 Before you begin, ensure you have the following installed:
