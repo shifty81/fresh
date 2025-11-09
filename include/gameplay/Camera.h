@@ -50,23 +50,23 @@ public:
      * @brief Get view matrix for rendering
      * @return View matrix
      */
-    glm::mat4 getViewMatrix() const;
+    [[nodiscard]] glm::mat4 getViewMatrix() const;
     
     /**
      * @brief Get projection matrix for rendering
      * @param aspectRatio Width/Height ratio of viewport
      * @return Projection matrix
      */
-    glm::mat4 getProjectionMatrix(float aspectRatio) const;
+    [[nodiscard]] glm::mat4 getProjectionMatrix(float aspectRatio) const;
     
     // Getters
-    glm::vec3 getPosition() const { return position; }
-    glm::vec3 getFront() const { return front; }
-    glm::vec3 getRight() const { return right; }
-    glm::vec3 getUp() const { return up; }
-    float getPitch() const { return pitch; }
-    float getYaw() const { return yaw; }
-    float getFOV() const { return fov; }
+    [[nodiscard]] glm::vec3 getPosition() const noexcept { return position; }
+    [[nodiscard]] glm::vec3 getFront() const noexcept { return front; }
+    [[nodiscard]] glm::vec3 getRight() const noexcept { return right; }
+    [[nodiscard]] glm::vec3 getUp() const noexcept { return up; }
+    [[nodiscard]] float getPitch() const noexcept { return pitch; }
+    [[nodiscard]] float getYaw() const noexcept { return yaw; }
+    [[nodiscard]] float getFOV() const noexcept { return fov; }
     
     // Setters
     void setFOV(float newFov) { fov = newFov; }

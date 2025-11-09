@@ -70,7 +70,7 @@ public:
      * @brief Get all loaded chunks
      * @return Map of chunk positions to chunks
      */
-    const std::unordered_map<ChunkPos, std::unique_ptr<Chunk>>& getChunks() const {
+    [[nodiscard]] const std::unordered_map<ChunkPos, std::unique_ptr<Chunk>>& getChunks() const noexcept {
         return m_chunks;
     }
 
