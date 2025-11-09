@@ -211,17 +211,10 @@ bool Engine::initialize()
         LOG_INFO_C("DirectX 11 voxel rendering ready", "Engine");
     }
 
-    // DirectX 12 warning
+    // DirectX 12 confirmation
     if (m_renderer->getAPI() == GraphicsAPI::DirectX12) {
-        std::cout << "\n=== INFO ===" << std::endl;
-        std::cout << "DirectX 12 backend selected, but voxel world rendering is not yet fully "
-                     "implemented."
-                  << std::endl;
-        std::cout << "You may see a blue sky. Use DirectX 11 or OpenGL for full rendering support."
-                  << std::endl;
-        std::cout << "=============\n" << std::endl;
-        LOG_INFO_C("DirectX 12 backend in use - voxel rendering not yet fully implemented.",
-                   "Engine");
+        std::cout << "DirectX 12 voxel rendering ready" << std::endl;
+        LOG_INFO_C("DirectX 12 voxel rendering ready", "Engine");
     }
 
     // Create voxel interaction system
