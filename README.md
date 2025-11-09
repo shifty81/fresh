@@ -241,8 +241,9 @@ dotnet build -c Release
 - Linux/macOS support: Not currently available
 
 ### Graphics
-- **DirectX 11** - Production ready ✅
-- **DirectX 12** - Core features complete, advanced features in progress
+- **DirectX 11** - Production ready ✅ Full voxel rendering
+- **DirectX 12** - Production ready ✅ Full voxel rendering
+- **OpenGL** - Production ready ✅ Full voxel rendering (cross-platform)
 
 ### Optional Features
 - **Lua Scripting** - Framework exists (~40% complete), needs Sol2 integration
