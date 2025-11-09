@@ -247,11 +247,6 @@ void DirectX11RenderContext::clearColor(float r, float g, float b, float a) {
     clearColorValue[1] = g;
     clearColorValue[2] = b;
     clearColorValue[3] = a;
-    
-    // Also clear immediately if we have a render target
-    if (renderTargetView && deviceContext) {
-        deviceContext->ClearRenderTargetView(renderTargetView.Get(), clearColorValue);
-    }
 }
 
 void DirectX11RenderContext::clearDepth(float depth) {

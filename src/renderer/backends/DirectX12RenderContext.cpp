@@ -361,13 +361,6 @@ void DirectX12RenderContext::clearColor(float r, float g, float b, float a) {
     clearColorValue[1] = g;
     clearColorValue[2] = b;
     clearColorValue[3] = a;
-    
-    // Also clear immediately if we have the necessary objects
-    if (commandList && rtvHeap) {
-        D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle = rtvHeap->GetCPUDescriptorHandleForHeapStart();
-        rtvHandle.ptr += currentFrame * rtvDescriptorSize;
-        commandList->ClearRenderTargetView(rtvHandle, clearColorValue, 0, nullptr);
-    }
 }
 
 void DirectX12RenderContext::clearDepth(float depth) {
