@@ -1,21 +1,24 @@
 #pragma once
 
-#include "VoxelTypes.h"
-#include <vector>
-#include <memory>
 #include <array>
+#include <memory>
+#include <vector>
 
-namespace fresh {
+#include "VoxelTypes.h"
+
+namespace fresh
+{
 
 class MeshGenerator;
 
 /**
  * @brief Represents a chunk of voxels
- * 
+ *
  * A chunk is a cubic section of the world containing voxel data.
  * Uses efficient storage and mesh generation for rendering.
  */
-class Chunk {
+class Chunk
+{
 public:
     explicit Chunk(const ChunkPos& position);
     ~Chunk();
@@ -43,23 +46,35 @@ public:
      * @brief Get chunk position
      * @return Chunk position
      */
-    [[nodiscard]] const ChunkPos& getPosition() const noexcept { return m_position; }
+    [[nodiscard]] const ChunkPos& getPosition() const noexcept
+    {
+        return m_position;
+    }
 
     /**
      * @brief Check if chunk needs mesh regeneration
      * @return true if mesh is dirty, false otherwise
      */
-    [[nodiscard]] bool isDirty() const noexcept { return m_dirty; }
+    [[nodiscard]] bool isDirty() const noexcept
+    {
+        return m_dirty;
+    }
 
     /**
      * @brief Mark chunk as needing mesh regeneration
      */
-    void markDirty() noexcept { m_dirty = true; }
+    void markDirty() noexcept
+    {
+        m_dirty = true;
+    }
 
     /**
      * @brief Clear dirty flag
      */
-    void clearDirty() noexcept { m_dirty = false; }
+    void clearDirty() noexcept
+    {
+        m_dirty = false;
+    }
 
     /**
      * @brief Generate mesh for this chunk
@@ -70,16 +85,23 @@ public:
      * @brief Get the mesh data
      * @return Pointer to mesh vertices
      */
-    [[nodiscard]] const std::vector<float>& getMeshVertices() const noexcept { return m_meshVertices; }
+    [[nodiscard]] const std::vector<float>& getMeshVertices() const noexcept
+    {
+        return m_meshVertices;
+    }
 
     /**
      * @brief Get the mesh indices
      * @return Pointer to mesh indices
      */
-    [[nodiscard]] const std::vector<uint32_t>& getMeshIndices() const noexcept { return m_meshIndices; }
+    [[nodiscard]] const std::vector<uint32_t>& getMeshIndices() const noexcept
+    {
+        return m_meshIndices;
+    }
 
 private:
-    inline int getIndex(int x, int y, int z) const noexcept {
+    inline int getIndex(int x, int y, int z) const noexcept
+    {
         return x + CHUNK_SIZE * (z + CHUNK_SIZE * y);
     }
 

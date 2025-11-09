@@ -1,11 +1,13 @@
 #pragma once
 #include <cstdint>
-#include <vector>
-#include <string>
 #include <memory>
+#include <string>
+#include <vector>
 
-namespace fresh {
-namespace networking {
+namespace fresh
+{
+namespace networking
+{
 
 /**
  * @brief Message types for network communication
@@ -26,16 +28,26 @@ enum class MessageType : uint16_t {
 /**
  * @brief Network message structure
  */
-class NetworkMessage {
+class NetworkMessage
+{
 public:
     NetworkMessage();
     NetworkMessage(MessageType type);
-    
+
     // Getters
-    MessageType getType() const { return type; }
-    uint32_t getSize() const { return static_cast<uint32_t>(data.size()); }
-    const std::vector<uint8_t>& getData() const { return data; }
-    
+    MessageType getType() const
+    {
+        return type;
+    }
+    uint32_t getSize() const
+    {
+        return static_cast<uint32_t>(data.size());
+    }
+    const std::vector<uint8_t>& getData() const
+    {
+        return data;
+    }
+
     // Serialization
     void writeByte(uint8_t value);
     void writeInt16(int16_t value);
@@ -43,7 +55,7 @@ public:
     void writeFloat(float value);
     void writeString(const std::string& value);
     void writeBytes(const uint8_t* bytes, size_t length);
-    
+
     // Deserialization
     uint8_t readByte();
     int16_t readInt16();
@@ -51,10 +63,13 @@ public:
     float readFloat();
     std::string readString();
     void readBytes(uint8_t* buffer, size_t length);
-    
+
     // Reset read position
-    void resetReadPosition() { readPosition = 0; }
-    
+    void resetReadPosition()
+    {
+        readPosition = 0;
+    }
+
     // Serialize/deserialize entire message for transmission
     std::vector<uint8_t> serialize() const;
     static std::unique_ptr<NetworkMessage> deserialize(const uint8_t* buffer, size_t length);

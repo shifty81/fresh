@@ -1,11 +1,13 @@
 #pragma once
 
-namespace fresh {
+namespace fresh
+{
 
 /**
  * @brief Basic physics system for player movement and collisions
  */
-class PhysicsSystem {
+class PhysicsSystem
+{
 public:
     PhysicsSystem();
     ~PhysicsSystem();

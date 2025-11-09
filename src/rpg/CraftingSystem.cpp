@@ -1,39 +1,48 @@
 #include "rpg/CraftingSystem.h"
 
-namespace fresh {
-namespace rpg {
+namespace fresh
+{
+namespace rpg
+{
 
-SubsystemUpgrade::SubsystemUpgrade()
-    : type(SubsystemType::Shield), level(1), name("Basic Upgrade") {
+SubsystemUpgrade::SubsystemUpgrade() : type(SubsystemType::Shield), level(1), name("Basic Upgrade")
+{
 }
 
 SubsystemUpgrade::SubsystemUpgrade(SubsystemType type, int level, const std::string& name)
-    : type(type), level(level), name(name) {
+    : type(type), level(level), name(name)
+{
 }
 
-float SubsystemUpgrade::getStatBonus(const std::string& statName) const {
+float SubsystemUpgrade::getStatBonus(const std::string& statName) const
+{
     auto it = statBonuses.find(statName);
     return (it != statBonuses.end()) ? it->second : 0.0f;
 }
 
-void SubsystemUpgrade::setStatBonus(const std::string& statName, float value) {
+void SubsystemUpgrade::setStatBonus(const std::string& statName, float value)
+{
     statBonuses[statName] = value;
 }
 
-CraftingSystem::CraftingSystem() {
+CraftingSystem::CraftingSystem()
+{
     initializeDefaultRecipes();
 }
 
-void CraftingSystem::addRecipe(const CraftingRecipe& recipe) {
+void CraftingSystem::addRecipe(const CraftingRecipe& recipe)
+{
     recipes[recipe.name] = recipe;
 }
 
-const CraftingRecipe* CraftingSystem::getRecipe(const std::string& name) const {
+const CraftingRecipe* CraftingSystem::getRecipe(const std::string& name) const
+{
     auto it = recipes.find(name);
     return (it != recipes.end()) ? &it->second : nullptr;
 }
 
-std::vector<std::string> CraftingSystem::getAllRecipeNames() const {
+std::vector<std::string> CraftingSystem::getAllRecipeNames() const
+{
     std::vector<std::string> names;
     names.reserve(recipes.size());
     for (const auto& pair : recipes) {
@@ -42,28 +51,30 @@ std::vector<std::string> CraftingSystem::getAllRecipeNames() const {
     return names;
 }
 
-bool CraftingSystem::canCraft(const std::string& recipeName, const Inventory& inventory) const {
+bool CraftingSystem::canCraft(const std::string& recipeName, const Inventory& inventory) const
+{
     const CraftingRecipe* recipe = getRecipe(recipeName);
     if (!recipe) {
         return false;
     }
-    
+
     for (const auto& req : recipe->requirements) {
         if (!inventory.hasResource(req.first, req.second)) {
             return false;
         }
     }
-    
+
     return true;
 }
 
-bool CraftingSystem::craft(const std::string& recipeName, Inventory& inventory, 
-                          SubsystemUpgrade& outUpgrade) {
+bool CraftingSystem::craft(const std::string& recipeName, Inventory& inventory,
+                           SubsystemUpgrade& outUpgrade)
+{
     const CraftingRecipe* recipe = getRecipe(recipeName);
     if (!recipe || !canCraft(recipeName, inventory)) {
         return false;
     }
-    
+
     // Consume resources
     for (const auto& req : recipe->requirements) {
         if (!inventory.removeResource(req.first, req.second)) {
@@ -71,13 +82,14 @@ bool CraftingSystem::craft(const std::string& recipeName, Inventory& inventory,
             return false;
         }
     }
-    
+
     // Create the upgrade
     outUpgrade = recipe->result;
     return true;
 }
 
-void CraftingSystem::initializeDefaultRecipes() {
+void CraftingSystem::initializeDefaultRecipes()
+{
     // Basic Shield
     {
         CraftingRecipe recipe;
@@ -90,7 +102,7 @@ void CraftingSystem::initializeDefaultRecipes() {
         recipe.craftingTime = 30.0f;
         addRecipe(recipe);
     }
-    
+
     // Advanced Shield
     {
         CraftingRecipe recipe;
@@ -103,7 +115,7 @@ void CraftingSystem::initializeDefaultRecipes() {
         recipe.craftingTime = 60.0f;
         addRecipe(recipe);
     }
-    
+
     // Basic Weapon
     {
         CraftingRecipe recipe;
@@ -116,7 +128,7 @@ void CraftingSystem::initializeDefaultRecipes() {
         recipe.craftingTime = 45.0f;
         addRecipe(recipe);
     }
-    
+
     // Cargo Bay Expansion
     {
         CraftingRecipe recipe;

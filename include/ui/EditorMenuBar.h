@@ -3,17 +3,19 @@
 #include <functional>
 #include <string>
 
-namespace fresh {
+namespace fresh
+{
 
 class VoxelWorld;
 class WorldEditor;
 
 /**
  * @brief Main menu bar for the editor
- * 
+ *
  * Provides standard menu options: File, Edit, Window, Build, Settings, Help
  */
-class EditorMenuBar {
+class EditorMenuBar
+{
 public:
     // Menu action callbacks
     using MenuCallback = std::function<void()>;
@@ -37,17 +39,50 @@ public:
     /**
      * @brief Set callback for menu actions
      */
-    void setNewWorldCallback(MenuCallback callback) { m_newWorldCallback = callback; }
-    void setSaveWorldCallback(MenuCallback callback) { m_saveWorldCallback = callback; }
-    void setSaveWorldAsCallback(MenuCallback callback) { m_saveWorldAsCallback = callback; }
-    void setLoadWorldCallback(MenuCallback callback) { m_loadWorldCallback = callback; }
-    void setExitCallback(MenuCallback callback) { m_exitCallback = callback; }
-    void setUndoCallback(MenuCallback callback) { m_undoCallback = callback; }
-    void setRedoCallback(MenuCallback callback) { m_redoCallback = callback; }
-    void setCutCallback(MenuCallback callback) { m_cutCallback = callback; }
-    void setCopyCallback(MenuCallback callback) { m_copyCallback = callback; }
-    void setPasteCallback(MenuCallback callback) { m_pasteCallback = callback; }
-    void setDeleteCallback(MenuCallback callback) { m_deleteCallback = callback; }
+    void setNewWorldCallback(MenuCallback callback)
+    {
+        m_newWorldCallback = callback;
+    }
+    void setSaveWorldCallback(MenuCallback callback)
+    {
+        m_saveWorldCallback = callback;
+    }
+    void setSaveWorldAsCallback(MenuCallback callback)
+    {
+        m_saveWorldAsCallback = callback;
+    }
+    void setLoadWorldCallback(MenuCallback callback)
+    {
+        m_loadWorldCallback = callback;
+    }
+    void setExitCallback(MenuCallback callback)
+    {
+        m_exitCallback = callback;
+    }
+    void setUndoCallback(MenuCallback callback)
+    {
+        m_undoCallback = callback;
+    }
+    void setRedoCallback(MenuCallback callback)
+    {
+        m_redoCallback = callback;
+    }
+    void setCutCallback(MenuCallback callback)
+    {
+        m_cutCallback = callback;
+    }
+    void setCopyCallback(MenuCallback callback)
+    {
+        m_copyCallback = callback;
+    }
+    void setPasteCallback(MenuCallback callback)
+    {
+        m_pasteCallback = callback;
+    }
+    void setDeleteCallback(MenuCallback callback)
+    {
+        m_deleteCallback = callback;
+    }
 
 private:
     void renderFileMenu();
@@ -60,7 +95,7 @@ private:
 private:
     VoxelWorld* m_world;
     WorldEditor* m_editor;
-    
+
     // Menu callbacks
     MenuCallback m_newWorldCallback;
     MenuCallback m_saveWorldCallback;
@@ -73,21 +108,36 @@ private:
     MenuCallback m_copyCallback;
     MenuCallback m_pasteCallback;
     MenuCallback m_deleteCallback;
-    
+
     // Window visibility flags (shared with other systems)
     bool* m_showSceneHierarchy;
     bool* m_showInspector;
     bool* m_showContentBrowser;
     bool* m_showConsole;
     bool* m_showToolPalette;
-    
+
 public:
     // Setters for window visibility flags
-    void setSceneHierarchyVisible(bool* visible) { m_showSceneHierarchy = visible; }
-    void setInspectorVisible(bool* visible) { m_showInspector = visible; }
-    void setContentBrowserVisible(bool* visible) { m_showContentBrowser = visible; }
-    void setConsoleVisible(bool* visible) { m_showConsole = visible; }
-    void setToolPaletteVisible(bool* visible) { m_showToolPalette = visible; }
+    void setSceneHierarchyVisible(bool* visible)
+    {
+        m_showSceneHierarchy = visible;
+    }
+    void setInspectorVisible(bool* visible)
+    {
+        m_showInspector = visible;
+    }
+    void setContentBrowserVisible(bool* visible)
+    {
+        m_showContentBrowser = visible;
+    }
+    void setConsoleVisible(bool* visible)
+    {
+        m_showConsole = visible;
+    }
+    void setToolPaletteVisible(bool* visible)
+    {
+        m_showToolPalette = visible;
+    }
 };
 
 } // namespace fresh

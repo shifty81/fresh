@@ -1,19 +1,21 @@
 #pragma once
 
+#include <memory>
 #include <string>
 #include <unordered_map>
-#include <memory>
 
-namespace fresh {
+namespace fresh
+{
 
 /**
  * @brief Manages shader loading, compilation, and hot-reloading
- * 
+ *
  * Provides shader management functionality including loading from files,
  * compilation, and optional hot-reloading during development.
  * API-agnostic - works with all rendering backends.
  */
-class ShaderManager {
+class ShaderManager
+{
 public:
     ShaderManager();
     ~ShaderManager();
@@ -41,7 +43,10 @@ public:
      * @brief Enable hot-reloading for development
      * @param enabled true to enable hot-reloading, false to disable
      */
-    void setHotReloadEnabled(bool enabled) { m_hotReloadEnabled = enabled; }
+    void setHotReloadEnabled(bool enabled)
+    {
+        m_hotReloadEnabled = enabled;
+    }
 
     /**
      * @brief Check if any shaders have been modified

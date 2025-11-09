@@ -1,45 +1,49 @@
 #include "editor/EditorManager.h"
-#include "core/Window.h"
+
 #include "core/Logger.h"
-#include "renderer/RenderContext.h"
-#include "voxel/VoxelWorld.h"
+#include "core/Window.h"
 #include "editor/WorldEditor.h"
-#include "ui/ImGuiContext.h"
-#include "ui/SceneHierarchyPanel.h"
-#include "ui/InspectorPanel.h"
+#include "renderer/RenderContext.h"
+#include "ui/ConsolePanel.h"
+#include "ui/ContentBrowserPanel.h"
 #include "ui/EditorMenuBar.h"
 #include "ui/EditorToolbar.h"
-#include "ui/ContentBrowserPanel.h"
-#include "ui/ConsolePanel.h"
+#include "ui/ImGuiContext.h"
+#include "ui/InspectorPanel.h"
+#include "ui/SceneHierarchyPanel.h"
 #include "ui/VoxelToolPalette.h"
+#include "voxel/VoxelWorld.h"
 
 #ifdef FRESH_IMGUI_AVAILABLE
-#include <imgui.h>
+    #include <imgui.h>
 #endif
 
-namespace fresh {
+namespace fresh
+{
 
 EditorManager::EditorManager()
-    : m_initialized(false)
-    , m_visible(true)
-    , m_window(nullptr)
-    , m_renderContext(nullptr)
-    , m_world(nullptr)
-    , m_worldEditor(nullptr)
-    , m_showSceneHierarchy(true)
-    , m_showInspector(true)
-    , m_showContentBrowser(true)
-    , m_showConsole(true)
-    , m_showToolPalette(true)
+    : m_initialized(false),
+      m_visible(true),
+      m_window(nullptr),
+      m_renderContext(nullptr),
+      m_world(nullptr),
+      m_worldEditor(nullptr),
+      m_showSceneHierarchy(true),
+      m_showInspector(true),
+      m_showContentBrowser(true),
+      m_showConsole(true),
+      m_showToolPalette(true)
 {
 }
 
-EditorManager::~EditorManager() {
+EditorManager::~EditorManager()
+{
     shutdown();
 }
 
-bool EditorManager::initialize(Window* window, IRenderContext* renderContext,
-                               VoxelWorld* world, WorldEditor* worldEditor) {
+bool EditorManager::initialize(Window* window, IRenderContext* renderContext, VoxelWorld* world,
+                               WorldEditor* worldEditor)
+{
     if (m_initialized) {
         LOG_WARNING_C("EditorManager already initialized", "EditorManager");
         return true;
@@ -82,7 +86,7 @@ bool EditorManager::initialize(Window* window, IRenderContext* renderContext,
         LOG_ERROR_C("Failed to initialize Menu Bar", "EditorManager");
         return false;
     }
-    
+
     // Link menu bar to panel visibility flags
     m_menuBar->setSceneHierarchyVisible(&m_showSceneHierarchy);
     m_menuBar->setInspectorVisible(&m_showInspector);
@@ -129,7 +133,8 @@ bool EditorManager::initialize(Window* window, IRenderContext* renderContext,
 #endif
 }
 
-void EditorManager::beginFrame() {
+void EditorManager::beginFrame()
+{
     if (!m_initialized || !m_visible) {
         return;
     }
@@ -141,7 +146,8 @@ void EditorManager::beginFrame() {
 #endif
 }
 
-void EditorManager::render() {
+void EditorManager::render()
+{
     if (!m_initialized || !m_visible) {
         return;
     }
@@ -163,7 +169,7 @@ void EditorManager::render() {
     // Render panels based on visibility flags
     if (m_showSceneHierarchy && m_sceneHierarchy) {
         m_sceneHierarchy->render();
-        
+
         // Connect to inspector
         if (m_inspector) {
             auto* selectedNode = m_sceneHierarchy->getSelectedNode();
@@ -192,7 +198,8 @@ void EditorManager::render() {
 #endif
 }
 
-void EditorManager::endFrame() {
+void EditorManager::endFrame()
+{
     if (!m_initialized || !m_visible) {
         return;
     }
@@ -204,7 +211,8 @@ void EditorManager::endFrame() {
 #endif
 }
 
-void EditorManager::shutdown() {
+void EditorManager::shutdown()
+{
     if (!m_initialized) {
         return;
     }
@@ -218,7 +226,7 @@ void EditorManager::shutdown() {
     m_menuBar.reset();
     m_inspector.reset();
     m_sceneHierarchy.reset();
-    
+
     if (m_imguiContext) {
         m_imguiContext->shutdown();
     }
@@ -229,46 +237,46 @@ void EditorManager::shutdown() {
     LOG_INFO_C("EditorManager shutdown complete", "EditorManager");
 }
 
-void EditorManager::setupDockspace() {
+void EditorManager::setupDockspace()
+{
 #ifdef FRESH_IMGUI_AVAILABLE
     // Create a fullscreen dockspace (requires ImGui docking branch)
     ImGuiViewport* viewport = ImGui::GetMainViewport();
     ImGui::SetNextWindowPos(viewport->WorkPos);
     ImGui::SetNextWindowSize(viewport->WorkSize);
-    
-#ifdef IMGUI_HAS_VIEWPORT
+
+    #ifdef IMGUI_HAS_VIEWPORT
     ImGui::SetNextWindowViewport(viewport->ID);
-#endif
-    
-    ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoTitleBar | 
-                                   ImGuiWindowFlags_NoCollapse |
-                                   ImGuiWindowFlags_NoResize | 
-                                   ImGuiWindowFlags_NoMove |
-                                   ImGuiWindowFlags_NoBringToFrontOnFocus | 
-                                   ImGuiWindowFlags_NoNavFocus;
-    
-#ifdef IMGUI_HAS_DOCK
+    #endif
+
+    ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse |
+                                    ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove |
+                                    ImGuiWindowFlags_NoBringToFrontOnFocus |
+                                    ImGuiWindowFlags_NoNavFocus;
+
+    #ifdef IMGUI_HAS_DOCK
     window_flags |= ImGuiWindowFlags_NoDocking;
-#endif
-    
+    #endif
+
     ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
     ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
     ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
-    
+
     ImGui::Begin("DockSpaceWindow", nullptr, window_flags);
     ImGui::PopStyleVar(3);
-    
-#ifdef IMGUI_HAS_DOCK
+
+    #ifdef IMGUI_HAS_DOCK
     // DockSpace (only available in docking branch)
     ImGuiID dockspace_id = ImGui::GetID("MyDockSpace");
     ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f), ImGuiDockNodeFlags_PassthruCentralNode);
-#endif
-    
+    #endif
+
     ImGui::End();
 #endif
 }
 
-bool EditorManager::wantCaptureMouse() const {
+bool EditorManager::wantCaptureMouse() const
+{
 #ifdef FRESH_IMGUI_AVAILABLE
     if (m_imguiContext) {
         return m_imguiContext->wantCaptureMouse();
@@ -277,7 +285,8 @@ bool EditorManager::wantCaptureMouse() const {
     return false;
 }
 
-bool EditorManager::wantCaptureKeyboard() const {
+bool EditorManager::wantCaptureKeyboard() const
+{
 #ifdef FRESH_IMGUI_AVAILABLE
     if (m_imguiContext) {
         return m_imguiContext->wantCaptureKeyboard();

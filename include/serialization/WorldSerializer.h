@@ -2,14 +2,16 @@
 
 #include <string>
 
-namespace fresh {
+namespace fresh
+{
 
 class VoxelWorld;
 
 /**
  * @brief Serialization system for saving/loading worlds
  */
-class WorldSerializer {
+class WorldSerializer
+{
 public:
     WorldSerializer();
     ~WorldSerializer();

@@ -1,22 +1,18 @@
 #pragma once
 
+#include <deque>
+#include <functional>
+#include <map>
 #include <string>
 #include <vector>
-#include <deque>
-#include <map>
-#include <functional>
 
-namespace fresh {
+namespace fresh
+{
 
 /**
  * @brief Console message types
  */
-enum class ConsoleMessageType {
-    Info,
-    Warning,
-    Error,
-    Success
-};
+enum class ConsoleMessageType { Info, Warning, Error, Success };
 
 /**
  * @brief Console message structure
@@ -25,18 +21,21 @@ struct ConsoleMessage {
     ConsoleMessageType type;
     std::string message;
     std::string timestamp;
-    
+
     ConsoleMessage(ConsoleMessageType t, const std::string& msg, const std::string& time)
-        : type(t), message(msg), timestamp(time) {}
+        : type(t), message(msg), timestamp(time)
+    {
+    }
 };
 
 /**
  * @brief Console / Status Bar Panel
- * 
+ *
  * Displays engine status, error messages, and debug information.
  * Acts as both a console for logging and a status bar for quick info.
  */
-class ConsolePanel {
+class ConsolePanel
+{
 public:
     ConsolePanel();
     ~ConsolePanel();
@@ -56,13 +55,19 @@ public:
      * @brief Set panel visibility
      * @param visible true to show, false to hide
      */
-    void setVisible(bool visible) { m_visible = visible; }
+    void setVisible(bool visible)
+    {
+        m_visible = visible;
+    }
 
     /**
      * @brief Check if panel is visible
      * @return true if visible
      */
-    bool isVisible() const { return m_visible; }
+    bool isVisible() const
+    {
+        return m_visible;
+    }
 
     /**
      * @brief Add a message to the console
@@ -83,8 +88,8 @@ public:
      * @param description Command description
      */
     void registerCommand(const std::string& name,
-                        std::function<void(const std::vector<std::string>&)> callback,
-                        const std::string& description = "");
+                         std::function<void(const std::vector<std::string>&)> callback,
+                         const std::string& description = "");
 
     /**
      * @brief Execute a command string

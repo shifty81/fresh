@@ -2,10 +2,14 @@
 
 #include <memory>
 
-namespace fresh {
+namespace fresh
+{
 
 // Forward declare from ECS namespace
-namespace ecs { class Entity; }
+namespace ecs
+{
+class Entity;
+}
 
 class BehaviorTree;
 
@@ -15,7 +19,8 @@ class AISystemImpl;
 /**
  * @brief AI system for NPC behavior management
  */
-class AISystem {
+class AISystem
+{
 public:
     AISystem();
     ~AISystem();
@@ -31,25 +36,25 @@ public:
      * @param deltaTime Time since last update
      */
     void update(float deltaTime);
-    
+
     /**
      * @brief Add an NPC with behavior tree
      * @param entity Entity to control
      * @param behavior Behavior tree for decision making
      */
     void addNPC(std::unique_ptr<ecs::Entity> entity, std::unique_ptr<BehaviorTree> behavior);
-    
+
     /**
      * @brief Remove an NPC from the system
      * @param entity Entity to remove
      */
     void removeNPC(ecs::Entity* entity);
-    
+
     /**
      * @brief Get number of active NPCs
      */
     size_t getNPCCount() const;
-    
+
 private:
     std::unique_ptr<AISystemImpl> pImpl;
 };

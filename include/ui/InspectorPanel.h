@@ -1,16 +1,18 @@
 #pragma once
 
-namespace fresh {
+namespace fresh
+{
 
 struct HierarchyNode;
 
 /**
  * @brief Inspector/Details Panel
- * 
+ *
  * Displays and allows editing of properties for the currently selected object,
  * including position, scale, components, scripts, and texture settings.
  */
-class InspectorPanel {
+class InspectorPanel
+{
 public:
     InspectorPanel();
     ~InspectorPanel();
@@ -30,19 +32,28 @@ public:
      * @brief Set panel visibility
      * @param visible true to show, false to hide
      */
-    void setVisible(bool visible) { m_visible = visible; }
+    void setVisible(bool visible)
+    {
+        m_visible = visible;
+    }
 
     /**
      * @brief Check if panel is visible
      * @return true if visible
      */
-    bool isVisible() const { return m_visible; }
+    bool isVisible() const
+    {
+        return m_visible;
+    }
 
     /**
      * @brief Set the object to inspect
      * @param node Scene node to inspect
      */
-    void setInspectedNode(HierarchyNode* node) { m_inspectedNode = node; }
+    void setInspectedNode(HierarchyNode* node)
+    {
+        m_inspectedNode = node;
+    }
 
 private:
     void renderTransformProperties();

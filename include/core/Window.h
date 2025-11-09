@@ -1,18 +1,20 @@
 #pragma once
 
-#include <string>
 #include <cstdint>
+#include <string>
 
 struct GLFWwindow;
 
-namespace fresh {
+namespace fresh
+{
 
 /**
  * @brief Window management class using GLFW
- * 
+ *
  * Handles window creation, event processing, and input management.
  */
-class Window {
+class Window
+{
 public:
     Window(uint32_t width, uint32_t height, const std::string& title);
     ~Window();
@@ -23,7 +25,8 @@ public:
 
     /**
      * @brief Initialize the window
-     * @param useOpenGL If true, creates an OpenGL context. If false, uses no API (for Vulkan/DirectX)
+     * @param useOpenGL If true, creates an OpenGL context. If false, uses no API (for
+     * Vulkan/DirectX)
      * @return true if initialization was successful, false otherwise
      */
     bool initialize(bool useOpenGL = false);
@@ -43,26 +46,38 @@ public:
      * @brief Get the GLFW window handle
      * @return pointer to GLFWwindow
      */
-    GLFWwindow* getHandle() const { return m_window; }
+    GLFWwindow* getHandle() const
+    {
+        return m_window;
+    }
 
     /**
      * @brief Get window width
      * @return window width in pixels
      */
-    uint32_t getWidth() const { return m_width; }
+    uint32_t getWidth() const
+    {
+        return m_width;
+    }
 
     /**
      * @brief Get window height
      * @return window height in pixels
      */
-    uint32_t getHeight() const { return m_height; }
+    uint32_t getHeight() const
+    {
+        return m_height;
+    }
 
     /**
      * @brief Get window title
      * @return window title string
      */
-    const std::string& getTitle() const { return m_title; }
-    
+    const std::string& getTitle() const
+    {
+        return m_title;
+    }
+
     /**
      * @brief Swap front and back buffers (for OpenGL)
      */

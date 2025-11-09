@@ -1,19 +1,22 @@
 #pragma once
 
-#include "VoxelTypes.h"
 #include <vector>
 
-namespace fresh {
+#include "VoxelTypes.h"
+
+namespace fresh
+{
 
 class Chunk;
 
 /**
  * @brief Generates optimized meshes from voxel data
- * 
+ *
  * Implements greedy meshing algorithm to reduce polygon count
  * by merging adjacent faces of the same type.
  */
-class MeshGenerator {
+class MeshGenerator
+{
 public:
     MeshGenerator();
     ~MeshGenerator();
@@ -24,9 +27,8 @@ public:
      * @param vertices Output vertex data
      * @param indices Output index data
      */
-    void generateChunkMesh(const Chunk* chunk, 
-                          std::vector<float>& vertices,
-                          std::vector<uint32_t>& indices);
+    void generateChunkMesh(const Chunk* chunk, std::vector<float>& vertices,
+                           std::vector<uint32_t>& indices);
 
     /**
      * @brief Generate simple cubic mesh (faster, more polygons)
@@ -34,9 +36,8 @@ public:
      * @param vertices Output vertex data
      * @param indices Output index data
      */
-    void generateSimpleMesh(const Chunk* chunk,
-                           std::vector<float>& vertices,
-                           std::vector<uint32_t>& indices);
+    void generateSimpleMesh(const Chunk* chunk, std::vector<float>& vertices,
+                            std::vector<uint32_t>& indices);
 
 private:
     struct Face {
@@ -46,9 +47,7 @@ private:
         VoxelType type;
     };
 
-    void addFace(const Face& face,
-                std::vector<float>& vertices,
-                std::vector<uint32_t>& indices);
+    void addFace(const Face& face, std::vector<float>& vertices, std::vector<uint32_t>& indices);
 };
 
 } // namespace fresh

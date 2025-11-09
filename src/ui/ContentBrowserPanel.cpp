@@ -1,43 +1,48 @@
 #include "ui/ContentBrowserPanel.h"
-#include "core/Logger.h"
-#include <imgui.h>
-#include <filesystem>
-#include <cstring>
 
-namespace fresh {
+#include <cstring>
+#include <filesystem>
+
+#include "core/Logger.h"
+
+#include <imgui.h>
+
+namespace fresh
+{
 namespace fs = std::filesystem;
 
 ContentBrowserPanel::ContentBrowserPanel()
-    : m_visible(true)
-    , m_assetsPath("assets")
-    , m_currentPath("assets")
-    , m_selectedAsset(nullptr)
-    , m_showDeleteDialog(false)
-    , m_showRenameDialog(false)
+    : m_visible(true),
+      m_assetsPath("assets"),
+      m_currentPath("assets"),
+      m_selectedAsset(nullptr),
+      m_showDeleteDialog(false),
+      m_showRenameDialog(false)
 {
     m_searchBuffer[0] = '\0';
     m_renameBuffer[0] = '\0';
 }
 
-ContentBrowserPanel::~ContentBrowserPanel() {
-}
+ContentBrowserPanel::~ContentBrowserPanel() {}
 
-bool ContentBrowserPanel::initialize(const std::string& assetsPath) {
+bool ContentBrowserPanel::initialize(const std::string& assetsPath)
+{
     m_assetsPath = assetsPath;
     m_currentPath = assetsPath;
-    
+
     // Create assets directory if it doesn't exist
     if (!fs::exists(assetsPath)) {
         fs::create_directories(assetsPath);
     }
-    
+
     refresh();
-    
+
     LOG_INFO_C("Content Browser Panel initialized", "ContentBrowserPanel");
     return true;
 }
 
-void ContentBrowserPanel::render() {
+void ContentBrowserPanel::render()
+{
     if (!m_visible) {
         return;
     }
@@ -52,21 +57,22 @@ void ContentBrowserPanel::render() {
         }
     }
     ImGui::SameLine();
-    
+
     if (ImGui::Button("Refresh")) {
         refresh();
     }
     ImGui::SameLine();
-    
+
     if (ImGui::Button("Import...")) {
         // Simple import dialog - in a full implementation, this would use a file dialog
         LOG_INFO_C("Import dialog would open here", "ContentBrowserPanel");
     }
     ImGui::SameLine();
-    
+
     // Search box
     ImGui::SetNextItemWidth(-1);
-    ImGui::InputTextWithHint("##search", "Search assets...", m_searchBuffer, sizeof(m_searchBuffer));
+    ImGui::InputTextWithHint("##search", "Search assets...", m_searchBuffer,
+                             sizeof(m_searchBuffer));
 
     ImGui::Separator();
 
@@ -86,7 +92,8 @@ void ContentBrowserPanel::render() {
     ImGui::End();
 }
 
-void ContentBrowserPanel::renderAssetGrid() {
+void ContentBrowserPanel::renderAssetGrid()
+{
     float cellSize = 80.0f;
     float panelWidth = ImGui::GetContentRegionAvail().x;
     int columnCount = std::max(1, (int)(panelWidth / cellSize));
@@ -140,24 +147,25 @@ void ContentBrowserPanel::renderAssetGrid() {
     ImGui::Columns(1);
 }
 
-void ContentBrowserPanel::renderAssetDetails(const AssetInfo& asset) {
+void ContentBrowserPanel::renderAssetDetails(const AssetInfo& asset)
+{
     ImGui::Text("Selected: %s", asset.name.c_str());
     ImGui::Text("Type: %s", asset.type.c_str());
     ImGui::Text("Path: %s", asset.path.c_str());
     ImGui::Text("Size: %zu bytes", asset.size);
-    
+
     ImGui::Spacing();
-    
+
     if (ImGui::Button("Open")) {
         LOG_INFO_C("Opening asset: " + asset.name, "ContentBrowserPanel");
     }
     ImGui::SameLine();
-    
+
     if (ImGui::Button("Delete")) {
         m_showDeleteDialog = true;
     }
     ImGui::SameLine();
-    
+
     if (ImGui::Button("Rename")) {
         m_showRenameDialog = true;
         // Pre-fill rename buffer with current name
@@ -168,7 +176,7 @@ void ContentBrowserPanel::renderAssetDetails(const AssetInfo& asset) {
         m_renameBuffer[sizeof(m_renameBuffer) - 1] = '\0';
 #endif
     }
-    
+
     // Delete confirmation dialog
     if (m_showDeleteDialog) {
         ImGui::OpenPopup("Delete Asset?");
@@ -176,7 +184,7 @@ void ContentBrowserPanel::renderAssetDetails(const AssetInfo& asset) {
             ImGui::Text("Are you sure you want to delete '%s'?", asset.name.c_str());
             ImGui::Text("This action cannot be undone.");
             ImGui::Separator();
-            
+
             if (ImGui::Button("Delete", ImVec2(120, 0))) {
                 if (deleteSelectedAsset()) {
                     LOG_INFO_C("Deleted asset: " + asset.name, "ContentBrowserPanel");
@@ -192,7 +200,7 @@ void ContentBrowserPanel::renderAssetDetails(const AssetInfo& asset) {
             ImGui::EndPopup();
         }
     }
-    
+
     // Rename dialog
     if (m_showRenameDialog) {
         ImGui::OpenPopup("Rename Asset");
@@ -200,11 +208,12 @@ void ContentBrowserPanel::renderAssetDetails(const AssetInfo& asset) {
             ImGui::Text("Enter new name for '%s':", asset.name.c_str());
             ImGui::InputText("##rename", m_renameBuffer, sizeof(m_renameBuffer));
             ImGui::Separator();
-            
+
             if (ImGui::Button("Rename", ImVec2(120, 0))) {
                 if (m_renameBuffer[0] != '\0') {
                     if (renameSelectedAsset(std::string(m_renameBuffer))) {
-                        LOG_INFO_C("Renamed asset to: " + std::string(m_renameBuffer), "ContentBrowserPanel");
+                        LOG_INFO_C("Renamed asset to: " + std::string(m_renameBuffer),
+                                   "ContentBrowserPanel");
                     }
                 }
                 m_showRenameDialog = false;
@@ -220,17 +229,25 @@ void ContentBrowserPanel::renderAssetDetails(const AssetInfo& asset) {
     }
 }
 
-const char* ContentBrowserPanel::getAssetIcon(const std::string& type) {
-    if (type == "folder") return "📁";
-    if (type == "texture") return "🖼️";
-    if (type == "model") return "📦";
-    if (type == "sound") return "🔊";
-    if (type == "script") return "📄";
-    if (type == "scene") return "🎬";
-    return "📋";  // Default icon
+const char* ContentBrowserPanel::getAssetIcon(const std::string& type)
+{
+    if (type == "folder")
+        return "📁";
+    if (type == "texture")
+        return "🖼️";
+    if (type == "model")
+        return "📦";
+    if (type == "sound")
+        return "🔊";
+    if (type == "script")
+        return "📄";
+    if (type == "scene")
+        return "🎬";
+    return "📋"; // Default icon
 }
 
-void ContentBrowserPanel::scanAssets(const std::string& path) {
+void ContentBrowserPanel::scanAssets(const std::string& path)
+{
     m_assets.clear();
 
     if (!fs::exists(path)) {
@@ -248,7 +265,7 @@ void ContentBrowserPanel::scanAssets(const std::string& path) {
                 asset.size = 0;
             } else {
                 asset.size = entry.file_size();
-                
+
                 // Determine type from extension
                 std::string ext = entry.path().extension().string();
                 if (ext == ".png" || ext == ".jpg" || ext == ".bmp") {
@@ -273,12 +290,14 @@ void ContentBrowserPanel::scanAssets(const std::string& path) {
     }
 }
 
-void ContentBrowserPanel::refresh() {
+void ContentBrowserPanel::refresh()
+{
     scanAssets(m_currentPath);
     m_selectedAsset = nullptr;
 }
 
-bool ContentBrowserPanel::deleteSelectedAsset() {
+bool ContentBrowserPanel::deleteSelectedAsset()
+{
     if (!m_selectedAsset) {
         return false;
     }
@@ -299,7 +318,8 @@ bool ContentBrowserPanel::deleteSelectedAsset() {
     return false;
 }
 
-bool ContentBrowserPanel::renameSelectedAsset(const std::string& newName) {
+bool ContentBrowserPanel::renameSelectedAsset(const std::string& newName)
+{
     if (!m_selectedAsset || newName.empty()) {
         return false;
     }
@@ -307,13 +327,13 @@ bool ContentBrowserPanel::renameSelectedAsset(const std::string& newName) {
     try {
         fs::path oldPath(m_selectedAsset->path);
         fs::path newPath = oldPath.parent_path() / newName;
-        
+
         // Check if target already exists
         if (fs::exists(newPath)) {
             LOG_ERROR_C("Asset with name '" + newName + "' already exists", "ContentBrowserPanel");
             return false;
         }
-        
+
         fs::rename(oldPath, newPath);
         refresh();
         return true;
@@ -323,7 +343,8 @@ bool ContentBrowserPanel::renameSelectedAsset(const std::string& newName) {
     return false;
 }
 
-bool ContentBrowserPanel::importAsset(const std::string& sourcePath) {
+bool ContentBrowserPanel::importAsset(const std::string& sourcePath)
+{
     if (sourcePath.empty() || !fs::exists(sourcePath)) {
         LOG_ERROR_C("Source file does not exist: " + sourcePath, "ContentBrowserPanel");
         return false;
@@ -332,13 +353,13 @@ bool ContentBrowserPanel::importAsset(const std::string& sourcePath) {
     try {
         fs::path source(sourcePath);
         fs::path destination = fs::path(m_currentPath) / source.filename();
-        
+
         // Check if destination already exists
         if (fs::exists(destination)) {
             LOG_ERROR_C("Asset already exists at destination", "ContentBrowserPanel");
             return false;
         }
-        
+
         fs::copy(source, destination, fs::copy_options::recursive);
         refresh();
         LOG_INFO_C("Imported asset: " + source.filename().string(), "ContentBrowserPanel");

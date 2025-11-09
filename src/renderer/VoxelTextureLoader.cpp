@@ -1,30 +1,35 @@
 #include "renderer/VoxelTextureLoader.h"
-#include "core/Logger.h"
+
 #include <sstream>
 
-namespace fresh {
+#include "core/Logger.h"
+
+namespace fresh
+{
 
 VoxelTextureLoader::VoxelTextureLoader(TextureResolution resolution, const std::string& basePath)
-    : currentResolution(resolution)
-    , textureBasePath(basePath)
+    : currentResolution(resolution), textureBasePath(basePath)
 {
 }
 
-std::string VoxelTextureLoader::getResolutionSuffix() const {
+std::string VoxelTextureLoader::getResolutionSuffix() const
+{
     int size = static_cast<int>(currentResolution);
     std::stringstream ss;
     ss << "_" << size << "x" << size << ".png";
     return ss.str();
 }
 
-std::string VoxelTextureLoader::getTexturePath(const std::string& textureName) const {
+std::string VoxelTextureLoader::getTexturePath(const std::string& textureName) const
+{
     return textureBasePath + "/" + textureName + getResolutionSuffix();
 }
 
-bool VoxelTextureLoader::loadAllTextures() {
+bool VoxelTextureLoader::loadAllTextures()
+{
     auto& texManager = TextureManager::getInstance();
     bool allLoaded = true;
-    
+
     // Load Stone
     {
         auto tex = texManager.loadTexture(getTexturePath(VoxelTexturePaths::STONE));
@@ -41,7 +46,7 @@ bool VoxelTextureLoader::loadAllTextures() {
             allLoaded = false;
         }
     }
-    
+
     // Load Dirt
     {
         auto tex = texManager.loadTexture(getTexturePath(VoxelTexturePaths::DIRT));
@@ -58,13 +63,13 @@ bool VoxelTextureLoader::loadAllTextures() {
             allLoaded = false;
         }
     }
-    
+
     // Load Grass (face-specific)
     {
         auto topTex = texManager.loadTexture(getTexturePath(VoxelTexturePaths::GRASS_TOP));
         auto sideTex = texManager.loadTexture(getTexturePath(VoxelTexturePaths::GRASS_SIDE));
         auto bottomTex = texManager.loadTexture(getTexturePath(VoxelTexturePaths::DIRT));
-        
+
         if (topTex && sideTex && bottomTex) {
             textureCache[VoxelType::Grass][BlockFace::Top] = topTex;
             textureCache[VoxelType::Grass][BlockFace::Bottom] = bottomTex;
@@ -78,7 +83,7 @@ bool VoxelTextureLoader::loadAllTextures() {
             allLoaded = false;
         }
     }
-    
+
     // Load Sand
     {
         auto tex = texManager.loadTexture(getTexturePath(VoxelTexturePaths::SAND));
@@ -95,7 +100,7 @@ bool VoxelTextureLoader::loadAllTextures() {
             allLoaded = false;
         }
     }
-    
+
     // Load Water
     {
         auto tex = texManager.loadTexture(getTexturePath(VoxelTexturePaths::WATER));
@@ -112,7 +117,7 @@ bool VoxelTextureLoader::loadAllTextures() {
             allLoaded = false;
         }
     }
-    
+
     // Load Wood
     {
         auto tex = texManager.loadTexture(getTexturePath(VoxelTexturePaths::WOOD));
@@ -129,7 +134,7 @@ bool VoxelTextureLoader::loadAllTextures() {
             allLoaded = false;
         }
     }
-    
+
     // Load Leaves
     {
         auto tex = texManager.loadTexture(getTexturePath(VoxelTexturePaths::LEAVES));
@@ -146,23 +151,24 @@ bool VoxelTextureLoader::loadAllTextures() {
             allLoaded = false;
         }
     }
-    
+
     if (allLoaded) {
         LOG_INFO("All voxel textures loaded successfully");
     } else {
         LOG_WARNING("Some voxel textures failed to load");
     }
-    
+
     return allLoaded;
 }
 
-std::shared_ptr<Texture> VoxelTextureLoader::getTexture(VoxelType type, BlockFace face) {
+std::shared_ptr<Texture> VoxelTextureLoader::getTexture(VoxelType type, BlockFace face)
+{
     auto typeIt = textureCache.find(type);
     if (typeIt == textureCache.end()) {
         LOG_WARNING_C("Texture not found for voxel type", "VoxelTextureLoader");
         return nullptr;
     }
-    
+
     auto faceIt = typeIt->second.find(face);
     if (faceIt == typeIt->second.end()) {
         // Try to get any texture for this type (fallback)
@@ -171,16 +177,18 @@ std::shared_ptr<Texture> VoxelTextureLoader::getTexture(VoxelType type, BlockFac
         }
         return nullptr;
     }
-    
+
     return faceIt->second;
 }
 
-bool VoxelTextureLoader::hasFaceSpecificTextures(VoxelType type) const {
+bool VoxelTextureLoader::hasFaceSpecificTextures(VoxelType type) const
+{
     // Currently only grass has face-specific textures
     return type == VoxelType::Grass;
 }
 
-void VoxelTextureLoader::setResolution(TextureResolution resolution) {
+void VoxelTextureLoader::setResolution(TextureResolution resolution)
+{
     if (resolution != currentResolution) {
         currentResolution = resolution;
         textureCache.clear();

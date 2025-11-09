@@ -11,7 +11,8 @@
     #define EXPORT_API extern "C" __attribute__((visibility("default")))
 #endif
 
-namespace fresh {
+namespace fresh
+{
 
 // Asset Manager C API
 EXPORT_API AssetManager* AssetManager_GetInstance();
@@ -20,14 +21,12 @@ EXPORT_API bool AssetManager_Initialize(AssetManager* instance, const char* asse
 
 EXPORT_API void AssetManager_Shutdown(AssetManager* instance);
 
-EXPORT_API bool AssetManager_ProcessNewAsset(AssetManager* instance, 
-                                              const char* sourcePath,
-                                              const char* assetType);
+EXPORT_API bool AssetManager_ProcessNewAsset(AssetManager* instance, const char* sourcePath,
+                                             const char* assetType);
 
 EXPORT_API const char* AssetManager_GetAssetTypeFolder(AssetManager* instance,
-                                                        const char* assetType);
+                                                       const char* assetType);
 
-EXPORT_API bool AssetManager_LoadAssetsFromLua(AssetManager* instance,
-                                                const char* configPath);
+EXPORT_API bool AssetManager_LoadAssetsFromLua(AssetManager* instance, const char* configPath);
 
 } // namespace fresh

@@ -2,14 +2,16 @@
 
 #include <vector>
 
-namespace fresh {
+namespace fresh
+{
 
 /**
  * @brief Noise generation using Perlin and Simplex algorithms
- * 
+ *
  * Provides various noise functions for procedural generation.
  */
-class NoiseGenerator {
+class NoiseGenerator
+{
 public:
     NoiseGenerator();
     explicit NoiseGenerator(int seed);
@@ -47,25 +49,27 @@ public:
      * @param lacunarity Frequency multiplier per octave
      * @return Noise value
      */
-    [[nodiscard]] float fractalNoise2D(float x, float y, int octaves = 4, 
-                        float persistence = 0.5f, float lacunarity = 2.0f) const;
+    [[nodiscard]] float fractalNoise2D(float x, float y, int octaves = 4, float persistence = 0.5f,
+                                       float lacunarity = 2.0f) const;
 
     /**
      * @brief Generate 3D fractal noise
      */
     [[nodiscard]] float fractalNoise3D(float x, float y, float z, int octaves = 4,
-                        float persistence = 0.5f, float lacunarity = 2.0f) const;
+                                       float persistence = 0.5f, float lacunarity = 2.0f) const;
 
 private:
     // Inline helper functions for better performance in hot paths
-    inline float fade(float t) const noexcept {
+    inline float fade(float t) const noexcept
+    {
         return t * t * t * (t * (t * 6.0f - 15.0f) + 10.0f);
     }
-    
-    inline float lerp(float t, float a, float b) const noexcept {
+
+    inline float lerp(float t, float a, float b) const noexcept
+    {
         return a + t * (b - a);
     }
-    
+
     float grad(int hash, float x, float y) const noexcept;
     float grad(int hash, float x, float y, float z) const noexcept;
 

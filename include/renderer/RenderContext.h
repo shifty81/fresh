@@ -1,12 +1,15 @@
 #pragma once
 
-#include "GraphicsAPI.h"
-#include <glm/glm.hpp>
 #include <cstdint>
-#include <string>
 #include <memory>
+#include <string>
 
-namespace fresh {
+#include <glm/glm.hpp>
+
+#include "GraphicsAPI.h"
+
+namespace fresh
+{
 
 class Window;
 class RenderBuffer;
@@ -16,94 +19,98 @@ class RenderPipeline;
 
 /**
  * @brief Abstract rendering context interface
- * 
+ *
  * This is the main interface for all graphics API backends.
  * Each API (Vulkan, OpenGL, DX11, DX12) implements this interface.
  */
-class IRenderContext {
+class IRenderContext
+{
 public:
     virtual ~IRenderContext() = default;
-    
+
     /**
      * @brief Initialize rendering context
      * @param window Window to render to
      * @return true if successful
      */
     virtual bool initialize(Window* window) = 0;
-    
+
     /**
      * @brief Shutdown and cleanup
      */
     virtual void shutdown() = 0;
-    
+
     /**
      * @brief Begin rendering a frame
      * @return true if ready to render
      */
     virtual bool beginFrame() = 0;
-    
+
     /**
      * @brief End frame and present
      */
     virtual void endFrame() = 0;
-    
+
     /**
      * @brief Wait for GPU to finish all work
      */
     virtual void waitIdle() = 0;
-    
+
     /**
      * @brief Set viewport
      */
     virtual void setViewport(int x, int y, int width, int height) = 0;
-    
+
     /**
      * @brief Set scissor rectangle
      */
     virtual void setScissor(int x, int y, int width, int height) = 0;
-    
+
     /**
      * @brief Clear color buffer
      */
     virtual void clearColor(float r, float g, float b, float a) = 0;
-    
+
     /**
      * @brief Clear depth buffer
      */
     virtual void clearDepth(float depth) = 0;
-    
+
     /**
      * @brief Get current graphics API
      */
     virtual GraphicsAPI getAPI() const = 0;
-    
+
     /**
      * @brief Get API-specific device handle (for advanced usage)
      */
     virtual void* getNativeDevice() = 0;
-    
+
     /**
      * @brief Get swapchain width
      */
     virtual int getSwapchainWidth() const = 0;
-    
+
     /**
      * @brief Get swapchain height
      */
     virtual int getSwapchainHeight() const = 0;
-    
+
     // Resource creation
     virtual std::shared_ptr<RenderBuffer> createVertexBuffer(const void* data, size_t size) = 0;
     virtual std::shared_ptr<RenderBuffer> createIndexBuffer(const void* data, size_t size) = 0;
     virtual std::shared_ptr<RenderBuffer> createUniformBuffer(size_t size) = 0;
-    virtual std::shared_ptr<RenderTexture> createTexture(int width, int height, const void* data) = 0;
-    virtual std::shared_ptr<RenderShader> createShader(const std::string& vertexCode, const std::string& fragmentCode) = 0;
+    virtual std::shared_ptr<RenderTexture> createTexture(int width, int height,
+                                                         const void* data) = 0;
+    virtual std::shared_ptr<RenderShader> createShader(const std::string& vertexCode,
+                                                       const std::string& fragmentCode) = 0;
 };
 
 /**
  * @brief Factory for creating render contexts
  */
-class RenderContextFactory {
+class RenderContextFactory
+{
 public:
     /**
      * @brief Create render context for specified API
@@ -111,7 +118,7 @@ public:
      * @return Unique pointer to render context
      */
     static std::unique_ptr<IRenderContext> create(GraphicsAPI api);
-    
+
     /**
      * @brief Create render context with auto-detection
      */
@@ -121,10 +128,11 @@ public:
 /**
  * @brief Abstract buffer interface (vertex, index, uniform)
  */
-class RenderBuffer {
+class RenderBuffer
+{
 public:
     virtual ~RenderBuffer() = default;
-    
+
     virtual void bind() = 0;
     virtual void unbind() = 0;
     virtual void updateData(const void* data, size_t size, size_t offset = 0) = 0;
@@ -135,10 +143,11 @@ public:
 /**
  * @brief Abstract texture interface
  */
-class RenderTexture {
+class RenderTexture
+{
 public:
     virtual ~RenderTexture() = default;
-    
+
     virtual void bind(int unit) = 0;
     virtual void unbind() = 0;
     virtual int getWidth() const = 0;
@@ -149,10 +158,11 @@ public:
 /**
  * @brief Abstract shader interface
  */
-class RenderShader {
+class RenderShader
+{
 public:
     virtual ~RenderShader() = default;
-    
+
     virtual void bind() = 0;
     virtual void unbind() = 0;
     virtual void setUniformInt(const std::string& name, int value) = 0;
