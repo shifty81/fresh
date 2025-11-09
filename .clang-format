@@ -125,7 +125,6 @@ NamespaceIndentation: None
 
 # Preprocessor
 IndentPPDirectives: BeforeHash
-IncludeBlocks: Regroup
 
 # Access modifiers
 AccessModifierOffset: -4
