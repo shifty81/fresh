@@ -269,8 +269,12 @@ bool DirectX12RenderContext::beginFrame() {
         commandList->OMSetRenderTargets(1, &rtvHandle, FALSE, &dsvHandle);
     }
     
-    // Clear render target
-    clearColor(0.0f, 0.2f, 0.4f, 1.0f);
+    // Clear render target using stored clear color
+    if (commandList && rtvHeap) {
+        D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle = rtvHeap->GetCPUDescriptorHandleForHeapStart();
+        rtvHandle.ptr += currentFrame * rtvDescriptorSize;
+        commandList->ClearRenderTargetView(rtvHandle, clearColorValue, 0, nullptr);
+    }
     
     // Clear depth stencil
     clearDepth(1.0f);
@@ -352,13 +356,18 @@ void DirectX12RenderContext::setScissor(int x, int y, int w, int h) {
 }
 
 void DirectX12RenderContext::clearColor(float r, float g, float b, float a) {
-    if (!commandList || !rtvHeap) return;
+    // Store the clear color for use in beginFrame()
+    clearColorValue[0] = r;
+    clearColorValue[1] = g;
+    clearColorValue[2] = b;
+    clearColorValue[3] = a;
     
-    float clearColor[4] = { r, g, b, a };
-    D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle = rtvHeap->GetCPUDescriptorHandleForHeapStart();
-    rtvHandle.ptr += currentFrame * rtvDescriptorSize;
-    
-    commandList->ClearRenderTargetView(rtvHandle, clearColor, 0, nullptr);
+    // Also clear immediately if we have the necessary objects
+    if (commandList && rtvHeap) {
+        D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle = rtvHeap->GetCPUDescriptorHandleForHeapStart();
+        rtvHandle.ptr += currentFrame * rtvDescriptorSize;
+        commandList->ClearRenderTargetView(rtvHandle, clearColorValue, 0, nullptr);
+    }
 }
 
 void DirectX12RenderContext::clearDepth(float depth) {
