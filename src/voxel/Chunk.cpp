@@ -13,6 +13,10 @@ Chunk::Chunk(const ChunkPos& position)
     for (auto& voxel : m_voxels) {
         voxel = Voxel(VoxelType::Air);
     }
+    
+    // Reserve mesh capacity to reduce allocations during generation
+    m_meshVertices.reserve(4096);  // Reasonable default for typical chunk
+    m_meshIndices.reserve(2048);
 }
 
 Chunk::~Chunk() {

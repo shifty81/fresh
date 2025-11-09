@@ -8,29 +8,29 @@
 namespace fresh {
 
 // AABB implementation
-bool AABB::contains(const glm::vec3& point) const {
+bool AABB::contains(const glm::vec3& point) const noexcept {
     return point.x >= min.x && point.x <= max.x &&
            point.y >= min.y && point.y <= max.y &&
            point.z >= min.z && point.z <= max.z;
 }
 
-bool AABB::intersects(const AABB& other) const {
+bool AABB::intersects(const AABB& other) const noexcept {
     return (min.x <= other.max.x && max.x >= other.min.x) &&
            (min.y <= other.max.y && max.y >= other.min.y) &&
            (min.z <= other.max.z && max.z >= other.min.z);
 }
 
 // BoundingSphere implementation
-bool BoundingSphere::contains(const glm::vec3& point) const {
+bool BoundingSphere::contains(const glm::vec3& point) const noexcept {
     return glm::distance(center, point) <= radius;
 }
 
-bool BoundingSphere::intersects(const BoundingSphere& other) const {
+bool BoundingSphere::intersects(const BoundingSphere& other) const noexcept {
     float distance = glm::distance(center, other.center);
     return distance <= (radius + other.radius);
 }
 
-bool BoundingSphere::intersects(const AABB& aabb) const {
+bool BoundingSphere::intersects(const AABB& aabb) const noexcept {
     glm::vec3 closest = glm::clamp(center, aabb.min, aabb.max);
     float distance = glm::distance(center, closest);
     return distance <= radius;

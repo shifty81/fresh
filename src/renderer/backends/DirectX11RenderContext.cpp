@@ -3,12 +3,12 @@
 #ifdef _WIN32
 
 #include "core/Window.h"
+#include "core/Logger.h"
 #include "voxel/VoxelWorld.h"
 #include "voxel/Chunk.h"
 #include "voxel/VoxelTypes.h"
 #include "gameplay/Player.h"
 #include "gameplay/Camera.h"
-#include <iostream>
 #include <d3dcompiler.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -146,10 +146,10 @@ DirectX11RenderContext::~DirectX11RenderContext() {
 }
 
 bool DirectX11RenderContext::initialize(Window* win) {
-    std::cout << "[DirectX 11] Initializing DirectX 11 render context..." << std::endl;
+    LOG_INFO_C("Initializing DirectX 11 render context...", "DirectX11");
     
     if (!win) {
-        std::cerr << "[DirectX 11] Invalid window pointer" << std::endl;
+        LOG_ERROR_C("Invalid window pointer", "DirectX11");
         return false;
     }
     
@@ -158,37 +158,37 @@ bool DirectX11RenderContext::initialize(Window* win) {
     height = static_cast<int>(window->getHeight());
     
     if (!createDevice()) {
-        std::cerr << "[DirectX 11] Failed to create device" << std::endl;
+        LOG_ERROR_C("Failed to create device", "DirectX11");
         return false;
     }
     
     if (!createSwapchain()) {
-        std::cerr << "[DirectX 11] Failed to create swapchain" << std::endl;
+        LOG_ERROR_C("Failed to create swapchain", "DirectX11");
         return false;
     }
     
     if (!createRenderTargetView()) {
-        std::cerr << "[DirectX 11] Failed to create render target view" << std::endl;
+        LOG_ERROR_C("Failed to create render target view", "DirectX11");
         return false;
     }
     
     if (!createDepthStencilView()) {
-        std::cerr << "[DirectX 11] Failed to create depth stencil view" << std::endl;
+        LOG_ERROR_C("Failed to create depth stencil view", "DirectX11");
         return false;
     }
     
     // Initialize voxel rendering system
     if (!initializeVoxelRendering()) {
-        std::cerr << "[DirectX 11] Failed to initialize voxel rendering" << std::endl;
+        LOG_ERROR_C("Failed to initialize voxel rendering", "DirectX11");
         return false;
     }
     
-    std::cout << "[DirectX 11] DirectX 11 context initialized successfully" << std::endl;
+    LOG_INFO_C("DirectX 11 context initialized successfully", "DirectX11");
     return true;
 }
 
 void DirectX11RenderContext::shutdown() {
-    std::cout << "[DirectX 11] Shutting down DirectX 11 context..." << std::endl;
+    LOG_INFO_C("Shutting down DirectX 11 context...", "DirectX11");
     
     // Shutdown voxel rendering first
     shutdownVoxelRendering();
@@ -288,7 +288,7 @@ std::shared_ptr<RenderBuffer> DirectX11RenderContext::createVertexBuffer(const v
     HRESULT hr = device->CreateBuffer(&bufferDesc, data ? &initData : nullptr, &buffer);
     
     if (FAILED(hr)) {
-        std::cerr << "[DirectX 11] Failed to create vertex buffer" << std::endl;
+        LOG_ERROR_C("Failed to create vertex buffer", "DirectX11");
         return nullptr;
     }
     
@@ -310,7 +310,7 @@ std::shared_ptr<RenderBuffer> DirectX11RenderContext::createIndexBuffer(const vo
     HRESULT hr = device->CreateBuffer(&bufferDesc, data ? &initData : nullptr, &buffer);
     
     if (FAILED(hr)) {
-        std::cerr << "[DirectX 11] Failed to create index buffer" << std::endl;
+        LOG_ERROR_C("Failed to create index buffer", "DirectX11");
         return nullptr;
     }
     
@@ -330,7 +330,7 @@ std::shared_ptr<RenderBuffer> DirectX11RenderContext::createUniformBuffer(size_t
     HRESULT hr = device->CreateBuffer(&bufferDesc, nullptr, &buffer);
     
     if (FAILED(hr)) {
-        std::cerr << "[DirectX 11] Failed to create uniform buffer" << std::endl;
+        LOG_ERROR_C("Failed to create uniform buffer", "DirectX11");
         return nullptr;
     }
     
@@ -359,7 +359,7 @@ std::shared_ptr<RenderTexture> DirectX11RenderContext::createTexture(int w, int 
     HRESULT hr = device->CreateTexture2D(&texDesc, data ? &initData : nullptr, &texture);
     
     if (FAILED(hr)) {
-        std::cerr << "[DirectX 11] Failed to create texture" << std::endl;
+        LOG_ERROR_C("Failed to create texture", "DirectX11");
         return nullptr;
     }
     
@@ -373,7 +373,7 @@ std::shared_ptr<RenderTexture> DirectX11RenderContext::createTexture(int w, int 
     hr = device->CreateShaderResourceView(texture.Get(), &srvDesc, &srv);
     
     if (FAILED(hr)) {
-        std::cerr << "[DirectX 11] Failed to create shader resource view" << std::endl;
+        LOG_ERROR_C("Failed to create shader resource view", "DirectX11");
         return nullptr;
     }
     
@@ -406,10 +406,11 @@ std::shared_ptr<RenderShader> DirectX11RenderContext::createShader(const std::st
     
     if (FAILED(hr)) {
         if (errorBlob) {
-            std::cerr << "[DirectX 11] Vertex shader compilation error: " 
-                      << static_cast<const char*>(errorBlob->GetBufferPointer()) << std::endl;
+            std::string error = "Vertex shader compilation error: ";
+            error += static_cast<const char*>(errorBlob->GetBufferPointer());
+            LOG_ERROR_C(error, "DirectX11");
         } else {
-            std::cerr << "[DirectX 11] Vertex shader compilation failed" << std::endl;
+            LOG_ERROR_C("Vertex shader compilation failed", "DirectX11");
         }
         return nullptr;
     }
@@ -422,7 +423,7 @@ std::shared_ptr<RenderShader> DirectX11RenderContext::createShader(const std::st
     );
     
     if (FAILED(hr)) {
-        std::cerr << "[DirectX 11] Failed to create vertex shader" << std::endl;
+        LOG_ERROR_C("Failed to create vertex shader", "DirectX11");
         return nullptr;
     }
     
@@ -445,10 +446,11 @@ std::shared_ptr<RenderShader> DirectX11RenderContext::createShader(const std::st
     
     if (FAILED(hr)) {
         if (errorBlob) {
-            std::cerr << "[DirectX 11] Pixel shader compilation error: " 
-                      << static_cast<const char*>(errorBlob->GetBufferPointer()) << std::endl;
+            std::string error = "Pixel shader compilation error: ";
+            error += static_cast<const char*>(errorBlob->GetBufferPointer());
+            LOG_ERROR_C(error, "DirectX11");
         } else {
-            std::cerr << "[DirectX 11] Pixel shader compilation failed" << std::endl;
+            LOG_ERROR_C("Pixel shader compilation failed", "DirectX11");
         }
         return nullptr;
     }
@@ -461,11 +463,11 @@ std::shared_ptr<RenderShader> DirectX11RenderContext::createShader(const std::st
     );
     
     if (FAILED(hr)) {
-        std::cerr << "[DirectX 11] Failed to create pixel shader" << std::endl;
+        LOG_ERROR_C("Failed to create pixel shader", "DirectX11");
         return nullptr;
     }
     
-    std::cout << "[DirectX 11] Shaders compiled and created successfully" << std::endl;
+    LOG_INFO_C("Shaders compiled and created successfully", "DirectX11");
     return std::make_shared<D3D11Shader>(vertexShader, pixelShader);
 }
 

@@ -43,22 +43,16 @@ void NoiseGenerator::setSeed(int seed) {
     }
 }
 
-float NoiseGenerator::fade(float t) const {
-    return t * t * t * (t * (t * 6 - 15) + 10);
-}
+// fade() and lerp() are now inline in the header for better performance
 
-float NoiseGenerator::lerp(float t, float a, float b) const {
-    return a + t * (b - a);
-}
-
-float NoiseGenerator::grad(int hash, float x, float y) const {
+float NoiseGenerator::grad(int hash, float x, float y) const noexcept {
     int h = hash & 15;
     float u = h < 8 ? x : y;
     float v = h < 4 ? y : x;
     return ((h & 1) ? -u : u) + ((h & 2) ? -v : v);
 }
 
-float NoiseGenerator::grad(int hash, float x, float y, float z) const {
+float NoiseGenerator::grad(int hash, float x, float y, float z) const noexcept {
     int h = hash & 15;
     float u = h < 8 ? x : y;
     float v = h < 4 ? y : (h == 12 || h == 14 ? x : z);

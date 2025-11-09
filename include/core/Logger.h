@@ -82,7 +82,7 @@ public:
     /**
      * @brief Check if logger is initialized
      */
-    bool isInitialized() const { return m_initialized; }
+    [[nodiscard]] bool isInitialized() const { return m_initialized; }
 
 private:
     Logger();

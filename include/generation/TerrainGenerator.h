@@ -37,7 +37,7 @@ public:
      * @param z World Z coordinate
      * @return Height value
      */
-    int getHeight(int x, int z) const;
+    [[nodiscard]] int getHeight(int x, int z) const;
 
 private:
     VoxelType getBlockType(int x, int y, int z, int surfaceHeight) const;
