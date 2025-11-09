@@ -133,6 +133,47 @@ Release\FreshVoxelEngine.exe
 4. **Build** - Place and remove blocks with mouse
 5. **Edit** - Press T to open editor with advanced terraforming tools
 
+**See [examples/README.md](examples/README.md) for 6 playable in-engine demo scenarios.**
+
+---
+
+## 🎨 Development Languages & Tools
+
+Fresh Voxel Engine supports multiple development approaches:
+
+### Primary: C++20 Core Engine
+- **Modern C++ features**: Concepts, ranges, coroutines
+- **High performance**: Direct hardware access
+- **Full engine control**: All features available
+- **Build with**: CMake + Visual Studio 2022
+
+### Optional: .NET 9 C# Bindings
+- **Managed development**: Memory safety, easier debugging
+- **Rapid iteration**: Hot reload, faster compile times
+- **Rich ecosystem**: NuGet packages, LINQ, async/await
+- **Interop**: P/Invoke to native engine
+- **See**: [DOTNET_INTEGRATION.md](DOTNET_INTEGRATION.md)
+
+### Optional: Lua Scripting
+- **Gameplay modding**: Custom behaviors and logic
+- **Hot reload**: Change scripts without recompiling
+- **Easy learning**: Simple syntax for non-programmers
+- **Event system**: Hook into engine events
+- **See**: [LUA_INTEGRATION_GUIDE.md](LUA_INTEGRATION_GUIDE.md)
+
+### Tools: Python 3.8+
+- **Asset pipeline**: Texture atlas generation
+- **Build verification**: Environment checking
+- **World analysis**: Debug saved worlds
+- **Cross-platform**: Works on Windows, Linux, macOS
+- **See**: [tools/README.md](tools/README.md)
+
+**Choose your language based on your needs:**
+- Performance-critical code → C++20
+- Game logic & rapid development → .NET 9 C#
+- Modding & scripting → Lua
+- Tools & automation → Python
+
 ---
 
 ## 📁 Project Structure
@@ -165,11 +206,11 @@ fresh/
 ├── textures/              # Placeholder textures (42 blocks + 11 UI)
 ├── sounds/                # Audio files
 ├── Assets/                # Game assets
-├── examples/              # Example code demonstrating features
+├── examples/              # In-engine gameplay demo documentation
 ├── docs/                  # Detailed documentation
 ├── dotnet/                # .NET 9 C# bindings
 ├── tests/                 # Unit tests
-└── tools/                 # Build and development tools
+└── tools/                 # Python development tools
 ```
 
 ---
