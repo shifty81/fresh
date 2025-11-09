@@ -24,8 +24,19 @@ public:
     }
     
     void updateData(const void* data, size_t dataSize, size_t offset) override {
-        (void)data; (void)dataSize; (void)offset; // Unused - stub implementation
-        // Would use upload heap and copy commands
+        if (!resource || !data || dataSize == 0) return;
+        
+        // Map the resource (only works for upload heap resources)
+        void* mappedData = nullptr;
+        D3D12_RANGE readRange = { 0, 0 }; // We won't read from this resource on the CPU
+        
+        HRESULT hr = resource->Map(0, &readRange, &mappedData);
+        if (SUCCEEDED(hr)) {
+            if (offset + dataSize <= size) {
+                memcpy(static_cast<char*>(mappedData) + offset, data, dataSize);
+            }
+            resource->Unmap(0, nullptr);
+        }
     }
     
     size_t getSize() const override { return size; }
@@ -128,8 +139,8 @@ bool DirectX12RenderContext::initialize(Window* win) {
     }
     
     window = win;
-    width = 1280;  // TODO: Get from window
-    height = 720;
+    width = static_cast<int>(window->getWidth());
+    height = static_cast<int>(window->getHeight());
     
 #ifdef _DEBUG
     if (!enableDebugLayer()) {
@@ -235,30 +246,74 @@ bool DirectX12RenderContext::beginFrame() {
         }
     }
     
-    // Transition render target to render target state
-    // Set render targets
-    // Clear render target and depth stencil
+    // Transition render target from PRESENT to RENDER_TARGET state
+    if (commandList && renderTargets[currentFrame]) {
+        D3D12_RESOURCE_BARRIER barrier = {};
+        barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+        barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
+        barrier.Transition.pResource = renderTargets[currentFrame].Get();
+        barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_PRESENT;
+        barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_RENDER_TARGET;
+        barrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
+        
+        commandList->ResourceBarrier(1, &barrier);
+    }
+    
+    // Set render target and depth stencil
+    if (commandList && rtvHeap && dsvHeap) {
+        D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle = rtvHeap->GetCPUDescriptorHandleForHeapStart();
+        rtvHandle.ptr += currentFrame * rtvDescriptorSize;
+        
+        D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle = dsvHeap->GetCPUDescriptorHandleForHeapStart();
+        
+        commandList->OMSetRenderTargets(1, &rtvHandle, FALSE, &dsvHandle);
+    }
+    
+    // Clear render target
+    float clearColor[4] = { 0.0f, 0.2f, 0.4f, 1.0f };
+    clearColor(clearColor[0], clearColor[1], clearColor[2], clearColor[3]);
+    
+    // Clear depth stencil
+    clearDepth(1.0f);
     
     return true;
 }
 
 void DirectX12RenderContext::endFrame() {
-    // Transition render target to present state
-    // Close command list
-    // Execute command list
-    // Present
-    
-    if (commandList) {
-        commandList->Close();
+    // Transition render target from RENDER_TARGET to PRESENT state
+    if (commandList && renderTargets[currentFrame]) {
+        D3D12_RESOURCE_BARRIER barrier = {};
+        barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+        barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
+        barrier.Transition.pResource = renderTargets[currentFrame].Get();
+        barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
+        barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_PRESENT;
+        barrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
+        
+        commandList->ResourceBarrier(1, &barrier);
     }
     
+    // Close command list
+    if (commandList) {
+        HRESULT hr = commandList->Close();
+        if (FAILED(hr)) {
+            std::cerr << "[DirectX 12] Failed to close command list" << std::endl;
+            return;
+        }
+    }
+    
+    // Execute command list
     if (commandQueue && commandList) {
         ID3D12CommandList* commandLists[] = { commandList.Get() };
         commandQueue->ExecuteCommandLists(1, commandLists);
     }
     
+    // Present
     if (swapchain) {
-        swapchain->Present(1, 0); // VSync enabled
+        HRESULT hr = swapchain->Present(1, 0); // VSync enabled
+        if (FAILED(hr)) {
+            std::cerr << "[DirectX 12] Failed to present" << std::endl;
+        }
     }
     
     // Move to next frame
@@ -298,13 +353,26 @@ void DirectX12RenderContext::setScissor(int x, int y, int w, int h) {
 }
 
 void DirectX12RenderContext::clearColor(float r, float g, float b, float a) {
-    (void)r; (void)g; (void)b; (void)a; // Unused - stub implementation
-    // Would use ClearRenderTargetView on command list
+    if (!commandList || !rtvHeap) return;
+    
+    float clearColor[4] = { r, g, b, a };
+    D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle = rtvHeap->GetCPUDescriptorHandleForHeapStart();
+    rtvHandle.ptr += currentFrame * rtvDescriptorSize;
+    
+    commandList->ClearRenderTargetView(rtvHandle, clearColor, 0, nullptr);
 }
 
 void DirectX12RenderContext::clearDepth(float depth) {
-    (void)depth; // Unused - stub implementation
-    // Would use ClearDepthStencilView on command list
+    if (!commandList || !dsvHeap) return;
+    
+    commandList->ClearDepthStencilView(
+        dsvHeap->GetCPUDescriptorHandleForHeapStart(),
+        D3D12_CLEAR_FLAG_DEPTH,
+        depth,
+        0,
+        0,
+        nullptr
+    );
 }
 
 std::shared_ptr<RenderBuffer> DirectX12RenderContext::createVertexBuffer(const void* data, size_t size) {
@@ -364,13 +432,51 @@ std::shared_ptr<RenderBuffer> DirectX12RenderContext::createUniformBuffer(size_t
 }
 
 std::shared_ptr<RenderTexture> DirectX12RenderContext::createTexture(int w, int h, const void* data) {
-    (void)data; // Unused - stub implementation
     if (!device) return nullptr;
     
-    // Create texture resource (stub implementation)
-    std::cout << "[DirectX 12] Creating texture (stub)" << std::endl;
+    // Create texture resource
+    D3D12_HEAP_PROPERTIES heapProps = {};
+    heapProps.Type = D3D12_HEAP_TYPE_DEFAULT;
+    heapProps.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_UNKNOWN;
+    heapProps.MemoryPoolPreference = D3D12_MEMORY_POOL_UNKNOWN;
+    heapProps.CreationNodeMask = 1;
+    heapProps.VisibleNodeMask = 1;
+    
+    D3D12_RESOURCE_DESC textureDesc = {};
+    textureDesc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
+    textureDesc.Alignment = 0;
+    textureDesc.Width = w;
+    textureDesc.Height = h;
+    textureDesc.DepthOrArraySize = 1;
+    textureDesc.MipLevels = 1;
+    textureDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+    textureDesc.SampleDesc.Count = 1;
+    textureDesc.SampleDesc.Quality = 0;
+    textureDesc.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
+    textureDesc.Flags = D3D12_RESOURCE_FLAG_NONE;
     
     ComPtr<ID3D12Resource> texture;
+    HRESULT hr = device->CreateCommittedResource(
+        &heapProps,
+        D3D12_HEAP_FLAG_NONE,
+        &textureDesc,
+        D3D12_RESOURCE_STATE_COPY_DEST,
+        nullptr,
+        IID_PPV_ARGS(&texture)
+    );
+    
+    if (FAILED(hr)) {
+        std::cerr << "[DirectX 12] Failed to create texture resource" << std::endl;
+        return nullptr;
+    }
+    
+    // If data is provided, would need to upload it via upload heap
+    // This is a complex operation in D3D12, skipping for now
+    if (data) {
+        std::cout << "[DirectX 12] Warning: Texture data upload not yet implemented" << std::endl;
+    }
+    
+    std::cout << "[DirectX 12] Texture created successfully" << std::endl;
     return std::make_shared<D3D12Texture>(texture, w, h);
 }
 
@@ -426,20 +532,147 @@ bool DirectX12RenderContext::createCommandQueue() {
 }
 
 bool DirectX12RenderContext::createSwapchain() {
-    // Stub - would create swapchain with DXGI factory and window handle
-    std::cout << "[DirectX 12] Swapchain created (stub)" << std::endl;
+    // Get native window handle
+    HWND hwnd = static_cast<HWND>(window->getNativeWindowHandle());
+    if (!hwnd) {
+        std::cerr << "[DirectX 12] Failed to get native window handle" << std::endl;
+        return false;
+    }
+    
+    // Create DXGI factory
+    ComPtr<IDXGIFactory4> factory;
+    HRESULT hr = CreateDXGIFactory2(0, IID_PPV_ARGS(&factory));
+    if (FAILED(hr)) {
+        std::cerr << "[DirectX 12] Failed to create DXGI factory" << std::endl;
+        return false;
+    }
+    
+    // Describe and create the swap chain
+    DXGI_SWAP_CHAIN_DESC1 swapchainDesc = {};
+    swapchainDesc.Width = width;
+    swapchainDesc.Height = height;
+    swapchainDesc.Format = rtvFormat;
+    swapchainDesc.Stereo = FALSE;
+    swapchainDesc.SampleDesc.Count = 1;
+    swapchainDesc.SampleDesc.Quality = 0;
+    swapchainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
+    swapchainDesc.BufferCount = FRAME_COUNT;
+    swapchainDesc.Scaling = DXGI_SCALING_STRETCH;
+    swapchainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
+    swapchainDesc.AlphaMode = DXGI_ALPHA_MODE_UNSPECIFIED;
+    swapchainDesc.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
+    
+    ComPtr<IDXGISwapChain1> swapchain1;
+    hr = factory->CreateSwapChainForHwnd(
+        commandQueue.Get(),
+        hwnd,
+        &swapchainDesc,
+        nullptr,
+        nullptr,
+        &swapchain1
+    );
+    
+    if (FAILED(hr)) {
+        std::cerr << "[DirectX 12] Failed to create swapchain" << std::endl;
+        return false;
+    }
+    
+    // Disable Alt+Enter fullscreen toggle
+    factory->MakeWindowAssociation(hwnd, DXGI_MWA_NO_ALT_ENTER);
+    
+    // Get IDXGISwapChain3 interface
+    hr = swapchain1.As(&swapchain);
+    if (FAILED(hr)) {
+        std::cerr << "[DirectX 12] Failed to get IDXGISwapChain3 interface" << std::endl;
+        return false;
+    }
+    
+    currentFrame = swapchain->GetCurrentBackBufferIndex();
+    
+    std::cout << "[DirectX 12] Swapchain created successfully" << std::endl;
     return true;
 }
 
 bool DirectX12RenderContext::createRenderTargets() {
-    // Stub - would get back buffers from swapchain
-    std::cout << "[DirectX 12] Render targets created (stub)" << std::endl;
+    if (!swapchain || !rtvHeap) {
+        std::cerr << "[DirectX 12] Swapchain or RTV heap not initialized" << std::endl;
+        return false;
+    }
+    
+    D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle = rtvHeap->GetCPUDescriptorHandleForHeapStart();
+    
+    // Create a RTV for each frame
+    for (UINT i = 0; i < FRAME_COUNT; i++) {
+        HRESULT hr = swapchain->GetBuffer(i, IID_PPV_ARGS(&renderTargets[i]));
+        if (FAILED(hr)) {
+            std::cerr << "[DirectX 12] Failed to get buffer " << i << " from swapchain" << std::endl;
+            return false;
+        }
+        
+        device->CreateRenderTargetView(renderTargets[i].Get(), nullptr, rtvHandle);
+        rtvHandle.ptr += rtvDescriptorSize;
+    }
+    
+    std::cout << "[DirectX 12] Render targets created successfully" << std::endl;
     return true;
 }
 
 bool DirectX12RenderContext::createDepthStencil() {
-    // Stub - would create depth stencil buffer
-    std::cout << "[DirectX 12] Depth stencil created (stub)" << std::endl;
+    if (!device || !dsvHeap) {
+        std::cerr << "[DirectX 12] Device or DSV heap not initialized" << std::endl;
+        return false;
+    }
+    
+    // Describe and create a depth stencil
+    D3D12_HEAP_PROPERTIES heapProps = {};
+    heapProps.Type = D3D12_HEAP_TYPE_DEFAULT;
+    heapProps.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_UNKNOWN;
+    heapProps.MemoryPoolPreference = D3D12_MEMORY_POOL_UNKNOWN;
+    heapProps.CreationNodeMask = 1;
+    heapProps.VisibleNodeMask = 1;
+    
+    D3D12_RESOURCE_DESC depthStencilDesc = {};
+    depthStencilDesc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
+    depthStencilDesc.Alignment = 0;
+    depthStencilDesc.Width = width;
+    depthStencilDesc.Height = height;
+    depthStencilDesc.DepthOrArraySize = 1;
+    depthStencilDesc.MipLevels = 1;
+    depthStencilDesc.Format = DXGI_FORMAT_D32_FLOAT;
+    depthStencilDesc.SampleDesc.Count = 1;
+    depthStencilDesc.SampleDesc.Quality = 0;
+    depthStencilDesc.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
+    depthStencilDesc.Flags = D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL;
+    
+    D3D12_CLEAR_VALUE clearValue = {};
+    clearValue.Format = DXGI_FORMAT_D32_FLOAT;
+    clearValue.DepthStencil.Depth = 1.0f;
+    clearValue.DepthStencil.Stencil = 0;
+    
+    HRESULT hr = device->CreateCommittedResource(
+        &heapProps,
+        D3D12_HEAP_FLAG_NONE,
+        &depthStencilDesc,
+        D3D12_RESOURCE_STATE_DEPTH_WRITE,
+        &clearValue,
+        IID_PPV_ARGS(&depthStencil)
+    );
+    
+    if (FAILED(hr)) {
+        std::cerr << "[DirectX 12] Failed to create depth stencil buffer" << std::endl;
+        return false;
+    }
+    
+    // Create depth stencil view
+    D3D12_DEPTH_STENCIL_VIEW_DESC dsvDesc = {};
+    dsvDesc.Format = DXGI_FORMAT_D32_FLOAT;
+    dsvDesc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2D;
+    dsvDesc.Flags = D3D12_DSV_FLAG_NONE;
+    
+    device->CreateDepthStencilView(depthStencil.Get(), &dsvDesc, 
+        dsvHeap->GetCPUDescriptorHandleForHeapStart());
+    
+    std::cout << "[DirectX 12] Depth stencil created successfully" << std::endl;
     return true;
 }
 
