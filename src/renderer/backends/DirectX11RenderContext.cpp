@@ -186,10 +186,9 @@ void DirectX11RenderContext::shutdown() {
 }
 
 bool DirectX11RenderContext::beginFrame() {
-    // Clear render target and depth stencil
-    float clearColor[4] = { 0.0f, 0.2f, 0.4f, 1.0f };
+    // Clear render target and depth stencil using the stored clear color
     if (renderTargetView && deviceContext) {
-        deviceContext->ClearRenderTargetView(renderTargetView.Get(), clearColor);
+        deviceContext->ClearRenderTargetView(renderTargetView.Get(), clearColorValue);
     }
     
     if (depthStencilView && deviceContext) {
@@ -243,10 +242,11 @@ void DirectX11RenderContext::setScissor(int x, int y, int w, int h) {
 }
 
 void DirectX11RenderContext::clearColor(float r, float g, float b, float a) {
-    if (!renderTargetView || !deviceContext) return;
-    
-    float clearColor[4] = { r, g, b, a };
-    deviceContext->ClearRenderTargetView(renderTargetView.Get(), clearColor);
+    // Store the clear color for use in beginFrame()
+    clearColorValue[0] = r;
+    clearColorValue[1] = g;
+    clearColorValue[2] = b;
+    clearColorValue[3] = a;
 }
 
 void DirectX11RenderContext::clearDepth(float depth) {

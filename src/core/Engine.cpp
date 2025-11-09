@@ -190,6 +190,16 @@ bool Engine::initialize() {
     if (m_renderer->getAPI() == GraphicsAPI::OpenGL) {
         initializeRendering();
     }
+#else
+    // Warn if DirectX is being used without voxel rendering support
+    if (m_renderer->getAPI() == GraphicsAPI::DirectX11 || m_renderer->getAPI() == GraphicsAPI::DirectX12) {
+        std::cout << "\n=== WARNING ===" << std::endl;
+        std::cout << "DirectX backend selected, but voxel world rendering is not yet implemented for DirectX." << std::endl;
+        std::cout << "You will see a blue sky but no terrain. OpenGL backend has full rendering support." << std::endl;
+        std::cout << "To use OpenGL: Install GLEW via vcpkg and rebuild." << std::endl;
+        std::cout << "===============\n" << std::endl;
+        LOG_WARNING_C("DirectX backend in use - voxel rendering not yet implemented. Only OpenGL supports full rendering.", "Engine");
+    }
 #endif
     
     // Create voxel interaction system
