@@ -31,6 +31,10 @@
 #include <GL/glew.h>
 #endif
 
+#ifdef _WIN32
+#include "renderer/backends/DirectX11RenderContext.h"
+#endif
+
 namespace fresh {
 
 // Rendering constants
@@ -185,22 +189,27 @@ bool Engine::initialize() {
     std::cout << "Editor GUI initialized" << std::endl;
     LOG_INFO_C("Editor GUI initialized", "Engine");
     
-    // Initialize OpenGL rendering (shaders, buffers, etc.)
+    // Initialize rendering based on API
 #if defined(FRESH_OPENGL_SUPPORT) && defined(FRESH_GLEW_AVAILABLE)
     if (m_renderer->getAPI() == GraphicsAPI::OpenGL) {
         initializeRendering();
     }
-#else
-    // Warn if DirectX is being used without voxel rendering support
-    if (m_renderer->getAPI() == GraphicsAPI::DirectX11 || m_renderer->getAPI() == GraphicsAPI::DirectX12) {
-        std::cout << "\n=== WARNING ===" << std::endl;
-        std::cout << "DirectX backend selected, but voxel world rendering is not yet implemented for DirectX." << std::endl;
-        std::cout << "You will see a blue sky but no terrain. OpenGL backend has full rendering support." << std::endl;
-        std::cout << "To use OpenGL: Install GLEW via vcpkg and rebuild." << std::endl;
-        std::cout << "===============\n" << std::endl;
-        LOG_WARNING_C("DirectX backend in use - voxel rendering not yet implemented. Only OpenGL supports full rendering.", "Engine");
-    }
 #endif
+    
+    // DirectX 11 rendering is now implemented and initialized automatically in DirectX11RenderContext::initialize()
+    if (m_renderer->getAPI() == GraphicsAPI::DirectX11) {
+        std::cout << "DirectX 11 voxel rendering ready" << std::endl;
+        LOG_INFO_C("DirectX 11 voxel rendering ready", "Engine");
+    }
+    
+    // DirectX 12 warning
+    if (m_renderer->getAPI() == GraphicsAPI::DirectX12) {
+        std::cout << "\n=== INFO ===" << std::endl;
+        std::cout << "DirectX 12 backend selected, but voxel world rendering is not yet fully implemented." << std::endl;
+        std::cout << "You may see a blue sky. Use DirectX 11 or OpenGL for full rendering support." << std::endl;
+        std::cout << "=============\n" << std::endl;
+        LOG_INFO_C("DirectX 12 backend in use - voxel rendering not yet fully implemented.", "Engine");
+    }
     
     // Create voxel interaction system
     m_voxelInteraction = std::make_unique<VoxelInteraction>();
@@ -571,6 +580,17 @@ void Engine::render() {
         renderCrosshair();
     }
 #endif
+    
+    // DirectX 11 rendering path
+    if (m_renderer->getAPI() == GraphicsAPI::DirectX11) {
+        // Render voxel world using DirectX 11
+        if (m_world && m_player) {
+            auto* dx11Context = dynamic_cast<DirectX11RenderContext*>(m_renderer.get());
+            if (dx11Context) {
+                dx11Context->renderVoxelWorld(m_world.get(), m_player.get());
+            }
+        }
+    }
     
 #ifdef FRESH_IMGUI_AVAILABLE
     // Begin editor frame (ImGui) before rendering editor UI

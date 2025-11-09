@@ -1,6 +1,7 @@
 #pragma once
 
 #include "renderer/RenderContext.h"
+#include <unordered_map>
 
 #ifdef _WIN32
 #define NOMINMAX
@@ -9,6 +10,9 @@
 using Microsoft::WRL::ComPtr;
 
 namespace fresh {
+
+// Forward declarations
+struct ChunkPos;
 
 /**
  * @brief DirectX 11 implementation of render context
@@ -45,6 +49,11 @@ public:
     std::shared_ptr<RenderTexture> createTexture(int width, int height, const void* data) override;
     std::shared_ptr<RenderShader> createShader(const std::string& vertexCode, const std::string& fragmentCode) override;
     
+    // DirectX 11 specific rendering methods for voxel world
+    bool initializeVoxelRendering();
+    void shutdownVoxelRendering();
+    void renderVoxelWorld(class VoxelWorld* world, class Player* player);
+    
 private:
     bool createDevice();
     bool createSwapchain();
@@ -62,6 +71,22 @@ private:
     int width = 0;
     int height = 0;
     float clearColorValue[4] = { 0.53f, 0.81f, 0.92f, 1.0f };  // Sky blue default
+    
+    // Voxel rendering resources
+    ComPtr<ID3D11VertexShader> voxelVertexShader;
+    ComPtr<ID3D11PixelShader> voxelPixelShader;
+    ComPtr<ID3D11InputLayout> voxelInputLayout;
+    ComPtr<ID3D11Buffer> matrixConstantBuffer;
+    ComPtr<ID3D11RasterizerState> rasterizerState;
+    ComPtr<ID3D11DepthStencilState> depthStencilState;
+    
+    // Per-chunk rendering data
+    struct ChunkRenderData {
+        ComPtr<ID3D11Buffer> vertexBuffer;
+        ComPtr<ID3D11Buffer> indexBuffer;
+        size_t indexCount = 0;
+    };
+    std::unordered_map<struct ChunkPos, ChunkRenderData> chunkRenderData;
 };
 
 } // namespace fresh
