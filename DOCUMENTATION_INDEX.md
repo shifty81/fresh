@@ -46,6 +46,11 @@ If you're new to Fresh Voxel Engine, follow this path:
 - **[CORE_SYSTEMS_GUIDE.md](CORE_SYSTEMS_GUIDE.md)** - Core engine systems
 - **[ROADMAP.md](ROADMAP.md)** - Development roadmap and future plans
 
+### Rendering Backends
+- **[DIRECTX11_STATUS.md](DIRECTX11_STATUS.md)** - DirectX 11 implementation status (40% complete)
+- **[DIRECTX12_STATUS.md](DIRECTX12_STATUS.md)** - DirectX 12 implementation status (30% complete)
+- **[DARKER_BLUE_SCREEN_FIX.md](DARKER_BLUE_SCREEN_FIX.md)** - DirectX clear color fix documentation
+
 ## 👥 Contributing
 
 - **[CONTRIBUTING.md](CONTRIBUTING.md)** - Contribution guidelines
@@ -104,6 +109,9 @@ If you're new to Fresh Voxel Engine, follow this path:
 
 ### "What features are completed?"
 → Check **[PROJECT_STATUS.md](PROJECT_STATUS.md)**
+
+### "What's the status of DirectX rendering?"
+→ See **[DIRECTX11_STATUS.md](DIRECTX11_STATUS.md)** or **[DIRECTX12_STATUS.md](DIRECTX12_STATUS.md)**
 
 ## 📖 Documentation Too Long?
 
