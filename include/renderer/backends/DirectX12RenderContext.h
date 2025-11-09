@@ -1,6 +1,9 @@
 #pragma once
 
+#include <unordered_map>
+
 #include "renderer/RenderContext.h"
+#include "voxel/VoxelTypes.h"
 
 #ifdef _WIN32
     #define NOMINMAX
@@ -83,6 +86,11 @@ public:
     std::shared_ptr<RenderShader> createShader(const std::string& vertexCode,
                                                const std::string& fragmentCode) override;
 
+    // DirectX 12 specific rendering methods for voxel world
+    bool initializeVoxelRendering();
+    void shutdownVoxelRendering();
+    void renderVoxelWorld(class VoxelWorld* world, class Player* player);
+
 private:
     bool enableDebugLayer();
     bool createDevice();
@@ -130,6 +138,20 @@ private:
     int width = 0;
     int height = 0;
     float clearColorValue[4] = {0.53f, 0.81f, 0.92f, 1.0f}; // Sky blue default
+
+    // Voxel rendering resources
+    ComPtr<ID3D12RootSignature> voxelRootSignature;
+    ComPtr<ID3D12PipelineState> voxelPipelineState;
+    
+    // Per-chunk rendering data
+    struct ChunkRenderData {
+        ComPtr<ID3D12Resource> vertexBuffer;
+        ComPtr<ID3D12Resource> indexBuffer;
+        D3D12_VERTEX_BUFFER_VIEW vertexBufferView = {};
+        D3D12_INDEX_BUFFER_VIEW indexBufferView = {};
+        size_t indexCount = 0;
+    };
+    std::unordered_map<ChunkPos, ChunkRenderData> chunkRenderData;
 };
 
 } // namespace fresh
