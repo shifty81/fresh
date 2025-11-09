@@ -15,6 +15,8 @@ If you're new to Fresh Voxel Engine, follow this path:
 ## 📦 Installation & Setup
 
 ### Windows Setup
+- **[AUTOMATED_BUILD.md](AUTOMATED_BUILD.md)** - 🚀 **NEW! Automated PowerShell script** - One command to set up everything (Recommended)
+- **[BUILD.md](BUILD.md)** - Complete step-by-step build instructions for Windows with VS2022
 - **[QUICKSTART_VISUAL.md](QUICKSTART_VISUAL.md)** - Visual guide for Visual Studio 2022 (Best for beginners)
 - **[VISUAL_STUDIO_SETUP.md](VISUAL_STUDIO_SETUP.md)** - Detailed Visual Studio configuration
 - **[VS2022_MIGRATION_GUIDE.md](VS2022_MIGRATION_GUIDE.md)** - Complete overview for VS2022 users
@@ -78,13 +80,15 @@ If you're new to Fresh Voxel Engine, follow this path:
 - **[WORKFLOWS.md](WORKFLOWS.md)** - CI/CD and automation
 
 ### Build & Tools
+- **[AUTOMATED_BUILD.md](AUTOMATED_BUILD.md)** - 🚀 Automated PowerShell build script (Recommended)
 - **[BUILD.md](BUILD.md)** - Complete build instructions for Windows with VS2022
 - **[tools/README.md](tools/README.md)** - Tools directory overview
 
 ## 🔍 Finding Specific Information
 
 ### "How do I install on Windows?"
-→ Start with **[BUILD.md](BUILD.md)** for complete step-by-step instructions
+→ **Easiest:** Run the automated script - see **[AUTOMATED_BUILD.md](AUTOMATED_BUILD.md)**  
+→ **Manual:** Follow **[BUILD.md](BUILD.md)** for complete step-by-step instructions
 
 ### "I'm getting build errors"
 → Check **[BUILD.md](BUILD.md)** Troubleshooting section or **[FIXING_ALL_BUILD_ERROR.md](FIXING_ALL_BUILD_ERROR.md)**

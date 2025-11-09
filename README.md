@@ -71,6 +71,32 @@ The Fresh Voxel Engine now includes a **playable demo** with basic voxel world e
 
 **See [BUILD.md](BUILD.md) for complete step-by-step build instructions.**
 
+### 🚀 Automated Build (Recommended)
+
+**One command to build everything:**
+
+```powershell
+# Clone repository
+git clone https://github.com/shifty81/fresh.git
+cd fresh
+
+# Run automated build script
+.\setup-and-build.ps1
+```
+
+This automated PowerShell script will:
+- ✅ Check all prerequisites (Visual Studio, CMake, Git)
+- ✅ Set up vcpkg for dependency management
+- ✅ Generate Visual Studio 2022 solution
+- ✅ Build the project (Release configuration)
+- ✅ Open Visual Studio for you to take over
+
+**Time:** 10-20 minutes on first run (includes dependency download/build)
+
+**See [AUTOMATED_BUILD.md](AUTOMATED_BUILD.md) for detailed documentation and options.**
+
+### 📝 Manual Build
+
 **Quick build from scratch:**
 
 ```batch
