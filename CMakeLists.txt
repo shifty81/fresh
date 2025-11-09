@@ -238,6 +238,8 @@ set(ENGINE_SOURCES
     src/character/BodyPartLibrary.cpp
     src/character/AnimationClip.cpp
     src/character/AnimationController.cpp
+    src/character/IKSolver.cpp
+    src/character/CharacterRenderer.cpp
     src/editor/EditorGUI.cpp
     src/editor/WorldEditor.cpp
     src/editor/TerraformingSystem.cpp
