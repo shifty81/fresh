@@ -4,15 +4,15 @@
 [![C++20](https://img.shields.io/badge/C++-20-blue.svg)](https://en.cppreference.com/w/cpp/20)
 [![.NET 9](https://img.shields.io/badge/.NET-9.0-512BD4.svg)](https://dotnet.microsoft.com/)
 [![CMake](https://img.shields.io/badge/CMake-3.20+-064F8C.svg)](https://cmake.org/)
-[![Graphics](https://img.shields.io/badge/Graphics-DirectX%2011%2F12%2FOpenGL-blue.svg)](https://github.com/shifty81/fresh)
-[![Cross-Platform](https://img.shields.io/badge/Platform-Windows%20%7C%20Linux%20%7C%20macOS-lightgrey.svg)](https://github.com/shifty81/fresh)
+[![Graphics](https://img.shields.io/badge/Graphics-DirectX%2011%2F12-blue.svg)](https://github.com/shifty81/fresh)
+[![Platform](https://img.shields.io/badge/Platform-Windows-lightgrey.svg)](https://github.com/shifty81/fresh)
 [![VS2022](https://img.shields.io/badge/Visual%20Studio-2022-5C2D91.svg)](https://visualstudio.microsoft.com/)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 
-A modern **cross-platform** voxel-based game engine built with **C++20**, featuring **DirectX 11/12** and **OpenGL 4.5+** rendering, **.NET 9 bindings**, procedural terrain generation, AI systems, and an integrated world editor.
+A modern **Windows-only** voxel-based game engine built with **C++20**, featuring **DirectX 11/12** rendering, **.NET 9 bindings**, **Lua scripting**, procedural terrain generation, AI systems, and an integrated world editor.
 
-**Platform Support:** Windows, Linux, macOS  
-**Graphics APIs:** DirectX 11/12 (Windows), OpenGL 4.5+ (All Platforms)
+**Platform Support:** Windows 10/11 (x64)  
+**Graphics APIs:** DirectX 11/12
 
 > 📚 **New to Fresh?** See [DOCUMENTATION_INDEX.md](DOCUMENTATION_INDEX.md) for a guide to all documentation.
 
@@ -20,22 +20,13 @@ A modern **cross-platform** voxel-based game engine built with **C++20**, featur
 
 ## 🎨 Graphics API Support
 
-Fresh Voxel Engine automatically selects the best graphics API for your platform:
+Fresh Voxel Engine uses DirectX for high-performance Windows-native rendering:
 
 ### Windows
-- **DirectX 12** - Native, cutting-edge performance (default)
+- **DirectX 12** - Cutting-edge performance for Windows 10/11 (default)
 - **DirectX 11** - Excellent compatibility across Windows versions
-- **OpenGL 4.5+** - Optional cross-platform rendering
 
-### Linux
-- **OpenGL 4.5+** - Native support with modern drivers
-- **Vulkan** - Planned for future release
-
-### macOS
-- **OpenGL 4.5+** - Currently supported (deprecated by Apple)
-- **Metal** - Planned for future release
-
-The engine **automatically detects and selects** the best available graphics API at runtime.
+The engine **automatically detects and selects** the best available DirectX version at runtime.
 
 ---
 
@@ -118,58 +109,6 @@ Release\FreshVoxelEngine.exe
 
 **Detailed instructions:** [BUILD.md](BUILD.md) provides complete step-by-step guidance including troubleshooting.
 
-### Linux & macOS
-
-<details>
-<summary><b>Linux Installation</b></summary>
-
-```bash
-# Clone the repository
-git clone https://github.com/shifty81/fresh.git
-cd fresh
-
-# Install dependencies (Ubuntu/Debian)
-sudo apt-get update
-sudo apt-get install -y build-essential cmake libglfw3-dev libglew-dev libglm-dev
-
-# Build
-mkdir build && cd build
-cmake ..
-make -j$(nproc)
-
-# Run
-./FreshVoxelEngine
-```
-
-For other Linux distributions, see [CROSS_PLATFORM_BUILD.md](CROSS_PLATFORM_BUILD.md).
-
-</details>
-
-<details>
-<summary><b>macOS Installation</b></summary>
-
-```bash
-# Clone the repository
-git clone https://github.com/shifty81/fresh.git
-cd fresh
-
-# Install dependencies
-brew install cmake glfw glew glm
-
-# Build
-mkdir build && cd build
-cmake ..
-make -j$(sysctl -n hw.ncpu)
-
-# Run
-./FreshVoxelEngine
-```
-
-For detailed cross-platform build instructions, see [CROSS_PLATFORM_BUILD.md](CROSS_PLATFORM_BUILD.md).
-
-</details>
-
----
 
 ## 🔷 .NET 9 Support (Optional C# Bindings)
 
@@ -343,10 +282,9 @@ See [BUILD.md](BUILD.md) for complete instructions including:
 
 ## Graphics API Selection
 
-The engine automatically selects the best graphics API for Windows:
+The engine automatically selects the best DirectX version for Windows:
 - **Default**: DirectX 12 (best performance on Windows 10+)
 - **Fallback**: DirectX 11 (excellent compatibility)
-- **Legacy**: OpenGL (broadest hardware support)
 
 To manually select a specific API, edit `src/renderer/GraphicsAPI.h` or use environment variables (feature coming soon).
 
@@ -361,9 +299,8 @@ fresh/
 ├── VISUAL_STUDIO_SETUP.md      # Visual Studio setup guide
 ├── include/                    # Header files
 │   ├── core/                  # Engine core (Engine, Window)
-│   ├── renderer/              # Multi-API rendering system
+│   ├── renderer/              # DirectX rendering system
 │   │   ├── backends/          # Graphics API implementations
-│   │   │   ├── OpenGLRenderContext.h
 │   │   │   ├── DirectX11RenderContext.h
 │   │   │   └── DirectX12RenderContext.h
 │   │   ├── GraphicsAPI.h      # API enumeration and selection
@@ -378,9 +315,9 @@ fresh/
 │   └── serialization/     # Save/load system
 ├── src/                   # Implementation files
 │   └── (mirrors include structure)
-├── shaders/               # GLSL shaders
-│   ├── voxel.vert        # Vertex shader
-│   └── voxel.frag        # Fragment shader
+├── shaders/               # HLSL shaders
+│   ├── voxel.hlsl        # DirectX shader
+│   └── voxel.vert/frag  # Legacy GLSL shaders (if needed)
 ├── textures/              # Placeholder textures (NEW!)
 │   ├── blocks/           # Block/voxel textures
 │   │   ├── stone_*.png   # Stone textures (16x16, 32x32, 64x64)
@@ -417,7 +354,7 @@ fresh/
 
 ### Completed (Phase 1-5)
 - [x] Project structure and build system
-- [x] **Multi-API rendering system** (OpenGL, DirectX 11/12)
+- [x] **DirectX 11/12 rendering system**
 - [x] **Visual Studio 2022 support**
 - [x] Voxel chunk system
 - [x] Procedural terrain generation
@@ -427,10 +364,8 @@ fresh/
 - [x] Enhanced input system with action mapping
 
 ### In Progress (Phase 6)
-- [x] OpenGL rendering backend (100% complete)
 - [x] DirectX 11 backend (95% complete - production ready)
 - [x] DirectX 12 backend (85% complete - core functionality complete)
-- [ ] Multi-API rendering abstraction refinement
 
 ### Starting (Phase 7)
 - [ ] Procedural voxel character system
@@ -450,24 +385,23 @@ fresh/
 
 ## Architecture
 
-### Multi-API Rendering System
-The engine uses an abstraction layer supporting multiple graphics APIs:
+### DirectX Rendering System
+The engine uses DirectX for native Windows performance:
 
 **Supported APIs:**
-- **OpenGL 4.5+** - Mature, widely supported cross-platform API
 - **DirectX 11** - High-level API with excellent Windows compatibility
-- **DirectX 12** - Low-level API for maximum performance on Windows
+- **DirectX 12** - Low-level API for maximum performance on Windows 10/11
 
 **Features:**
-- Multiple graphics API support (OpenGL, DirectX 11/12)
-- Automatic API selection (DirectX 12 by default)
-- Unified interface for all backends (`IRenderContext`)
+- DirectX 11/12 support with automatic version selection
+- DirectX 12 by default with DirectX 11 fallback
+- Unified interface for both backends (`IRenderContext`)
 - Swapchain and framebuffer management
 - Resource creation (buffers, textures, shaders)
 - Synchronization and frame pacing
 
-**API Priority on Windows:**
-DirectX 12 → DirectX 11 → OpenGL
+**API Priority:**
+DirectX 12 → DirectX 11
 
 ### Voxel World
 The world is divided into chunks for efficient rendering and streaming:
@@ -612,34 +546,27 @@ For complete input system documentation, see [docs/INPUT_SYSTEM.md](docs/INPUT_S
 - **DirectX 11** - Production ready (95% complete) ✅
   - All core rendering functionality implemented
   - HLSL shader compilation working
-  - Ready for Windows testing
+  - Ready for Windows deployment
 - **DirectX 12** - Core functionality complete (85% complete) ✅
   - All rendering operations implemented
   - Resource state transitions working
   - Advanced shader features (PSO) pending
   - Texture data upload pending
-- **OpenGL** - Fully functional on all platforms ✅
 
 ### Platform Support
-- **Linux** - Fully tested and working ✅
-- **Windows** - Should build, DirectX renderers ready for testing ✅
-  - OpenGL backend fully working
+- **Windows 10/11** - Primary platform ✅
   - DirectX 11 backend production ready
   - DirectX 12 backend functional
-- **macOS** - Expected to work but not tested ⚠️
-  - OpenGL deprecated by Apple (still functional)
+  - Full feature support
 
 ### Features
 - **ImGui Integration** - Not included by default
   - Editor UI limited to console mode
-  - **Installation:** `vcpkg install imgui[glfw-binding,opengl3-binding]`
+  - **Installation:** `vcpkg install imgui[glfw-binding,dx11-binding,dx12-binding]:x64-windows`
 - **Lua Scripting** - Optional feature, framework exists but incomplete (~40%)
   - **Engine builds and runs without Lua** - Lua-dependent features use stub implementations
   - Need Sol2 library integration for full functionality
-  - **Installation:** 
-    - Windows: `vcpkg install luajit:x64-windows` or `vcpkg install lua:x64-windows`
-    - Linux: `sudo apt-get install liblua5.4-dev`
-    - macOS: `brew install lua`
+  - **Installation:** `vcpkg install luajit:x64-windows` or `vcpkg install lua:x64-windows`
   - **Setup:** Clone sol2 to `external/sol2/` for advanced features
 - **Audio** - Only WAV files supported
   - OGG/Vorbis support planned
@@ -649,8 +576,8 @@ For complete input system documentation, see [docs/INPUT_SYSTEM.md](docs/INPUT_S
 
 ### Testing
 - **Code Coverage** - ~30% (target: 50%+)
-- **Platform Testing** - Only verified on Linux
-  - Windows/macOS builds expected but not verified
+- **Platform Testing** - Windows-focused
+  - DirectX 11/12 backends ready for testing
 
 ### Performance
 - **Memory Usage** - Not yet optimized for large worlds
@@ -699,7 +626,6 @@ While Fresh Voxel Engine has a solid foundation, there are some known limitation
 ### Graphics APIs
 - **DirectX 11**: Production ready (95% complete) - all core functionality implemented
 - **DirectX 12**: Core functionality complete (85% complete) - advanced features pending (PSO, texture upload)
-- **OpenGL**: Fully functional and cross-platform
 
 ### Systems in Development
 - **Lua Scripting**: Framework exists (~40% complete) but needs Sol2 integration for full functionality
@@ -708,12 +634,12 @@ While Fresh Voxel Engine has a solid foundation, there are some known limitation
 
 ### Testing
 - **Test Coverage**: Good coverage for core systems (156 tests passing)
-- **Platform Testing**: Primarily tested on Linux; Windows DirectX testing pending
+- **Platform Testing**: Windows-focused with DirectX testing
 
 ### Recommended for Production
 For production use, we recommend:
-- Using **OpenGL backend** (most stable, cross-platform)
 - Using **DirectX 11 backend** on Windows (production ready, excellent performance)
+- Using **DirectX 12 backend** for cutting-edge performance (85% complete)
 - Focusing on **single-player experiences** (networking not ready)
 - Using **built-in systems** rather than Lua scripting (until Sol2 integration complete)
 
