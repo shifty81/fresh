@@ -72,9 +72,11 @@ private:
     void shutdownRendering();
     void renderVoxelWorld();
     void renderCrosshair();
+#if defined(FRESH_OPENGL_SUPPORT) && defined(FRESH_GLEW_AVAILABLE)
     std::string loadShaderFile(const std::string& filepath);
     GLuint compileShader(const std::string& source, GLenum shaderType);
     GLuint createShaderProgram(const std::string& vertPath, const std::string& fragPath);
+#endif
 
 private:
     bool m_running;
@@ -95,6 +97,7 @@ private:
     std::unique_ptr<VoxelInteraction> m_voxelInteraction;
     VoxelType m_selectedBlockType;
     
+#if defined(FRESH_OPENGL_SUPPORT) && defined(FRESH_GLEW_AVAILABLE)
     // OpenGL rendering state
     GLuint m_shaderProgram = 0;
     GLuint m_crosshairShader = 0;
@@ -104,6 +107,7 @@ private:
     std::unordered_map<ChunkPos, GLuint> m_chunkVBOs;
     std::unordered_map<ChunkPos, GLuint> m_chunkEBOs;
     std::unordered_map<ChunkPos, size_t> m_chunkIndexCounts;
+#endif
     
     void createNewWorld(const std::string& name, int seed);
     void loadWorld(const std::string& name);
