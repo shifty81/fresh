@@ -7,7 +7,7 @@ extern "C" {
 /**
  * @file InputManagerCAPI.h
  * @brief C API for InputManager to enable .NET P/Invoke interop
- * 
+ *
  * This file provides a C-compatible API wrapper around the C++ InputManager class
  * to enable .NET applications to call input functions via P/Invoke.
  */

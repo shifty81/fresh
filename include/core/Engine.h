@@ -5,12 +5,13 @@
 #include <unordered_map>
 
 #if defined(FRESH_OPENGL_SUPPORT) && defined(FRESH_GLEW_AVAILABLE)
-#include <GL/glew.h>
+    #include <GL/glew.h>
 #endif
 
 #include "voxel/VoxelTypes.h"
 
-namespace fresh {
+namespace fresh
+{
 
 class Window;
 class IRenderContext;
@@ -27,11 +28,12 @@ class VoxelInteraction;
 
 /**
  * @brief Main engine class that orchestrates all subsystems
- * 
+ *
  * This is the central component that manages the lifecycle of the voxel engine,
  * including initialization, main loop, and cleanup of all subsystems.
  */
-class Engine {
+class Engine
+{
 public:
     Engine();
     ~Engine();
@@ -60,13 +62,16 @@ public:
      * @brief Check if the engine is running
      * @return true if the engine is running, false otherwise
      */
-    bool isRunning() const { return m_running; }
+    bool isRunning() const
+    {
+        return m_running;
+    }
 
 private:
     void processInput();
     void update(float deltaTime);
     void render();
-    
+
     // Rendering helpers (private implementation details)
     void initializeRendering();
     void shutdownRendering();
@@ -96,7 +101,7 @@ private:
     std::unique_ptr<InputManager> m_inputManager;
     std::unique_ptr<VoxelInteraction> m_voxelInteraction;
     VoxelType m_selectedBlockType;
-    
+
 #if defined(FRESH_OPENGL_SUPPORT) && defined(FRESH_GLEW_AVAILABLE)
     // OpenGL rendering state
     GLuint m_shaderProgram = 0;
@@ -108,12 +113,12 @@ private:
     std::unordered_map<ChunkPos, GLuint> m_chunkEBOs;
     std::unordered_map<ChunkPos, size_t> m_chunkIndexCounts;
 #endif
-    
+
     void createNewWorld(const std::string& name, int seed);
     void loadWorld(const std::string& name);
     void setupInputCallbacks();
     void initializeGameSystems(); // Helper for common initialization
-    
+
     // User data for GLFW callbacks
     struct CallbackUserData {
         InputManager* inputManager;

@@ -1,17 +1,19 @@
 #include "devtools/DebugRenderer.h"
+
 #include <algorithm>
 
-namespace fresh {
-namespace devtools {
+namespace fresh
+{
+namespace devtools
+{
 
-DebugRenderer::DebugRenderer() : enabled(true) {
-}
+DebugRenderer::DebugRenderer() : enabled(true) {}
 
-DebugRenderer::~DebugRenderer() {
-}
+DebugRenderer::~DebugRenderer() {}
 
-void DebugRenderer::drawLine(const glm::vec3& start, const glm::vec3& end,
-                            const glm::vec4& color, float duration) {
+void DebugRenderer::drawLine(const glm::vec3& start, const glm::vec3& end, const glm::vec4& color,
+                             float duration)
+{
     DebugDrawCommand cmd;
     cmd.type = DebugShapeType::Line;
     cmd.position = start;
@@ -21,8 +23,9 @@ void DebugRenderer::drawLine(const glm::vec3& start, const glm::vec3& end,
     commands.push_back(cmd);
 }
 
-void DebugRenderer::drawBox(const glm::vec3& center, const glm::vec3& size,
-                           const glm::vec4& color, float duration) {
+void DebugRenderer::drawBox(const glm::vec3& center, const glm::vec3& size, const glm::vec4& color,
+                            float duration)
+{
     DebugDrawCommand cmd;
     cmd.type = DebugShapeType::Box;
     cmd.position = center;
@@ -32,8 +35,9 @@ void DebugRenderer::drawBox(const glm::vec3& center, const glm::vec3& size,
     commands.push_back(cmd);
 }
 
-void DebugRenderer::drawSphere(const glm::vec3& center, float radius,
-                              const glm::vec4& color, float duration) {
+void DebugRenderer::drawSphere(const glm::vec3& center, float radius, const glm::vec4& color,
+                               float duration)
+{
     DebugDrawCommand cmd;
     cmd.type = DebugShapeType::Sphere;
     cmd.position = center;
@@ -43,8 +47,9 @@ void DebugRenderer::drawSphere(const glm::vec3& center, float radius,
     commands.push_back(cmd);
 }
 
-void DebugRenderer::drawArrow(const glm::vec3& start, const glm::vec3& end,
-                             const glm::vec4& color, float duration) {
+void DebugRenderer::drawArrow(const glm::vec3& start, const glm::vec3& end, const glm::vec4& color,
+                              float duration)
+{
     DebugDrawCommand cmd;
     cmd.type = DebugShapeType::Arrow;
     cmd.position = start;
@@ -55,7 +60,8 @@ void DebugRenderer::drawArrow(const glm::vec3& start, const glm::vec3& end,
 }
 
 void DebugRenderer::drawText(const glm::vec3& position, const std::string& text,
-                            const glm::vec4& color, float duration) {
+                             const glm::vec4& color, float duration)
+{
     DebugDrawCommand cmd;
     cmd.type = DebugShapeType::Text;
     cmd.position = position;
@@ -65,19 +71,21 @@ void DebugRenderer::drawText(const glm::vec3& position, const std::string& text,
     commands.push_back(cmd);
 }
 
-void DebugRenderer::update(float deltaTime) {
+void DebugRenderer::update(float deltaTime)
+{
     if (!enabled) {
         return;
     }
-    
+
     removeExpiredCommands(deltaTime);
 }
 
-void DebugRenderer::render() {
+void DebugRenderer::render()
+{
     if (!enabled) {
         return;
     }
-    
+
     // Render all debug commands
     // This would integrate with the actual rendering system
     for (const auto& cmd : commands) {
@@ -87,23 +95,23 @@ void DebugRenderer::render() {
     }
 }
 
-void DebugRenderer::clear() {
+void DebugRenderer::clear()
+{
     commands.clear();
 }
 
-void DebugRenderer::removeExpiredCommands(float deltaTime) {
+void DebugRenderer::removeExpiredCommands(float deltaTime)
+{
     // Remove one-frame commands and expired persistent commands
-    commands.erase(
-        std::remove_if(commands.begin(), commands.end(),
-            [deltaTime](DebugDrawCommand& cmd) {
-                if (cmd.duration > 0.0f) {
-                    cmd.duration -= deltaTime;
-                    return cmd.duration <= 0.0f;
-                }
-                return cmd.duration == 0.0f; // Remove one-frame commands
-            }),
-        commands.end()
-    );
+    commands.erase(std::remove_if(commands.begin(), commands.end(),
+                                  [deltaTime](DebugDrawCommand& cmd) {
+                                      if (cmd.duration > 0.0f) {
+                                          cmd.duration -= deltaTime;
+                                          return cmd.duration <= 0.0f;
+                                      }
+                                      return cmd.duration == 0.0f; // Remove one-frame commands
+                                  }),
+                   commands.end());
 }
 
 } // namespace devtools

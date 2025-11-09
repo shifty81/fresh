@@ -1,25 +1,29 @@
 #include "input/InputManager.h"
+
 #include <cmath>
 
-namespace fresh {
+namespace fresh
+{
 
-void InputManager::initialize(GLFWwindow* win) {
+void InputManager::initialize(GLFWwindow* win)
+{
     window = win;
     initializeDefaultBindings();
     setCursorMode(true); // Start with captured cursor
 }
 
-void InputManager::update() {
+void InputManager::update()
+{
     // Clear just-pressed states from previous frame
     keyPressedThisFrame.clear();
     mouseButtonPressedThisFrame.clear();
-    
+
     // Reset mouse delta
     mouseDelta = glm::vec2(0.0f);
-    
+
     // Update gamepads
     updateGamepads();
-    
+
     // Handle "Hold Alt" feature for temporary UI mode switching
     bool altHeld = isAltHeld();
     if (altHeld && !temporaryModeSet && currentMode == InputMode::GameMode) {
@@ -28,33 +32,34 @@ void InputManager::update() {
         baseMode = currentMode;
         currentMode = InputMode::UIMode;
         temporaryModeSet = true;
-        setCursorMode(false);  // Show cursor
+        setCursorMode(false); // Show cursor
     } else if (!altHeld && temporaryModeSet) {
         // Release Alt, return to base mode
         currentMode = baseMode;
         temporaryModeSet = false;
         if (currentMode == InputMode::GameMode) {
-            setCursorMode(true);  // Hide and capture cursor
+            setCursorMode(true); // Hide and capture cursor
         }
     }
 }
 
-void InputManager::updateGamepads() {
+void InputManager::updateGamepads()
+{
     // Poll all gamepads (GLFW supports up to 16)
     for (int i = 0; i < MAX_GAMEPADS; ++i) {
         int present = glfwJoystickPresent(GLFW_JOYSTICK_1 + i);
         gamepads[i].connected = (present == GLFW_TRUE);
-        
+
         if (!gamepads[i].connected) {
             continue;
         }
-        
+
         // Get gamepad name
         const char* name = glfwGetJoystickName(GLFW_JOYSTICK_1 + i);
         if (name) {
             gamepads[i].name = name;
         }
-        
+
         // Get axes (analog sticks and triggers)
         int axisCount;
         const float* axes = glfwGetJoystickAxes(GLFW_JOYSTICK_1 + i, &axisCount);
@@ -63,7 +68,7 @@ void InputManager::updateGamepads() {
                 gamepads[i].axes[j] = applyDeadzone(axes[j]);
             }
         }
-        
+
         // Get buttons
         int buttonCount;
         const unsigned char* buttons = glfwGetJoystickButtons(GLFW_JOYSTICK_1 + i, &buttonCount);
@@ -75,32 +80,46 @@ void InputManager::updateGamepads() {
     }
 }
 
-bool InputManager::isGamepadConnected(int gamepadID) const {
-    if (gamepadID < 0 || gamepadID >= MAX_GAMEPADS) return false;
+bool InputManager::isGamepadConnected(int gamepadID) const
+{
+    if (gamepadID < 0 || gamepadID >= MAX_GAMEPADS)
+        return false;
     return gamepads[gamepadID].connected;
 }
 
-float InputManager::getGamepadAxis(int gamepadID, int axis) const {
-    if (gamepadID < 0 || gamepadID >= MAX_GAMEPADS) return 0.0f;
-    if (!gamepads[gamepadID].connected) return 0.0f;
-    if (axis < 0 || axis >= 6) return 0.0f;
+float InputManager::getGamepadAxis(int gamepadID, int axis) const
+{
+    if (gamepadID < 0 || gamepadID >= MAX_GAMEPADS)
+        return 0.0f;
+    if (!gamepads[gamepadID].connected)
+        return 0.0f;
+    if (axis < 0 || axis >= 6)
+        return 0.0f;
     return gamepads[gamepadID].axes[axis];
 }
 
-bool InputManager::isGamepadButtonPressed(int gamepadID, int button) const {
-    if (gamepadID < 0 || gamepadID >= MAX_GAMEPADS) return false;
-    if (!gamepads[gamepadID].connected) return false;
-    if (button < 0 || button >= 15) return false;
+bool InputManager::isGamepadButtonPressed(int gamepadID, int button) const
+{
+    if (gamepadID < 0 || gamepadID >= MAX_GAMEPADS)
+        return false;
+    if (!gamepads[gamepadID].connected)
+        return false;
+    if (button < 0 || button >= 15)
+        return false;
     return gamepads[gamepadID].buttons[button];
 }
 
-std::string InputManager::getGamepadName(int gamepadID) const {
-    if (gamepadID < 0 || gamepadID >= MAX_GAMEPADS) return "";
-    if (!gamepads[gamepadID].connected) return "";
+std::string InputManager::getGamepadName(int gamepadID) const
+{
+    if (gamepadID < 0 || gamepadID >= MAX_GAMEPADS)
+        return "";
+    if (!gamepads[gamepadID].connected)
+        return "";
     return gamepads[gamepadID].name;
 }
 
-void InputManager::setGamepadVibration(int gamepadID, float leftMotor, float rightMotor) {
+void InputManager::setGamepadVibration(int gamepadID, float leftMotor, float rightMotor)
+{
     // Note: GLFW doesn't support force feedback/vibration directly
     // This would require platform-specific implementations (XInput on Windows, etc.)
     // For now, this is a placeholder
@@ -109,7 +128,8 @@ void InputManager::setGamepadVibration(int gamepadID, float leftMotor, float rig
     (void)rightMotor;
 }
 
-float InputManager::applyDeadzone(float value) const {
+float InputManager::applyDeadzone(float value) const
+{
     if (std::abs(value) < gamepadDeadzone) {
         return 0.0f;
     }
@@ -119,7 +139,8 @@ float InputManager::applyDeadzone(float value) const {
     return sign * scaled;
 }
 
-void InputManager::processKeyEvent(int key, int action) {
+void InputManager::processKeyEvent(int key, int action)
+{
     if (action == GLFW_PRESS) {
         keyStates[key] = true;
         keyPressedThisFrame[key] = true;
@@ -128,26 +149,28 @@ void InputManager::processKeyEvent(int key, int action) {
     }
 }
 
-void InputManager::processMouseMovement(double xpos, double ypos) {
+void InputManager::processMouseMovement(double xpos, double ypos)
+{
     if (firstMouse) {
         lastMouseX = xpos;
         lastMouseY = ypos;
         firstMouse = false;
         return;
     }
-    
+
     float xOffset = static_cast<float>(xpos - lastMouseX);
     float yOffset = static_cast<float>(ypos - lastMouseY);
-    
+
     lastMouseX = xpos;
     lastMouseY = ypos;
-    
+
     if (cursorCaptured) {
         mouseDelta = glm::vec2(xOffset, yOffset);
     }
 }
 
-void InputManager::processMouseButton(int button, int action) {
+void InputManager::processMouseButton(int button, int action)
+{
     if (action == GLFW_PRESS) {
         mouseButtonStates[button] = true;
         mouseButtonPressedThisFrame[button] = true;
@@ -156,29 +179,37 @@ void InputManager::processMouseButton(int button, int action) {
     }
 }
 
-bool InputManager::isActionActive(InputAction action) const {
+bool InputManager::isActionActive(InputAction action) const
+{
     auto it = keyBindings.find(action);
-    if (it == keyBindings.end()) return false;
-    
+    if (it == keyBindings.end())
+        return false;
+
     auto keyIt = keyStates.find(it->second);
-    if (keyIt == keyStates.end()) return false;
-    
+    if (keyIt == keyStates.end())
+        return false;
+
     return keyIt->second;
 }
 
-bool InputManager::isActionJustPressed(InputAction action) const {
+bool InputManager::isActionJustPressed(InputAction action) const
+{
     auto it = keyBindings.find(action);
-    if (it == keyBindings.end()) return false;
-    
+    if (it == keyBindings.end())
+        return false;
+
     auto keyIt = keyPressedThisFrame.find(it->second);
-    if (keyIt == keyPressedThisFrame.end()) return false;
-    
+    if (keyIt == keyPressedThisFrame.end())
+        return false;
+
     return keyIt->second;
 }
 
-void InputManager::setCursorMode(bool captured) {
-    if (!window) return;
-    
+void InputManager::setCursorMode(bool captured)
+{
+    if (!window)
+        return;
+
     cursorCaptured = captured;
     if (captured) {
         glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
@@ -188,56 +219,67 @@ void InputManager::setCursorMode(bool captured) {
     }
 }
 
-bool InputManager::isMouseButtonPressed(int button) const {
+bool InputManager::isMouseButtonPressed(int button) const
+{
     auto it = mouseButtonStates.find(button);
-    if (it == mouseButtonStates.end()) return false;
+    if (it == mouseButtonStates.end())
+        return false;
     return it->second;
 }
 
-bool InputManager::isMouseButtonJustPressed(int button) const {
+bool InputManager::isMouseButtonJustPressed(int button) const
+{
     auto it = mouseButtonPressedThisFrame.find(button);
-    if (it == mouseButtonPressedThisFrame.end()) return false;
+    if (it == mouseButtonPressedThisFrame.end())
+        return false;
     return it->second;
 }
 
-bool InputManager::isKeyPressed(int key) const {
+bool InputManager::isKeyPressed(int key) const
+{
     auto it = keyStates.find(key);
-    if (it == keyStates.end()) return false;
+    if (it == keyStates.end())
+        return false;
     return it->second;
 }
 
-bool InputManager::isKeyJustPressed(int key) const {
+bool InputManager::isKeyJustPressed(int key) const
+{
     auto it = keyPressedThisFrame.find(key);
-    if (it == keyPressedThisFrame.end()) return false;
+    if (it == keyPressedThisFrame.end())
+        return false;
     return it->second;
 }
 
-glm::vec2 InputManager::getMousePosition() const {
+glm::vec2 InputManager::getMousePosition() const
+{
     return glm::vec2(static_cast<float>(lastMouseX), static_cast<float>(lastMouseY));
 }
 
-void InputManager::setKeyBinding(InputAction action, int key) {
+void InputManager::setKeyBinding(InputAction action, int key)
+{
     keyBindings[action] = key;
 }
 
-void InputManager::initializeDefaultBindings() {
+void InputManager::initializeDefaultBindings()
+{
     // WASD movement
     keyBindings[InputAction::MoveForward] = GLFW_KEY_W;
     keyBindings[InputAction::MoveBackward] = GLFW_KEY_S;
     keyBindings[InputAction::MoveLeft] = GLFW_KEY_A;
     keyBindings[InputAction::MoveRight] = GLFW_KEY_D;
-    
+
     // Actions
     keyBindings[InputAction::Jump] = GLFW_KEY_SPACE;
     keyBindings[InputAction::Crouch] = GLFW_KEY_LEFT_CONTROL;
     keyBindings[InputAction::Sprint] = GLFW_KEY_LEFT_SHIFT;
     keyBindings[InputAction::Use] = GLFW_KEY_E;
-    
+
     // Mouse actions (mapped to keys for consistency, actual mouse handled separately)
     keyBindings[InputAction::Attack] = GLFW_MOUSE_BUTTON_LEFT;
     keyBindings[InputAction::PlaceBlock] = GLFW_MOUSE_BUTTON_RIGHT;
     keyBindings[InputAction::BreakBlock] = GLFW_MOUSE_BUTTON_LEFT;
-    
+
     // UI
     keyBindings[InputAction::OpenInventory] = GLFW_KEY_TAB;
     keyBindings[InputAction::OpenMenu] = GLFW_KEY_ESCAPE;
@@ -245,39 +287,42 @@ void InputManager::initializeDefaultBindings() {
     keyBindings[InputAction::OpenChat] = GLFW_KEY_ENTER;
 }
 
-void InputManager::setInputMode(InputMode mode, bool temporary) {
+void InputManager::setInputMode(InputMode mode, bool temporary)
+{
     // Don't update baseMode if we're currently in a temporary Alt-hold mode
     // This prevents overwriting the return-to mode when Alt is released
     if (!temporaryModeSet || !isAltHeld()) {
         baseMode = mode;
     }
-    
+
     currentMode = mode;
     temporaryModeSet = temporary;
-    
+
     // Update cursor mode based on input mode
     if (mode == InputMode::GameMode) {
-        setCursorMode(true);  // Capture and hide cursor
+        setCursorMode(true); // Capture and hide cursor
     } else {
-        setCursorMode(false);  // Free and show cursor
+        setCursorMode(false); // Free and show cursor
     }
 }
 
-bool InputManager::isAltHeld() const {
+bool InputManager::isAltHeld() const
+{
     // Check both left and right Alt keys
     auto leftAlt = keyStates.find(GLFW_KEY_LEFT_ALT);
     auto rightAlt = keyStates.find(GLFW_KEY_RIGHT_ALT);
-    
+
     bool leftAltPressed = (leftAlt != keyStates.end() && leftAlt->second);
     bool rightAltPressed = (rightAlt != keyStates.end() && rightAlt->second);
-    
+
     return leftAltPressed || rightAltPressed;
 }
 
-bool InputManager::isInUIMode() const {
+bool InputManager::isInUIMode() const
+{
     // UI mode is active if explicitly set or if Alt is held (temporary mode)
     // Check both the current mode and if we're temporarily in UI mode via Alt hold
-    return (currentMode == InputMode::UIMode || currentMode == InputMode::BuildMode || 
+    return (currentMode == InputMode::UIMode || currentMode == InputMode::BuildMode ||
             (temporaryModeSet && isAltHeld()));
 }
 

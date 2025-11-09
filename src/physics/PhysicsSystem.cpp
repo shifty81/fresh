@@ -1,18 +1,19 @@
 #include "physics/PhysicsSystem.h"
 
-namespace fresh {
+namespace fresh
+{
 
-PhysicsSystem::PhysicsSystem() {
-}
+PhysicsSystem::PhysicsSystem() {}
 
-PhysicsSystem::~PhysicsSystem() {
-}
+PhysicsSystem::~PhysicsSystem() {}
 
-bool PhysicsSystem::initialize() {
+bool PhysicsSystem::initialize()
+{
     return true;
 }
 
-void PhysicsSystem::update(float deltaTime) {
+void PhysicsSystem::update(float deltaTime)
+{
     (void)deltaTime; // Unused - stub implementation
     // Stub implementation
 }

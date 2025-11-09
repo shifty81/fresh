@@ -4,18 +4,20 @@
 
 struct GLFWwindow;
 
-namespace fresh {
+namespace fresh
+{
 
 class Window;
 class IRenderContext;
 
 /**
  * @brief Manages ImGui context and integration
- * 
+ *
  * Handles ImGui initialization, frame management, and rendering
  * for all supported graphics APIs (OpenGL, DirectX 11/12).
  */
-class ImGuiContext {
+class ImGuiContext
+{
 public:
     ImGuiContext();
     ~ImGuiContext();
@@ -53,7 +55,10 @@ public:
      * @brief Check if ImGui is initialized
      * @return true if initialized
      */
-    bool isInitialized() const { return m_initialized; }
+    bool isInitialized() const
+    {
+        return m_initialized;
+    }
 
     /**
      * @brief Check if ImGui wants to capture mouse input
@@ -71,9 +76,9 @@ private:
     bool m_initialized;
     Window* m_window;
     IRenderContext* m_renderContext;
-    
+
     // Cached pointers to avoid repeated dynamic_cast
-    void* m_backendRenderContext;  // Points to DirectX11/12RenderContext or nullptr for OpenGL
+    void* m_backendRenderContext; // Points to DirectX11/12RenderContext or nullptr for OpenGL
 };
 
 } // namespace fresh

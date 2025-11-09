@@ -1,21 +1,25 @@
 #pragma once
-#include "GalaxySector.h"
-#include <random>
 #include <memory>
+#include <random>
 
-namespace fresh {
-namespace galaxy {
+#include "GalaxySector.h"
+
+namespace fresh
+{
+namespace galaxy
+{
 
 /**
  * @brief Generates galaxy sectors with deterministic, seed-based algorithms
- * 
+ *
  * Provides procedural generation of asteroids, stations, and ships
  * with consistent results based on sector coordinates and seed.
  */
-class GalaxyGenerator {
+class GalaxyGenerator
+{
 public:
     explicit GalaxyGenerator(uint32_t seed = 12345);
-    
+
     /**
      * @brief Generate a complete sector
      * @param x Sector X coordinate
@@ -23,29 +27,41 @@ public:
      * @return Generated sector with all objects
      */
     std::unique_ptr<GalaxySector> generateSector(int x, int y);
-    
+
     /**
      * @brief Set the generation seed
      */
     void setSeed(uint32_t seed);
-    uint32_t getSeed() const { return baseSeed; }
-    
+    uint32_t getSeed() const
+    {
+        return baseSeed;
+    }
+
     // Configuration
-    void setAsteroidDensity(float density) { asteroidDensity = density; }
-    void setStationChance(float chance) { stationChance = chance; }
-    void setShipDensity(float density) { shipDensity = density; }
+    void setAsteroidDensity(float density)
+    {
+        asteroidDensity = density;
+    }
+    void setStationChance(float chance)
+    {
+        stationChance = chance;
+    }
+    void setShipDensity(float density)
+    {
+        shipDensity = density;
+    }
 
 private:
     uint32_t baseSeed;
     float asteroidDensity;
     float stationChance;
     float shipDensity;
-    
+
     // Generation methods
     void generateAsteroids(GalaxySector* sector, std::mt19937& rng);
     void generateStations(GalaxySector* sector, std::mt19937& rng);
     void generateShips(GalaxySector* sector, std::mt19937& rng);
-    
+
     // Helper methods
     uint32_t getSectorSeed(int x, int y) const;
     ResourceType getRandomResourceType(std::mt19937& rng);

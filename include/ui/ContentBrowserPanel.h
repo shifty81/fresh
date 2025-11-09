@@ -3,7 +3,8 @@
 #include <string>
 #include <vector>
 
-namespace fresh {
+namespace fresh
+{
 
 /**
  * @brief Asset information structure
@@ -11,21 +12,24 @@ namespace fresh {
 struct AssetInfo {
     std::string name;
     std::string path;
-    std::string type;  // "texture", "model", "sound", "script", etc.
+    std::string type; // "texture", "model", "sound", "script", etc.
     size_t size;
-    
-    AssetInfo(const std::string& n = "", const std::string& p = "", 
-              const std::string& t = "", size_t s = 0)
-        : name(n), path(p), type(t), size(s) {}
+
+    AssetInfo(const std::string& n = "", const std::string& p = "", const std::string& t = "",
+              size_t s = 0)
+        : name(n), path(p), type(t), size(s)
+    {
+    }
 };
 
 /**
  * @brief Content Browser / Asset Manager Panel
- * 
+ *
  * Manages all project assets (textures, models, sounds, scripts),
  * allowing for filtering, searching, importing, and previewing.
  */
-class ContentBrowserPanel {
+class ContentBrowserPanel
+{
 public:
     ContentBrowserPanel();
     ~ContentBrowserPanel();
@@ -46,13 +50,19 @@ public:
      * @brief Set panel visibility
      * @param visible true to show, false to hide
      */
-    void setVisible(bool visible) { m_visible = visible; }
+    void setVisible(bool visible)
+    {
+        m_visible = visible;
+    }
 
     /**
      * @brief Check if panel is visible
      * @return true if visible
      */
-    bool isVisible() const { return m_visible; }
+    bool isVisible() const
+    {
+        return m_visible;
+    }
 
     /**
      * @brief Refresh asset list
@@ -94,7 +104,7 @@ private:
     std::vector<AssetInfo> m_assets;
     AssetInfo* m_selectedAsset;
     char m_searchBuffer[256];
-    
+
     // Dialog state
     bool m_showDeleteDialog;
     bool m_showRenameDialog;

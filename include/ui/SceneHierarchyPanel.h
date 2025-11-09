@@ -1,10 +1,11 @@
 #pragma once
 
+#include <memory>
 #include <string>
 #include <vector>
-#include <memory>
 
-namespace fresh {
+namespace fresh
+{
 
 class VoxelWorld;
 
@@ -16,19 +17,22 @@ struct HierarchyNode {
     bool visible;
     bool selected;
     std::vector<std::shared_ptr<HierarchyNode>> children;
-    void* userData;  // Can be entity, chunk, or other game object
+    void* userData; // Can be entity, chunk, or other game object
 
     HierarchyNode(const std::string& nodeName = "Object")
-        : name(nodeName), visible(true), selected(false), userData(nullptr) {}
+        : name(nodeName), visible(true), selected(false), userData(nullptr)
+    {
+    }
 };
 
 /**
  * @brief Scene Hierarchy/Outliner Panel
- * 
+ *
  * Displays a tree-structure list of all objects in the current scene,
  * allowing for easy selection, organization, and parent/child relationships.
  */
-class SceneHierarchyPanel {
+class SceneHierarchyPanel
+{
 public:
     SceneHierarchyPanel();
     ~SceneHierarchyPanel();
@@ -49,19 +53,28 @@ public:
      * @brief Set panel visibility
      * @param visible true to show, false to hide
      */
-    void setVisible(bool visible) { m_visible = visible; }
+    void setVisible(bool visible)
+    {
+        m_visible = visible;
+    }
 
     /**
      * @brief Check if panel is visible
      * @return true if visible
      */
-    bool isVisible() const { return m_visible; }
+    bool isVisible() const
+    {
+        return m_visible;
+    }
 
     /**
      * @brief Get the currently selected node
      * @return Pointer to selected node or nullptr
      */
-    HierarchyNode* getSelectedNode() { return m_selectedNode; }
+    HierarchyNode* getSelectedNode()
+    {
+        return m_selectedNode;
+    }
 
     /**
      * @brief Refresh the scene hierarchy from world data
@@ -98,7 +111,7 @@ private:
     VoxelWorld* m_world;
     std::shared_ptr<HierarchyNode> m_rootNode;
     HierarchyNode* m_selectedNode;
-    
+
     // Dialog state
     bool m_showRenameDialog;
     bool m_showDeleteDialog;

@@ -3,17 +3,19 @@
 #include "NoiseGenerator.h"
 #include "voxel/VoxelTypes.h"
 
-namespace fresh {
+namespace fresh
+{
 
 class Chunk;
 
 /**
  * @brief Generates terrain using procedural algorithms
- * 
+ *
  * Uses noise functions to create natural-looking terrain with
  * different biomes, caves, and structures.
  */
-class TerrainGenerator {
+class TerrainGenerator
+{
 public:
     TerrainGenerator();
     explicit TerrainGenerator(int seed);

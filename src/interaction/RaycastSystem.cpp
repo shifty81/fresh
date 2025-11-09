@@ -1,14 +1,14 @@
 #include "interaction/RaycastSystem.h"
 
-namespace fresh {
+namespace fresh
+{
 
-RaycastSystem::RaycastSystem() {
-}
+RaycastSystem::RaycastSystem() {}
 
-RaycastSystem::~RaycastSystem() {
-}
+RaycastSystem::~RaycastSystem() {}
 
-bool RaycastSystem::initialize() {
+bool RaycastSystem::initialize()
+{
     return true;
 }
 

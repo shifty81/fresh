@@ -2,18 +2,20 @@
 
 #include <memory>
 
-namespace fresh {
+namespace fresh
+{
 
 class VoxelWorld;
 class TerraformingSystem;
 
 /**
  * @brief World editing tools
- * 
+ *
  * Provides high-level world editing functionality including
  * terraforming, object placement, and world manipulation.
  */
-class WorldEditor {
+class WorldEditor
+{
 public:
     WorldEditor();
     ~WorldEditor();
@@ -35,19 +37,28 @@ public:
      * @brief Get the terraforming system
      * @return Pointer to terraforming system
      */
-    TerraformingSystem* getTerraformingSystem() const { return m_terraformingSystem.get(); }
+    TerraformingSystem* getTerraformingSystem() const
+    {
+        return m_terraformingSystem.get();
+    }
 
     /**
      * @brief Enable or disable editor mode
      * @param enabled true to enable, false to disable
      */
-    void setEnabled(bool enabled) { m_enabled = enabled; }
+    void setEnabled(bool enabled)
+    {
+        m_enabled = enabled;
+    }
 
     /**
      * @brief Check if editor is enabled
      * @return true if enabled, false otherwise
      */
-    bool isEnabled() const { return m_enabled; }
+    bool isEnabled() const
+    {
+        return m_enabled;
+    }
 
 private:
     VoxelWorld* m_world;

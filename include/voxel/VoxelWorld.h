@@ -1,21 +1,24 @@
 #pragma once
 
-#include "Chunk.h"
-#include <unordered_map>
 #include <memory>
+#include <unordered_map>
 #include <vector>
 
-namespace fresh {
+#include "Chunk.h"
+
+namespace fresh
+{
 
 class TerrainGenerator;
 
 /**
  * @brief Manages the entire voxel world
- * 
+ *
  * Handles chunk loading/unloading, world updates, and provides
  * interface for voxel manipulation.
  */
-class VoxelWorld {
+class VoxelWorld
+{
 public:
     VoxelWorld();
     ~VoxelWorld();
@@ -70,7 +73,9 @@ public:
      * @brief Get all loaded chunks
      * @return Map of chunk positions to chunks
      */
-    [[nodiscard]] const std::unordered_map<ChunkPos, std::unique_ptr<Chunk>>& getChunks() const noexcept {
+    [[nodiscard]] const std::unordered_map<ChunkPos, std::unique_ptr<Chunk>>&
+    getChunks() const noexcept
+    {
         return m_chunks;
     }
 
@@ -78,7 +83,10 @@ public:
      * @brief Set render distance
      * @param distance Render distance in chunks
      */
-    void setRenderDistance(int distance) { m_renderDistance = distance; }
+    void setRenderDistance(int distance)
+    {
+        m_renderDistance = distance;
+    }
 
 private:
     std::unordered_map<ChunkPos, std::unique_ptr<Chunk>> m_chunks;

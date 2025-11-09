@@ -1,45 +1,51 @@
 #include "character/AnimationController.h"
+
 #include <algorithm>
 
-namespace fresh {
+namespace fresh
+{
 
-AnimationController::AnimationController() 
-    : currentTime(0.0f), blending(false), blendTime(0.0f), blendDuration(0.0f) {
+AnimationController::AnimationController()
+    : currentTime(0.0f), blending(false), blendTime(0.0f), blendDuration(0.0f)
+{
 }
 
 AnimationController::~AnimationController() = default;
 
-void AnimationController::addState(const AnimationState& state) {
+void AnimationController::addState(const AnimationState& state)
+{
     states[state.name] = state;
-    
+
     // Set as current state if it's the first one
     if (currentStateName.empty()) {
         currentStateName = state.name;
     }
 }
 
-void AnimationController::addTransition(const AnimationTransition& transition) {
+void AnimationController::addTransition(const AnimationTransition& transition)
+{
     transitions.push_back(transition);
 }
 
-void AnimationController::setState(const std::string& stateName) {
+void AnimationController::setState(const std::string& stateName)
+{
     if (states.find(stateName) == states.end()) {
-        return;  // State doesn't exist
+        return; // State doesn't exist
     }
-    
+
     if (stateName == currentStateName) {
-        return;  // Already in this state
+        return; // Already in this state
     }
-    
+
     // Start blending to new state
     previousStateName = currentStateName;
     currentStateName = stateName;
     blending = true;
     blendTime = 0.0f;
-    
+
     // Use default blend duration if not specified
     blendDuration = 0.3f;
-    
+
     // Find if there's a specific transition with blend duration
     for (const auto& transition : transitions) {
         if (transition.fromState == previousStateName && transition.toState == stateName) {
@@ -47,16 +53,18 @@ void AnimationController::setState(const std::string& stateName) {
             break;
         }
     }
-    
+
     // Reset animation time for new state
     currentTime = 0.0f;
 }
 
-void AnimationController::setParameter(const std::string& paramName, float value) {
+void AnimationController::setParameter(const std::string& paramName, float value)
+{
     parameters[paramName] = value;
 }
 
-float AnimationController::getParameter(const std::string& paramName) const {
+float AnimationController::getParameter(const std::string& paramName) const
+{
     auto it = parameters.find(paramName);
     if (it != parameters.end()) {
         return it->second;
@@ -64,14 +72,15 @@ float AnimationController::getParameter(const std::string& paramName) const {
     return 0.0f;
 }
 
-void AnimationController::update(VoxelCharacter& character, float deltaTime) {
+void AnimationController::update(VoxelCharacter& character, float deltaTime)
+{
     if (currentStateName.empty() || states.find(currentStateName) == states.end()) {
         return;
     }
-    
+
     // Check for state transitions
     checkTransitions();
-    
+
     // Update blend time if blending
     if (blending) {
         blendTime += deltaTime;
@@ -80,50 +89,52 @@ void AnimationController::update(VoxelCharacter& character, float deltaTime) {
             blendTime = 0.0f;
         }
     }
-    
+
     // Update animation time
     AnimationState& currentState = states[currentStateName];
     currentTime += deltaTime * currentState.speed;
-    
+
     // Handle looping
     if (currentState.clip.isLooping() && currentTime >= currentState.clip.getDuration()) {
         currentTime = 0.0f;
     }
-    
+
     // Apply animation
     applyAnimation(character);
 }
 
-void AnimationController::checkTransitions() {
+void AnimationController::checkTransitions()
+{
     for (const auto& transition : transitions) {
         if (transition.fromState != currentStateName) {
             continue;
         }
-        
+
         // Check condition
         float paramValue = getParameter(transition.conditionParameter);
         bool conditionMet = false;
-        
+
         if (transition.conditionGreaterThan) {
             conditionMet = paramValue > transition.conditionValue;
         } else {
             conditionMet = paramValue < transition.conditionValue;
         }
-        
+
         if (conditionMet) {
             setState(transition.toState);
-            break;  // Only one transition per frame
+            break; // Only one transition per frame
         }
     }
 }
 
-void AnimationController::applyAnimation(VoxelCharacter& character) {
+void AnimationController::applyAnimation(VoxelCharacter& character)
+{
     if (currentStateName.empty()) {
         return;
     }
-    
+
     AnimationState& currentState = states[currentStateName];
-    
+
     if (blending && !previousStateName.empty() && states.find(previousStateName) != states.end()) {
         // Blend between previous and current animation
         AnimationState& previousState = states[previousStateName];
@@ -133,7 +144,7 @@ void AnimationController::applyAnimation(VoxelCharacter& character) {
         // Apply current animation only
         const AnimationClip& clip = currentState.clip;
         auto& skeleton = character.getSkeleton();
-        
+
         for (size_t i = 0; i < skeleton.size(); ++i) {
             glm::vec3 rotation, position;
             if (clip.sampleBone(currentTime, static_cast<int>(i), rotation, position)) {
@@ -144,19 +155,19 @@ void AnimationController::applyAnimation(VoxelCharacter& character) {
     }
 }
 
-void AnimationController::blendAnimations(VoxelCharacter& character, 
-                                         const AnimationClip& fromClip,
-                                         const AnimationClip& toClip, 
-                                         float blendFactor) {
+void AnimationController::blendAnimations(VoxelCharacter& character, const AnimationClip& fromClip,
+                                          const AnimationClip& toClip, float blendFactor)
+{
     auto& skeleton = character.getSkeleton();
-    
+
     for (size_t i = 0; i < skeleton.size(); ++i) {
         glm::vec3 fromRotation, fromPosition;
         glm::vec3 toRotation, toPosition;
-        
-        bool hasFrom = fromClip.sampleBone(currentTime, static_cast<int>(i), fromRotation, fromPosition);
+
+        bool hasFrom =
+            fromClip.sampleBone(currentTime, static_cast<int>(i), fromRotation, fromPosition);
         bool hasTo = toClip.sampleBone(currentTime, static_cast<int>(i), toRotation, toPosition);
-        
+
         if (hasFrom && hasTo) {
             // Blend both rotations
             glm::vec3 blendedRotation = glm::mix(fromRotation, toRotation, blendFactor);

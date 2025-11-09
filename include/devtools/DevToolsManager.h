@@ -1,42 +1,64 @@
 #pragma once
-#include "DebugRenderer.h"
-#include "PerformanceProfiler.h"
-#include "MemoryTracker.h"
-#include "DebugConsole.h"
 #include <memory>
 
-namespace fresh {
-namespace devtools {
+#include "DebugConsole.h"
+#include "DebugRenderer.h"
+#include "MemoryTracker.h"
+#include "PerformanceProfiler.h"
+
+namespace fresh
+{
+namespace devtools
+{
 
 /**
  * @brief Manages all development tools
- * 
+ *
  * Central hub for debug rendering, performance profiling, memory tracking,
  * and debug console.
  */
-class DevToolsManager {
+class DevToolsManager
+{
 public:
     DevToolsManager();
     ~DevToolsManager();
-    
+
     // Lifecycle
     void initialize();
     void shutdown();
     void update(float deltaTime);
     void render();
-    
+
     // Get individual tools
-    DebugRenderer& getDebugRenderer() { return debugRenderer; }
-    PerformanceProfiler& getProfiler() { return profiler; }
-    MemoryTracker& getMemoryTracker() { return memoryTracker; }
-    DebugConsole& getConsole() { return console; }
-    
+    DebugRenderer& getDebugRenderer()
+    {
+        return debugRenderer;
+    }
+    PerformanceProfiler& getProfiler()
+    {
+        return profiler;
+    }
+    MemoryTracker& getMemoryTracker()
+    {
+        return memoryTracker;
+    }
+    DebugConsole& getConsole()
+    {
+        return console;
+    }
+
     // Enable/disable all tools
     void setEnabled(bool isEnabled);
-    bool isEnabled() const { return enabled; }
-    
+    bool isEnabled() const
+    {
+        return enabled;
+    }
+
     // Toggle console
-    void toggleConsole() { console.toggle(); }
+    void toggleConsole()
+    {
+        console.toggle();
+    }
 
 private:
     DebugRenderer debugRenderer;
@@ -44,7 +66,7 @@ private:
     MemoryTracker memoryTracker;
     DebugConsole console;
     bool enabled;
-    
+
     void setupConsoleCommands();
 };
 

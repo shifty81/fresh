@@ -1,27 +1,29 @@
 #pragma once
 
 #include <vector>
+
 #include <glm/glm.hpp>
 
-namespace fresh {
+namespace fresh
+{
 
 // Forward declare from ECS namespace
-namespace ecs { class Entity; }
+namespace ecs
+{
+class Entity;
+}
 class VoxelWorld;
 
 /**
  * @brief Basic behavior tree node types
  */
-enum class NodeStatus {
-    Success,
-    Failure,
-    Running
-};
+enum class NodeStatus { Success, Failure, Running };
 
 /**
  * @brief Base node for behavior tree
  */
-class BehaviorNode {
+class BehaviorNode
+{
 public:
     virtual ~BehaviorNode() = default;
     virtual NodeStatus execute(ecs::Entity* entity, float deltaTime) = 0;
@@ -30,21 +32,22 @@ public:
 /**
  * @brief Behavior tree for AI decision making
  */
-class BehaviorTree {
+class BehaviorTree
+{
 public:
     BehaviorTree();
     ~BehaviorTree();
-    
+
     /**
      * @brief Set the root node of the behavior tree
      */
     void setRoot(BehaviorNode* root);
-    
+
     /**
      * @brief Execute the behavior tree
      */
     NodeStatus tick(ecs::Entity* entity, float deltaTime);
-    
+
 private:
     BehaviorNode* rootNode;
 };
@@ -52,11 +55,12 @@ private:
 /**
  * @brief Sequence node - executes children in order until one fails
  */
-class SequenceNode : public BehaviorNode {
+class SequenceNode : public BehaviorNode
+{
 public:
     void addChild(BehaviorNode* child);
     NodeStatus execute(ecs::Entity* entity, float deltaTime) override;
-    
+
 private:
     std::vector<BehaviorNode*> children;
 };
@@ -64,11 +68,12 @@ private:
 /**
  * @brief Selector node - executes children until one succeeds
  */
-class SelectorNode : public BehaviorNode {
+class SelectorNode : public BehaviorNode
+{
 public:
     void addChild(BehaviorNode* child);
     NodeStatus execute(ecs::Entity* entity, float deltaTime) override;
-    
+
 private:
     std::vector<BehaviorNode*> children;
 };
@@ -76,11 +81,12 @@ private:
 /**
  * @brief Example behavior: Wander randomly
  */
-class WanderBehavior : public BehaviorNode {
+class WanderBehavior : public BehaviorNode
+{
 public:
     WanderBehavior(VoxelWorld* world);
     NodeStatus execute(ecs::Entity* entity, float deltaTime) override;
-    
+
 private:
     VoxelWorld* world;
     float wanderTimer;
@@ -90,11 +96,12 @@ private:
 /**
  * @brief Example behavior: Follow target
  */
-class FollowBehavior : public BehaviorNode {
+class FollowBehavior : public BehaviorNode
+{
 public:
     FollowBehavior(ecs::Entity* target, float followDistance = 5.0f);
     NodeStatus execute(ecs::Entity* entity, float deltaTime) override;
-    
+
 private:
     ecs::Entity* targetEntity;
     float followDistance;

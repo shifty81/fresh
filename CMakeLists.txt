@@ -525,7 +525,9 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
 message(STATUS "DirectX libraries linked")
 
 # Compiler warnings (Windows/MSVC only)
-target_compile_options(${PROJECT_NAME} PRIVATE /W4)
+# /W4: Warning level 4 (high)
+# /WX: Treat warnings as errors to maintain code quality
+target_compile_options(${PROJECT_NAME} PRIVATE /W4 /WX)
 
 # Copy shaders to build directory
 file(GLOB SHADER_FILES "${CMAKE_CURRENT_SOURCE_DIR}/shaders/*.vert" 
@@ -624,7 +626,8 @@ if(BUILD_TESTS)
     
     # Compiler settings for tests (Windows/MSVC only)
     target_compile_features(${PROJECT_NAME}Tests PRIVATE cxx_std_20)
-    target_compile_options(${PROJECT_NAME}Tests PRIVATE /W4)
+    # /W4: Warning level 4, /WX: Treat warnings as errors
+    target_compile_options(${PROJECT_NAME}Tests PRIVATE /W4 /WX)
     
     # Register tests with CTest
     include(GoogleTest)

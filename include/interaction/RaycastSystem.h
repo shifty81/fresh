@@ -2,12 +2,14 @@
 
 #include "voxel/VoxelTypes.h"
 
-namespace fresh {
+namespace fresh
+{
 
 /**
  * @brief Raycasting system for block interaction
  */
-class RaycastSystem {
+class RaycastSystem
+{
 public:
     RaycastSystem();
     ~RaycastSystem();
