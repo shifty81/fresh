@@ -13,53 +13,19 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 # Platform Detection and Graphics API Configuration
 # ==============================================================================
 
-message(STATUS "Configuring Fresh Voxel Engine for ${CMAKE_SYSTEM_NAME}")
+message(STATUS "Configuring Fresh Voxel Engine for Windows")
 
-# Initialize graphics API support flags
-set(ENABLE_DIRECTX OFF)
-set(ENABLE_OPENGL OFF)
-
-# Platform-specific configuration
-if(WIN32)
-    message(STATUS "Windows platform detected")
-    message(STATUS "  - DirectX 11/12 support: ENABLED")
-    message(STATUS "  - OpenGL support: OPTIONAL (can be enabled)")
-    
-    # DirectX is available on Windows
-    set(ENABLE_DIRECTX ON)
-    add_definitions(-DFRESH_DIRECTX_SUPPORT)
-    
-    # OpenGL can also be used on Windows
-    option(USE_OPENGL_ON_WINDOWS "Enable OpenGL backend on Windows" ON)
-    if(USE_OPENGL_ON_WINDOWS)
-        set(ENABLE_OPENGL ON)
-    endif()
-    
-elseif(UNIX AND NOT APPLE)
-    message(STATUS "Linux platform detected")
-    message(STATUS "  - OpenGL support: ENABLED")
-    message(STATUS "  - Vulkan support: OPTIONAL (future)")
-    
-    # OpenGL is the primary backend on Linux
-    set(ENABLE_OPENGL ON)
-    
-elseif(APPLE)
-    message(STATUS "macOS platform detected")
-    message(STATUS "  - OpenGL support: ENABLED (deprecated by Apple)")
-    message(STATUS "  - Metal support: FUTURE")
-    
-    # OpenGL on macOS (though deprecated)
-    set(ENABLE_OPENGL ON)
-    
-else()
-    message(FATAL_ERROR "Unsupported platform: ${CMAKE_SYSTEM_NAME}")
+# Windows-only build - DirectX 11/12 support
+if(NOT WIN32)
+    message(FATAL_ERROR "This build configuration is Windows-only. Please use Windows to build this project.")
 endif()
 
-# Add OpenGL definition if enabled
-if(ENABLE_OPENGL)
-    add_definitions(-DFRESH_OPENGL_SUPPORT)
-    message(STATUS "OpenGL backend enabled")
-endif()
+message(STATUS "Windows platform detected")
+message(STATUS "  - DirectX 11/12 support: ENABLED")
+
+# DirectX is the primary backend on Windows
+set(ENABLE_DIRECTX ON)
+add_definitions(-DFRESH_DIRECTX_SUPPORT)
 
 # ==============================================================================
 # Dependencies
@@ -75,37 +41,6 @@ else()
     message(STATUS "Not using vcpkg - dependencies must be pre-installed")
 endif()
 
-# Find OpenGL (if enabled)
-if(ENABLE_OPENGL)
-    find_package(OpenGL REQUIRED)
-    if(OPENGL_FOUND)
-        message(STATUS "OpenGL found: ${OPENGL_LIBRARIES}")
-    else()
-        message(FATAL_ERROR "OpenGL not found but is required for this platform")
-    endif()
-    
-    # GLEW is needed for OpenGL extension loading on Windows/Linux
-    if(WIN32 OR UNIX)
-        find_package(GLEW QUIET)
-        if(NOT GLEW_FOUND)
-            message(STATUS "GLEW not found via find_package, trying pkg-config")
-            find_package(PkgConfig QUIET)
-            if(PKG_CONFIG_FOUND)
-                pkg_check_modules(GLEW QUIET glew)
-            endif()
-        endif()
-        
-        if(GLEW_FOUND OR GLEW_LIBRARIES)
-            message(STATUS "GLEW found")
-            set(GLEW_AVAILABLE TRUE)
-            add_definitions(-DFRESH_GLEW_AVAILABLE)
-        else()
-            message(WARNING "GLEW not found. OpenGL backend may not work properly.")
-            set(GLEW_AVAILABLE FALSE)
-        endif()
-    endif()
-endif()
-
 # Try to find GLFW (required for windowing)
 find_package(glfw3 QUIET)
 if(NOT glfw3_FOUND)
@@ -117,12 +52,7 @@ if(NOT glfw3_FOUND)
     
     if(NOT GLFW_FOUND)
         message(WARNING "GLFW not found. Please install GLFW 3.3+")
-        if(WIN32)
-            message(WARNING "  Windows: vcpkg install glfw3:x64-windows")
-        else()
-            message(WARNING "  Linux: sudo apt-get install libglfw3-dev")
-            message(WARNING "  macOS: brew install glfw")
-        endif()
+        message(WARNING "  Windows: vcpkg install glfw3:x64-windows")
     endif()
 endif()
 
@@ -136,28 +66,19 @@ endif()
 find_package(imgui QUIET)
 if(NOT imgui_FOUND)
     message(WARNING "ImGui not found. Editor UI features will be limited.")
-    if(WIN32 AND ENABLE_DIRECTX)
-        message(WARNING "  vcpkg install imgui[glfw-binding,dx11-binding,dx12-binding,opengl3-binding]:x64-windows")
-    else()
-        message(WARNING "  vcpkg install imgui[glfw-binding,opengl3-binding]")
-    endif()
+    message(WARNING "  vcpkg install imgui[glfw-binding,dx11-binding,dx12-binding]:x64-windows")
 endif()
 
 # OpenAL for audio
 find_package(OpenAL QUIET)
 if(NOT OpenAL_FOUND)
     message(WARNING "OpenAL not found. Audio features will be disabled.")
-    if(WIN32)
-        message(WARNING "  vcpkg install openal-soft:x64-windows")
-    else()
-        message(WARNING "  Linux: sudo apt-get install libopenal-dev")
-        message(WARNING "  macOS: brew install openal-soft")
-    endif()
+    message(WARNING "  vcpkg install openal-soft:x64-windows")
 endif()
 
 # Lua for scripting
 # On Windows with vcpkg, prefer CONFIG mode to get proper target
-if(WIN32 AND USING_VCPKG)
+if(USING_VCPKG)
     # Try vcpkg's CONFIG mode first on Windows
     # Try LuaJIT first (has better C linkage support on Windows)
     find_package(luajit CONFIG QUIET)
@@ -208,13 +129,8 @@ endif()
 
 if(NOT Lua_FOUND)
     message(WARNING "Lua not found. Asset management Lua integration will be disabled.")
-    if(WIN32)
-        message(WARNING "  vcpkg install luajit:x64-windows")
-        message(WARNING "  or vcpkg install lua:x64-windows")
-    else()
-        message(WARNING "  Linux: sudo apt-get install liblua5.4-dev")
-        message(WARNING "  macOS: brew install lua")
-    endif()
+    message(WARNING "  vcpkg install luajit:x64-windows")
+    message(WARNING "  or vcpkg install lua:x64-windows")
 endif()
 
 # ==============================================================================
@@ -359,12 +275,6 @@ if(ENABLE_DIRECTX)
     list(APPEND ENGINE_SOURCES
         src/renderer/backends/DirectX11RenderContext.cpp
         src/renderer/backends/DirectX12RenderContext.cpp
-    )
-endif()
-
-if(ENABLE_OPENGL)
-    list(APPEND ENGINE_SOURCES
-        src/renderer/backends/OpenGLRenderContext.cpp
     )
 endif()
 
@@ -600,40 +510,17 @@ else()
     set(LUA_IMPLEMENTATION_FILE src/scripting/lua/ScriptingEngine.cpp)
 endif()
 
-# Link OpenGL (if enabled)
-if(ENABLE_OPENGL)
-    target_link_libraries(${PROJECT_NAME} PRIVATE ${OPENGL_LIBRARIES})
-    
-    # Link GLEW for OpenGL extension loading
-    if(GLEW_AVAILABLE)
-        if(TARGET GLEW::GLEW)
-            target_link_libraries(${PROJECT_NAME} PRIVATE GLEW::GLEW)
-        elseif(GLEW_LIBRARIES)
-            target_include_directories(${PROJECT_NAME} PRIVATE ${GLEW_INCLUDE_DIRS})
-            target_link_libraries(${PROJECT_NAME} PRIVATE ${GLEW_LIBRARIES})
-        endif()
-    endif()
-    
-    message(STATUS "OpenGL libraries linked")
-endif()
+# Link DirectX (Windows)
+target_link_libraries(${PROJECT_NAME} PRIVATE 
+    d3d11.lib 
+    d3d12.lib 
+    dxgi.lib 
+    d3dcompiler.lib
+)
+message(STATUS "DirectX libraries linked")
 
-# Link DirectX (Windows only)
-if(ENABLE_DIRECTX)
-    target_link_libraries(${PROJECT_NAME} PRIVATE 
-        d3d11.lib 
-        d3d12.lib 
-        dxgi.lib 
-        d3dcompiler.lib
-    )
-    message(STATUS "DirectX libraries linked")
-endif()
-
-# Compiler warnings
-if(MSVC)
-    target_compile_options(${PROJECT_NAME} PRIVATE /W4)
-else()
-    target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Wextra -Wpedantic)
-endif()
+# Compiler warnings (Windows/MSVC only)
+target_compile_options(${PROJECT_NAME} PRIVATE /W4)
 
 # Copy shaders to build directory
 file(GLOB SHADER_FILES "${CMAKE_CURRENT_SOURCE_DIR}/shaders/*.vert" 
@@ -730,14 +617,9 @@ if(BUILD_TESTS)
         target_link_libraries(${PROJECT_NAME}Tests PRIVATE glm::glm)
     endif()
     
-    # Compiler settings for tests
+    # Compiler settings for tests (Windows/MSVC only)
     target_compile_features(${PROJECT_NAME}Tests PRIVATE cxx_std_20)
-    
-    if(MSVC)
-        target_compile_options(${PROJECT_NAME}Tests PRIVATE /W4)
-    else()
-        target_compile_options(${PROJECT_NAME}Tests PRIVATE -Wall -Wextra -Wpedantic)
-    endif()
+    target_compile_options(${PROJECT_NAME}Tests PRIVATE /W4)
     
     # Register tests with CTest
     include(GoogleTest)
