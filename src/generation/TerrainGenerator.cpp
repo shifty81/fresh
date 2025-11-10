@@ -3,6 +3,8 @@
 #include <cmath>
 
 #include "voxel/Chunk.h"
+#include "voxel/VoxelWorld.h"
+#include "assets/ModularAssetSystem.h"
 
 namespace fresh
 {
@@ -101,6 +103,32 @@ void TerrainGenerator::generateChunk(Chunk* chunk)
     }
 
     chunk->markDirty();
+}
+
+void TerrainGenerator::generateChunkWithAssets(Chunk* chunk, VoxelWorld* world)
+{
+    // First generate the base terrain
+    generateChunk(chunk);
+
+    // If world is provided, generate and place assets
+    if (world) {
+        const ChunkPos& chunkPos = chunk->getPosition();
+        
+        // Generate assets for this chunk using the modular asset system
+        auto& assetSystem = ModularAssetSystem::getInstance();
+        auto assetInstances = assetSystem.generateAssetsForChunk(
+            world, 
+            chunkPos.x, 
+            chunkPos.z, 
+            static_cast<uint32_t>(m_seed)
+        );
+
+        // Place the generated assets in the world
+        assetSystem.placeAssetsInWorld(assetInstances, world);
+        
+        // Mark chunk as dirty to regenerate mesh with new assets
+        chunk->markDirty();
+    }
 }
 
 } // namespace fresh

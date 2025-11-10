@@ -456,10 +456,85 @@ void ModularAssetSystem::placeAssetsInWorld(const std::vector<AssetInstance>& in
         return;
 
     for (const auto& instance : instances) {
-        // TODO: Actually place asset in world
-        // This would create a visual representation (mesh, entity, etc.)
         std::cout << "Placing asset: " << instance.assetName << " at (" << instance.position.x
                   << ", " << instance.position.y << ", " << instance.position.z << ")" << std::endl;
+
+        // Get the asset metadata to determine size
+        AssetMetadata* assetMeta = nullptr;
+        for (const auto& pack : loadedPacks) {
+            for (const auto& asset : pack->getAssets()) {
+                if (asset.name == instance.assetName) {
+                    assetMeta = const_cast<AssetMetadata*>(&asset);
+                    break;
+                }
+            }
+            if (assetMeta)
+                break;
+        }
+
+        if (!assetMeta) {
+            std::cerr << "Asset metadata not found for: " << instance.assetName << std::endl;
+            continue;
+        }
+
+        // Simple voxel-based representation
+        // For now, we'll place a solid block of voxels matching the asset's size
+        // In a full implementation, this would load actual 3D models
+        
+        // Determine voxel type based on asset tags
+        VoxelType voxelType = VoxelType::Wood; // Default
+        if (std::find(assetMeta->tags.begin(), assetMeta->tags.end(), "rock") != assetMeta->tags.end()) {
+            voxelType = VoxelType::Stone;
+        } else if (std::find(assetMeta->tags.begin(), assetMeta->tags.end(), "tree") != assetMeta->tags.end() ||
+                   std::find(assetMeta->tags.begin(), assetMeta->tags.end(), "vegetation") != assetMeta->tags.end()) {
+            voxelType = VoxelType::Wood;
+        }
+
+        // Calculate placement bounds
+        int startX = static_cast<int>(instance.position.x - assetMeta->size.x / 2.0f);
+        int startY = static_cast<int>(instance.position.y);
+        int startZ = static_cast<int>(instance.position.z - assetMeta->size.z / 2.0f);
+        
+        int endX = static_cast<int>(instance.position.x + assetMeta->size.x / 2.0f);
+        int endY = static_cast<int>(instance.position.y + assetMeta->size.y);
+        int endZ = static_cast<int>(instance.position.z + assetMeta->size.z / 2.0f);
+
+        // Apply embed depth if configured
+        if (assetMeta->embedInTerrain && assetMeta->embedDepth > 0.0f) {
+            startY -= static_cast<int>(assetMeta->embedDepth);
+        }
+
+        // Place voxels
+        for (int x = startX; x < endX; ++x) {
+            for (int y = startY; y < endY; ++y) {
+                for (int z = startZ; z < endZ; ++z) {
+                    // Simple shape - could be enhanced with more complex patterns
+                    // For trees, create a trunk and leaves pattern
+                    if (voxelType == VoxelType::Wood && std::find(assetMeta->tags.begin(), assetMeta->tags.end(), "tree") != assetMeta->tags.end()) {
+                        // Trunk in the center
+                        int centerX = static_cast<int>(instance.position.x);
+                        int centerZ = static_cast<int>(instance.position.z);
+                        
+                        if (x == centerX && z == centerZ && y < startY + assetMeta->size.y * 0.7f) {
+                            // Trunk
+                            WorldPos pos(x, y, z);
+                            world->setVoxel(pos, Voxel(VoxelType::Wood));
+                        } else if (y >= startY + assetMeta->size.y * 0.5f) {
+                            // Leaves in upper portion
+                            float distFromCenter = std::sqrt((x - centerX) * (x - centerX) + (z - centerZ) * (z - centerZ));
+                            if (distFromCenter < assetMeta->size.x / 2.0f) {
+                                WorldPos pos(x, y, z);
+                                world->setVoxel(pos, Voxel(VoxelType::Leaves));
+                            }
+                        }
+                    } else {
+                        // Simple solid block for other assets
+                        WorldPos pos(x, y, z);
+                        world->setVoxel(pos, Voxel(voxelType));
+                    }
+                }
+            }
+        }
 
         // Track placement
         glm::vec2 pos2D(instance.position.x, instance.position.z);
