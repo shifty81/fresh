@@ -7,6 +7,7 @@ namespace fresh
 {
 
 class Chunk;
+class VoxelWorld;
 
 /**
  * @brief Generates terrain using procedural algorithms
@@ -26,6 +27,13 @@ public:
      * @param chunk Chunk to generate terrain for
      */
     void generateChunk(Chunk* chunk);
+
+    /**
+     * @brief Generate terrain and assets for a chunk
+     * @param chunk Chunk to generate for
+     * @param world VoxelWorld for asset placement (optional)
+     */
+    void generateChunkWithAssets(Chunk* chunk, VoxelWorld* world = nullptr);
 
     /**
      * @brief Set generation seed

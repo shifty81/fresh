@@ -6,6 +6,11 @@
 #include <iostream>
 #include <random>
 
+#ifdef FRESH_JSON_AVAILABLE
+#include <nlohmann/json.hpp>
+using json = nlohmann::json;
+#endif
+
 #include "core/ResourceManager.h"
 #include "voxel/VoxelWorld.h"
 
@@ -93,10 +98,134 @@ std::vector<AssetMetadata> AssetPack::getAssetsByRule(PlacementRule rule) const
 
 bool AssetPack::parseManifest(const std::string& manifestPath)
 {
-    (void)manifestPath; // Unused - placeholder for future implementation
-    // TODO: Implement JSON parsing
-    // For now, create some example assets
+#ifdef FRESH_JSON_AVAILABLE
+    try {
+        // Read JSON file
+        std::ifstream file(manifestPath);
+        if (!file.is_open()) {
+            std::cerr << "Failed to open manifest file: " << manifestPath << std::endl;
+            return false;
+        }
 
+        json manifestJson;
+        file >> manifestJson;
+        file.close();
+
+        // Parse pack metadata
+        name = manifestJson.value("name", std::filesystem::path(packPath).filename().string());
+        version = manifestJson.value("version", "1.0.0");
+        author = manifestJson.value("author", "Unknown");
+
+        // Parse assets array
+        if (manifestJson.contains("assets") && manifestJson["assets"].is_array()) {
+            for (const auto& assetJson : manifestJson["assets"]) {
+                AssetMetadata asset;
+                
+                // Required fields
+                asset.name = assetJson.value("name", "");
+                asset.description = assetJson.value("description", "");
+                asset.modelPath = packPath + "/" + assetJson.value("modelPath", "");
+                asset.texturePath = packPath + "/" + assetJson.value("texturePath", "");
+
+                // Parse biomes
+                if (assetJson.contains("biomes") && assetJson["biomes"].is_array()) {
+                    for (const auto& biomeStr : assetJson["biomes"]) {
+                        std::string biome = biomeStr.get<std::string>();
+                        if (biome == "Any") asset.allowedBiomes.push_back(BiomeType::Any);
+                        else if (biome == "Forest") asset.allowedBiomes.push_back(BiomeType::Forest);
+                        else if (biome == "Plains") asset.allowedBiomes.push_back(BiomeType::Plains);
+                        else if (biome == "Desert") asset.allowedBiomes.push_back(BiomeType::Desert);
+                        else if (biome == "Mountains") asset.allowedBiomes.push_back(BiomeType::Mountains);
+                        else if (biome == "Swamp") asset.allowedBiomes.push_back(BiomeType::Swamp);
+                        else if (biome == "Tundra") asset.allowedBiomes.push_back(BiomeType::Tundra);
+                        else if (biome == "Ocean") asset.allowedBiomes.push_back(BiomeType::Ocean);
+                        else if (biome == "Cave") asset.allowedBiomes.push_back(BiomeType::Cave);
+                    }
+                }
+                if (asset.allowedBiomes.empty()) {
+                    asset.allowedBiomes.push_back(BiomeType::Any);
+                }
+
+                // Parse placement rule
+                std::string ruleStr = assetJson.value("placementRule", "Random");
+                if (ruleStr == "Clustered") asset.placementRule = PlacementRule::Clustered;
+                else if (ruleStr == "Grid") asset.placementRule = PlacementRule::Grid;
+                else if (ruleStr == "NearWater") asset.placementRule = PlacementRule::NearWater;
+                else if (ruleStr == "OnHills") asset.placementRule = PlacementRule::OnHills;
+                else if (ruleStr == "InCaves") asset.placementRule = PlacementRule::InCaves;
+                else if (ruleStr == "RiverSide") asset.placementRule = PlacementRule::RiverSide;
+                else asset.placementRule = PlacementRule::Random;
+
+                // Parse placement parameters
+                asset.spawnChance = assetJson.value("spawnChance", 0.1f);
+                asset.minDistance = assetJson.value("minDistance", 10.0f);
+                asset.minGroupSize = assetJson.value("minGroupSize", 1);
+                asset.maxGroupSize = assetJson.value("maxGroupSize", 5);
+
+                // Parse size
+                if (assetJson.contains("size") && assetJson["size"].is_array() && assetJson["size"].size() == 3) {
+                    asset.size = glm::vec3(
+                        assetJson["size"][0].get<float>(),
+                        assetJson["size"][1].get<float>(),
+                        assetJson["size"][2].get<float>()
+                    );
+                } else {
+                    asset.size = glm::vec3(1.0f);
+                }
+
+                // Parse offset
+                if (assetJson.contains("offset") && assetJson["offset"].is_array() && assetJson["offset"].size() == 3) {
+                    asset.offset = glm::vec3(
+                        assetJson["offset"][0].get<float>(),
+                        assetJson["offset"][1].get<float>(),
+                        assetJson["offset"][2].get<float>()
+                    );
+                }
+
+                // Parse rotation settings
+                asset.randomRotation = assetJson.value("randomRotation", true);
+                asset.rotationStep = assetJson.value("rotationStep", 90.0f);
+
+                // Parse world generation settings
+                asset.placeOnSurface = assetJson.value("placeOnSurface", true);
+                asset.embedInTerrain = assetJson.value("embedInTerrain", false);
+                asset.embedDepth = assetJson.value("embedDepth", 0.0f);
+
+                // Parse tags
+                if (assetJson.contains("tags") && assetJson["tags"].is_array()) {
+                    for (const auto& tag : assetJson["tags"]) {
+                        asset.tags.push_back(tag.get<std::string>());
+                    }
+                }
+
+                // Parse custom properties
+                if (assetJson.contains("customProperties") && assetJson["customProperties"].is_object()) {
+                    for (auto& [key, value] : assetJson["customProperties"].items()) {
+                        if (value.is_string()) {
+                            asset.customProperties[key] = value.get<std::string>();
+                        }
+                    }
+                }
+
+                assets.push_back(asset);
+            }
+        }
+
+        std::cout << "Parsed manifest: " << name << " v" << version << " by " << author << std::endl;
+        std::cout << "  Loaded " << assets.size() << " asset definitions" << std::endl;
+        return true;
+
+    } catch (const json::exception& e) {
+        std::cerr << "JSON parsing error: " << e.what() << std::endl;
+        return false;
+    } catch (const std::exception& e) {
+        std::cerr << "Error parsing manifest: " << e.what() << std::endl;
+        return false;
+    }
+#else
+    // Fallback implementation when JSON library is not available
+    std::cout << "JSON library not available - using fallback asset loading" << std::endl;
+    
     name = std::filesystem::path(packPath).filename().string();
     version = "1.0.0";
     author = "Fresh Engine";
@@ -137,6 +266,7 @@ bool AssetPack::parseManifest(const std::string& manifestPath)
     assets.push_back(rock);
 
     return true;
+#endif
 }
 
 // ModularAssetSystem implementation
@@ -326,10 +456,85 @@ void ModularAssetSystem::placeAssetsInWorld(const std::vector<AssetInstance>& in
         return;
 
     for (const auto& instance : instances) {
-        // TODO: Actually place asset in world
-        // This would create a visual representation (mesh, entity, etc.)
         std::cout << "Placing asset: " << instance.assetName << " at (" << instance.position.x
                   << ", " << instance.position.y << ", " << instance.position.z << ")" << std::endl;
+
+        // Get the asset metadata to determine size
+        AssetMetadata* assetMeta = nullptr;
+        for (const auto& pack : loadedPacks) {
+            for (const auto& asset : pack->getAssets()) {
+                if (asset.name == instance.assetName) {
+                    assetMeta = const_cast<AssetMetadata*>(&asset);
+                    break;
+                }
+            }
+            if (assetMeta)
+                break;
+        }
+
+        if (!assetMeta) {
+            std::cerr << "Asset metadata not found for: " << instance.assetName << std::endl;
+            continue;
+        }
+
+        // Simple voxel-based representation
+        // For now, we'll place a solid block of voxels matching the asset's size
+        // In a full implementation, this would load actual 3D models
+        
+        // Determine voxel type based on asset tags
+        VoxelType voxelType = VoxelType::Wood; // Default
+        if (std::find(assetMeta->tags.begin(), assetMeta->tags.end(), "rock") != assetMeta->tags.end()) {
+            voxelType = VoxelType::Stone;
+        } else if (std::find(assetMeta->tags.begin(), assetMeta->tags.end(), "tree") != assetMeta->tags.end() ||
+                   std::find(assetMeta->tags.begin(), assetMeta->tags.end(), "vegetation") != assetMeta->tags.end()) {
+            voxelType = VoxelType::Wood;
+        }
+
+        // Calculate placement bounds
+        int startX = static_cast<int>(instance.position.x - assetMeta->size.x / 2.0f);
+        int startY = static_cast<int>(instance.position.y);
+        int startZ = static_cast<int>(instance.position.z - assetMeta->size.z / 2.0f);
+        
+        int endX = static_cast<int>(instance.position.x + assetMeta->size.x / 2.0f);
+        int endY = static_cast<int>(instance.position.y + assetMeta->size.y);
+        int endZ = static_cast<int>(instance.position.z + assetMeta->size.z / 2.0f);
+
+        // Apply embed depth if configured
+        if (assetMeta->embedInTerrain && assetMeta->embedDepth > 0.0f) {
+            startY -= static_cast<int>(assetMeta->embedDepth);
+        }
+
+        // Place voxels
+        for (int x = startX; x < endX; ++x) {
+            for (int y = startY; y < endY; ++y) {
+                for (int z = startZ; z < endZ; ++z) {
+                    // Simple shape - could be enhanced with more complex patterns
+                    // For trees, create a trunk and leaves pattern
+                    if (voxelType == VoxelType::Wood && std::find(assetMeta->tags.begin(), assetMeta->tags.end(), "tree") != assetMeta->tags.end()) {
+                        // Trunk in the center
+                        int centerX = static_cast<int>(instance.position.x);
+                        int centerZ = static_cast<int>(instance.position.z);
+                        
+                        if (x == centerX && z == centerZ && y < startY + assetMeta->size.y * 0.7f) {
+                            // Trunk
+                            WorldPos pos(x, y, z);
+                            world->setVoxel(pos, Voxel(VoxelType::Wood));
+                        } else if (y >= startY + assetMeta->size.y * 0.5f) {
+                            // Leaves in upper portion
+                            float distFromCenter = std::sqrt((x - centerX) * (x - centerX) + (z - centerZ) * (z - centerZ));
+                            if (distFromCenter < assetMeta->size.x / 2.0f) {
+                                WorldPos pos(x, y, z);
+                                world->setVoxel(pos, Voxel(VoxelType::Leaves));
+                            }
+                        }
+                    } else {
+                        // Simple solid block for other assets
+                        WorldPos pos(x, y, z);
+                        world->setVoxel(pos, Voxel(voxelType));
+                    }
+                }
+            }
+        }
 
         // Track placement
         glm::vec2 pos2D(instance.position.x, instance.position.z);
@@ -339,14 +544,113 @@ void ModularAssetSystem::placeAssetsInWorld(const std::vector<AssetInstance>& in
 
 bool ModularAssetSystem::createAssetPackTemplate(const std::string& outputPath)
 {
-    std::cout << "Creating asset pack template at: " << outputPath << std::endl;
+    std::cout << "=== Creating Asset Pack Template ===" << std::endl;
+    std::cout << "Output path: " << outputPath << std::endl;
 
     // Create directory structure
     std::filesystem::create_directories(outputPath);
     std::filesystem::create_directories(outputPath + "/models");
     std::filesystem::create_directories(outputPath + "/textures");
 
-    // Create manifest template
+    // Create README file with structure documentation
+    std::string readmePath = outputPath + "/README.md";
+    std::ofstream readme(readmePath);
+    if (readme.is_open()) {
+        readme << "# Asset Pack Template\n\n";
+        readme << "This is a template for creating custom asset packs for the Fresh Voxel Engine.\n\n";
+        
+        readme << "## Directory Structure\n\n";
+        readme << "```\n";
+        readme << "YourAssetPack/\n";
+        readme << "├── manifest.json       # Asset pack configuration (REQUIRED)\n";
+        readme << "├── README.md           # Documentation (optional)\n";
+        readme << "├── models/             # 3D model files (.obj, .fbx, .gltf)\n";
+        readme << "│   └── tree.obj\n";
+        readme << "└── textures/           # Texture files (.png, .jpg)\n";
+        readme << "    └── tree.png\n";
+        readme << "```\n\n";
+        
+        readme << "## Manifest File (manifest.json)\n\n";
+        readme << "The manifest.json file is **REQUIRED** and defines your asset pack metadata and asset definitions.\n\n";
+        
+        readme << "### Pack Metadata\n";
+        readme << "- `name`: (string) Unique name for your asset pack\n";
+        readme << "- `version`: (string) Version number (e.g., \"1.0.0\")\n";
+        readme << "- `author`: (string) Pack creator name\n";
+        readme << "- `description`: (string) Brief description of the pack\n\n";
+        
+        readme << "### Asset Definitions\n";
+        readme << "Each asset in the `assets` array can have the following properties:\n\n";
+        
+        readme << "#### Required Fields\n";
+        readme << "- `name`: (string) Unique identifier for the asset\n";
+        readme << "- `modelPath`: (string) Path to model file relative to pack root\n";
+        readme << "- `texturePath`: (string) Path to texture file relative to pack root\n\n";
+        
+        readme << "#### Optional Fields\n";
+        readme << "- `description`: (string) Asset description\n";
+        readme << "- `biomes`: (array) Where asset can spawn. Options:\n";
+        readme << "  - `\"Any\"` - Can spawn in any biome (default)\n";
+        readme << "  - `\"Forest\"` - Forest biomes\n";
+        readme << "  - `\"Plains\"` - Plains biomes\n";
+        readme << "  - `\"Desert\"` - Desert biomes\n";
+        readme << "  - `\"Mountains\"` - Mountain biomes\n";
+        readme << "  - `\"Swamp\"` - Swamp biomes\n";
+        readme << "  - `\"Tundra\"` - Tundra biomes\n";
+        readme << "  - `\"Ocean\"` - Ocean biomes\n";
+        readme << "  - `\"Cave\"` - Cave/underground biomes\n";
+        readme << "- `placementRule`: (string) How assets are placed. Options:\n";
+        readme << "  - `\"Random\"` - Random placement (default)\n";
+        readme << "  - `\"Clustered\"` - Grouped together\n";
+        readme << "  - `\"Grid\"` - Regular grid pattern\n";
+        readme << "  - `\"NearWater\"` - Near water sources\n";
+        readme << "  - `\"OnHills\"` - On elevated terrain\n";
+        readme << "  - `\"InCaves\"` - Underground caves\n";
+        readme << "  - `\"RiverSide\"` - Along rivers\n";
+        readme << "- `spawnChance`: (float) 0.0-1.0, probability of spawning (default: 0.1)\n";
+        readme << "- `minDistance`: (float) Minimum distance between instances (default: 10.0)\n";
+        readme << "- `minGroupSize`: (int) Minimum group size for clustered placement (default: 1)\n";
+        readme << "- `maxGroupSize`: (int) Maximum group size for clustered placement (default: 5)\n";
+        readme << "- `size`: (array) [width, height, depth] in voxels (default: [1.0, 1.0, 1.0])\n";
+        readme << "- `offset`: (array) [x, y, z] position offset (default: [0.0, 0.0, 0.0])\n";
+        readme << "- `randomRotation`: (bool) Random Y-axis rotation (default: true)\n";
+        readme << "- `rotationStep`: (float) Rotation angle step in degrees (default: 90.0)\n";
+        readme << "- `placeOnSurface`: (bool) Place on terrain surface (default: true)\n";
+        readme << "- `embedInTerrain`: (bool) Partially sink into terrain (default: false)\n";
+        readme << "- `embedDepth`: (float) How deep to embed if enabled (default: 0.0)\n";
+        readme << "- `tags`: (array of strings) Tags for filtering/categorization\n";
+        readme << "- `customProperties`: (object) Custom key-value pairs for game-specific data\n\n";
+        
+        readme << "## Example Manifest\n\n";
+        readme << "See the included `manifest.json` for a complete example.\n\n";
+        
+        readme << "## Installation\n\n";
+        readme << "1. Place your asset pack folder in the engine's assets directory\n";
+        readme << "2. The engine will automatically discover and load it on startup\n";
+        readme << "3. Check the console for loading messages and any errors\n\n";
+        
+        readme << "## Supported File Formats\n\n";
+        readme << "- **Models**: .obj, .fbx, .gltf, .glb, .dae\n";
+        readme << "- **Textures**: .png, .jpg, .jpeg, .bmp, .tga, .dds\n\n";
+        
+        readme << "## Tips\n\n";
+        readme << "- Start with low spawn chances (0.05-0.15) to avoid overcrowding\n";
+        readme << "- Use `minDistance` to prevent overlapping assets\n";
+        readme << "- Test different biomes and placement rules\n";
+        readme << "- Use tags for easy filtering and organization\n";
+        readme << "- Keep model poly count reasonable for performance\n\n";
+        
+        readme << "## Troubleshooting\n\n";
+        readme << "- **Pack not loading**: Check that manifest.json is valid JSON\n";
+        readme << "- **Assets not appearing**: Verify file paths are correct and relative to pack root\n";
+        readme << "- **Performance issues**: Reduce spawn chances or increase min distances\n";
+        readme << "- **Validation errors**: Check console output for specific error messages\n\n";
+        
+        readme.close();
+        std::cout << "  Created README.md with documentation" << std::endl;
+    }
+
+    // Create comprehensive manifest template
     std::string manifestPath = outputPath + "/manifest.json";
     std::ofstream manifest(manifestPath);
     if (!manifest.is_open()) {
@@ -362,21 +666,58 @@ bool ModularAssetSystem::createAssetPackTemplate(const std::string& outputPath)
     manifest << "  \"assets\": [\n";
     manifest << "    {\n";
     manifest << "      \"name\": \"ExampleTree\",\n";
-    manifest << "      \"description\": \"An example tree asset\",\n";
+    manifest << "      \"description\": \"An example tree asset for forests\",\n";
     manifest << "      \"modelPath\": \"models/tree.obj\",\n";
     manifest << "      \"texturePath\": \"textures/tree.png\",\n";
     manifest << "      \"biomes\": [\"Forest\", \"Plains\"],\n";
     manifest << "      \"placementRule\": \"Clustered\",\n";
     manifest << "      \"spawnChance\": 0.15,\n";
     manifest << "      \"minDistance\": 8.0,\n";
+    manifest << "      \"minGroupSize\": 2,\n";
+    manifest << "      \"maxGroupSize\": 8,\n";
     manifest << "      \"size\": [3.0, 12.0, 3.0],\n";
-    manifest << "      \"tags\": [\"tree\", \"vegetation\"]\n";
+    manifest << "      \"offset\": [0.0, 0.0, 0.0],\n";
+    manifest << "      \"randomRotation\": true,\n";
+    manifest << "      \"rotationStep\": 90.0,\n";
+    manifest << "      \"placeOnSurface\": true,\n";
+    manifest << "      \"embedInTerrain\": false,\n";
+    manifest << "      \"embedDepth\": 0.0,\n";
+    manifest << "      \"tags\": [\"tree\", \"vegetation\", \"natural\"],\n";
+    manifest << "      \"customProperties\": {\n";
+    manifest << "        \"flammable\": \"true\",\n";
+    manifest << "        \"harvestable\": \"true\"\n";
+    manifest << "      }\n";
+    manifest << "    },\n";
+    manifest << "    {\n";
+    manifest << "      \"name\": \"ExampleRock\",\n";
+    manifest << "      \"description\": \"A large boulder for mountains\",\n";
+    manifest << "      \"modelPath\": \"models/rock.obj\",\n";
+    manifest << "      \"texturePath\": \"textures/rock.png\",\n";
+    manifest << "      \"biomes\": [\"Mountains\", \"Plains\"],\n";
+    manifest << "      \"placementRule\": \"Random\",\n";
+    manifest << "      \"spawnChance\": 0.08,\n";
+    manifest << "      \"minDistance\": 15.0,\n";
+    manifest << "      \"size\": [2.5, 2.0, 2.5],\n";
+    manifest << "      \"randomRotation\": true,\n";
+    manifest << "      \"placeOnSurface\": true,\n";
+    manifest << "      \"embedInTerrain\": true,\n";
+    manifest << "      \"embedDepth\": 0.3,\n";
+    manifest << "      \"tags\": [\"rock\", \"obstacle\", \"natural\"]\n";
     manifest << "    }\n";
     manifest << "  ]\n";
     manifest << "}\n";
     manifest.close();
 
-    std::cout << "Asset pack template created successfully" << std::endl;
+    std::cout << "  Created manifest.json template" << std::endl;
+    std::cout << "\n=== Asset Pack Template Created Successfully ===" << std::endl;
+    std::cout << "Location: " << outputPath << std::endl;
+    std::cout << "\nNext steps:" << std::endl;
+    std::cout << "1. Read the README.md for detailed instructions" << std::endl;
+    std::cout << "2. Edit manifest.json with your asset pack details" << std::endl;
+    std::cout << "3. Add your model files to the models/ directory" << std::endl;
+    std::cout << "4. Add your texture files to the textures/ directory" << std::endl;
+    std::cout << "5. Place the pack folder in your assets directory" << std::endl;
+    
     return true;
 }
 

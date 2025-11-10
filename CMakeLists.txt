@@ -133,6 +133,13 @@ if(NOT Lua_FOUND)
     message(WARNING "  or vcpkg install lua:x64-windows")
 endif()
 
+# nlohmann-json for JSON parsing
+find_package(nlohmann_json QUIET CONFIG)
+if(NOT nlohmann_json_FOUND)
+    message(WARNING "nlohmann-json not found. Asset pack manifest parsing will be limited.")
+    message(WARNING "  vcpkg install nlohmann-json:x64-windows")
+endif()
+
 # ==============================================================================
 # Dependency Check Summary
 # ==============================================================================
@@ -513,6 +520,13 @@ if(Lua_FOUND)
 else()
     # No Lua available, use stub implementation
     set(LUA_IMPLEMENTATION_FILE src/scripting/lua/ScriptingEngine.cpp)
+endif()
+
+# Link nlohmann-json (JSON parsing for asset manifests)
+if(nlohmann_json_FOUND)
+    target_link_libraries(${PROJECT_NAME} PRIVATE nlohmann_json::nlohmann_json)
+    add_definitions(-DFRESH_JSON_AVAILABLE)
+    message(STATUS "nlohmann-json enabled for asset manifest parsing")
 endif()
 
 # Link DirectX (Windows)
