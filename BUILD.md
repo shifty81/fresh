@@ -1,8 +1,18 @@
-# Building Fresh Voxel Engine with Visual Studio 2022
+# Building Fresh Voxel Engine
 
-This guide provides clear, step-by-step instructions for building Fresh Voxel Engine from source using Visual Studio 2022 on Windows.
+This guide provides clear, step-by-step instructions for building Fresh Voxel Engine from source on multiple platforms.
 
-## 🚀 Quick Start: Automated Build
+## Platform-Specific Guides
+
+- **[Windows Build Instructions](#windows-build-visual-studio-2022)** - Visual Studio 2022 with DirectX 11/12
+- **[Linux Build Instructions](#linux-build-instructions)** - GCC/Clang with OpenGL
+- **[macOS Build Instructions](#macos-build-instructions)** - Clang with OpenGL
+
+---
+
+## Windows Build (Visual Studio 2022)
+
+### 🚀 Quick Start: Automated Build
 
 **For the fastest and easiest setup, use the automated PowerShell script:**
 
@@ -431,3 +441,217 @@ Release\FreshVoxelEngine.exe
 The `generate_vs2022.bat` script automatically detects vcpkg in either the parent or project directory.
 
 That's it! You now have a fully built Fresh Voxel Engine ready for development.
+
+---
+
+## Linux Build Instructions
+
+Fresh Voxel Engine now supports Linux using OpenGL 4.5+ for rendering. This guide covers Ubuntu/Debian and Fedora/RHEL distributions.
+
+### Prerequisites
+
+#### Ubuntu/Debian
+```bash
+sudo apt-get update
+sudo apt-get install -y \
+    build-essential \
+    cmake \
+    git \
+    libglfw3-dev \
+    libglm-dev \
+    libglew-dev \
+    libopenal-dev \
+    libgtest-dev
+```
+
+#### Fedora/RHEL
+```bash
+sudo dnf install -y \
+    gcc-c++ \
+    cmake \
+    git \
+    glfw-devel \
+    glm-devel \
+    glew-devel \
+    openal-soft-devel \
+    gtest-devel
+```
+
+### Build Steps
+
+1. **Clone the Repository**
+```bash
+git clone https://github.com/shifty81/fresh.git
+cd fresh
+```
+
+2. **Create Build Directory**
+```bash
+mkdir build
+cd build
+```
+
+3. **Configure with CMake**
+```bash
+cmake ..
+```
+
+The configuration will:
+- Detect Linux platform automatically
+- Enable OpenGL rendering backend
+- Find system-installed dependencies
+- Configure tests
+
+4. **Build the Project**
+```bash
+cmake --build . --config Release -j$(nproc)
+```
+
+This will compile:
+- Main engine executable: `FreshVoxelEngine`
+- Test executable: `FreshVoxelEngineTests`
+
+5. **Run Tests (Optional)**
+```bash
+./FreshVoxelEngineTests
+```
+
+All 156 tests should pass successfully.
+
+6. **Run the Engine**
+```bash
+./FreshVoxelEngine
+```
+
+### Build Options
+
+#### Debug Build
+```bash
+mkdir build-debug
+cd build-debug
+cmake -DCMAKE_BUILD_TYPE=Debug ..
+cmake --build .
+```
+
+#### Disable Tests
+```bash
+cmake -DBUILD_TESTS=OFF ..
+cmake --build .
+```
+
+### Troubleshooting
+
+**Problem:** CMake cannot find dependencies
+```
+Solution: Make sure all dependencies are installed. Re-run the apt-get/dnf install command.
+```
+
+**Problem:** OpenGL not found
+```
+Solution: Install mesa development files:
+  Ubuntu/Debian: sudo apt-get install libgl-dev
+  Fedora/RHEL: sudo dnf install mesa-libGL-devel
+```
+
+**Problem:** GLEW not found
+```
+Solution: Install GLEW development files:
+  Ubuntu/Debian: sudo apt-get install libglew-dev
+  Fedora/RHEL: sudo dnf install glew-devel
+```
+
+### Graphics Backend
+
+On Linux, Fresh Voxel Engine uses:
+- **OpenGL 4.5+** for rendering
+- **GLEW** for OpenGL extension loading
+- **GLFW** for windowing and input
+
+The engine automatically detects that it's running on Linux and configures the OpenGL backend.
+
+---
+
+## macOS Build Instructions
+
+Fresh Voxel Engine supports macOS using OpenGL for rendering.
+
+### Prerequisites
+
+Install Homebrew if you haven't already:
+```bash
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+```
+
+Install dependencies:
+```bash
+brew install cmake glfw glm openal-soft googletest
+```
+
+**Note:** macOS uses native OpenGL framework, so GLEW is not required.
+
+### Build Steps
+
+1. **Clone the Repository**
+```bash
+git clone https://github.com/shifty81/fresh.git
+cd fresh
+```
+
+2. **Create Build Directory**
+```bash
+mkdir build
+cd build
+```
+
+3. **Configure with CMake**
+```bash
+cmake ..
+```
+
+4. **Build the Project**
+```bash
+cmake --build . --config Release -j$(sysctl -n hw.ncpu)
+```
+
+5. **Run Tests (Optional)**
+```bash
+./FreshVoxelEngineTests
+```
+
+6. **Run the Engine**
+```bash
+./FreshVoxelEngine
+```
+
+### Graphics Backend
+
+On macOS, Fresh Voxel Engine uses:
+- **OpenGL** (native framework, no GLEW needed)
+- **GLFW** for windowing and input
+
+---
+
+## Platform Comparison
+
+| Feature | Windows | Linux | macOS |
+|---------|---------|-------|-------|
+| **Graphics API** | DirectX 11/12, OpenGL | OpenGL 4.5+ | OpenGL |
+| **Build Tool** | Visual Studio 2022, CMake | CMake + GCC/Clang | CMake + Clang |
+| **Package Manager** | vcpkg | apt/dnf | Homebrew |
+| **Extension Loading** | Native DirectX, GLEW for OpenGL | GLEW | Native OpenGL |
+| **Status** | ✅ Production Ready | ✅ Production Ready | ✅ Production Ready |
+
+---
+
+## Additional Resources
+
+- **Automated Build (Windows)**: See [AUTOMATED_BUILD.md](AUTOMATED_BUILD.md)
+- **Getting Started Guide**: See [GETTING_STARTED.md](GETTING_STARTED.md)
+- **Architecture Overview**: See [ARCHITECTURE.md](ARCHITECTURE.md)
+- **Development Guidelines**: See [CONTRIBUTING.md](CONTRIBUTING.md)
+
+---
+
+**Questions or Issues?**
+- Open an issue: https://github.com/shifty81/fresh/issues
+- Join discussions: https://github.com/shifty81/fresh/discussions
