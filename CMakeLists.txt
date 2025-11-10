@@ -13,19 +13,38 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 # Platform Detection and Graphics API Configuration
 # ==============================================================================
 
-message(STATUS "Configuring Fresh Voxel Engine for Windows")
-
-# Windows-only build - DirectX 11/12 support
-if(NOT WIN32)
-    message(FATAL_ERROR "This build configuration is Windows-only. Please use Windows to build this project.")
+if(WIN32)
+    message(STATUS "Configuring Fresh Voxel Engine for Windows")
+    message(STATUS "Windows platform detected")
+    message(STATUS "  - DirectX 11/12 support: ENABLED")
+    message(STATUS "  - OpenGL support: AVAILABLE")
+    
+    # DirectX is the primary backend on Windows
+    set(ENABLE_DIRECTX ON)
+    set(ENABLE_OPENGL ON)
+    add_definitions(-DFRESH_DIRECTX_SUPPORT)
+    add_definitions(-DFRESH_OPENGL_SUPPORT)
+elseif(UNIX AND NOT APPLE)
+    message(STATUS "Configuring Fresh Voxel Engine for Linux")
+    message(STATUS "Linux platform detected")
+    message(STATUS "  - OpenGL support: ENABLED")
+    
+    # OpenGL is the primary backend on Linux
+    set(ENABLE_DIRECTX OFF)
+    set(ENABLE_OPENGL ON)
+    add_definitions(-DFRESH_OPENGL_SUPPORT)
+elseif(APPLE)
+    message(STATUS "Configuring Fresh Voxel Engine for macOS")
+    message(STATUS "macOS platform detected")
+    message(STATUS "  - OpenGL support: ENABLED")
+    
+    # OpenGL is the primary backend on macOS
+    set(ENABLE_DIRECTX OFF)
+    set(ENABLE_OPENGL ON)
+    add_definitions(-DFRESH_OPENGL_SUPPORT)
+else()
+    message(FATAL_ERROR "Unsupported platform. Fresh Voxel Engine supports Windows, Linux, and macOS.")
 endif()
-
-message(STATUS "Windows platform detected")
-message(STATUS "  - DirectX 11/12 support: ENABLED")
-
-# DirectX is the primary backend on Windows
-set(ENABLE_DIRECTX ON)
-add_definitions(-DFRESH_DIRECTX_SUPPORT)
 
 # ==============================================================================
 # Dependencies
@@ -60,6 +79,33 @@ endif()
 find_package(glm QUIET)
 if(NOT glm_FOUND)
     message(STATUS "GLM not found, will use header-only include if available")
+endif()
+
+# OpenGL and GLEW (for OpenGL extension loading on non-Apple platforms)
+if(ENABLE_OPENGL)
+    find_package(OpenGL QUIET)
+    if(OpenGL_FOUND)
+        message(STATUS "OpenGL found")
+    else()
+        message(WARNING "OpenGL not found. OpenGL backend will not be available.")
+    endif()
+    
+    # GLEW is needed on Windows and Linux for OpenGL extension loading
+    # macOS uses native OpenGL framework
+    if(NOT APPLE)
+        find_package(GLEW QUIET)
+        if(GLEW_FOUND)
+            message(STATUS "GLEW found for OpenGL extension loading")
+            add_definitions(-DFRESH_GLEW_AVAILABLE)
+        else()
+            message(WARNING "GLEW not found. Please install GLEW for OpenGL support.")
+            if(WIN32)
+                message(WARNING "  Windows: vcpkg install glew:x64-windows")
+            else()
+                message(WARNING "  Linux: sudo apt-get install libglew-dev")
+            endif()
+        endif()
+    endif()
 endif()
 
 # ImGui for UI
@@ -168,6 +214,20 @@ if(NOT imgui_FOUND)
     list(APPEND MISSING_DEPS "ImGui (optional)")
 endif()
 
+# OpenGL dependencies (platform-specific)
+if(ENABLE_OPENGL)
+    if(NOT OpenGL_FOUND)
+        set(DEPENDENCIES_OK FALSE)
+        list(APPEND MISSING_DEPS "OpenGL")
+    endif()
+    
+    # GLEW is required on Windows and Linux for OpenGL
+    if(NOT APPLE AND NOT GLEW_FOUND)
+        set(DEPENDENCIES_OK FALSE)
+        list(APPEND MISSING_DEPS "GLEW")
+    endif()
+endif()
+
 # If not using vcpkg and dependencies are missing, provide clear guidance
 if(NOT USING_VCPKG AND NOT DEPENDENCIES_OK)
     message("")
@@ -181,17 +241,35 @@ if(NOT USING_VCPKG AND NOT DEPENDENCIES_OK)
     message("")
     message(STATUS "To resolve this issue, you have two options:")
     message("")
-    message(STATUS "Option 1: Use vcpkg for automatic dependency management (RECOMMENDED)")
-    message(STATUS "  From the project root directory, run:")
-    message(STATUS "     git clone https://github.com/Microsoft/vcpkg.git")
-    message(STATUS "     cd vcpkg")
-    message(STATUS "     bootstrap-vcpkg.bat")
-    message(STATUS "     cd ..")
-    message(STATUS "     generate_vs2022.bat")
-    message("")
-    message(STATUS "Option 2: Install dependencies manually")
-    message(STATUS "  Download and install each library, then set CMAKE_PREFIX_PATH")
-    message(STATUS "  See DEVELOPER_SETUP.md for detailed instructions")
+    if(WIN32)
+        message(STATUS "Option 1: Use vcpkg for automatic dependency management (RECOMMENDED)")
+        message(STATUS "  From the project root directory, run:")
+        message(STATUS "     git clone https://github.com/Microsoft/vcpkg.git")
+        message(STATUS "     cd vcpkg")
+        message(STATUS "     bootstrap-vcpkg.bat")
+        message(STATUS "     cd ..")
+        message(STATUS "     generate_vs2022.bat")
+        message("")
+        message(STATUS "Option 2: Install dependencies manually")
+        message(STATUS "  Download and install each library, then set CMAKE_PREFIX_PATH")
+        message(STATUS "  See BUILD.md for detailed instructions")
+    else()
+        message(STATUS "Option 1: Install system packages (RECOMMENDED)")
+        if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+            message(STATUS "  Ubuntu/Debian:")
+            message(STATUS "    sudo apt-get install libglfw3-dev libglm-dev libglew-dev")
+            message(STATUS "    sudo apt-get install libopenal-dev libgtest-dev")
+            message(STATUS "  Fedora/RHEL:")
+            message(STATUS "    sudo dnf install glfw-devel glm-devel glew-devel")
+            message(STATUS "    sudo dnf install openal-soft-devel gtest-devel")
+        elseif(APPLE)
+            message(STATUS "  macOS (using Homebrew):")
+            message(STATUS "    brew install glfw glm openal-soft googletest")
+        endif()
+        message("")
+        message(STATUS "Option 2: Use vcpkg for dependency management")
+        message(STATUS "  See BUILD.md for detailed instructions")
+    endif()
     message("")
     message(WARNING "CMake configuration will continue, but compilation will fail without these dependencies!")
     message("========================================================================")
@@ -287,6 +365,12 @@ if(ENABLE_DIRECTX)
     list(APPEND ENGINE_SOURCES
         src/renderer/backends/DirectX11RenderContext.cpp
         src/renderer/backends/DirectX12RenderContext.cpp
+    )
+endif()
+
+if(ENABLE_OPENGL)
+    list(APPEND ENGINE_SOURCES
+        src/renderer/backends/OpenGLRenderContext.cpp
     )
 endif()
 
@@ -529,19 +613,45 @@ if(nlohmann_json_FOUND)
     message(STATUS "nlohmann-json enabled for asset manifest parsing")
 endif()
 
-# Link DirectX (Windows)
-target_link_libraries(${PROJECT_NAME} PRIVATE 
-    d3d11.lib 
-    d3d12.lib 
-    dxgi.lib 
-    d3dcompiler.lib
-)
-message(STATUS "DirectX libraries linked")
+# Link DirectX (Windows only)
+if(WIN32 AND ENABLE_DIRECTX)
+    target_link_libraries(${PROJECT_NAME} PRIVATE 
+        d3d11.lib 
+        d3d12.lib 
+        dxgi.lib 
+        d3dcompiler.lib
+    )
+    message(STATUS "DirectX libraries linked")
+endif()
 
-# Compiler warnings (Windows/MSVC only)
-# /W4: Warning level 4 (high)
-# /WX: Treat warnings as errors to maintain code quality
-target_compile_options(${PROJECT_NAME} PRIVATE /W4 /WX)
+# Link OpenGL and GLEW (cross-platform)
+if(ENABLE_OPENGL AND OpenGL_FOUND)
+    target_link_libraries(${PROJECT_NAME} PRIVATE OpenGL::GL)
+    message(STATUS "OpenGL library linked")
+    
+    # Link GLEW on Windows and Linux
+    if(NOT APPLE AND GLEW_FOUND)
+        target_link_libraries(${PROJECT_NAME} PRIVATE GLEW::GLEW)
+        message(STATUS "GLEW library linked")
+    endif()
+endif()
+
+# Compiler warnings and settings (cross-platform)
+if(MSVC)
+    # Windows/MSVC specific options
+    # /W4: Warning level 4 (high)
+    # /WX: Treat warnings as errors to maintain code quality
+    target_compile_options(${PROJECT_NAME} PRIVATE /W4 /WX)
+elseif(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+    # GCC/Clang specific options
+    # -Wall: Enable most warnings
+    # -Wextra: Enable extra warnings
+    # -Werror: Treat warnings as errors
+    # -Wno-unused-parameter: Don't warn about unused parameters (common in callbacks)
+    target_compile_options(${PROJECT_NAME} PRIVATE 
+        -Wall -Wextra -Werror -Wno-unused-parameter
+    )
+endif()
 
 # Copy shaders to build directory
 file(GLOB SHADER_FILES "${CMAKE_CURRENT_SOURCE_DIR}/shaders/*.vert" 
@@ -600,6 +710,7 @@ if(BUILD_TESTS)
     # Engine source files needed for tests (exclude main.cpp)
     set(TEST_ENGINE_SOURCES
         src/voxel/Chunk.cpp
+        src/voxel/VoxelWorld.cpp
         src/voxel/MeshGenerator.cpp
         src/generation/NoiseGenerator.cpp
         src/generation/TerrainGenerator.cpp
@@ -609,6 +720,7 @@ if(BUILD_TESTS)
         src/input/InputManager.cpp
         src/rpg/Inventory.cpp
         src/rpg/CraftingSystem.cpp
+        src/assets/ModularAssetSystem.cpp
     )
     
     # Create test executable
@@ -638,10 +750,17 @@ if(BUILD_TESTS)
         target_link_libraries(${PROJECT_NAME}Tests PRIVATE glm::glm)
     endif()
     
-    # Compiler settings for tests (Windows/MSVC only)
+    # Compiler settings for tests (cross-platform)
     target_compile_features(${PROJECT_NAME}Tests PRIVATE cxx_std_20)
-    # /W4: Warning level 4, /WX: Treat warnings as errors
-    target_compile_options(${PROJECT_NAME}Tests PRIVATE /W4 /WX)
+    
+    if(MSVC)
+        # /W4: Warning level 4, /WX: Treat warnings as errors
+        target_compile_options(${PROJECT_NAME}Tests PRIVATE /W4 /WX)
+    elseif(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+        target_compile_options(${PROJECT_NAME}Tests PRIVATE 
+            -Wall -Wextra -Werror -Wno-unused-parameter
+        )
+    endif()
     
     # Register tests with CTest
     include(GoogleTest)

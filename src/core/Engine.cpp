@@ -49,10 +49,12 @@ constexpr float MAX_INTERACTION_DISTANCE = 5.0f;
 constexpr float CROSSHAIR_SIZE = 0.02f;
 constexpr float CROSSHAIR_LINE_WIDTH = 2.0f;
 constexpr int SHADER_INFO_LOG_SIZE = 512;
+#ifdef FRESH_OPENGL_SUPPORT
 const char* VOXEL_VERTEX_SHADER = "shaders/voxel.vert";
 const char* VOXEL_FRAGMENT_SHADER = "shaders/voxel.frag";
 const char* CROSSHAIR_VERTEX_SHADER = "shaders/crosshair.vert";
 const char* CROSSHAIR_FRAGMENT_SHADER = "shaders/crosshair.frag";
+#endif
 } // namespace
 
 Engine::Engine() : m_running(false), m_inGame(false), m_selectedBlockType(VoxelType::Stone) {}
@@ -597,6 +599,7 @@ void Engine::render()
 #endif
 
     // DirectX 11 rendering path
+#ifdef _WIN32
     if (m_renderer->getAPI() == GraphicsAPI::DirectX11) {
         // Render voxel world using DirectX 11
         if (m_world && m_player) {
@@ -617,6 +620,7 @@ void Engine::render()
             }
         }
     }
+#endif
 
 #ifdef FRESH_IMGUI_AVAILABLE
     // Begin editor frame (ImGui) before rendering editor UI

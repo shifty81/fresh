@@ -58,15 +58,30 @@ A modern **Windows-native** voxel game engine built with **C++20**, featuring **
 
 ### Prerequisites
 
+#### Windows
 - **Windows 10/11** (x64)
 - **Visual Studio 2022** with "Desktop development with C++"
 - **CMake 3.20+**
 - **Git for Windows**
 - **.NET 9 SDK** (optional, for C# bindings only)
 
+#### Linux (Ubuntu/Debian)
+- **Ubuntu 20.04+** or **Debian 11+**
+- **GCC 11+** or **Clang 12+**
+- **CMake 3.20+**
+- **Git**
+- Development libraries: `libglfw3-dev libglm-dev libglew-dev libopenal-dev`
+
+#### macOS
+- **macOS 12.0+** (Monterey or later)
+- **Xcode Command Line Tools** or **Clang 12+**
+- **CMake 3.20+** (via Homebrew)
+- **Git**
+- Development libraries: `glfw glm openal-soft` (via Homebrew)
+
 ### Build and Run
 
-#### Option 1: Automated Build (Recommended)
+#### Windows: Automated Build (Recommended)
 
 ```powershell
 # Clone repository
@@ -81,7 +96,7 @@ This script handles everything: vcpkg setup, dependency installation, CMake gene
 
 **See [AUTOMATED_BUILD.md](AUTOMATED_BUILD.md) for detailed options.**
 
-#### Option 2: Manual Build
+#### Windows: Manual Build
 
 ```batch
 # 1. Clone repository
@@ -103,6 +118,47 @@ cmake --build . --config Release
 
 # 5. Run
 Release\FreshVoxelEngine.exe
+```
+
+**For complete step-by-step instructions, see [BUILD.md](BUILD.md).**
+
+#### Linux: Quick Build
+
+```bash
+# 1. Install dependencies (Ubuntu/Debian)
+sudo apt-get install -y build-essential cmake git \
+    libglfw3-dev libglm-dev libglew-dev libopenal-dev libgtest-dev
+
+# 2. Clone repository
+git clone https://github.com/shifty81/fresh.git
+cd fresh
+
+# 3. Build
+mkdir build && cd build
+cmake ..
+cmake --build . --config Release -j$(nproc)
+
+# 4. Run
+./FreshVoxelEngine
+```
+
+#### macOS: Quick Build
+
+```bash
+# 1. Install dependencies (Homebrew)
+brew install cmake glfw glm openal-soft googletest
+
+# 2. Clone repository
+git clone https://github.com/shifty81/fresh.git
+cd fresh
+
+# 3. Build
+mkdir build && cd build
+cmake ..
+cmake --build . --config Release -j$(sysctl -n hw.ncpu)
+
+# 4. Run
+./FreshVoxelEngine
 ```
 
 **For complete step-by-step instructions, see [BUILD.md](BUILD.md).**
@@ -253,12 +309,21 @@ fresh/
 
 ## 🎨 Graphics APIs
 
-Fresh Engine uses **DirectX for Windows**:
+Fresh Engine supports multiple graphics APIs across platforms:
 
+### Windows
 - **DirectX 12** - Default, cutting-edge performance (Windows 10/11)
 - **DirectX 11** - Automatic fallback, excellent compatibility
+- **OpenGL 4.5+** - Cross-platform option
 
-The engine **automatically detects** and selects the best available API at runtime.
+### Linux
+- **OpenGL 4.5+** - Primary rendering backend
+- GLEW for extension loading
+
+### macOS
+- **OpenGL** - Native framework support
+
+The engine **automatically detects** the platform and selects the appropriate API at runtime.
 
 ---
 
@@ -278,8 +343,9 @@ dotnet build -c Release
 ## ⚠️ Current Limitations
 
 ### Platform Support
-- **Windows 10/11 only** - DirectX requires Windows
-- Linux/macOS support: Not currently available
+- **Windows 10/11** ✅ Full support (DirectX 11/12 + OpenGL)
+- **Linux** ✅ Full support (OpenGL 4.5+)
+- **macOS** ✅ Full support (OpenGL)
 
 ### Graphics
 - **DirectX 11** - Production ready ✅ Full voxel rendering
