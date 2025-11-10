@@ -96,6 +96,7 @@ if(ENABLE_OPENGL)
         find_package(GLEW QUIET)
         if(GLEW_FOUND)
             message(STATUS "GLEW found for OpenGL extension loading")
+            add_definitions(-DFRESH_GLEW_AVAILABLE)
         else()
             message(WARNING "GLEW not found. Please install GLEW for OpenGL support.")
             if(WIN32)
@@ -709,6 +710,7 @@ if(BUILD_TESTS)
     # Engine source files needed for tests (exclude main.cpp)
     set(TEST_ENGINE_SOURCES
         src/voxel/Chunk.cpp
+        src/voxel/VoxelWorld.cpp
         src/voxel/MeshGenerator.cpp
         src/generation/NoiseGenerator.cpp
         src/generation/TerrainGenerator.cpp
@@ -718,6 +720,7 @@ if(BUILD_TESTS)
         src/input/InputManager.cpp
         src/rpg/Inventory.cpp
         src/rpg/CraftingSystem.cpp
+        src/assets/ModularAssetSystem.cpp
     )
     
     # Create test executable

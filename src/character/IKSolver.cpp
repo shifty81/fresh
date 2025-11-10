@@ -48,7 +48,8 @@ IKSolution TwoBoneIK::solve(const glm::vec3& origin, float joint1Length, float j
     glm::vec3 poleDir = glm::normalize(poleVector);
 
     // Calculate rotation axis (perpendicular to target direction and pole direction)
-    glm::vec3 rotationAxis = glm::normalize(glm::cross(targetDir, poleDir));
+    // Note: Currently unused but reserved for future full 3D rotation calculation
+    [[maybe_unused]] glm::vec3 rotationAxis = glm::normalize(glm::cross(targetDir, poleDir));
 
     // Apply angles to solution
     // Note: This is a simplified 2D solution projected into 3D
