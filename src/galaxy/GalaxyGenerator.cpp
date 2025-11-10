@@ -170,6 +170,9 @@ AsteroidShape GalaxyGenerator::getRandomAsteroidShape(std::mt19937& rng)
 
 glm::vec3 GalaxyGenerator::generateStretchFactor(AsteroidShape shape, std::mt19937& rng)
 {
+    // Maximum stretch ratio for structural integrity (configurable per material)
+    const float MAX_STRETCH_RATIO = 5.0f;
+    
     std::uniform_real_distribution<float> stretchDist(0.5f, 2.5f);
     
     switch (shape) {
@@ -178,14 +181,20 @@ glm::vec3 GalaxyGenerator::generateStretchFactor(AsteroidShape shape, std::mt199
         return glm::vec3(1.0f, 1.0f, 1.0f);
         
     case AsteroidShape::Cube:
-        // Cubes have slight variations
-        return glm::vec3(stretchDist(rng) * 0.8f + 0.2f, 
-                        stretchDist(rng) * 0.8f + 0.2f,
-                        stretchDist(rng) * 0.8f + 0.2f);
+        // Cubes have slight variations (limited stretch)
+        return glm::vec3(
+            std::min(stretchDist(rng) * 0.8f + 0.2f, MAX_STRETCH_RATIO),
+            std::min(stretchDist(rng) * 0.8f + 0.2f, MAX_STRETCH_RATIO),
+            std::min(stretchDist(rng) * 0.8f + 0.2f, MAX_STRETCH_RATIO)
+        );
         
     case AsteroidShape::Triangular:
         // Triangular shapes are flatter in one dimension
-        return glm::vec3(stretchDist(rng), stretchDist(rng), stretchDist(rng) * 0.4f);
+        return glm::vec3(
+            std::min(stretchDist(rng), MAX_STRETCH_RATIO),
+            std::min(stretchDist(rng), MAX_STRETCH_RATIO),
+            std::min(stretchDist(rng) * 0.4f, MAX_STRETCH_RATIO)
+        );
         
     case AsteroidShape::Elongated:
         // Elongated asteroids are stretched along one axis
@@ -193,14 +202,22 @@ glm::vec3 GalaxyGenerator::generateStretchFactor(AsteroidShape shape, std::mt199
             std::uniform_int_distribution<int> axisDist(0, 2);
             int stretchAxis = axisDist(rng);
             glm::vec3 stretch(1.0f, 1.0f, 1.0f);
-            stretch[stretchAxis] = stretchDist(rng) * 2.0f; // 2x-5x stretch
+            // 2x-5x stretch but capped at MAX_STRETCH_RATIO
+            stretch[stretchAxis] = std::min(stretchDist(rng) * 2.0f, MAX_STRETCH_RATIO);
             return stretch;
         }
         
     case AsteroidShape::Irregular:
     default:
         // Irregular shapes have random stretching in all dimensions
-        return glm::vec3(stretchDist(rng), stretchDist(rng), stretchDist(rng));
+        {
+            glm::vec3 stretch(stretchDist(rng), stretchDist(rng), stretchDist(rng));
+            // Ensure no dimension exceeds MAX_STRETCH_RATIO
+            stretch.x = std::min(stretch.x, MAX_STRETCH_RATIO);
+            stretch.y = std::min(stretch.y, MAX_STRETCH_RATIO);
+            stretch.z = std::min(stretch.z, MAX_STRETCH_RATIO);
+            return stretch;
+        }
     }
 }
 
