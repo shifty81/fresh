@@ -15,6 +15,11 @@ namespace galaxy
 enum class ResourceType { Iron, Titanium, Naonite, Trinium, Xanion, Ogonite, Avorion };
 
 /**
+ * @brief Shape types for asteroids
+ */
+enum class AsteroidShape { Sphere, Cube, Triangular, Elongated, Irregular };
+
+/**
  * @brief Data structure for an asteroid
  */
 struct AsteroidData {
@@ -22,9 +27,16 @@ struct AsteroidData {
     float size;
     ResourceType resourceType;
     float resourceAmount;
+    AsteroidShape shape;        // Shape of the asteroid
+    glm::vec3 stretchFactor;    // Allows stretching in x, y, z directions (1.0 = no stretch)
 
     AsteroidData()
-        : position(0.0f), size(1.0f), resourceType(ResourceType::Iron), resourceAmount(0.0f)
+        : position(0.0f),
+          size(1.0f),
+          resourceType(ResourceType::Iron),
+          resourceAmount(0.0f),
+          shape(AsteroidShape::Sphere),
+          stretchFactor(1.0f, 1.0f, 1.0f)
     {
     }
 };
@@ -38,7 +50,70 @@ enum class StationType {
     Shipyard,
     Factory,
     MiningStation,
-    ResearchStation
+    ResearchStation,
+    MilitaryOutpost,
+    RefuelingDepot,
+    CargoHub,
+    ScienceLab
+};
+
+/**
+ * @brief Services offered by stations
+ */
+enum class StationService {
+    Trade,          // Buy/sell commodities
+    Repair,         // Ship repairs
+    Refuel,         // Refueling services
+    HireCaptain,    // Hire captains for fleet
+    ShipPurchase,   // Buy new ships
+    Upgrade,        // Ship upgrades
+    Medical,        // Medical services
+    Information     // Information broker
+};
+
+/**
+ * @brief Commodity types for trade
+ */
+enum class CommodityType {
+    Food,
+    Water,
+    Fuel,
+    Ore,
+    Metal,
+    Electronics,
+    Medicine,
+    Weapons,
+    Luxury
+};
+
+/**
+ * @brief Captain data for hiring
+ */
+struct CaptainData {
+    std::string name;
+    int skillLevel;         // 1-10 skill rating
+    std::string specialty;  // Combat, Trade, Exploration, Mining
+    int hiringCost;
+    
+    CaptainData()
+        : name("Captain"), skillLevel(1), specialty("General"), hiringCost(1000)
+    {
+    }
+};
+
+/**
+ * @brief Docking arm configuration
+ */
+struct DockingArm {
+    glm::vec3 offset;       // Position relative to station center
+    glm::vec3 direction;    // Direction the arm extends
+    float length;           // Length of the docking arm
+    int dockingBays;        // Number of docking bays on this arm
+
+    DockingArm()
+        : offset(0.0f), direction(1.0f, 0.0f, 0.0f), length(50.0f), dockingBays(2)
+    {
+    }
 };
 
 /**
@@ -49,8 +124,22 @@ struct StationData {
     StationType type;
     std::string name;
     int level;
+    float sizeMultiplier;                   // 4-5x larger than before
+    std::vector<DockingArm> dockingArms;    // Large docking arms
+    int designVariant;                      // Different build designs (0-4)
+    std::vector<StationService> services;   // Services offered by this station
+    std::vector<CommodityType> commodities; // Commodities available for trade
+    std::vector<CaptainData> availableCaptains; // Captains available for hire
 
-    StationData() : position(0.0f), type(StationType::TradingPost), name("Station"), level(1) {}
+    StationData()
+        : position(0.0f),
+          type(StationType::TradingPost),
+          name("Station"),
+          level(1),
+          sizeMultiplier(4.5f),
+          designVariant(0)
+    {
+    }
 };
 
 /**
@@ -67,13 +156,17 @@ struct ShipData {
     ShipType type;
     std::string faction;
     bool isHostile;
+    bool hasCaptain;                    // Whether ship has assigned captain
+    CaptainData captain;                // Current captain (if hasCaptain is true)
+    std::vector<CaptainData> passengers; // Passenger bay for captains awaiting transfer
 
     ShipData()
         : position(0.0f),
           velocity(0.0f),
           type(ShipType::Fighter),
           faction("Independent"),
-          isHostile(false)
+          isHostile(false),
+          hasCaptain(false)
     {
     }
 };

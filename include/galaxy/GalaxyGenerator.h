@@ -69,6 +69,17 @@ private:
     ShipType getRandomShipType(std::mt19937& rng);
     std::string generateStationName(int x, int y, std::mt19937& rng);
     std::string getRandomFaction(std::mt19937& rng);
+    
+    // New helper methods for enhanced generation
+    AsteroidShape getRandomAsteroidShape(std::mt19937& rng);
+    glm::vec3 generateStretchFactor(AsteroidShape shape, std::mt19937& rng);
+    void generateDockingArms(StationData& station, std::mt19937& rng);
+    int getRandomDesignVariant(std::mt19937& rng);
+    void populateStationServices(StationData& station, std::mt19937& rng);
+    void populateCommodities(StationData& station, std::mt19937& rng);
+    void generateAvailableCaptains(StationData& station, std::mt19937& rng);
+    std::string generateCaptainName(std::mt19937& rng);
+    std::string getRandomCaptainSpecialty(std::mt19937& rng);
 };
 
 } // namespace galaxy

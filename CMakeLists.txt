@@ -328,6 +328,7 @@ set(ENGINE_SOURCES
     src/editor/EditorGUI.cpp
     src/editor/WorldEditor.cpp
     src/editor/TerraformingSystem.cpp
+    src/editor/BlockBuilder.cpp
     src/serialization/WorldSerializer.cpp
     src/ui/MainMenu.cpp
     src/input/InputManager.cpp
