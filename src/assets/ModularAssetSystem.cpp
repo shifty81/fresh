@@ -521,7 +521,7 @@ void ModularAssetSystem::placeAssetsInWorld(const std::vector<AssetInstance>& in
                             world->setVoxel(pos, Voxel(VoxelType::Wood));
                         } else if (y >= startY + assetMeta->size.y * 0.5f) {
                             // Leaves in upper portion
-                            float distFromCenter = std::sqrt((x - centerX) * (x - centerX) + (z - centerZ) * (z - centerZ));
+                            float distFromCenter = static_cast<float>(std::sqrt((x - centerX) * (x - centerX) + (z - centerZ) * (z - centerZ)));
                             if (distFromCenter < assetMeta->size.x / 2.0f) {
                                 WorldPos pos(x, y, z);
                                 world->setVoxel(pos, Voxel(VoxelType::Leaves));
