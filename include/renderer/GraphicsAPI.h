@@ -58,12 +58,13 @@ inline const char* getGraphicsAPIName(GraphicsAPI api)
 
 /**
  * @brief Select the best graphics API for the platform
- * Windows: DirectX 12 -> DirectX 11 -> OpenGL (if GLEW available)
+ * Windows: OpenGL (default, complete rendering implementation) -> DirectX 12 -> DirectX 11
  * Linux/Mac: OpenGL (if GLEW available)
  *
- * Note: On Linux/Mac, if GLEW is not available, OpenGL will be returned
- * as the best option, but it will fail at runtime. This should not happen
- * if dependencies are properly installed.
+ * Note: OpenGL is the default on Windows as it has complete rendering implementation.
+ * DirectX backends are available but have stub implementations for some features.
+ * On Linux/Mac, if GLEW is not available, OpenGL will be returned as the best option,
+ * but runtime initialization will fail with proper error message.
  */
 inline GraphicsAPI selectBestGraphicsAPI()
 {

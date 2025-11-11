@@ -5,9 +5,9 @@
 [![.NET 9](https://img.shields.io/badge/.NET-9.0-512BD4.svg)](https://dotnet.microsoft.com/)
 [![CMake](https://img.shields.io/badge/CMake-3.20+-064F8C.svg)](https://cmake.org/)
 [![Platform](https://img.shields.io/badge/Platform-Windows-lightgrey.svg)](https://github.com/shifty81/fresh)
-[![DirectX](https://img.shields.io/badge/Graphics-DirectX%2011%2F12-blue.svg)](https://github.com/shifty81/fresh)
+[![Graphics](https://img.shields.io/badge/Graphics-OpenGL%20%2F%20DirectX-blue.svg)](https://github.com/shifty81/fresh)
 
-A modern **Windows-native** voxel game engine built with **C++20**, featuring **DirectX 11/12** rendering, **.NET 9 bindings**, **Lua scripting**, procedural terrain generation, and an integrated world editor.
+A modern **cross-platform** voxel game engine built with **C++20**, featuring **OpenGL** rendering (default) with **DirectX 11/12** support, **.NET 9 bindings**, **Lua scripting**, procedural terrain generation, and an integrated world editor.
 
 > 📚 **New to Fresh?** See [DOCUMENTATION_INDEX.md](DOCUMENTATION_INDEX.md) for complete documentation guide.
 
@@ -16,7 +16,8 @@ A modern **Windows-native** voxel game engine built with **C++20**, featuring **
 ## ✨ Features
 
 ### Core Engine
-- **DirectX 11/12 Rendering** - Native Windows graphics with automatic API selection
+- **OpenGL 4.5+ Rendering** - Default, complete cross-platform graphics (Windows/Linux/macOS)
+- **DirectX 11/12 Rendering** - Optional Windows-native graphics backends
 - **C++20** - Modern C++ with strong type safety and performance
 - **.NET 9 Bindings** - Optional C# scripting support
 - **Lua Scripting** - Optional scripting engine (framework ready)
@@ -191,6 +192,8 @@ cmake --build . --config Release -j$(sysctl -n hw.ncpu)
 
 **See [examples/README.md](examples/README.md) for 6 playable in-engine demo scenarios.**
 
+**Try the Showcase Demo**: Create a world named "ShowcaseDemo" with seed **12345** to see all engine capabilities! See [examples/DEMO_SHOWCASE.md](examples/DEMO_SHOWCASE.md) for the complete guided demo.
+
 ---
 
 ## 🎨 Development Languages & Tools
@@ -312,9 +315,9 @@ fresh/
 Fresh Engine supports multiple graphics APIs across platforms:
 
 ### Windows
-- **DirectX 12** - Default, cutting-edge performance (Windows 10/11)
-- **DirectX 11** - Automatic fallback, excellent compatibility
-- **OpenGL 4.5+** - Cross-platform option
+- **OpenGL 4.5+** - **Default**, complete rendering implementation, cross-platform
+- **DirectX 12** - Available, cutting-edge performance (Windows 10/11)
+- **DirectX 11** - Available, excellent compatibility fallback
 
 ### Linux
 - **OpenGL 4.5+** - Primary rendering backend
@@ -323,7 +326,7 @@ Fresh Engine supports multiple graphics APIs across platforms:
 ### macOS
 - **OpenGL** - Native framework support
 
-The engine **automatically detects** the platform and selects the appropriate API at runtime.
+The engine **automatically selects** OpenGL as the default on Windows for its complete feature implementation. DirectX backends are available but have some stub implementations. The best API for the platform is selected at runtime.
 
 ---
 
