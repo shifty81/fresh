@@ -6,6 +6,7 @@
 #include <gtest/gtest.h>
 #include "generation/TerrainGenerator.h"
 #include "voxel/Chunk.h"
+#include "voxel/VoxelWorld.h"
 #include "voxel/VoxelTypes.h"
 #include <chrono>
 
@@ -366,4 +367,83 @@ TEST(TerrainGeneratorPerformanceTest, GetHeight_Performance_ManySamples) {
     // Assert
     EXPECT_LT(duration.count(), 100) << "Height sampling too slow: " << duration.count() << "ms";
     EXPECT_GT(sum, 0); // Use sum to prevent optimization
+}
+
+/**
+ * Test world generation with trees and foliage
+ */
+TEST_F(TerrainGeneratorTest, GenerateChunkWithAssets_CreatesTreesAndFoliage) {
+    // Arrange
+    VoxelWorld world;
+    world.initialize();
+    Chunk chunk(ChunkPos(0, 0));
+    
+    // Act - Generate chunk with assets (trees and foliage)
+    generator->generateChunkWithAssets(&chunk, &world);
+    
+    // Assert - Count Wood blocks (tree trunks) and Leaves (tree foliage)
+    int woodCount = 0;
+    int leavesCount = 0;
+    
+    for (int x = 0; x < CHUNK_SIZE; x++) {
+        for (int y = 0; y < CHUNK_HEIGHT; y++) {
+            for (int z = 0; z < CHUNK_SIZE; z++) {
+                VoxelType type = chunk.getVoxel(x, y, z).type;
+                if (type == VoxelType::Wood) {
+                    woodCount++;
+                }
+                if (type == VoxelType::Leaves) {
+                    leavesCount++;
+                }
+            }
+        }
+    }
+    
+    // Log what we found
+    std::cout << "Found " << woodCount << " wood blocks (tree trunks)" << std::endl;
+    std::cout << "Found " << leavesCount << " leaves blocks (tree foliage)" << std::endl;
+    
+    // We should find at least some trees given the spawn probability
+    EXPECT_GT(woodCount, 0) << "Expected to find wood blocks (tree trunks)";
+    EXPECT_GT(leavesCount, 0) << "Expected to find leaves blocks (tree foliage)";
+}
+
+TEST_F(TerrainGeneratorTest, GenerateChunkWithAssets_MultipleChunks_GeneratesTrees) {
+    // Arrange - Generate multiple chunks to increase chance of tree spawning
+    VoxelWorld world;
+    world.initialize();
+    int totalWood = 0;
+    int totalLeaves = 0;
+    
+    // Act - Generate several chunks
+    for (int cx = 0; cx < 4; cx++) {
+        for (int cz = 0; cz < 4; cz++) {
+            Chunk chunk(ChunkPos(cx, cz));
+            generator->generateChunkWithAssets(&chunk, &world);
+            
+            // Count trees in this chunk
+            for (int x = 0; x < CHUNK_SIZE; x++) {
+                for (int y = 0; y < CHUNK_HEIGHT; y++) {
+                    for (int z = 0; z < CHUNK_SIZE; z++) {
+                        VoxelType type = chunk.getVoxel(x, y, z).type;
+                        if (type == VoxelType::Wood) {
+                            totalWood++;
+                        }
+                        if (type == VoxelType::Leaves) {
+                            totalLeaves++;
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
+    // Log results
+    std::cout << "Generated 16 chunks" << std::endl;
+    std::cout << "Total wood blocks: " << totalWood << std::endl;
+    std::cout << "Total leaves blocks: " << totalLeaves << std::endl;
+    
+    // Assert - Should have generated many trees across 16 chunks
+    EXPECT_GT(totalWood, 0) << "Expected to find wood blocks across multiple chunks";
+    EXPECT_GT(totalLeaves, 0) << "Expected to find leaves blocks across multiple chunks";
 }

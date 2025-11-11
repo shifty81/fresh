@@ -51,6 +51,7 @@ public:
 
 private:
     VoxelType getBlockType(int x, int y, int z, int surfaceHeight) const;
+    void generateTreesAndFoliage(Chunk* chunk, VoxelWorld* world);
 
 private:
     NoiseGenerator m_noiseGenerator;
