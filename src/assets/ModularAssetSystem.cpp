@@ -850,7 +850,6 @@ std::vector<AssetInstance> ModularAssetSystem::placeGrid(const AssetMetadata& as
                                                          uint32_t seed)
 {
     (void)seed;  // Unused - could be used for variations in the future
-    (void)world; // Unused - placeholder for future terrain queries
 
     std::vector<AssetInstance> instances;
     // Use the global CHUNK_SIZE constant
@@ -883,7 +882,6 @@ bool ModularAssetSystem::canPlaceAsset(const AssetMetadata& asset, const glm::ve
                                        VoxelWorld* world, BiomeType biome)
 {
     (void)world;    // Unused - placeholder for future terrain queries
-    (void)position; // Unused - placeholder for position-based checks
     // Check biome compatibility
     bool biomeAllowed = std::find(asset.allowedBiomes.begin(), asset.allowedBiomes.end(), biome) !=
                         asset.allowedBiomes.end();
