@@ -703,6 +703,7 @@ if(BUILD_TESTS)
         tests/generation/NoiseTests.cpp
         tests/generation/TerrainGeneratorTests.cpp
         tests/input/InputManagerTests.cpp
+        tests/core/EngineInitializationTests.cpp  # Tests for engine initialization sequence
         # tests/core/MemoryManagerTests.cpp  # Disabled - tests don't match implementation
         tests/scripting/EventSystemTests.cpp
         tests/rpg/InventoryTests.cpp
