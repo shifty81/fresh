@@ -136,6 +136,8 @@ void TerrainGenerator::generateChunkWithAssets(Chunk* chunk, VoxelWorld* world)
 
 void TerrainGenerator::generateTreesAndFoliage(Chunk* chunk, VoxelWorld* world)
 {
+    (void)world; // Parameter reserved for future cross-chunk tree generation
+    
     if (!chunk) {
         return;
     }
