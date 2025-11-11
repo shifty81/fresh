@@ -91,14 +91,21 @@ int main(int argc, char **argv) {
     // On Windows, pause before closing console if tests were run directly
     // (not from Visual Studio or command prompt that stays open)
     // Check if we should pause by looking at environment variables
-    char* vsEnv = std::getenv("VisualStudioVersion");
-    char* termEnv = std::getenv("TERM");
+    char* vsEnv = nullptr;
+    char* termEnv = nullptr;
+    size_t len = 0;
+    _dupenv_s(&vsEnv, &len, "VisualStudioVersion");
+    _dupenv_s(&termEnv, &len, "TERM");
     
     // Pause if not running from VS or a persistent terminal
     if (!vsEnv && !termEnv) {
         std::cout << "\nPress any key to exit...";
         _getch();
     }
+    
+    // Free allocated memory
+    free(vsEnv);
+    free(termEnv);
     #endif
     
     return result;

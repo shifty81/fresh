@@ -259,6 +259,7 @@ int GalaxyGenerator::getRandomDesignVariant(std::mt19937& rng)
 
 void GalaxyGenerator::populateStationServices(StationData& station, std::mt19937& rng)
 {
+    (void)rng; // Parameter reserved for future randomization
     // All stations offer some basic services
     station.services.push_back(StationService::Refuel);
     station.services.push_back(StationService::Information);
