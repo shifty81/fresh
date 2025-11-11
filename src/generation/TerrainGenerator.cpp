@@ -114,7 +114,10 @@ void TerrainGenerator::generateChunkWithAssets(Chunk* chunk, VoxelWorld* world)
     if (world) {
         const ChunkPos& chunkPos = chunk->getPosition();
         
-        // Generate assets for this chunk using the modular asset system
+        // Generate trees and foliage directly for testing
+        generateTreesAndFoliage(chunk, world);
+        
+        // Also try to use the modular asset system if asset packs are available
         auto& assetSystem = ModularAssetSystem::getInstance();
         auto assetInstances = assetSystem.generateAssetsForChunk(
             world, 
@@ -128,6 +131,87 @@ void TerrainGenerator::generateChunkWithAssets(Chunk* chunk, VoxelWorld* world)
         
         // Mark chunk as dirty to regenerate mesh with new assets
         chunk->markDirty();
+    }
+}
+
+void TerrainGenerator::generateTreesAndFoliage(Chunk* chunk, VoxelWorld* world)
+{
+    if (!chunk) {
+        return;
+    }
+
+    const ChunkPos& chunkPos = chunk->getPosition();
+    
+    // Use noise to determine tree placement positions
+    // This creates natural-looking clusters of trees
+    for (int localX = 0; localX < CHUNK_SIZE; ++localX) {
+        for (int localZ = 0; localZ < CHUNK_SIZE; ++localZ) {
+            // Convert to world coordinates
+            int worldX = chunkPos.x * CHUNK_SIZE + localX;
+            int worldZ = chunkPos.z * CHUNK_SIZE + localZ;
+            
+            // Use noise to determine if a tree should spawn here
+            // Scale of 0.1 creates clusters of trees
+            float treeNoise = m_noiseGenerator.perlin2D(worldX * 0.1f, worldZ * 0.1f);
+            
+            // Only spawn trees on elevated terrain (grass blocks) with certain noise values
+            int surfaceHeight = getHeight(worldX, worldZ);
+            
+            // Check if surface is grass (good for trees)
+            if (surfaceHeight > 62 && surfaceHeight < 75) {
+                // Spawn trees with higher probability
+                if (treeNoise > 0.3f && treeNoise < 0.8f) {
+                    // Generate a tree at this position
+                    int treeHeight = 5 + static_cast<int>((treeNoise + 1.0f) * 2.0f); // 5-9 blocks tall
+                    int trunkHeight = treeHeight - 3; // Leaves start 3 blocks from top
+                    
+                    // Place tree trunk (Wood blocks) - directly in chunk
+                    for (int y = 1; y <= trunkHeight; ++y) {
+                        int worldY = surfaceHeight + y;
+                        if (worldY < CHUNK_HEIGHT) {
+                            chunk->setVoxel(localX, worldY, localZ, Voxel(VoxelType::Wood));
+                        }
+                    }
+                    
+                    // Place leaves (foliage) in a spherical pattern around the top
+                    int leavesStartY = surfaceHeight + trunkHeight - 1;
+                    int leavesRadius = 2; // Leaves spread 2 blocks in each direction
+                    
+                    for (int dy = 0; dy <= 4; ++dy) {
+                        int worldY = leavesStartY + dy;
+                        if (worldY >= CHUNK_HEIGHT) break;
+                        
+                        // Smaller radius at top and bottom of leaves
+                        int currentRadius = leavesRadius;
+                        if (dy == 0 || dy == 4) {
+                            currentRadius = 1;
+                        }
+                        
+                        for (int dx = -currentRadius; dx <= currentRadius; ++dx) {
+                            for (int dz = -currentRadius; dz <= currentRadius; ++dz) {
+                                // Skip the trunk position
+                                if (dx == 0 && dz == 0 && dy < 3) {
+                                    continue;
+                                }
+                                
+                                // Create roughly spherical shape
+                                float dist = std::sqrt(dx * dx + dz * dz + dy * dy * 0.5f);
+                                if (dist <= leavesRadius + 0.5f) {
+                                    int leafX = localX + dx;
+                                    int leafZ = localZ + dz;
+                                    
+                                    // Only place leaves within chunk bounds
+                                    if (leafX >= 0 && leafX < CHUNK_SIZE && 
+                                        leafZ >= 0 && leafZ < CHUNK_SIZE) {
+                                        chunk->setVoxel(leafX, worldY, leafZ, Voxel(VoxelType::Leaves));
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 }
 
