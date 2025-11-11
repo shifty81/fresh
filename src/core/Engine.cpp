@@ -676,6 +676,13 @@ void Engine::initializeGameSystems()
         m_renderer->initialize(m_window.get());
     }
 
+    // Initialize rendering based on API
+#if defined(FRESH_OPENGL_SUPPORT) && defined(FRESH_GLEW_AVAILABLE)
+    if (m_renderer && m_renderer->getAPI() == GraphicsAPI::OpenGL && m_shaderProgram == 0) {
+        initializeRendering();
+    }
+#endif
+
     // Create player
     if (!m_player && m_world) {
         m_player = std::make_unique<Player>();
