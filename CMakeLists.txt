@@ -16,10 +16,11 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 if(WIN32)
     message(STATUS "Configuring Fresh Voxel Engine for Windows")
     message(STATUS "Windows platform detected")
-    message(STATUS "  - DirectX 11/12 support: ENABLED")
-    message(STATUS "  - OpenGL support: AVAILABLE")
+    message(STATUS "  - OpenGL support: ENABLED (default)")
+    message(STATUS "  - DirectX 11/12 support: AVAILABLE")
     
-    # DirectX is the primary backend on Windows
+    # OpenGL is the default backend on Windows (complete implementation)
+    # DirectX backends are available as alternatives
     set(ENABLE_DIRECTX ON)
     set(ENABLE_OPENGL ON)
     add_definitions(-DFRESH_DIRECTX_SUPPORT)

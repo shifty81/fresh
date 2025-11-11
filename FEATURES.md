@@ -231,10 +231,11 @@ Editor:
 
 ## 🎨 Graphics & Rendering
 
-### DirectX Support
-- **DirectX 12** - Default, best performance (Windows 10+)
-- **DirectX 11** - Automatic fallback, excellent compatibility
-- **Auto-Detection** - Engine selects best available API
+### Multi-API Support
+- **OpenGL 4.5+** - Default, cross-platform, complete rendering implementation
+- **DirectX 12** - Optional, best performance on Windows 10+
+- **DirectX 11** - Optional, excellent compatibility fallback
+- **Auto-Detection** - Engine selects best available API (defaults to OpenGL)
 - **Feature Set** - Full shader support, modern effects
 
 ### Rendering Features
@@ -242,7 +243,7 @@ Editor:
 - **Lighting** - Directional light simulation
 - **Depth Testing** - Correct occlusion
 - **Face Culling** - Back-face culling for performance
-- **Shader System** - HLSL shaders for DirectX
+- **Shader System** - GLSL shaders for OpenGL, HLSL for DirectX
 - **Hot-Reload** - Shader changes apply instantly
 
 ### Performance
