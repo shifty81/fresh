@@ -1,0 +1,37 @@
+# Asset Packs .gitignore
+#
+# This file helps you manage which asset packs are committed to version control
+
+# By default, include the example pack for documentation
+!example_pack/
+
+# Ignore user-installed community packs (add ! to include specific ones)
+# Uncomment the patterns you want:
+
+# Ignore all custom packs except the example
+# *
+# !example_pack/
+# !README.md
+# !.gitignore
+
+# Ignore common temporary files in packs
+**/textures/*.tmp
+**/textures/*_backup.*
+**/.DS_Store
+**/Thumbs.db
+**/*.swp
+**/*.swo
+**/*~
+
+# Ignore pack work-in-progress directories
+**/_wip/
+**/_backup/
+**/_old/
+
+# If you want to include your custom pack in the repository:
+# !my_custom_pack/
+
+# If you're distributing packs as zip files:
+*.zip
+*.tar.gz
+*.7z

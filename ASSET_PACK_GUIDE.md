@@ -2,6 +2,14 @@
 
 This guide explains how to create custom asset packs for the Fresh Voxel Engine.
 
+> **🎨 NEW!** We now have a **complete example asset pack** with all 14 voxel types, textures, and comprehensive documentation!
+> 
+> **Quick Start for Voxel Texture Packs:**
+> - See [`asset_packs/example_pack/`](asset_packs/example_pack/) for a complete working example
+> - Use [`./asset_packs/create_pack.sh`](asset_packs/create_pack.sh) to quickly create a new pack
+> - Read [`asset_packs/README.md`](asset_packs/README.md) for detailed documentation
+> - Check [`asset_packs/QUICK_REFERENCE.md`](asset_packs/QUICK_REFERENCE.md) for fast lookups
+
 ## Table of Contents
 - [Overview](#overview)
 - [Asset Pack Types](#asset-pack-types)
