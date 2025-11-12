@@ -361,6 +361,7 @@ set(ENGINE_SOURCES
     src/devtools/DebugConsole.cpp
     src/devtools/DevToolsManager.cpp
     src/scripting/lua/ScriptingEngine.cpp
+    src/scripting/lua/LuaScriptingEngine.cpp
 )
 
 # Add platform-specific rendering backends
@@ -462,6 +463,7 @@ set(ENGINE_HEADERS
     include/devtools/DebugConsole.h
     include/devtools/DevToolsManager.h
     include/scripting/lua/ScriptingEngine.h
+    include/scripting/lua/LuaScriptingEngine.h
     include/character/VoxelCharacter.h
 )
 
