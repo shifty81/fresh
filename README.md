@@ -170,17 +170,21 @@ cmake --build . --config Release -j$(sysctl -n hw.ncpu)
 
 ### Controls
 
+**Mouse Controls:**
+- **Mouse Movement** - Look around (first-person camera)
+- **Left Click** - Break blocks
+- **Right Click** - Place blocks
+- **Hold Alt** - Show cursor temporarily without opening editor
+
+**Keyboard Controls:**
 - **WASD** - Move (FPS-style)
-- **Mouse** - Look around
 - **Space** - Jump
 - **Shift** - Sprint
 - **Ctrl** - Crouch
-- **Left Click** - Break blocks
-- **Right Click** - Place blocks
-- **T** - Toggle editor
+- **T** - Toggle editor (full mouse-enabled UI)
 - **ESC** - Pause/Exit
 
-**See [CONTROLS.md](CONTROLS.md) for complete controls.**
+**See [CONTROLS.md](CONTROLS.md) for complete controls reference including all editor mouse controls.**
 
 ### Getting Started
 
