@@ -195,7 +195,7 @@ bool Engine::initialize()
         LOG_ERROR_C("Failed to initialize editor GUI", "Engine");
         return false;
     }
-    m_editor->setVisible(true); // Show editor UI by default
+    m_editor->setVisible(false); // Hide editor UI by default, toggle with 'T'
     std::cout << "Editor GUI initialized" << std::endl;
     LOG_INFO_C("Editor GUI initialized", "Engine");
 
@@ -442,6 +442,11 @@ void Engine::shutdown()
 
 void Engine::processInput()
 {
+    // Reset mouse delta from previous frame BEFORE polling new events
+    if (m_inputManager) {
+        m_inputManager->resetMouseDelta();
+    }
+
     if (m_window) {
         m_window->pollEvents();
     }

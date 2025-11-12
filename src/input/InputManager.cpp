@@ -18,8 +18,8 @@ void InputManager::update()
     keyPressedThisFrame.clear();
     mouseButtonPressedThisFrame.clear();
 
-    // Reset mouse delta
-    mouseDelta = glm::vec2(0.0f);
+    // Note: mouseDelta is NOT reset here - it will be reset after being consumed
+    // The mouseDelta should be reset AFTER the game logic uses it
 
     // Update gamepads
     updateGamepads();

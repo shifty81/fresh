@@ -10,7 +10,7 @@ namespace fresh
 {
 
 EditorGUI::EditorGUI()
-    : m_worldEditor(nullptr), m_visible(true), m_showTerraformingPanel(true), m_showWorldInfo(true)
+    : m_worldEditor(nullptr), m_visible(false), m_showTerraformingPanel(true), m_showWorldInfo(true)
 {
 }
 

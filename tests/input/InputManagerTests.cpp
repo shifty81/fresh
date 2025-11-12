@@ -310,3 +310,42 @@ TEST_F(InputManagerTest, IsMouseButtonJustPressed_WithoutInit_DoesNotCrash) {
     EXPECT_NO_THROW(inputManager->isMouseButtonJustPressed(GLFW_MOUSE_BUTTON_LEFT));
     EXPECT_NO_THROW(inputManager->isMouseButtonJustPressed(GLFW_MOUSE_BUTTON_RIGHT));
 }
+
+/**
+ * Test resetMouseDelta method
+ */
+TEST_F(InputManagerTest, ResetMouseDelta_SetsToZero) {
+    // Arrange - simulate some mouse movement to set delta
+    inputManager->processMouseMovement(100.0, 100.0);
+    inputManager->processMouseMovement(150.0, 120.0);
+    
+    // Act - reset the delta
+    inputManager->resetMouseDelta();
+    
+    // Assert - delta should be zero
+    glm::vec2 delta = inputManager->getMouseDelta();
+    EXPECT_FLOAT_EQ(delta.x, 0.0f);
+    EXPECT_FLOAT_EQ(delta.y, 0.0f);
+}
+
+/**
+ * Test mouse delta accumulation after reset
+ */
+TEST_F(InputManagerTest, ResetMouseDelta_AllowsNewMovement) {
+    // Arrange - reset to known state
+    inputManager->resetMouseDelta();
+    
+    // Simulate initial position
+    inputManager->processMouseMovement(100.0, 100.0);
+    
+    // Reset delta (should clear previous movement)
+    inputManager->resetMouseDelta();
+    
+    // Act - simulate new movement
+    inputManager->processMouseMovement(110.0, 110.0);
+    
+    // Assert - should have tracked the new movement
+    glm::vec2 delta = inputManager->getMouseDelta();
+    EXPECT_FLOAT_EQ(delta.x, 10.0f);
+    EXPECT_FLOAT_EQ(delta.y, 10.0f);
+}
