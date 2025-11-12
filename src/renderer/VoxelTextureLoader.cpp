@@ -161,8 +161,17 @@ bool VoxelTextureLoader::loadAllTextures()
     return allLoaded;
 }
 
-std::shared_ptr<Texture> VoxelTextureLoader::getTexture(VoxelType type, BlockFace face)
+std::shared_ptr<Texture> VoxelTextureLoader::getTexture(VoxelType type, BlockFace face, 
+                                                        bool useMaterialPacks)
 {
+    // First, try to get texture from material packs if requested
+    if (useMaterialPacks) {
+        // Check VoxelMaterialPackManager for texture
+        // This would be implemented when material pack system is integrated
+        // For now, fall through to default texture cache
+    }
+
+    // Use default texture cache
     auto typeIt = textureCache.find(type);
     if (typeIt == textureCache.end()) {
         LOG_WARNING_C("Texture not found for voxel type", "VoxelTextureLoader");
