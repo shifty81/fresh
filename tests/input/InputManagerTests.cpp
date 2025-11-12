@@ -279,3 +279,34 @@ TEST_F(InputManagerTest, ProcessMouseMovement_MultipleCallsWithUpdate_TracksMove
     // At minimum, these calls should not crash
     EXPECT_NO_THROW(inputManager->getMouseDelta());
 }
+
+/**
+ * Test that mouse position tracking exists
+ */
+TEST_F(InputManagerTest, GetMousePosition_WithoutInit_ReturnsValidValue) {
+    // Act
+    glm::vec2 pos = inputManager->getMousePosition();
+    
+    // Assert - should return a valid vec2 (even if zero)
+    EXPECT_TRUE(std::isfinite(pos.x));
+    EXPECT_TRUE(std::isfinite(pos.y));
+}
+
+/**
+ * Test that mouse button state tracking exists
+ */
+TEST_F(InputManagerTest, IsMouseButtonPressed_WithoutInit_DoesNotCrash) {
+    // Act & Assert - should handle gracefully
+    EXPECT_NO_THROW(inputManager->isMouseButtonPressed(GLFW_MOUSE_BUTTON_LEFT));
+    EXPECT_NO_THROW(inputManager->isMouseButtonPressed(GLFW_MOUSE_BUTTON_RIGHT));
+    EXPECT_NO_THROW(inputManager->isMouseButtonPressed(GLFW_MOUSE_BUTTON_MIDDLE));
+}
+
+/**
+ * Test mouse button just pressed tracking
+ */
+TEST_F(InputManagerTest, IsMouseButtonJustPressed_WithoutInit_DoesNotCrash) {
+    // Act & Assert - should handle gracefully
+    EXPECT_NO_THROW(inputManager->isMouseButtonJustPressed(GLFW_MOUSE_BUTTON_LEFT));
+    EXPECT_NO_THROW(inputManager->isMouseButtonJustPressed(GLFW_MOUSE_BUTTON_RIGHT));
+}
