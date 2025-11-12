@@ -1,5 +1,6 @@
 #include "galaxy/GalaxyGenerator.h"
 
+#include <algorithm>
 #include <cmath>
 #include <sstream>
 
