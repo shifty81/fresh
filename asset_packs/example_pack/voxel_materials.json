@@ -1,0 +1,187 @@
+{
+  "name": "Example Voxel Material Pack",
+  "version": "1.0.0",
+  "author": "Fresh Engine",
+  "description": "A complete example material pack showing all available voxel types and features",
+  "priority": 100,
+  
+  "materials": [
+    {
+      "voxelType": "Stone",
+      "name": "Stone Block",
+      "textures": {
+        "all": "textures/stone.png"
+      },
+      "materialProperties": {
+        "metallic": 0.0,
+        "roughness": 0.9,
+        "ao": 1.0,
+        "alpha": 1.0
+      },
+      "includeInAtlas": true
+    },
+    {
+      "voxelType": "Dirt",
+      "name": "Dirt Block",
+      "textures": {
+        "all": "textures/dirt.png"
+      },
+      "materialProperties": {
+        "metallic": 0.0,
+        "roughness": 1.0,
+        "ao": 1.0,
+        "alpha": 1.0
+      },
+      "includeInAtlas": true
+    },
+    {
+      "voxelType": "Grass",
+      "name": "Grass Block",
+      "textures": {
+        "top": "textures/grass_top.png",
+        "bottom": "textures/dirt.png",
+        "sides": "textures/grass_side.png"
+      },
+      "materialProperties": {
+        "metallic": 0.0,
+        "roughness": 0.9,
+        "ao": 1.0,
+        "alpha": 1.0
+      },
+      "includeInAtlas": true
+    },
+    {
+      "voxelType": "Sand",
+      "name": "Sand Block",
+      "textures": {
+        "all": "textures/sand.png"
+      },
+      "materialProperties": {
+        "metallic": 0.0,
+        "roughness": 0.95,
+        "ao": 1.0,
+        "alpha": 1.0
+      },
+      "includeInAtlas": true
+    },
+    {
+      "voxelType": "Water",
+      "name": "Water Block",
+      "textures": {
+        "all": "textures/water.png"
+      },
+      "materialProperties": {
+        "metallic": 0.1,
+        "roughness": 0.1,
+        "ao": 1.0,
+        "alpha": 0.6,
+        "alphaBlend": true
+      },
+      "includeInAtlas": true
+    },
+    {
+      "voxelType": "Wood",
+      "name": "Wood Log",
+      "textures": {
+        "top": "textures/wood_top.png",
+        "bottom": "textures/wood_top.png",
+        "sides": "textures/wood_side.png"
+      },
+      "materialProperties": {
+        "metallic": 0.0,
+        "roughness": 0.8,
+        "ao": 1.0,
+        "alpha": 1.0
+      },
+      "includeInAtlas": true
+    },
+    {
+      "voxelType": "Leaves",
+      "name": "Leaf Block",
+      "textures": {
+        "all": "textures/leaves.png"
+      },
+      "materialProperties": {
+        "metallic": 0.0,
+        "roughness": 0.9,
+        "ao": 0.8,
+        "alpha": 0.8,
+        "alphaBlend": true,
+        "alphaCutoffValue": 0.3
+      },
+      "includeInAtlas": true
+    },
+    {
+      "voxelType": "Cobblestone",
+      "name": "Cobblestone",
+      "textures": {
+        "all": "textures/cobblestone.png"
+      },
+      "materialProperties": {
+        "metallic": 0.0,
+        "roughness": 0.95,
+        "ao": 1.0,
+        "alpha": 1.0
+      },
+      "includeInAtlas": true
+    },
+    {
+      "voxelType": "Planks",
+      "name": "Wooden Planks",
+      "textures": {
+        "all": "textures/planks.png"
+      },
+      "materialProperties": {
+        "metallic": 0.0,
+        "roughness": 0.7,
+        "ao": 1.0,
+        "alpha": 1.0
+      },
+      "includeInAtlas": true
+    },
+    {
+      "voxelType": "Glass",
+      "name": "Glass Block",
+      "textures": {
+        "all": "textures/glass.png"
+      },
+      "materialProperties": {
+        "metallic": 0.1,
+        "roughness": 0.05,
+        "ao": 1.0,
+        "alpha": 0.3,
+        "alphaBlend": true
+      },
+      "includeInAtlas": true
+    },
+    {
+      "voxelType": "Snow",
+      "name": "Snow Block",
+      "textures": {
+        "all": "textures/snow.png"
+      },
+      "materialProperties": {
+        "metallic": 0.0,
+        "roughness": 0.6,
+        "ao": 1.0,
+        "alpha": 1.0
+      },
+      "includeInAtlas": true
+    },
+    {
+      "voxelType": "Ice",
+      "name": "Ice Block",
+      "textures": {
+        "all": "textures/ice.png"
+      },
+      "materialProperties": {
+        "metallic": 0.2,
+        "roughness": 0.1,
+        "ao": 1.0,
+        "alpha": 0.7,
+        "alphaBlend": true
+      },
+      "includeInAtlas": true
+    }
+  ]
+}
