@@ -23,7 +23,7 @@ namespace fresh
 
 EditorManager::EditorManager()
     : m_initialized(false),
-      m_visible(true),
+      m_visible(false),
       m_window(nullptr),
       m_renderContext(nullptr),
       m_world(nullptr),

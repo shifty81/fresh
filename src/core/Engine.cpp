@@ -195,7 +195,7 @@ bool Engine::initialize()
         LOG_ERROR_C("Failed to initialize editor GUI", "Engine");
         return false;
     }
-    m_editor->setVisible(true); // Show editor UI by default
+    m_editor->setVisible(false); // Hide editor UI by default, toggle with 'T'
     std::cout << "Editor GUI initialized" << std::endl;
     LOG_INFO_C("Editor GUI initialized", "Engine");
 
