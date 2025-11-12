@@ -33,7 +33,7 @@ bool LuaScriptingEngine::initialize() {
 
     try {
         // Create new Lua state with Sol2
-        m_lua = std::make_unique<sol::state>();
+        m_lua = new sol::state();
         
         // Open standard Lua libraries
         m_lua->open_libraries(
@@ -84,7 +84,8 @@ void LuaScriptingEngine::shutdown() {
 
     m_loadedScripts.clear();
     m_loadedMods.clear();
-    m_lua.reset();
+    delete m_lua;
+    m_lua = nullptr;
     m_initialized = false;
     
     std::cout << "[LuaScriptingEngine] Shutdown complete" << std::endl;

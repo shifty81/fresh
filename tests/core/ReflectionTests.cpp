@@ -20,13 +20,13 @@ private:
 };
 
 // Register the test type
-static TypeRegistrar<TestObject> testObjectRegistrar("TestObject")
+static TypeRegistrar<TestObject> testObjectRegistrar = TypeRegistrar<TestObject>("TestObject")
     .property("intValue", &TestObject::intValue)
     .property("floatValue", &TestObject::floatValue)
     .property("doubleValue", &TestObject::doubleValue)
     .property("boolValue", &TestObject::boolValue)
     .property("stringValue", &TestObject::stringValue)
-    .property("readOnlyValue",
+    .property<int>("readOnlyValue",
         [](const TestObject* obj) { return obj->getReadOnlyValue(); },
         [](TestObject*, int) { /* No-op setter */ },
         PropertyFlags::ReadOnly | PropertyFlags::EditorVisible);
