@@ -298,6 +298,7 @@ set(ENGINE_SOURCES
     src/core/MemoryManager.cpp
     src/core/ResourceManager.cpp
     src/core/SceneManager.cpp
+    src/core/Reflection.cpp
     src/renderer/ShaderManager.cpp
     src/renderer/RenderContext.cpp
     src/renderer/Material.cpp
@@ -399,6 +400,7 @@ set(ENGINE_HEADERS
     include/core/MemoryManager.h
     include/core/ResourceManager.h
     include/core/SceneManager.h
+    include/core/Reflection.h
     include/renderer/ShaderManager.h
     include/voxel/Chunk.h
     include/voxel/VoxelWorld.h
@@ -704,6 +706,7 @@ if(BUILD_TESTS)
         tests/generation/TerrainGeneratorTests.cpp
         tests/input/InputManagerTests.cpp
         tests/core/EngineInitializationTests.cpp  # Tests for engine initialization sequence
+        tests/core/ReflectionTests.cpp            # Tests for reflection system
         # tests/core/MemoryManagerTests.cpp  # Disabled - tests don't match implementation
         tests/scripting/EventSystemTests.cpp
         tests/rpg/InventoryTests.cpp
@@ -719,6 +722,7 @@ if(BUILD_TESTS)
         src/generation/TerrainGenerator.cpp
         src/core/MemoryManager.cpp
         src/core/Logger.cpp
+        src/core/Reflection.cpp
         src/scripting/EventSystem.cpp
         src/input/InputManager.cpp
         src/rpg/Inventory.cpp
