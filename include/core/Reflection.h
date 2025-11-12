@@ -243,20 +243,20 @@ public:
     }
 
 private:
-    template<typename PropertyType>
-    PropertyType getPropertyType() {
-        if constexpr (std::is_same_v<PropertyType, bool>) {
-            return PropertyType::Bool;
-        } else if constexpr (std::is_same_v<PropertyType, int> || std::is_same_v<PropertyType, int32_t>) {
-            return PropertyType::Int;
-        } else if constexpr (std::is_same_v<PropertyType, float>) {
-            return PropertyType::Float;
-        } else if constexpr (std::is_same_v<PropertyType, double>) {
-            return PropertyType::Double;
-        } else if constexpr (std::is_same_v<PropertyType, std::string>) {
-            return PropertyType::String;
+    template<typename PropType>
+    fresh::PropertyType getPropertyType() {
+        if constexpr (std::is_same_v<PropType, bool>) {
+            return fresh::PropertyType::Bool;
+        } else if constexpr (std::is_same_v<PropType, int> || std::is_same_v<PropType, int32_t>) {
+            return fresh::PropertyType::Int;
+        } else if constexpr (std::is_same_v<PropType, float>) {
+            return fresh::PropertyType::Float;
+        } else if constexpr (std::is_same_v<PropType, double>) {
+            return fresh::PropertyType::Double;
+        } else if constexpr (std::is_same_v<PropType, std::string>) {
+            return fresh::PropertyType::String;
         } else {
-            return PropertyType::Unknown;
+            return fresh::PropertyType::Unknown;
         }
     }
 

@@ -85,10 +85,10 @@ public:
     void clearError() { m_lastError.clear(); }
 
     // Direct Lua state access (for advanced users)
-    sol::state* getLuaState() { return m_lua.get(); }
+    sol::state* getLuaState() { return m_lua; }
 
 private:
-    std::unique_ptr<sol::state> m_lua;
+    sol::state* m_lua;
     bool m_initialized = false;
     bool m_hotReloadEnabled = false;
     std::string m_lastError;
