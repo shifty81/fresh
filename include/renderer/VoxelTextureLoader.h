@@ -51,9 +51,11 @@ public:
      * @brief Get texture for a specific voxel type and face
      * @param type Voxel type
      * @param face Block face (default: Top for single texture blocks)
+     * @param useMaterialPacks If true, check material packs first (default: true)
      * @return Shared pointer to texture or nullptr if not found
      */
-    std::shared_ptr<Texture> getTexture(VoxelType type, BlockFace face = BlockFace::Top);
+    std::shared_ptr<Texture> getTexture(VoxelType type, BlockFace face = BlockFace::Top, 
+                                       bool useMaterialPacks = true);
 
     /**
      * @brief Check if a voxel type has face-specific textures
