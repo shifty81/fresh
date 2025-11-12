@@ -164,9 +164,9 @@ void InputManager::processMouseMovement(double xpos, double ypos)
     lastMouseX = xpos;
     lastMouseY = ypos;
 
-    if (cursorCaptured) {
-        mouseDelta = glm::vec2(xOffset, yOffset);
-    }
+    // Always track mouse delta for consistency, even when cursor is not captured
+    // This allows proper testing and can be useful for UI interactions
+    mouseDelta = glm::vec2(xOffset, yOffset);
 }
 
 void InputManager::processMouseButton(int button, int action)
