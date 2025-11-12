@@ -754,6 +754,8 @@ std::string Engine::loadShaderFile(const std::string& filepath)
     std::ifstream file(filepath);
     if (!file.is_open()) {
         LOG_ERROR_C("Failed to open shader file: " + filepath, "Engine");
+        LOG_ERROR_C("Make sure to run the executable from the build directory where shaders/ folder exists", "Engine");
+        LOG_ERROR_C("The shaders are copied to: <build_directory>/shaders/", "Engine");
         return "";
     }
 
