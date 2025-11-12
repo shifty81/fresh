@@ -6,6 +6,7 @@
 #include <memory>
 #include <string>
 #include <vector>
+#include <ctime>
 
 // Forward declare sol types to avoid including the full header
 namespace sol {
