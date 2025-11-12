@@ -74,8 +74,11 @@ void MainMenu::render()
 
 void MainMenu::renderMainMenu()
 {
-    // Console-based menu for now
-    // In a real implementation, this would use ImGui
+    // Console-based menu for pre-initialization phase
+    // This menu runs BEFORE graphics/window initialization, so cannot use mouse input
+    // All in-game features and editor support full mouse interaction once initialized
+    // 
+    // Future enhancement: Move menu to post-initialization for graphical mouse-enabled UI
 
     std::cout << "\n";
     std::cout << "========================================\n";
