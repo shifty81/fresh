@@ -442,6 +442,11 @@ void Engine::shutdown()
 
 void Engine::processInput()
 {
+    // Reset mouse delta from previous frame BEFORE polling new events
+    if (m_inputManager) {
+        m_inputManager->resetMouseDelta();
+    }
+
     if (m_window) {
         m_window->pollEvents();
     }

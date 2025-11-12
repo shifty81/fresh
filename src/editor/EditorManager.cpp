@@ -278,7 +278,8 @@ void EditorManager::setupDockspace()
 bool EditorManager::wantCaptureMouse() const
 {
 #ifdef FRESH_IMGUI_AVAILABLE
-    if (m_imguiContext) {
+    // Only capture input when editor is visible
+    if (m_visible && m_imguiContext) {
         return m_imguiContext->wantCaptureMouse();
     }
 #endif
@@ -288,7 +289,8 @@ bool EditorManager::wantCaptureMouse() const
 bool EditorManager::wantCaptureKeyboard() const
 {
 #ifdef FRESH_IMGUI_AVAILABLE
-    if (m_imguiContext) {
+    // Only capture input when editor is visible
+    if (m_visible && m_imguiContext) {
         return m_imguiContext->wantCaptureKeyboard();
     }
 #endif

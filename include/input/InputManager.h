@@ -103,6 +103,14 @@ public:
     }
 
     /**
+     * @brief Reset mouse delta (called at start of frame before polling events)
+     */
+    void resetMouseDelta()
+    {
+        mouseDelta = glm::vec2(0.0f);
+    }
+
+    /**
      * @brief Set mouse sensitivity multiplier
      */
     void setMouseSensitivity(float sens)
