@@ -337,6 +337,7 @@ set(ENGINE_SOURCES
     src/gameplay/Camera.cpp
     src/gameplay/Player.cpp
     src/assets/ModularAssetSystem.cpp
+    src/assets/VoxelMaterialPack.cpp
     src/assets/AssetManager.cpp
     src/assets/AssetManagerExports.cpp
     src/ecs/EntityManager.cpp
