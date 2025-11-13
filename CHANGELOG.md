@@ -48,6 +48,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Platform-specific installation instructions
 
 ### Fixed
+- **EditorManager Initialization** - Fixed engine initialization failure
+  - EditorManager can now be initialized before a world is created
+  - Made world and worldEditor optional parameters (can be nullptr)
+  - World-dependent panels are deferred until world is available
+  - MainMenuPanel and SettingsPanel initialize without requiring a world
+  - Fixes error: "[ERROR][EditorManager] Invalid parameters for EditorManager"
 - Compilation errors on Linux (DirectX-specific code)
 - Linking errors in test suite (missing VoxelWorld.cpp and ModularAssetSystem.cpp)
 - Unused variable warnings in IKSolver.cpp and Engine.cpp
