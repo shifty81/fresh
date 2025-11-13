@@ -40,13 +40,13 @@ public:
      * @brief Initialize the editor manager
      * @param window Main window
      * @param renderContext Render context for ImGui
-     * @param world Voxel world
-     * @param worldEditor World editor instance
+     * @param world Voxel world (optional, can be nullptr - world-dependent panels will be initialized later)
+     * @param worldEditor World editor instance (optional, can be nullptr - world-dependent panels will be initialized later)
      * @param inputManager Input manager for settings
      * @return true if successful
      */
-    bool initialize(Window* window, IRenderContext* renderContext, VoxelWorld* world,
-                    WorldEditor* worldEditor, class InputManager* inputManager = nullptr);
+    bool initialize(Window* window, IRenderContext* renderContext, VoxelWorld* world = nullptr,
+                    WorldEditor* worldEditor = nullptr, class InputManager* inputManager = nullptr);
 
     /**
      * @brief Begin a new editor frame

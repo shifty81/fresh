@@ -51,7 +51,7 @@ bool EditorManager::initialize(Window* window, IRenderContext* renderContext, Vo
         return true;
     }
 
-    if (!window || !renderContext || !world || !worldEditor) {
+    if (!window || !renderContext) {
         LOG_ERROR_C("Invalid parameters for EditorManager", "EditorManager");
         return false;
     }
@@ -70,61 +70,66 @@ bool EditorManager::initialize(Window* window, IRenderContext* renderContext, Vo
     }
     LOG_INFO_C("ImGui context initialized", "EditorManager");
 
-    // Initialize UI panels
-    m_sceneHierarchy = std::make_unique<SceneHierarchyPanel>();
-    if (!m_sceneHierarchy->initialize(world)) {
-        LOG_ERROR_C("Failed to initialize Scene Hierarchy panel", "EditorManager");
-        return false;
-    }
-
-    m_inspector = std::make_unique<InspectorPanel>();
-    if (!m_inspector->initialize()) {
-        LOG_ERROR_C("Failed to initialize Inspector panel", "EditorManager");
-        return false;
-    }
-
-    m_menuBar = std::make_unique<EditorMenuBar>();
-    if (!m_menuBar->initialize(world, worldEditor)) {
-        LOG_ERROR_C("Failed to initialize Menu Bar", "EditorManager");
-        return false;
-    }
-
-    // Link menu bar to panel visibility flags
-    m_menuBar->setSceneHierarchyVisible(&m_showSceneHierarchy);
-    m_menuBar->setInspectorVisible(&m_showInspector);
-    m_menuBar->setContentBrowserVisible(&m_showContentBrowser);
-    m_menuBar->setConsoleVisible(&m_showConsole);
-    m_menuBar->setToolPaletteVisible(&m_showToolPalette);
-
-    // Set settings callback to open settings panel
-    m_menuBar->setSettingsCallback([this]() {
-        if (m_settingsPanel) {
-            m_settingsPanel->setVisible(true);
+    // Initialize UI panels that require world/worldEditor
+    // Only initialize these if world and worldEditor are available
+    if (world && worldEditor) {
+        m_sceneHierarchy = std::make_unique<SceneHierarchyPanel>();
+        if (!m_sceneHierarchy->initialize(world)) {
+            LOG_ERROR_C("Failed to initialize Scene Hierarchy panel", "EditorManager");
+            return false;
         }
-    });
 
-    m_toolbar = std::make_unique<EditorToolbar>();
-    if (!m_toolbar->initialize()) {
-        LOG_ERROR_C("Failed to initialize Toolbar", "EditorManager");
-        return false;
-    }
+        m_inspector = std::make_unique<InspectorPanel>();
+        if (!m_inspector->initialize()) {
+            LOG_ERROR_C("Failed to initialize Inspector panel", "EditorManager");
+            return false;
+        }
 
-    m_contentBrowser = std::make_unique<ContentBrowserPanel>();
-    if (!m_contentBrowser->initialize("assets")) {
-        LOG_ERROR_C("Failed to initialize Content Browser panel", "EditorManager");
-        return false;
-    }
+        m_menuBar = std::make_unique<EditorMenuBar>();
+        if (!m_menuBar->initialize(world, worldEditor)) {
+            LOG_ERROR_C("Failed to initialize Menu Bar", "EditorManager");
+            return false;
+        }
 
-    m_console = std::make_unique<ConsolePanel>();
-    if (!m_console->initialize()) {
-        LOG_ERROR_C("Failed to initialize Console panel", "EditorManager");
-        return false;
-    }
+        // Link menu bar to panel visibility flags
+        m_menuBar->setSceneHierarchyVisible(&m_showSceneHierarchy);
+        m_menuBar->setInspectorVisible(&m_showInspector);
+        m_menuBar->setContentBrowserVisible(&m_showContentBrowser);
+        m_menuBar->setConsoleVisible(&m_showConsole);
+        m_menuBar->setToolPaletteVisible(&m_showToolPalette);
 
-    m_voxelTools = std::make_unique<VoxelToolPalette>();
-    if (!m_voxelTools->initialize(worldEditor->getTerraformingSystem())) {
-        LOG_ERROR_C("Failed to initialize Voxel Tool Palette", "EditorManager");
-        return false;
+        // Set settings callback to open settings panel
+        m_menuBar->setSettingsCallback([this]() {
+            if (m_settingsPanel) {
+                m_settingsPanel->setVisible(true);
+            }
+        });
+
+        m_toolbar = std::make_unique<EditorToolbar>();
+        if (!m_toolbar->initialize()) {
+            LOG_ERROR_C("Failed to initialize Toolbar", "EditorManager");
+            return false;
+        }
+
+        m_contentBrowser = std::make_unique<ContentBrowserPanel>();
+        if (!m_contentBrowser->initialize("assets")) {
+            LOG_ERROR_C("Failed to initialize Content Browser panel", "EditorManager");
+            return false;
+        }
+
+        m_console = std::make_unique<ConsolePanel>();
+        if (!m_console->initialize()) {
+            LOG_ERROR_C("Failed to initialize Console panel", "EditorManager");
+            return false;
+        }
+
+        m_voxelTools = std::make_unique<VoxelToolPalette>();
+        if (!m_voxelTools->initialize(worldEditor->getTerraformingSystem())) {
+            LOG_ERROR_C("Failed to initialize Voxel Tool Palette", "EditorManager");
+            return false;
+        }
+    } else {
+        LOG_INFO_C("World and WorldEditor not provided, deferring initialization of world-dependent panels", "EditorManager");
     }
 
     // Initialize main menu panel
