@@ -257,6 +257,8 @@ void EditorManager::shutdown()
 
 #ifdef FRESH_IMGUI_AVAILABLE
     // Shutdown in reverse order
+    m_settingsPanel.reset();
+    m_mainMenuPanel.reset();
     m_voxelTools.reset();
     m_console.reset();
     m_contentBrowser.reset();
