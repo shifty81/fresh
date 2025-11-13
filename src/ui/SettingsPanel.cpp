@@ -251,7 +251,6 @@ void SettingsPanel::renderControlsSettings()
 
     // Mouse sensitivity
     ImGui::Text("Mouse Sensitivity:");
-    float oldSensitivity = m_mouseSensitivity;
     if (ImGui::SliderFloat("##MouseSensitivity", &m_mouseSensitivity, 0.1f, 5.0f, "%.2f")) {
         setMouseSensitivity(m_mouseSensitivity);
         m_settingsChanged = true;

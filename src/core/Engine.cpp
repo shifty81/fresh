@@ -26,6 +26,7 @@
 #include "renderer/RenderContext.h"
 #include "serialization/WorldSerializer.h"
 #include "ui/MainMenu.h"
+#include "ui/MainMenuPanel.h"
 #include "voxel/Chunk.h"
 #include "voxel/VoxelTypes.h"
 #include "voxel/VoxelWorld.h"
