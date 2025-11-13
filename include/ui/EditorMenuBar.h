@@ -83,6 +83,10 @@ public:
     {
         m_deleteCallback = callback;
     }
+    void setSettingsCallback(MenuCallback callback)
+    {
+        m_settingsCallback = callback;
+    }
 
 private:
     void renderFileMenu();
@@ -108,6 +112,7 @@ private:
     MenuCallback m_copyCallback;
     MenuCallback m_pasteCallback;
     MenuCallback m_deleteCallback;
+    MenuCallback m_settingsCallback;
 
     // Window visibility flags (shared with other systems)
     bool* m_showSceneHierarchy;

@@ -10,7 +10,9 @@
 #include "ui/EditorToolbar.h"
 #include "ui/ImGuiContext.h"
 #include "ui/InspectorPanel.h"
+#include "ui/MainMenuPanel.h"
 #include "ui/SceneHierarchyPanel.h"
+#include "ui/SettingsPanel.h"
 #include "ui/VoxelToolPalette.h"
 #include "voxel/VoxelWorld.h"
 
@@ -42,7 +44,7 @@ EditorManager::~EditorManager()
 }
 
 bool EditorManager::initialize(Window* window, IRenderContext* renderContext, VoxelWorld* world,
-                               WorldEditor* worldEditor)
+                               WorldEditor* worldEditor, InputManager* inputManager)
 {
     if (m_initialized) {
         LOG_WARNING_C("EditorManager already initialized", "EditorManager");
@@ -94,6 +96,13 @@ bool EditorManager::initialize(Window* window, IRenderContext* renderContext, Vo
     m_menuBar->setConsoleVisible(&m_showConsole);
     m_menuBar->setToolPaletteVisible(&m_showToolPalette);
 
+    // Set settings callback to open settings panel
+    m_menuBar->setSettingsCallback([this]() {
+        if (m_settingsPanel) {
+            m_settingsPanel->setVisible(true);
+        }
+    });
+
     m_toolbar = std::make_unique<EditorToolbar>();
     if (!m_toolbar->initialize()) {
         LOG_ERROR_C("Failed to initialize Toolbar", "EditorManager");
@@ -115,6 +124,20 @@ bool EditorManager::initialize(Window* window, IRenderContext* renderContext, Vo
     m_voxelTools = std::make_unique<VoxelToolPalette>();
     if (!m_voxelTools->initialize(worldEditor->getTerraformingSystem())) {
         LOG_ERROR_C("Failed to initialize Voxel Tool Palette", "EditorManager");
+        return false;
+    }
+
+    // Initialize main menu panel
+    m_mainMenuPanel = std::make_unique<MainMenuPanel>();
+    if (!m_mainMenuPanel->initialize()) {
+        LOG_ERROR_C("Failed to initialize Main Menu Panel", "EditorManager");
+        return false;
+    }
+
+    // Initialize settings panel
+    m_settingsPanel = std::make_unique<SettingsPanel>();
+    if (!m_settingsPanel->initialize(window, inputManager)) {
+        LOG_ERROR_C("Failed to initialize Settings Panel", "EditorManager");
         return false;
     }
 
@@ -191,6 +214,16 @@ void EditorManager::render()
 
     if (m_showToolPalette && m_voxelTools) {
         m_voxelTools->render();
+    }
+
+    // Render main menu panel if active
+    if (m_mainMenuPanel) {
+        m_mainMenuPanel->render();
+    }
+
+    // Render settings panel if visible
+    if (m_settingsPanel) {
+        m_settingsPanel->render();
     }
 #else
     // Console mode fallback
