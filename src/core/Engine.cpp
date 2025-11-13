@@ -343,6 +343,14 @@ void Engine::run()
         // If not in game yet, show GUI menu and handle world creation
         if (!m_inGame) {
 #ifdef FRESH_IMGUI_AVAILABLE
+            // Set clear color and begin frame for menu rendering
+            if (m_renderer) {
+                m_renderer->clearColor(0.53f, 0.81f, 0.92f, 1.0f);
+                m_renderer->beginFrame();
+                m_renderer->setViewport(0, 0, m_renderer->getSwapchainWidth(),
+                                        m_renderer->getSwapchainHeight());
+            }
+
             // Render the editor with main menu panel
             if (m_editorManager) {
                 m_editorManager->beginFrame();
@@ -364,9 +372,8 @@ void Engine::run()
                 m_editorManager->endFrame();
             }
 
-            // Render the frame
+            // End frame
             if (m_renderer) {
-                m_renderer->beginFrame();
                 m_renderer->endFrame();
             }
 #else
