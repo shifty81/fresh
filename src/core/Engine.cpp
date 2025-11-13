@@ -69,32 +69,6 @@ bool Engine::initialize()
     std::cout << "Initializing Fresh Voxel Engine..." << std::endl;
     LOG_INFO_C("Initializing Fresh Voxel Engine...", "Engine");
 
-    // Create main menu first
-    m_mainMenu = std::make_unique<MainMenu>();
-    if (!m_mainMenu->initialize()) {
-        std::cerr << "Failed to initialize main menu" << std::endl;
-        LOG_ERROR_C("Failed to initialize main menu", "Engine");
-        return false;
-    }
-    std::cout << "Main menu initialized" << std::endl;
-    LOG_INFO_C("Main menu initialized", "Engine");
-
-    // Show main menu and wait for user choice
-    m_mainMenu->render();
-
-    // Check if user wants to create or load a world
-    if (m_mainMenu->shouldCreateNewWorld()) {
-        createNewWorld(m_mainMenu->getNewWorldName(), m_mainMenu->getWorldSeed());
-    } else if (m_mainMenu->shouldLoadWorld()) {
-        loadWorld(m_mainMenu->getLoadWorldName());
-    } else {
-        // User might be still in menu - we'll handle this in the run loop
-        m_running = true;
-        return true;
-    }
-
-    m_mainMenu->clearFlags();
-
     // Create renderer using the abstraction layer first to determine API
     // Auto-select best graphics API for the platform
     m_renderer = RenderContextFactory::createBest();
@@ -111,7 +85,7 @@ bool Engine::initialize()
     // Determine if we need OpenGL context for the window based on selected API
     bool useOpenGL = (m_renderer->getAPI() == GraphicsAPI::OpenGL);
 
-    // Create window
+    // Create window FIRST so we can show the GUI
     m_window = std::make_unique<Window>(1280, 720, "Fresh Voxel Engine");
     if (!m_window->initialize(useOpenGL)) {
         std::cerr << "Failed to initialize window" << std::endl;
@@ -120,14 +94,6 @@ bool Engine::initialize()
     }
     std::cout << "Window created" << std::endl;
     LOG_INFO_C("Window created", "Engine");
-
-    // Create input manager and set up callbacks
-    m_inputManager = std::make_unique<InputManager>();
-    m_inputManager->initialize(m_window->getHandle());
-    m_inputManager->setInputMode(InputMode::GameMode); // Start in game mode with captured cursor
-    setupInputCallbacks();
-    std::cout << "Input manager initialized" << std::endl;
-    LOG_INFO_C("Input manager initialized", "Engine");
 
     // Initialize renderer with the window
     if (!m_renderer->initialize(m_window.get())) {
@@ -140,101 +106,41 @@ bool Engine::initialize()
     LOG_INFO_C("Renderer initialized with " + std::string(getGraphicsAPIName(m_renderer->getAPI())),
                "Engine");
 
-    // Create physics system
-    m_physics = std::make_unique<PhysicsSystem>();
-    if (!m_physics->initialize()) {
-        std::cerr << "Failed to initialize physics system" << std::endl;
-        LOG_ERROR_C("Failed to initialize physics system", "Engine");
-        return false;
-    }
-    std::cout << "Physics system initialized" << std::endl;
-    LOG_INFO_C("Physics system initialized", "Engine");
+    // Create input manager and set up callbacks
+    m_inputManager = std::make_unique<InputManager>();
+    m_inputManager->initialize(m_window->getHandle());
+    m_inputManager->setInputMode(InputMode::UIMode); // Start in UI mode for menu
+    setupInputCallbacks();
+    std::cout << "Input manager initialized" << std::endl;
+    LOG_INFO_C("Input manager initialized", "Engine");
 
-    // Create AI system
-    m_aiSystem = std::make_unique<AISystem>();
-    if (!m_aiSystem->initialize()) {
-        std::cerr << "Failed to initialize AI system" << std::endl;
-        LOG_ERROR_C("Failed to initialize AI system", "Engine");
+    // Create console-based main menu for backward compatibility
+    m_mainMenu = std::make_unique<MainMenu>();
+    if (!m_mainMenu->initialize()) {
+        std::cerr << "Failed to initialize main menu" << std::endl;
+        LOG_ERROR_C("Failed to initialize main menu", "Engine");
         return false;
     }
-    std::cout << "AI system initialized" << std::endl;
-    LOG_INFO_C("AI system initialized", "Engine");
-
-    // Create world editor
-    m_worldEditor = std::make_unique<WorldEditor>();
-    if (m_world && !m_worldEditor->initialize(m_world.get())) {
-        std::cerr << "Failed to initialize world editor" << std::endl;
-        LOG_ERROR_C("Failed to initialize world editor", "Engine");
-        return false;
-    }
-    m_worldEditor->setEnabled(true); // Enable editor by default
-    std::cout << "World editor initialized" << std::endl;
-    LOG_INFO_C("World editor initialized", "Engine");
+    std::cout << "Main menu initialized" << std::endl;
+    LOG_INFO_C("Main menu initialized", "Engine");
 
 #ifdef FRESH_IMGUI_AVAILABLE
-    // Create comprehensive editor manager (requires ImGui)
+    // Create comprehensive editor manager (requires ImGui) - show immediately
     m_editorManager = std::make_unique<EditorManager>();
-    if (!m_editorManager->initialize(m_window.get(), m_renderer.get(), m_world.get(),
-                                     m_worldEditor.get())) {
+    // Initialize with nullptr for world and worldEditor initially
+    if (!m_editorManager->initialize(m_window.get(), m_renderer.get(), nullptr, nullptr,
+                                     m_inputManager.get())) {
         std::cerr << "Failed to initialize editor manager" << std::endl;
         LOG_ERROR_C("Failed to initialize editor manager", "Engine");
-        // Continue without full editor if ImGui not available
-    } else {
-        std::cout << "Editor manager initialized" << std::endl;
-        LOG_INFO_C("Editor manager initialized", "Engine");
-    }
-#else
-    std::cout << "Editor manager skipped (ImGui not available)" << std::endl;
-    LOG_INFO_C("Editor manager skipped (ImGui not available)", "Engine");
-#endif
-
-    // Create legacy editor GUI (for backward compatibility)
-    m_editor = std::make_unique<EditorGUI>();
-    if (!m_editor->initialize(m_worldEditor.get())) {
-        std::cerr << "Failed to initialize editor GUI" << std::endl;
-        LOG_ERROR_C("Failed to initialize editor GUI", "Engine");
         return false;
     }
-    m_editor->setVisible(false); // Hide editor UI by default, toggle with 'T'
-    std::cout << "Editor GUI initialized" << std::endl;
-    LOG_INFO_C("Editor GUI initialized", "Engine");
-
-    // Initialize rendering based on API
-#if defined(FRESH_OPENGL_SUPPORT) && defined(FRESH_GLEW_AVAILABLE)
-    if (m_renderer->getAPI() == GraphicsAPI::OpenGL) {
-        initializeRendering();
-    }
+    m_editorManager->setVisible(true); // Show editor immediately
+    std::cout << "Editor manager initialized" << std::endl;
+    LOG_INFO_C("Editor manager initialized", "Engine");
 #endif
 
-    // DirectX 11 rendering is now implemented and initialized automatically in
-    // DirectX11RenderContext::initialize()
-    if (m_renderer->getAPI() == GraphicsAPI::DirectX11) {
-        std::cout << "DirectX 11 voxel rendering ready" << std::endl;
-        LOG_INFO_C("DirectX 11 voxel rendering ready", "Engine");
-    }
-
-    // DirectX 12 confirmation
-    if (m_renderer->getAPI() == GraphicsAPI::DirectX12) {
-        std::cout << "DirectX 12 voxel rendering ready" << std::endl;
-        LOG_INFO_C("DirectX 12 voxel rendering ready", "Engine");
-    }
-
-    // Create voxel interaction system
-    m_voxelInteraction = std::make_unique<VoxelInteraction>();
-    m_voxelInteraction->initialize(m_world.get());
-    std::cout << "Voxel interaction initialized" << std::endl;
-    LOG_INFO_C("Voxel interaction initialized", "Engine");
-
-    // Create player
-    m_player = std::make_unique<Player>();
-    m_player->setWorld(m_world.get());
-    // Set player spawn position at a safe height
-    m_player->setPosition(glm::vec3(0.0f, 80.0f, 0.0f));
-    std::cout << "Player initialized" << std::endl;
-    LOG_INFO_C("Player initialized", "Engine");
-
     m_running = true;
-    m_inGame = true;
+    m_inGame = false; // Start in menu mode
     return true;
 }
 
@@ -274,12 +180,8 @@ void Engine::createNewWorld(const std::string& name, int seed)
     std::cout << "World '" << name << "' created successfully!" << std::endl;
     std::cout << "Total chunks: " << m_world->getChunks().size() << std::endl;
 
-    // Initialize world editor if we have a world
-    if (m_world && !m_worldEditor) {
-        m_worldEditor = std::make_unique<WorldEditor>();
-        m_worldEditor->initialize(m_world.get());
-        m_worldEditor->setEnabled(true);
-    }
+    // Now initialize game systems after world is created
+    initializeGameSystems();
 
     // Save the world
     WorldSerializer serializer;
@@ -310,14 +212,108 @@ void Engine::loadWorld(const std::string& name)
         std::cerr << "Failed to load world. Creating new world instead..." << std::endl;
         // Fall back to creating a new world
         createNewWorld(name, static_cast<int>(std::time(nullptr)));
+        return; // createNewWorld will call initializeGameSystems
     }
 
-    // Initialize world editor if we have a world
-    if (m_world && !m_worldEditor) {
+    // Now initialize game systems after world is loaded
+    initializeGameSystems();
+}
+
+void Engine::initializeGameSystems()
+{
+    // This function sets up all game systems after a world is created/loaded
+
+    // Create physics system
+    if (!m_physics) {
+        m_physics = std::make_unique<PhysicsSystem>();
+        if (!m_physics->initialize()) {
+            LOG_ERROR_C("Failed to initialize physics system", "Engine");
+            return;
+        }
+        std::cout << "Physics system initialized" << std::endl;
+    }
+
+    // Create AI system
+    if (!m_aiSystem) {
+        m_aiSystem = std::make_unique<AISystem>();
+        if (!m_aiSystem->initialize()) {
+            LOG_ERROR_C("Failed to initialize AI system", "Engine");
+            return;
+        }
+        std::cout << "AI system initialized" << std::endl;
+    }
+
+    // Create/update world editor
+    if (!m_worldEditor) {
         m_worldEditor = std::make_unique<WorldEditor>();
+    }
+    if (m_world) {
         m_worldEditor->initialize(m_world.get());
         m_worldEditor->setEnabled(true);
+        std::cout << "World editor initialized" << std::endl;
     }
+
+    // Create legacy editor GUI (for backward compatibility)
+    if (!m_editor) {
+        m_editor = std::make_unique<EditorGUI>();
+        if (m_worldEditor && !m_editor->initialize(m_worldEditor.get())) {
+            LOG_ERROR_C("Failed to initialize editor GUI", "Engine");
+        } else {
+            m_editor->setVisible(false); // Hide by default
+            std::cout << "Editor GUI initialized" << std::endl;
+        }
+    }
+
+#ifdef FRESH_IMGUI_AVAILABLE
+    // Re-initialize editor manager with the world
+    if (m_editorManager && m_world && m_worldEditor) {
+        // Update the editor manager with world and world editor references
+        m_editorManager->shutdown();
+        if (!m_editorManager->initialize(m_window.get(), m_renderer.get(), m_world.get(),
+                                         m_worldEditor.get(), m_inputManager.get())) {
+            LOG_ERROR_C("Failed to re-initialize editor manager with world", "Engine");
+        } else {
+            m_editorManager->setVisible(true);
+            std::cout << "Editor manager updated with world" << std::endl;
+        }
+    }
+#endif
+
+    // Initialize rendering based on API
+#if defined(FRESH_OPENGL_SUPPORT) && defined(FRESH_GLEW_AVAILABLE)
+    if (m_renderer->getAPI() == GraphicsAPI::OpenGL) {
+        initializeRendering();
+    }
+#endif
+
+    // DirectX 11 rendering confirmation
+    if (m_renderer->getAPI() == GraphicsAPI::DirectX11) {
+        std::cout << "DirectX 11 voxel rendering ready" << std::endl;
+    }
+
+    // DirectX 12 confirmation
+    if (m_renderer->getAPI() == GraphicsAPI::DirectX12) {
+        std::cout << "DirectX 12 voxel rendering ready" << std::endl;
+    }
+
+    // Create voxel interaction system
+    if (!m_voxelInteraction) {
+        m_voxelInteraction = std::make_unique<VoxelInteraction>();
+    }
+    m_voxelInteraction->initialize(m_world.get());
+    std::cout << "Voxel interaction initialized" << std::endl;
+
+    // Create player
+    if (!m_player) {
+        m_player = std::make_unique<Player>();
+    }
+    m_player->setWorld(m_world.get());
+    m_player->setPosition(glm::vec3(0.0f, 80.0f, 0.0f));
+    std::cout << "Player initialized" << std::endl;
+
+    // Switch to game mode
+    m_inputManager->setInputMode(InputMode::GameMode);
+    m_inGame = true;
 }
 
 void Engine::run()
@@ -332,34 +328,61 @@ void Engine::run()
     const float MAX_DELTA_TIME = 0.1f;                 // Cap at 100ms to prevent physics issues
 
     while (m_running) {
-        // If not in game yet, show menu
-        if (!m_inGame) {
-            m_mainMenu->render();
-
-            if (m_mainMenu->shouldCreateNewWorld()) {
-                createNewWorld(m_mainMenu->getNewWorldName(), m_mainMenu->getWorldSeed());
-                m_mainMenu->clearFlags();
-
-                // Initialize all game systems (window, input, renderer, player)
-                initializeGameSystems();
-                m_inGame = true;
-            } else if (m_mainMenu->shouldLoadWorld()) {
-                loadWorld(m_mainMenu->getLoadWorldName());
-                m_mainMenu->clearFlags();
-
-                // Initialize all game systems (window, input, renderer, player)
-                initializeGameSystems();
-                m_inGame = true;
-            }
-
-            continue;
-        }
-
-        // Normal game loop
+        // Check if window should close
         if (m_window && m_window->shouldClose()) {
             m_running = false;
             break;
         }
+
+        // Poll events
+        if (m_window) {
+            m_window->pollEvents();
+        }
+
+        // If not in game yet, show GUI menu and handle world creation
+        if (!m_inGame) {
+#ifdef FRESH_IMGUI_AVAILABLE
+            // Render the editor with main menu panel
+            if (m_editorManager) {
+                m_editorManager->beginFrame();
+                m_editorManager->render();
+
+                // Check if user wants to create or load a world from GUI
+                auto* mainMenuPanel = m_editorManager->getMainMenuPanel();
+                if (mainMenuPanel) {
+                    if (mainMenuPanel->shouldCreateNewWorld()) {
+                        createNewWorld(mainMenuPanel->getNewWorldName(),
+                                       mainMenuPanel->getWorldSeed());
+                        mainMenuPanel->clearFlags();
+                    } else if (mainMenuPanel->shouldLoadWorld()) {
+                        loadWorld(mainMenuPanel->getLoadWorldName());
+                        mainMenuPanel->clearFlags();
+                    }
+                }
+
+                m_editorManager->endFrame();
+            }
+
+            // Render the frame
+            if (m_renderer) {
+                m_renderer->beginFrame();
+                m_renderer->endFrame();
+            }
+#else
+            // Fallback to console menu if ImGui not available
+            m_mainMenu->render();
+            if (m_mainMenu->shouldCreateNewWorld()) {
+                createNewWorld(m_mainMenu->getNewWorldName(), m_mainMenu->getWorldSeed());
+                m_mainMenu->clearFlags();
+            } else if (m_mainMenu->shouldLoadWorld()) {
+                loadWorld(m_mainMenu->getLoadWorldName());
+                m_mainMenu->clearFlags();
+            }
+#endif
+            continue;
+        }
+
+        // Normal game loop
 
         auto currentTime = std::chrono::high_resolution_clock::now();
         float deltaTime = std::chrono::duration<float>(currentTime - lastTime).count();
@@ -645,55 +668,6 @@ void Engine::render()
 #endif // FRESH_IMGUI_AVAILABLE
 
     m_renderer->endFrame();
-}
-
-void Engine::initializeGameSystems()
-{
-    // This helper is called after world creation to initialize all game systems
-
-    // Create renderer first to determine API
-    if (!m_renderer) {
-        m_renderer = RenderContextFactory::createBest();
-        std::cout << "Render context created: " << getGraphicsAPIName(m_renderer->getAPI())
-                  << std::endl;
-    }
-
-    // Determine if we need OpenGL context based on selected API
-    bool useOpenGL = (m_renderer && m_renderer->getAPI() == GraphicsAPI::OpenGL);
-
-    if (!m_window) {
-        m_window = std::make_unique<Window>(1280, 720, "Fresh Voxel Engine");
-        if (!m_window->initialize(useOpenGL)) {
-            std::cerr << "Failed to initialize window in game systems" << std::endl;
-            return;
-        }
-    }
-
-    // Create input manager and set up callbacks
-    if (!m_inputManager) {
-        m_inputManager = std::make_unique<InputManager>();
-        m_inputManager->initialize(m_window->getHandle());
-        setupInputCallbacks();
-    }
-
-    // Initialize renderer with window
-    if (m_renderer && m_window) {
-        m_renderer->initialize(m_window.get());
-    }
-
-    // Initialize rendering based on API
-#if defined(FRESH_OPENGL_SUPPORT) && defined(FRESH_GLEW_AVAILABLE)
-    if (m_renderer && m_renderer->getAPI() == GraphicsAPI::OpenGL && m_shaderProgram == 0) {
-        initializeRendering();
-    }
-#endif
-
-    // Create player
-    if (!m_player && m_world) {
-        m_player = std::make_unique<Player>();
-        m_player->setWorld(m_world.get());
-        m_player->setPosition(glm::vec3(0.0f, 80.0f, 0.0f));
-    }
 }
 
 void Engine::setupInputCallbacks()

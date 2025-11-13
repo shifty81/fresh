@@ -271,6 +271,14 @@ void EditorMenuBar::renderBuildMenu()
 void EditorMenuBar::renderSettingsMenu()
 {
     if (ImGui::BeginMenu("Settings")) {
+        if (ImGui::MenuItem("Game Settings...", "Ctrl+,")) {
+            if (m_settingsCallback) {
+                m_settingsCallback();
+            }
+        }
+
+        ImGui::Separator();
+
         if (ImGui::BeginMenu("Graphics API")) {
             bool isOpenGL = true; // Would query from render context
             bool isDX11 = false;

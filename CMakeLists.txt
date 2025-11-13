@@ -391,6 +391,8 @@ if(imgui_FOUND)
         src/ui/ContentBrowserPanel.cpp
         src/ui/ConsolePanel.cpp
         src/ui/VoxelToolPalette.cpp
+        src/ui/MainMenuPanel.cpp
+        src/ui/SettingsPanel.cpp
     )
 endif()
 
@@ -435,6 +437,8 @@ set(ENGINE_HEADERS
     include/ui/ContentBrowserPanel.h
     include/ui/ConsolePanel.h
     include/ui/VoxelToolPalette.h
+    include/ui/MainMenuPanel.h
+    include/ui/SettingsPanel.h
     include/input/InputManager.h
     include/gameplay/Camera.h
     include/gameplay/Player.h

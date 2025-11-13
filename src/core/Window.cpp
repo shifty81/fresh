@@ -80,6 +80,15 @@ bool Window::shouldClose() const
     return glfwWindowShouldClose(m_window);
 }
 
+void Window::setSize(uint32_t width, uint32_t height)
+{
+    m_width = width;
+    m_height = height;
+    if (m_window) {
+        glfwSetWindowSize(m_window, width, height);
+    }
+}
+
 void Window::framebufferResizeCallback(GLFWwindow* window, int width, int height)
 {
     auto app = reinterpret_cast<Window*>(glfwGetWindowUserPointer(window));

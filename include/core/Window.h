@@ -79,6 +79,13 @@ public:
     }
 
     /**
+     * @brief Set window size
+     * @param width New width in pixels
+     * @param height New height in pixels
+     */
+    void setSize(uint32_t width, uint32_t height);
+
+    /**
      * @brief Swap front and back buffers (for OpenGL)
      */
     void swapBuffers();

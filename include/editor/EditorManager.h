@@ -17,6 +17,8 @@ class EditorToolbar;
 class ContentBrowserPanel;
 class ConsolePanel;
 class VoxelToolPalette;
+class MainMenuPanel;
+class SettingsPanel;
 
 /**
  * @brief Comprehensive Editor Manager
@@ -40,10 +42,11 @@ public:
      * @param renderContext Render context for ImGui
      * @param world Voxel world
      * @param worldEditor World editor instance
+     * @param inputManager Input manager for settings
      * @return true if successful
      */
     bool initialize(Window* window, IRenderContext* renderContext, VoxelWorld* world,
-                    WorldEditor* worldEditor);
+                    WorldEditor* worldEditor, class InputManager* inputManager = nullptr);
 
     /**
      * @brief Begin a new editor frame
@@ -122,6 +125,24 @@ public:
         return m_imguiContext.get();
     }
 
+    /**
+     * @brief Get the main menu panel
+     * @return Main menu panel pointer
+     */
+    MainMenuPanel* getMainMenuPanel() const
+    {
+        return m_mainMenuPanel.get();
+    }
+
+    /**
+     * @brief Get the settings panel
+     * @return Settings panel pointer
+     */
+    SettingsPanel* getSettingsPanel() const
+    {
+        return m_settingsPanel.get();
+    }
+
 private:
     void setupDockspace();
 
@@ -140,6 +161,8 @@ private:
     std::unique_ptr<ContentBrowserPanel> m_contentBrowser;
     std::unique_ptr<ConsolePanel> m_console;
     std::unique_ptr<VoxelToolPalette> m_voxelTools;
+    std::unique_ptr<MainMenuPanel> m_mainMenuPanel;
+    std::unique_ptr<SettingsPanel> m_settingsPanel;
 
     // References
     Window* m_window;
