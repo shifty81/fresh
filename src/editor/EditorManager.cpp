@@ -288,6 +288,98 @@ void EditorManager::shutdown()
     LOG_INFO_C("EditorManager shutdown complete", "EditorManager");
 }
 
+bool EditorManager::updateWorld(VoxelWorld* world, WorldEditor* worldEditor)
+{
+    if (!m_initialized) {
+        LOG_ERROR_C("EditorManager not initialized, cannot update world", "EditorManager");
+        return false;
+    }
+
+    if (!world || !worldEditor) {
+        LOG_ERROR_C("Invalid world or worldEditor parameters", "EditorManager");
+        return false;
+    }
+
+#ifdef FRESH_IMGUI_AVAILABLE
+    // Update world references
+    m_world = world;
+    m_worldEditor = worldEditor;
+
+    // Recreate world-dependent panels with new world reference
+    // Shutdown and reinitialize only the world-dependent panels
+    m_sceneHierarchy.reset();
+    m_inspector.reset();
+    m_menuBar.reset();
+    m_toolbar.reset();
+    m_contentBrowser.reset();
+    m_console.reset();
+    m_voxelTools.reset();
+
+    // Reinitialize world-dependent panels
+    m_sceneHierarchy = std::make_unique<SceneHierarchyPanel>();
+    if (!m_sceneHierarchy->initialize(world)) {
+        LOG_ERROR_C("Failed to initialize Scene Hierarchy panel", "EditorManager");
+        return false;
+    }
+
+    m_inspector = std::make_unique<InspectorPanel>();
+    if (!m_inspector->initialize()) {
+        LOG_ERROR_C("Failed to initialize Inspector panel", "EditorManager");
+        return false;
+    }
+
+    m_menuBar = std::make_unique<EditorMenuBar>();
+    if (!m_menuBar->initialize(world, worldEditor)) {
+        LOG_ERROR_C("Failed to initialize Menu Bar", "EditorManager");
+        return false;
+    }
+
+    // Link menu bar to panel visibility flags
+    m_menuBar->setSceneHierarchyVisible(&m_showSceneHierarchy);
+    m_menuBar->setInspectorVisible(&m_showInspector);
+    m_menuBar->setContentBrowserVisible(&m_showContentBrowser);
+    m_menuBar->setConsoleVisible(&m_showConsole);
+    m_menuBar->setToolPaletteVisible(&m_showToolPalette);
+
+    // Set settings callback to open settings panel
+    m_menuBar->setSettingsCallback([this]() {
+        if (m_settingsPanel) {
+            m_settingsPanel->setVisible(true);
+        }
+    });
+
+    m_toolbar = std::make_unique<EditorToolbar>();
+    if (!m_toolbar->initialize()) {
+        LOG_ERROR_C("Failed to initialize Toolbar", "EditorManager");
+        return false;
+    }
+
+    m_contentBrowser = std::make_unique<ContentBrowserPanel>();
+    if (!m_contentBrowser->initialize("assets")) {
+        LOG_ERROR_C("Failed to initialize Content Browser panel", "EditorManager");
+        return false;
+    }
+
+    m_console = std::make_unique<ConsolePanel>();
+    if (!m_console->initialize()) {
+        LOG_ERROR_C("Failed to initialize Console panel", "EditorManager");
+        return false;
+    }
+
+    m_voxelTools = std::make_unique<VoxelToolPalette>();
+    if (!m_voxelTools->initialize(worldEditor->getTerraformingSystem())) {
+        LOG_ERROR_C("Failed to initialize Voxel Tool Palette", "EditorManager");
+        return false;
+    }
+
+    LOG_INFO_C("EditorManager updated with new world successfully", "EditorManager");
+    return true;
+#else
+    LOG_WARNING_C("ImGui not available, updateWorld has no effect", "EditorManager");
+    return true;
+#endif
+}
+
 void EditorManager::setupDockspace()
 {
 #ifdef FRESH_IMGUI_AVAILABLE

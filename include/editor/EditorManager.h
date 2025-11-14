@@ -70,6 +70,14 @@ public:
     void shutdown();
 
     /**
+     * @brief Update world and world editor references
+     * @param world New voxel world reference
+     * @param worldEditor New world editor reference
+     * @return true if successful
+     */
+    bool updateWorld(VoxelWorld* world, WorldEditor* worldEditor);
+
+    /**
      * @brief Check if editor is initialized
      * @return true if initialized
      */

@@ -266,15 +266,13 @@ void Engine::initializeGameSystems()
     }
 
 #ifdef FRESH_IMGUI_AVAILABLE
-    // Re-initialize editor manager with the world
+    // Update editor manager with the world instead of shutting down and re-initializing
     if (m_editorManager && m_world && m_worldEditor) {
         // Update the editor manager with world and world editor references
-        m_editorManager->shutdown();
-        if (!m_editorManager->initialize(m_window.get(), m_renderer.get(), m_world.get(),
-                                         m_worldEditor.get(), m_inputManager.get())) {
-            LOG_ERROR_C("Failed to re-initialize editor manager with world", "Engine");
+        if (!m_editorManager->updateWorld(m_world.get(), m_worldEditor.get())) {
+            LOG_ERROR_C("Failed to update editor manager with world", "Engine");
             LOG_WARNING_C("Editor will be unavailable. Game will continue without editor UI.", "Engine");
-            std::cerr << "Warning: Editor manager re-initialization failed. Continuing without editor UI." << std::endl;
+            std::cerr << "Warning: Editor manager update failed. Continuing without editor UI." << std::endl;
         } else {
             m_editorManager->setVisible(true);
             std::cout << "Editor manager updated with world" << std::endl;

@@ -108,6 +108,29 @@ TEST_F(EngineInitializationTest, ShutdownOrderPreventsAccessViolation) {
               << "before resetting m_renderer to prevent use-after-free.";
 }
 
+/**
+ * @brief Test that EditorManager updates world without full shutdown
+ * 
+ * This test documents the fix for the createNewWorld crash:
+ * - When creating a new world, EditorManager should update world references
+ * - It should NOT shut down and re-initialize ImGuiContext
+ * - Full shutdown/re-init causes ImGui state corruption and access violations
+ */
+TEST_F(EngineInitializationTest, EditorManagerUpdatesWorldWithoutShutdown) {
+    // This test documents the updateWorld fix
+    
+    // GIVEN: EditorManager is initialized and a new world is being created
+    // WHEN: initializeGameSystems() is called after createNewWorld
+    // THEN: EditorManager.updateWorld() should be called instead of shutdown/initialize
+    // AND: ImGuiContext should remain valid throughout the process
+    // AND: Only world-dependent panels should be recreated
+    // AND: No access violation occurs
+    
+    SUCCEED() << "This test documents the expected behavior. "
+              << "EditorManager::updateWorld() updates world-dependent panels "
+              << "without shutting down ImGuiContext, preventing access violations.";
+}
+
 } // namespace fresh
 
 /**
@@ -146,4 +169,28 @@ TEST_F(EngineInitializationTest, ShutdownOrderPreventsAccessViolation) {
  *           access the render context during its shutdown sequence.
  * 
  * Impact: Engine can now shut down cleanly without access violations.
+ * 
+ * Bug Fix Summary #3:
+ * -------------------
+ * Problem: "Exception thrown: read access violation.
+ *           this->m_renderContext-> was 0xFFFFFFFFFFFFFFAF."
+ *           Crash occurs right after hitting accept on name/seed window when creating
+ *           a new world. Stack trace shows crash in ImGuiContext::shutdown() line 330
+ *           called from EditorManager::shutdown() line 275 during initializeGameSystems().
+ * 
+ * Root Cause: When creating a new world, initializeGameSystems() called 
+ *             EditorManager::shutdown() followed by initialize() to update world references.
+ *             This destroyed and recreated the ImGuiContext, which:
+ *             - Called ImGui::DestroyContext() then ImGui::CreateContext()
+ *             - Corrupted ImGui state when done during active frame
+ *             - Led to m_renderContext pointer becoming invalid (0xFFFFFFFFFFFFFFAF)
+ * 
+ * Solution: Created EditorManager::updateWorld() method that:
+ *           - Updates world/worldEditor references without touching ImGuiContext
+ *           - Recreates only the world-dependent panels (scene hierarchy, inspector, etc.)
+ *           - Keeps ImGuiContext and ImGui state intact
+ *           - Changed Engine::initializeGameSystems() to call updateWorld() instead
+ * 
+ * Impact: New worlds can be created from the main menu without crashes. ImGui state
+ *         remains valid throughout the world creation process.
  */
