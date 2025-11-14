@@ -128,6 +128,13 @@ private:
      */
     bool checkGrounded();
 
+    /**
+     * @brief Check if there's ground ahead at a position (for crouch edge detection)
+     * @param newPos Position to check
+     * @return true if ground exists below this position
+     */
+    bool checkGroundAhead(const glm::vec3& newPos);
+
     Camera camera;
     VoxelWorld* world = nullptr;
 

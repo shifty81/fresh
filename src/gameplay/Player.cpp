@@ -179,6 +179,18 @@ void Player::handleMovement(const glm::vec3& direction, float speed, float delta
 {
     glm::vec3 movement = direction * speed * deltaTime;
 
+    // When crouching, check for edges to prevent falling off
+    if (isCrouching && !freeFlightMode) {
+        // Calculate the new position if we were to move
+        glm::vec3 potentialNewPos = position + movement;
+        
+        // Check if there's ground at the new position
+        if (!checkGroundAhead(potentialNewPos)) {
+            // No ground ahead - prevent movement in this direction
+            return;
+        }
+    }
+
     // Try to move in X
     glm::vec3 newPos = position + glm::vec3(movement.x, 0.0f, 0.0f);
     if (!checkCollision(newPos)) {
@@ -251,6 +263,36 @@ bool Player::checkGrounded()
     }
 
     return false;
+}
+
+bool Player::checkGroundAhead(const glm::vec3& newPos)
+{
+    if (!world)
+        return false;
+
+    // Check slightly below the new position to see if there's ground
+    // This prevents the player from walking off edges while crouching
+    float checkY = newPos.y - 0.5f; // Check a bit below feet
+
+    // Sample points around player cylinder at the new position
+    int samples = 8;
+    for (int i = 0; i < samples; ++i) {
+        float angle = (2.0f * 3.14159f * i) / samples;
+        float x = newPos.x + (radius * 0.8f) * cos(angle);
+        float z = newPos.z + (radius * 0.8f) * sin(angle);
+
+        int blockX = static_cast<int>(std::floor(x));
+        int blockY = static_cast<int>(std::floor(checkY));
+        int blockZ = static_cast<int>(std::floor(z));
+
+        Voxel* voxelPtr = world->getVoxel(WorldPos(blockX, blockY, blockZ));
+        VoxelType voxel = voxelPtr ? voxelPtr->type : VoxelType::Air;
+        if (voxel != VoxelType::Air && voxel != VoxelType::Water) {
+            return true; // Ground detected ahead
+        }
+    }
+
+    return false; // No ground ahead - would fall off edge
 }
 
 } // namespace fresh
