@@ -186,7 +186,7 @@ void Engine::createNewWorld(const std::string& name, int seed)
 
     // Save the world
     WorldSerializer serializer;
-    std::string savePath = "saves/" + name + ".world";
+    std::string savePath = std::string("saves/") + name + ".world";
     if (serializer.saveWorld(m_world.get(), savePath)) {
         std::cout << "World saved to: " << savePath << std::endl;
     }
@@ -205,7 +205,7 @@ void Engine::loadWorld(const std::string& name)
 
     // Load the world from file
     WorldSerializer serializer;
-    std::string loadPath = "saves/" + name + ".world";
+    std::string loadPath = std::string("saves/") + name + ".world";
 
     if (serializer.loadWorld(m_world.get(), loadPath)) {
         std::cout << "World '" << name << "' loaded successfully!" << std::endl;
