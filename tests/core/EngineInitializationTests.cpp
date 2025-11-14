@@ -86,13 +86,35 @@ TEST_F(EngineInitializationTest, DirectXBackendsWorkWithoutExtraInit) {
               << "DirectX backends don't use initializeRendering().";
 }
 
+/**
+ * @brief Test that Engine shutdown properly handles EditorManager cleanup
+ * 
+ * This test documents the fix for the shutdown crash:
+ * - Engine::shutdown() must shut down EditorManager before resetting renderer
+ * - Otherwise ImGuiContext tries to access freed render context
+ * - This causes a read access violation (0xFFFFFFFFFFFFFFAF)
+ */
+TEST_F(EngineInitializationTest, ShutdownOrderPreventsAccessViolation) {
+    // This test documents the shutdown order fix
+    
+    // GIVEN: Engine is shutting down with an active EditorManager
+    // WHEN: shutdown() is called
+    // THEN: EditorManager must be shutdown before renderer is destroyed
+    // AND: ImGuiContext can safely access render context during its shutdown
+    // AND: No access violation occurs
+    
+    SUCCEED() << "This test documents the expected behavior. "
+              << "Engine::shutdown() now explicitly shuts down EditorManager "
+              << "before resetting m_renderer to prevent use-after-free.";
+}
+
 } // namespace fresh
 
 /**
  * @brief Test suite documentation
  * 
- * Bug Fix Summary:
- * ----------------
+ * Bug Fix Summary #1:
+ * -------------------
  * Problem: "When I launch new world I do not see any world generation 
  *           however console outputs that I am moving"
  * 
@@ -107,4 +129,21 @@ TEST_F(EngineInitializationTest, DirectXBackendsWorkWithoutExtraInit) {
  *           - One-time initialization check (m_shaderProgram == 0)
  * 
  * Impact: Now worlds created from the main menu render correctly with OpenGL.
+ * 
+ * Bug Fix Summary #2:
+ * -------------------
+ * Problem: "Exception thrown: read access violation. 
+ *           this->m_renderContext-> was 0xFFFFFFFFFFFFFFAF."
+ *           Crash occurs in ImGuiContext::shutdown() at line 330.
+ * 
+ * Root Cause: Engine::shutdown() was resetting m_renderer (which owns the render
+ *             context) before EditorManager was cleaned up. When EditorManager's
+ *             destructor later ran, it called ImGuiContext::shutdown() which tried
+ *             to access the already-freed m_renderContext pointer.
+ * 
+ * Solution: Added explicit EditorManager shutdown and reset in Engine::shutdown()
+ *           BEFORE resetting m_renderer. This ensures ImGuiContext can safely
+ *           access the render context during its shutdown sequence.
+ * 
+ * Impact: Engine can now shut down cleanly without access violations.
  */

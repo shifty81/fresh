@@ -487,6 +487,15 @@ void Engine::shutdown()
     // Clean up GLFW callback user data
     m_callbackUserData.reset();
 
+#ifdef FRESH_IMGUI_AVAILABLE
+    // Explicitly shutdown editor manager BEFORE resetting renderer
+    // This ensures ImGuiContext can safely access render context during shutdown
+    if (m_editorManager) {
+        m_editorManager->shutdown();
+        m_editorManager.reset();
+    }
+#endif
+
     m_player.reset();
     m_inputManager.reset();
     m_editor.reset();
