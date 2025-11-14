@@ -709,6 +709,8 @@ if(BUILD_TESTS)
     set(TEST_SOURCES
         tests/test_main.cpp                 # Custom main with better error handling
         tests/voxel/ChunkTests.cpp
+        tests/voxel/VoxelWorldTests.cpp
+        tests/integration/WorldCreationIntegrationTest.cpp
         tests/generation/NoiseTests.cpp
         tests/generation/TerrainGeneratorTests.cpp
         tests/input/InputManagerTests.cpp
