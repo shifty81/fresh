@@ -321,6 +321,9 @@ void ImGuiContext::shutdown()
         ImGui_ImplGlfw_Shutdown();
         ::ImGui::DestroyContext();
         m_initialized = false;
+        m_backendRenderContext = nullptr;
+        m_renderContext = nullptr; // Ensure it's null
+        m_window = nullptr;        // Clear the window pointer as well
         return;
     }
 
@@ -355,6 +358,8 @@ void ImGuiContext::shutdown()
 
     m_initialized = false;
     m_backendRenderContext = nullptr;
+    m_renderContext = nullptr; // Clear the render context pointer to avoid dangling pointer
+    m_window = nullptr;        // Clear the window pointer as well
     LOG_INFO_C("ImGui context shutdown", "ImGuiContext");
 #endif // FRESH_IMGUI_AVAILABLE
 }
