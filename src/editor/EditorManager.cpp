@@ -277,6 +277,12 @@ void EditorManager::shutdown()
     m_imguiContext.reset();
 #endif
 
+    // Clear all pointer references to avoid dangling pointers
+    m_window = nullptr;
+    m_renderContext = nullptr;
+    m_world = nullptr;
+    m_worldEditor = nullptr;
+
     m_initialized = false;
     m_visible = false; // Reset visibility flag on shutdown
     LOG_INFO_C("EditorManager shutdown complete", "EditorManager");

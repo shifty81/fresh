@@ -360,18 +360,30 @@ void Engine::run()
 
                 // Check if user wants to create or load a world from GUI
                 auto* mainMenuPanel = m_editorManager->getMainMenuPanel();
+                bool worldActionRequested = false;
                 if (mainMenuPanel) {
                     if (mainMenuPanel->shouldCreateNewWorld()) {
+                        // End the current ImGui frame before world creation to avoid frame lifecycle issues
+                        m_editorManager->endFrame();
+                        
                         createNewWorld(mainMenuPanel->getNewWorldName(),
                                        mainMenuPanel->getWorldSeed());
                         mainMenuPanel->clearFlags();
+                        worldActionRequested = true;
                     } else if (mainMenuPanel->shouldLoadWorld()) {
+                        // End the current ImGui frame before world loading to avoid frame lifecycle issues
+                        m_editorManager->endFrame();
+                        
                         loadWorld(mainMenuPanel->getLoadWorldName());
                         mainMenuPanel->clearFlags();
+                        worldActionRequested = true;
                     }
                 }
 
-                m_editorManager->endFrame();
+                // Only call endFrame if we didn't already call it above
+                if (!worldActionRequested) {
+                    m_editorManager->endFrame();
+                }
             }
 
             // End frame
