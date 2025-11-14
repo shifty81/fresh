@@ -216,7 +216,7 @@ bool ImGuiContext::initialize(Window* window, IRenderContext* renderContext)
 void ImGuiContext::newFrame()
 {
 #ifdef FRESH_IMGUI_AVAILABLE
-    if (!m_initialized) {
+    if (!m_initialized || !m_renderContext) {
         return;
     }
 
@@ -252,7 +252,7 @@ void ImGuiContext::newFrame()
 void ImGuiContext::render()
 {
 #ifdef FRESH_IMGUI_AVAILABLE
-    if (!m_initialized) {
+    if (!m_initialized || !m_renderContext) {
         return;
     }
 
@@ -313,7 +313,17 @@ void ImGuiContext::shutdown()
         return;
     }
 
-    // Shutdown graphics backend
+    // Shutdown graphics backend only if render context is still valid
+    if (!m_renderContext) {
+        LOG_WARNING_C("Render context is null during shutdown, skipping backend cleanup",
+                      "ImGuiContext");
+        // Still need to cleanup ImGui and GLFW
+        ImGui_ImplGlfw_Shutdown();
+        ::ImGui::DestroyContext();
+        m_initialized = false;
+        return;
+    }
+
     GraphicsAPI api = m_renderContext->getAPI();
 
     switch (api) {
