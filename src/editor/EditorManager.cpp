@@ -163,11 +163,13 @@ bool EditorManager::initialize(Window* window, IRenderContext* renderContext, Vo
 
 void EditorManager::beginFrame()
 {
-    if (!m_initialized || !m_visible) {
+    if (!m_initialized) {
         return;
     }
 
 #ifdef FRESH_IMGUI_AVAILABLE
+    // Always call newFrame() when initialized, regardless of visibility
+    // This is required by ImGui - NewFrame() and Render() must always be paired
     if (m_imguiContext) {
         m_imguiContext->newFrame();
     }
@@ -238,11 +240,13 @@ void EditorManager::render()
 
 void EditorManager::endFrame()
 {
-    if (!m_initialized || !m_visible) {
+    if (!m_initialized) {
         return;
     }
 
 #ifdef FRESH_IMGUI_AVAILABLE
+    // Always call render() when initialized, regardless of visibility
+    // This is required by ImGui - NewFrame() and Render() must always be paired
     if (m_imguiContext) {
         m_imguiContext->render();
     }
@@ -274,6 +278,7 @@ void EditorManager::shutdown()
 #endif
 
     m_initialized = false;
+    m_visible = false; // Reset visibility flag on shutdown
     LOG_INFO_C("EditorManager shutdown complete", "EditorManager");
 }
 
