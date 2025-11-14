@@ -1,6 +1,7 @@
 #include "ui/SceneHierarchyPanel.h"
 
 #include <cstring>
+#include <functional>
 
 #include "core/Logger.h"
 #include "voxel/VoxelWorld.h"
@@ -336,6 +337,45 @@ std::shared_ptr<HierarchyNode> SceneHierarchyPanel::duplicateNode(HierarchyNode*
     }
 
     return duplicate;
+}
+
+void SceneHierarchyPanel::selectAll()
+{
+    if (!m_rootNode) {
+        return;
+    }
+
+    // Recursive function to select all nodes
+    std::function<void(HierarchyNode*)> selectNodeAndChildren = [&](HierarchyNode* node) {
+        if (!node) return;
+        node->selected = true;
+        for (auto& child : node->children) {
+            selectNodeAndChildren(child.get());
+        }
+    };
+
+    selectNodeAndChildren(m_rootNode.get());
+    LOG_INFO_C("Selected all nodes in scene hierarchy", "SceneHierarchyPanel");
+}
+
+void SceneHierarchyPanel::deselectAll()
+{
+    if (!m_rootNode) {
+        return;
+    }
+
+    // Recursive function to deselect all nodes
+    std::function<void(HierarchyNode*)> deselectNodeAndChildren = [&](HierarchyNode* node) {
+        if (!node) return;
+        node->selected = false;
+        for (auto& child : node->children) {
+            deselectNodeAndChildren(child.get());
+        }
+    };
+
+    deselectNodeAndChildren(m_rootNode.get());
+    m_selectedNode = nullptr;
+    LOG_INFO_C("Deselected all nodes in scene hierarchy", "SceneHierarchyPanel");
 }
 
 } // namespace fresh

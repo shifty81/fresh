@@ -168,11 +168,19 @@ void EditorMenuBar::renderEditMenu()
         ImGui::Separator();
 
         if (ImGui::MenuItem("Select All", "Ctrl+A")) {
-            LOG_INFO_C("Select All - would select all objects in scene", "EditorMenuBar");
+            if (m_selectAllCallback) {
+                m_selectAllCallback();
+            } else {
+                LOG_INFO_C("Select All - would select all objects in scene", "EditorMenuBar");
+            }
         }
 
         if (ImGui::MenuItem("Deselect All", "Ctrl+D")) {
-            LOG_INFO_C("Deselect All - would clear selection", "EditorMenuBar");
+            if (m_deselectAllCallback) {
+                m_deselectAllCallback();
+            } else {
+                LOG_INFO_C("Deselect All - would clear selection", "EditorMenuBar");
+            }
         }
 
         ImGui::Separator();

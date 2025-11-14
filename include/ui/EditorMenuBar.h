@@ -91,6 +91,14 @@ public:
     {
         m_importAssetsCallback = callback;
     }
+    void setSelectAllCallback(MenuCallback callback)
+    {
+        m_selectAllCallback = callback;
+    }
+    void setDeselectAllCallback(MenuCallback callback)
+    {
+        m_deselectAllCallback = callback;
+    }
 
 private:
     void renderFileMenu();
@@ -118,6 +126,8 @@ private:
     MenuCallback m_deleteCallback;
     MenuCallback m_settingsCallback;
     MenuCallback m_importAssetsCallback;
+    MenuCallback m_selectAllCallback;
+    MenuCallback m_deselectAllCallback;
 
     // Window visibility flags (shared with other systems)
     bool* m_showSceneHierarchy;
