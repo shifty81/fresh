@@ -106,10 +106,12 @@ template <>
 struct hash<fresh::ChunkPos> {
     std::size_t operator()(const fresh::ChunkPos& pos) const noexcept
     {
-        // Use FNV-1a hash combining for better distribution
-        std::size_t h1 = std::hash<int>{}(pos.x);
-        std::size_t h2 = std::hash<int>{}(pos.z);
-        return h1 ^ (h2 << 1);
+        // Use a better hash combining technique (Boost-style hash_combine)
+        // This provides better distribution than simple XOR
+        std::size_t seed = 0;
+        seed ^= std::hash<int>{}(pos.x) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+        seed ^= std::hash<int>{}(pos.z) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+        return seed;
     }
 };
 } // namespace std

@@ -30,8 +30,8 @@ public:
      * @param z Local z coordinate (0-CHUNK_SIZE)
      * @return Reference to voxel
      */
-    Voxel& getVoxel(int x, int y, int z);
-    const Voxel& getVoxel(int x, int y, int z) const;
+    [[nodiscard]] Voxel& getVoxel(int x, int y, int z) noexcept;
+    [[nodiscard]] const Voxel& getVoxel(int x, int y, int z) const noexcept;
 
     /**
      * @brief Set voxel at local chunk coordinates

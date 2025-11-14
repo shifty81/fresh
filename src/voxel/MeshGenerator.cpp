@@ -140,11 +140,11 @@ void MeshGenerator::generateSimpleMesh(const Chunk* chunk, std::vector<float>& v
 void MeshGenerator::addFace(const Face& face, std::vector<float>& vertices,
                             std::vector<uint32_t>& indices)
 {
-    float x = static_cast<float>(face.x);
-    float y = static_cast<float>(face.y);
-    float z = static_cast<float>(face.z);
+    const float x = static_cast<float>(face.x);
+    const float y = static_cast<float>(face.y);
+    const float z = static_cast<float>(face.z);
 
-    uint32_t startIndex =
+    const uint32_t startIndex =
         static_cast<uint32_t>(vertices.size() / 6); // 6 floats per vertex (pos + normal)
 
     // Color based on block type (not currently used in vertex data, but may be used for
@@ -174,43 +174,182 @@ void MeshGenerator::addFace(const Face& face, std::vector<float>& vertices,
     (void)g;
     (void)b;
 
+    // Pre-allocate space for 4 vertices (24 floats: 4 vertices * 6 floats each)
+    vertices.reserve(vertices.size() + 24);
+
     // Add vertices based on face direction
+    // Using individual emplace_back calls is more efficient than insert with initializer lists
     switch (face.direction) {
-    case 0: // +X
-        vertices.insert(vertices.end(), {x + 1, y,    z,     1.0f, 0.0f,  0.0f,  x + 1, y + 1,
-                                         z,     1.0f, 0.0f,  0.0f, x + 1, y + 1, z + 1, 1.0f,
-                                         0.0f,  0.0f, x + 1, y,    z + 1, 1.0f,  0.0f,  0.0f});
+    case 0: // +X face (right)
+        // Vertex 0: bottom-left
+        vertices.emplace_back(x + 1);
+        vertices.emplace_back(y);
+        vertices.emplace_back(z);
+        vertices.emplace_back(1.0f);
+        vertices.emplace_back(0.0f);
+        vertices.emplace_back(0.0f);
+        // Vertex 1: top-left
+        vertices.emplace_back(x + 1);
+        vertices.emplace_back(y + 1);
+        vertices.emplace_back(z);
+        vertices.emplace_back(1.0f);
+        vertices.emplace_back(0.0f);
+        vertices.emplace_back(0.0f);
+        // Vertex 2: top-right
+        vertices.emplace_back(x + 1);
+        vertices.emplace_back(y + 1);
+        vertices.emplace_back(z + 1);
+        vertices.emplace_back(1.0f);
+        vertices.emplace_back(0.0f);
+        vertices.emplace_back(0.0f);
+        // Vertex 3: bottom-right
+        vertices.emplace_back(x + 1);
+        vertices.emplace_back(y);
+        vertices.emplace_back(z + 1);
+        vertices.emplace_back(1.0f);
+        vertices.emplace_back(0.0f);
+        vertices.emplace_back(0.0f);
         break;
-    case 1: // -X
-        vertices.insert(vertices.end(),
-                        {x, y,     z,     -1.0f, 0.0f, 0.0f, x, y,     z + 1, -1.0f, 0.0f, 0.0f,
-                         x, y + 1, z + 1, -1.0f, 0.0f, 0.0f, x, y + 1, z,     -1.0f, 0.0f, 0.0f});
+    case 1: // -X face (left)
+        vertices.emplace_back(x);
+        vertices.emplace_back(y);
+        vertices.emplace_back(z);
+        vertices.emplace_back(-1.0f);
+        vertices.emplace_back(0.0f);
+        vertices.emplace_back(0.0f);
+        vertices.emplace_back(x);
+        vertices.emplace_back(y);
+        vertices.emplace_back(z + 1);
+        vertices.emplace_back(-1.0f);
+        vertices.emplace_back(0.0f);
+        vertices.emplace_back(0.0f);
+        vertices.emplace_back(x);
+        vertices.emplace_back(y + 1);
+        vertices.emplace_back(z + 1);
+        vertices.emplace_back(-1.0f);
+        vertices.emplace_back(0.0f);
+        vertices.emplace_back(0.0f);
+        vertices.emplace_back(x);
+        vertices.emplace_back(y + 1);
+        vertices.emplace_back(z);
+        vertices.emplace_back(-1.0f);
+        vertices.emplace_back(0.0f);
+        vertices.emplace_back(0.0f);
         break;
-    case 2: // +Y
-        vertices.insert(vertices.end(), {x,     y + 1, z,     0.0f,  1.0f,  0.0f,  x,     y + 1,
-                                         z + 1, 0.0f,  1.0f,  0.0f,  x + 1, y + 1, z + 1, 0.0f,
-                                         1.0f,  0.0f,  x + 1, y + 1, z,     0.0f,  1.0f,  0.0f});
+    case 2: // +Y face (top)
+        vertices.emplace_back(x);
+        vertices.emplace_back(y + 1);
+        vertices.emplace_back(z);
+        vertices.emplace_back(0.0f);
+        vertices.emplace_back(1.0f);
+        vertices.emplace_back(0.0f);
+        vertices.emplace_back(x);
+        vertices.emplace_back(y + 1);
+        vertices.emplace_back(z + 1);
+        vertices.emplace_back(0.0f);
+        vertices.emplace_back(1.0f);
+        vertices.emplace_back(0.0f);
+        vertices.emplace_back(x + 1);
+        vertices.emplace_back(y + 1);
+        vertices.emplace_back(z + 1);
+        vertices.emplace_back(0.0f);
+        vertices.emplace_back(1.0f);
+        vertices.emplace_back(0.0f);
+        vertices.emplace_back(x + 1);
+        vertices.emplace_back(y + 1);
+        vertices.emplace_back(z);
+        vertices.emplace_back(0.0f);
+        vertices.emplace_back(1.0f);
+        vertices.emplace_back(0.0f);
         break;
-    case 3: // -Y
-        vertices.insert(vertices.end(),
-                        {x,     y, z,     0.0f, -1.0f, 0.0f, x + 1, y, z,     0.0f, -1.0f, 0.0f,
-                         x + 1, y, z + 1, 0.0f, -1.0f, 0.0f, x,     y, z + 1, 0.0f, -1.0f, 0.0f});
+    case 3: // -Y face (bottom)
+        vertices.emplace_back(x);
+        vertices.emplace_back(y);
+        vertices.emplace_back(z);
+        vertices.emplace_back(0.0f);
+        vertices.emplace_back(-1.0f);
+        vertices.emplace_back(0.0f);
+        vertices.emplace_back(x + 1);
+        vertices.emplace_back(y);
+        vertices.emplace_back(z);
+        vertices.emplace_back(0.0f);
+        vertices.emplace_back(-1.0f);
+        vertices.emplace_back(0.0f);
+        vertices.emplace_back(x + 1);
+        vertices.emplace_back(y);
+        vertices.emplace_back(z + 1);
+        vertices.emplace_back(0.0f);
+        vertices.emplace_back(-1.0f);
+        vertices.emplace_back(0.0f);
+        vertices.emplace_back(x);
+        vertices.emplace_back(y);
+        vertices.emplace_back(z + 1);
+        vertices.emplace_back(0.0f);
+        vertices.emplace_back(-1.0f);
+        vertices.emplace_back(0.0f);
         break;
-    case 4: // +Z
-        vertices.insert(vertices.end(), {x,     y,    z + 1, 0.0f,  0.0f,  1.0f,  x + 1, y,
-                                         z + 1, 0.0f, 0.0f,  1.0f,  x + 1, y + 1, z + 1, 0.0f,
-                                         0.0f,  1.0f, x,     y + 1, z + 1, 0.0f,  0.0f,  1.0f});
+    case 4: // +Z face (front)
+        vertices.emplace_back(x);
+        vertices.emplace_back(y);
+        vertices.emplace_back(z + 1);
+        vertices.emplace_back(0.0f);
+        vertices.emplace_back(0.0f);
+        vertices.emplace_back(1.0f);
+        vertices.emplace_back(x + 1);
+        vertices.emplace_back(y);
+        vertices.emplace_back(z + 1);
+        vertices.emplace_back(0.0f);
+        vertices.emplace_back(0.0f);
+        vertices.emplace_back(1.0f);
+        vertices.emplace_back(x + 1);
+        vertices.emplace_back(y + 1);
+        vertices.emplace_back(z + 1);
+        vertices.emplace_back(0.0f);
+        vertices.emplace_back(0.0f);
+        vertices.emplace_back(1.0f);
+        vertices.emplace_back(x);
+        vertices.emplace_back(y + 1);
+        vertices.emplace_back(z + 1);
+        vertices.emplace_back(0.0f);
+        vertices.emplace_back(0.0f);
+        vertices.emplace_back(1.0f);
         break;
-    case 5: // -Z
-        vertices.insert(vertices.end(),
-                        {x,     y,     z, 0.0f, 0.0f, -1.0f, x,     y + 1, z, 0.0f, 0.0f, -1.0f,
-                         x + 1, y + 1, z, 0.0f, 0.0f, -1.0f, x + 1, y,     z, 0.0f, 0.0f, -1.0f});
+    case 5: // -Z face (back)
+        vertices.emplace_back(x);
+        vertices.emplace_back(y);
+        vertices.emplace_back(z);
+        vertices.emplace_back(0.0f);
+        vertices.emplace_back(0.0f);
+        vertices.emplace_back(-1.0f);
+        vertices.emplace_back(x);
+        vertices.emplace_back(y + 1);
+        vertices.emplace_back(z);
+        vertices.emplace_back(0.0f);
+        vertices.emplace_back(0.0f);
+        vertices.emplace_back(-1.0f);
+        vertices.emplace_back(x + 1);
+        vertices.emplace_back(y + 1);
+        vertices.emplace_back(z);
+        vertices.emplace_back(0.0f);
+        vertices.emplace_back(0.0f);
+        vertices.emplace_back(-1.0f);
+        vertices.emplace_back(x + 1);
+        vertices.emplace_back(y);
+        vertices.emplace_back(z);
+        vertices.emplace_back(0.0f);
+        vertices.emplace_back(0.0f);
+        vertices.emplace_back(-1.0f);
         break;
     }
 
-    // Add indices for two triangles
-    indices.insert(indices.end(), {startIndex, startIndex + 1, startIndex + 2, startIndex,
-                                   startIndex + 2, startIndex + 3});
+    // Add indices for two triangles (more efficient to reserve + push_back than insert)
+    indices.reserve(indices.size() + 6);
+    indices.emplace_back(startIndex);
+    indices.emplace_back(startIndex + 1);
+    indices.emplace_back(startIndex + 2);
+    indices.emplace_back(startIndex);
+    indices.emplace_back(startIndex + 2);
+    indices.emplace_back(startIndex + 3);
 }
 
 bool MeshGenerator::isVoxelOpaque(const Chunk* chunk, int x, int y, int z,

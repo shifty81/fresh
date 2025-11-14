@@ -111,6 +111,8 @@ private:
 };
 
 // Template implementations
+#ifdef FRESH_LUA_AVAILABLE
+// Only compile template implementations when Sol2 is available
 template<typename... Args>
 bool LuaScriptingEngine::callFunction(const std::string& functionName, Args&&... args) {
     if (!m_initialized) {
@@ -146,6 +148,7 @@ template<typename T>
 void LuaScriptingEngine::registerClass(const std::string& className) {
     // Implementation in .cpp file using Sol2
     // This is a placeholder for custom class registration
+    (void)className; // Suppress unused parameter warning
 }
 
 template<typename T>
@@ -173,6 +176,47 @@ T LuaScriptingEngine::getGlobal(const std::string& name) {
         return T();
     }
 }
+
+#else // FRESH_LUA_AVAILABLE not defined
+
+// Stub implementations when Lua/Sol2 is not available
+template<typename... Args>
+bool LuaScriptingEngine::callFunction(const std::string& functionName, Args&&... args) {
+    (void)functionName;
+    (void)sizeof...(args); // Suppress unused parameter warning
+    reportError("Lua support not compiled in");
+    return false;
+}
+
+template<typename Ret, typename... Args>
+Ret LuaScriptingEngine::callFunctionWithReturn(const std::string& functionName, Args&&... args) {
+    (void)functionName;
+    (void)sizeof...(args); // Suppress unused parameter warning
+    reportError("Lua support not compiled in");
+    return Ret();
+}
+
+template<typename T>
+void LuaScriptingEngine::registerClass(const std::string& className) {
+    (void)className;
+    // Stub implementation - do nothing
+}
+
+template<typename T>
+void LuaScriptingEngine::registerObject(const std::string& name, T* object) {
+    (void)name;
+    (void)object;
+    // Stub implementation - do nothing
+}
+
+template<typename T>
+T LuaScriptingEngine::getGlobal(const std::string& name) {
+    (void)name;
+    reportError("Lua support not compiled in");
+    return T();
+}
+
+#endif // FRESH_LUA_AVAILABLE
 
 } // namespace scripting
 } // namespace fresh
