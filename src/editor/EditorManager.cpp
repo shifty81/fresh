@@ -105,6 +105,26 @@ bool EditorManager::initialize(Window* window, IRenderContext* renderContext, Vo
             }
         });
 
+        // Set import assets callback to show import dialog in content browser
+        m_menuBar->setImportAssetsCallback([this]() {
+            if (m_contentBrowser) {
+                m_contentBrowser->showImportDialog();
+            }
+        });
+
+        // Set select all/deselect all callbacks for scene hierarchy
+        m_menuBar->setSelectAllCallback([this]() {
+            if (m_sceneHierarchy) {
+                m_sceneHierarchy->selectAll();
+            }
+        });
+
+        m_menuBar->setDeselectAllCallback([this]() {
+            if (m_sceneHierarchy) {
+                m_sceneHierarchy->deselectAll();
+            }
+        });
+
         m_toolbar = std::make_unique<EditorToolbar>();
         if (!m_toolbar->initialize()) {
             LOG_ERROR_C("Failed to initialize Toolbar", "EditorManager");
@@ -348,6 +368,26 @@ bool EditorManager::updateWorld(VoxelWorld* world, WorldEditor* worldEditor)
         }
     });
 
+    // Set import assets callback to show import dialog in content browser
+    m_menuBar->setImportAssetsCallback([this]() {
+        if (m_contentBrowser) {
+            m_contentBrowser->showImportDialog();
+        }
+    });
+
+    // Set select all/deselect all callbacks for scene hierarchy
+    m_menuBar->setSelectAllCallback([this]() {
+        if (m_sceneHierarchy) {
+            m_sceneHierarchy->selectAll();
+        }
+    });
+
+    m_menuBar->setDeselectAllCallback([this]() {
+        if (m_sceneHierarchy) {
+            m_sceneHierarchy->deselectAll();
+        }
+    });
+
     m_toolbar = std::make_unique<EditorToolbar>();
     if (!m_toolbar->initialize()) {
         LOG_ERROR_C("Failed to initialize Toolbar", "EditorManager");
@@ -395,7 +435,7 @@ void EditorManager::setupDockspace()
     ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse |
                                     ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove |
                                     ImGuiWindowFlags_NoBringToFrontOnFocus |
-                                    ImGuiWindowFlags_NoNavFocus;
+                                    ImGuiWindowFlags_NoNavFocus | ImGuiWindowFlags_NoBackground;
 
     #ifdef IMGUI_HAS_DOCK
     window_flags |= ImGuiWindowFlags_NoDocking;

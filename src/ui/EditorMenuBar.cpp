@@ -90,7 +90,11 @@ void EditorMenuBar::renderFileMenu()
         ImGui::Separator();
 
         if (ImGui::MenuItem("Import Assets...")) {
-            LOG_INFO_C("Import Assets dialog would open here", "EditorMenuBar");
+            if (m_importAssetsCallback) {
+                m_importAssetsCallback();
+            } else {
+                LOG_INFO_C("Import Assets dialog would open here", "EditorMenuBar");
+            }
         }
 
         if (ImGui::MenuItem("Export World...")) {
@@ -133,7 +137,7 @@ void EditorMenuBar::renderEditMenu()
             if (m_cutCallback) {
                 m_cutCallback();
             } else {
-                LOG_INFO_C("Cut (callback not set)", "EditorMenuBar");
+                LOG_INFO_C("Cut - TODO: Requires voxel selection system. Would cut selected voxels to clipboard.", "EditorMenuBar");
             }
         }
 
@@ -141,7 +145,7 @@ void EditorMenuBar::renderEditMenu()
             if (m_copyCallback) {
                 m_copyCallback();
             } else {
-                LOG_INFO_C("Copy (callback not set)", "EditorMenuBar");
+                LOG_INFO_C("Copy - TODO: Requires voxel selection system. Would copy selected voxels to clipboard.", "EditorMenuBar");
             }
         }
 
@@ -149,7 +153,7 @@ void EditorMenuBar::renderEditMenu()
             if (m_pasteCallback) {
                 m_pasteCallback();
             } else {
-                LOG_INFO_C("Paste (callback not set)", "EditorMenuBar");
+                LOG_INFO_C("Paste - TODO: Requires voxel selection system. Would paste voxels from clipboard.", "EditorMenuBar");
             }
         }
 
@@ -157,18 +161,26 @@ void EditorMenuBar::renderEditMenu()
             if (m_deleteCallback) {
                 m_deleteCallback();
             } else {
-                LOG_INFO_C("Delete (callback not set)", "EditorMenuBar");
+                LOG_INFO_C("Delete - TODO: Would delete currently selected object(s) or voxels.", "EditorMenuBar");
             }
         }
 
         ImGui::Separator();
 
         if (ImGui::MenuItem("Select All", "Ctrl+A")) {
-            LOG_INFO_C("Select All - would select all objects in scene", "EditorMenuBar");
+            if (m_selectAllCallback) {
+                m_selectAllCallback();
+            } else {
+                LOG_INFO_C("Select All - would select all objects in scene", "EditorMenuBar");
+            }
         }
 
         if (ImGui::MenuItem("Deselect All", "Ctrl+D")) {
-            LOG_INFO_C("Deselect All - would clear selection", "EditorMenuBar");
+            if (m_deselectAllCallback) {
+                m_deselectAllCallback();
+            } else {
+                LOG_INFO_C("Deselect All - would clear selection", "EditorMenuBar");
+            }
         }
 
         ImGui::Separator();
@@ -302,15 +314,15 @@ void EditorMenuBar::renderSettingsMenu()
         ImGui::Separator();
 
         if (ImGui::MenuItem("Input Settings...")) {
-            // TODO: Open input settings
+            LOG_INFO_C("TODO: Open input settings dialog - would show key bindings, mouse sensitivity, etc.", "EditorMenuBar");
         }
 
         if (ImGui::MenuItem("Audio Settings...")) {
-            // TODO: Open audio settings
+            LOG_INFO_C("TODO: Open audio settings dialog - would show volume controls, audio device selection, etc.", "EditorMenuBar");
         }
 
         if (ImGui::MenuItem("Editor Settings...")) {
-            // TODO: Open editor settings
+            LOG_INFO_C("TODO: Open editor settings dialog - would show autosave settings, UI preferences, etc.", "EditorMenuBar");
         }
 
         ImGui::EndMenu();
@@ -321,25 +333,25 @@ void EditorMenuBar::renderHelpMenu()
 {
     if (ImGui::BeginMenu("Help")) {
         if (ImGui::MenuItem("Documentation", "F1")) {
-            // TODO: Open documentation
+            LOG_INFO_C("TODO: Open documentation - would open README.md or launch browser to docs", "EditorMenuBar");
         }
 
         if (ImGui::MenuItem("API Reference")) {
-            // TODO: Open API reference
+            LOG_INFO_C("TODO: Open API reference - would open Doxygen-generated API docs", "EditorMenuBar");
         }
 
         if (ImGui::MenuItem("Tutorials")) {
-            // TODO: Open tutorials
+            LOG_INFO_C("TODO: Open tutorials - would show getting started guides", "EditorMenuBar");
         }
 
         ImGui::Separator();
 
         if (ImGui::MenuItem("Report Bug...")) {
-            // TODO: Open bug report form
+            LOG_INFO_C("TODO: Open bug report form - would launch browser to GitHub issues page", "EditorMenuBar");
         }
 
         if (ImGui::MenuItem("Feature Request...")) {
-            // TODO: Open feature request form
+            LOG_INFO_C("TODO: Open feature request form - would launch browser to GitHub discussions", "EditorMenuBar");
         }
 
         ImGui::Separator();

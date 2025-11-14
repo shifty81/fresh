@@ -100,6 +100,16 @@ public:
      */
     bool deleteSelectedNode();
 
+    /**
+     * @brief Select all nodes in the hierarchy
+     */
+    void selectAll();
+
+    /**
+     * @brief Deselect all nodes in the hierarchy
+     */
+    void deselectAll();
+
 private:
     void renderNode(HierarchyNode* node);
     void buildHierarchyFromWorld();
