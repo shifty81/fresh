@@ -260,6 +260,14 @@ void OpenGLRenderContext::shutdown()
 
 bool OpenGLRenderContext::beginFrame()
 {
+    // Update viewport size from actual framebuffer size (handles window resize)
+    if (window) {
+        int framebufferWidth, framebufferHeight;
+        glfwGetFramebufferSize(window->getHandle(), &framebufferWidth, &framebufferHeight);
+        width = framebufferWidth;
+        height = framebufferHeight;
+    }
+
     // Bind the default framebuffer (required in core profile)
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     checkGLErrors("Bind default framebuffer");

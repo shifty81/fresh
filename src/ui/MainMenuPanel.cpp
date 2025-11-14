@@ -20,6 +20,7 @@ MainMenuPanel::MainMenuPanel()
     : m_menuActive(true),
       m_createNewWorld(false),
       m_loadWorld(false),
+      m_exitRequested(false),
       m_showNewWorldDialog(false),
       m_showLoadWorldDialog(false),
       m_worldSeed(0),
@@ -57,11 +58,11 @@ void MainMenuPanel::render()
         return;
     }
 
-    // Center the window on screen
+    // Center the window on screen and update position on resize
     ImGuiIO& io = ImGui::GetIO();
     ImGui::SetNextWindowPos(ImVec2(io.DisplaySize.x * 0.5f, io.DisplaySize.y * 0.5f),
-                            ImGuiCond_Always, ImVec2(0.5f, 0.5f));
-    ImGui::SetNextWindowSize(ImVec2(600, 400), ImGuiCond_FirstUseEver);
+                            ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
+    ImGui::SetNextWindowSize(ImVec2(600, 400), ImGuiCond_Appearing);
 
     ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize;
 
@@ -126,7 +127,7 @@ void MainMenuPanel::renderWorldSelection()
 
     // Exit button
     if (ImGui::Button("Exit", ImVec2(buttonWidth, buttonHeight))) {
-        // This will be handled by the engine
+        m_exitRequested = true;
         LOG_INFO_C("Exit requested from main menu", "MainMenuPanel");
     }
 
@@ -148,8 +149,8 @@ void MainMenuPanel::renderNewWorldDialog()
 #ifdef FRESH_IMGUI_AVAILABLE
     ImGuiIO& io = ImGui::GetIO();
     ImGui::SetNextWindowPos(ImVec2(io.DisplaySize.x * 0.5f, io.DisplaySize.y * 0.5f),
-                            ImGuiCond_Always, ImVec2(0.5f, 0.5f));
-    ImGui::SetNextWindowSize(ImVec2(500, 250), ImGuiCond_FirstUseEver);
+                            ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
+    ImGui::SetNextWindowSize(ImVec2(500, 250), ImGuiCond_Appearing);
 
     ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize;
 
@@ -220,8 +221,8 @@ void MainMenuPanel::renderLoadWorldDialog()
 #ifdef FRESH_IMGUI_AVAILABLE
     ImGuiIO& io = ImGui::GetIO();
     ImGui::SetNextWindowPos(ImVec2(io.DisplaySize.x * 0.5f, io.DisplaySize.y * 0.5f),
-                            ImGuiCond_Always, ImVec2(0.5f, 0.5f));
-    ImGui::SetNextWindowSize(ImVec2(500, 400), ImGuiCond_FirstUseEver);
+                            ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
+    ImGui::SetNextWindowSize(ImVec2(500, 400), ImGuiCond_Appearing);
 
     ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize;
 
@@ -296,6 +297,7 @@ void MainMenuPanel::clearFlags()
 {
     m_createNewWorld = false;
     m_loadWorld = false;
+    m_exitRequested = false;
 }
 
 void MainMenuPanel::scanWorldSaves()
