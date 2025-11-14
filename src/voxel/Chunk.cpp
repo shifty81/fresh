@@ -21,12 +21,12 @@ Chunk::Chunk(const ChunkPos& position) : m_position(position), m_voxels(CHUNK_VO
 
 Chunk::~Chunk() {}
 
-Voxel& Chunk::getVoxel(int x, int y, int z)
+Voxel& Chunk::getVoxel(int x, int y, int z) noexcept
 {
     return m_voxels[getIndex(x, y, z)];
 }
 
-const Voxel& Chunk::getVoxel(int x, int y, int z) const
+const Voxel& Chunk::getVoxel(int x, int y, int z) const noexcept
 {
     return m_voxels[getIndex(x, y, z)];
 }
