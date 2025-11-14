@@ -273,6 +273,8 @@ void Engine::initializeGameSystems()
         if (!m_editorManager->initialize(m_window.get(), m_renderer.get(), m_world.get(),
                                          m_worldEditor.get(), m_inputManager.get())) {
             LOG_ERROR_C("Failed to re-initialize editor manager with world", "Engine");
+            LOG_WARNING_C("Editor will be unavailable. Game will continue without editor UI.", "Engine");
+            std::cerr << "Warning: Editor manager re-initialization failed. Continuing without editor UI." << std::endl;
         } else {
             m_editorManager->setVisible(true);
             std::cout << "Editor manager updated with world" << std::endl;
@@ -352,7 +354,7 @@ void Engine::run()
             }
 
             // Render the editor with main menu panel
-            if (m_editorManager) {
+            if (m_editorManager && m_editorManager->isInitialized()) {
                 m_editorManager->beginFrame();
                 m_editorManager->render();
 
@@ -660,17 +662,17 @@ void Engine::render()
 
 #ifdef FRESH_IMGUI_AVAILABLE
     // Begin editor frame (ImGui) before rendering editor UI
-    if (m_editorManager) {
+    if (m_editorManager && m_editorManager->isInitialized()) {
         m_editorManager->beginFrame();
     }
 
     // Render comprehensive editor UI
-    if (m_editorManager && m_editorManager->isVisible()) {
+    if (m_editorManager && m_editorManager->isInitialized() && m_editorManager->isVisible()) {
         m_editorManager->render();
     }
 
     // End editor frame (render ImGui)
-    if (m_editorManager) {
+    if (m_editorManager && m_editorManager->isInitialized()) {
         m_editorManager->endFrame();
     }
 #endif // FRESH_IMGUI_AVAILABLE
