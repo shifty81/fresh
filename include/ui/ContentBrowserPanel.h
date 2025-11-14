@@ -89,6 +89,11 @@ public:
      */
     bool importAsset(const std::string& sourcePath);
 
+    /**
+     * @brief Show import dialog (opens file picker)
+     */
+    void showImportDialog();
+
 private:
     void scanAssets(const std::string& path);
     void renderAssetGrid();

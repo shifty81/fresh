@@ -370,4 +370,13 @@ bool ContentBrowserPanel::importAsset(const std::string& sourcePath)
     return false;
 }
 
+void ContentBrowserPanel::showImportDialog()
+{
+    // For now, just focus the Content Browser and show instructions
+    // In a full implementation, this would open a native file dialog
+    m_visible = true;
+    LOG_INFO_C("Import Assets: Please use the Import button in the Content Browser panel", "ContentBrowserPanel");
+    LOG_INFO_C("In a full implementation, this would open a file dialog to select assets to import", "ContentBrowserPanel");
+}
+
 } // namespace fresh

@@ -90,7 +90,11 @@ void EditorMenuBar::renderFileMenu()
         ImGui::Separator();
 
         if (ImGui::MenuItem("Import Assets...")) {
-            LOG_INFO_C("Import Assets dialog would open here", "EditorMenuBar");
+            if (m_importAssetsCallback) {
+                m_importAssetsCallback();
+            } else {
+                LOG_INFO_C("Import Assets dialog would open here", "EditorMenuBar");
+            }
         }
 
         if (ImGui::MenuItem("Export World...")) {

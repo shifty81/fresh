@@ -87,6 +87,10 @@ public:
     {
         m_settingsCallback = callback;
     }
+    void setImportAssetsCallback(MenuCallback callback)
+    {
+        m_importAssetsCallback = callback;
+    }
 
 private:
     void renderFileMenu();
@@ -113,6 +117,7 @@ private:
     MenuCallback m_pasteCallback;
     MenuCallback m_deleteCallback;
     MenuCallback m_settingsCallback;
+    MenuCallback m_importAssetsCallback;
 
     // Window visibility flags (shared with other systems)
     bool* m_showSceneHierarchy;

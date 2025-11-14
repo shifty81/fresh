@@ -372,7 +372,9 @@ bool ImGuiContext::wantCaptureMouse() const
     }
 
     ImGuiIO& io = ::ImGui::GetIO();
-    return io.WantCaptureMouse;
+    // Only capture mouse if ImGui wants it AND we're actually hovering over a window
+    // This allows mouse interaction with the 3D viewport even when editor is open
+    return io.WantCaptureMouse || ::ImGui::IsWindowHovered(ImGuiHoveredFlags_AnyWindow);
 #else
     return false;
 #endif
