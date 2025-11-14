@@ -88,6 +88,12 @@ public:
         m_renderDistance = distance;
     }
 
+    /**
+     * @brief Set the seed for terrain generation
+     * @param seed Random seed for terrain generation
+     */
+    void setSeed(int seed);
+
 private:
     std::unordered_map<ChunkPos, std::unique_ptr<Chunk>> m_chunks;
     std::unique_ptr<TerrainGenerator> m_terrainGenerator;

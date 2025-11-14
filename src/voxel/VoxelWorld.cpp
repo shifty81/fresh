@@ -95,4 +95,11 @@ void VoxelWorld::setVoxel(const WorldPos& pos, const Voxel& voxel)
     chunk->setVoxel(localX, pos.y, localZ, voxel);
 }
 
+void VoxelWorld::setSeed(int seed)
+{
+    if (m_terrainGenerator) {
+        m_terrainGenerator->setSeed(seed);
+    }
+}
+
 } // namespace fresh

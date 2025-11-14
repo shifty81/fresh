@@ -158,7 +158,7 @@ void Engine::createNewWorld(const std::string& name, int seed)
     std::cout << "Voxel world initialized" << std::endl;
 
     // Set custom seed for terrain generator
-    TerrainGenerator terrainGen(seed);
+    m_world->setSeed(seed);
 
     // Generate initial chunks around spawn
     std::cout << "Generating initial terrain..." << std::endl;
