@@ -24,7 +24,16 @@ void VoxelWorld::update(const WorldPos& playerPos)
     // In a real implementation, this would be more sophisticated
 }
 
-Chunk* VoxelWorld::getChunk(const ChunkPos& pos)
+Chunk* VoxelWorld::getChunk(const ChunkPos& pos) noexcept
+{
+    auto it = m_chunks.find(pos);
+    if (it != m_chunks.end()) {
+        return it->second.get();
+    }
+    return nullptr;
+}
+
+const Chunk* VoxelWorld::getChunk(const ChunkPos& pos) const noexcept
 {
     auto it = m_chunks.find(pos);
     if (it != m_chunks.end()) {
@@ -57,40 +66,33 @@ void VoxelWorld::unloadChunk(const ChunkPos& pos)
 
 Voxel* VoxelWorld::getVoxel(const WorldPos& pos)
 {
-    ChunkPos chunkPos = ChunkPos::fromWorldPos(pos);
+    const ChunkPos chunkPos = ChunkPos::fromWorldPos(pos);
     Chunk* chunk = getChunk(chunkPos);
 
     if (!chunk) {
         return nullptr;
     }
 
-    int localX = pos.x - chunkPos.x * CHUNK_SIZE;
-    int localZ = pos.z - chunkPos.z * CHUNK_SIZE;
-
-    if (localX < 0)
-        localX += CHUNK_SIZE;
-    if (localZ < 0)
-        localZ += CHUNK_SIZE;
+    // Compute local coordinates more efficiently
+    // Use modulo for proper wrapping of negative coordinates
+    const int localX = ((pos.x % CHUNK_SIZE) + CHUNK_SIZE) % CHUNK_SIZE;
+    const int localZ = ((pos.z % CHUNK_SIZE) + CHUNK_SIZE) % CHUNK_SIZE;
 
     return &chunk->getVoxel(localX, pos.y, localZ);
 }
 
 void VoxelWorld::setVoxel(const WorldPos& pos, const Voxel& voxel)
 {
-    ChunkPos chunkPos = ChunkPos::fromWorldPos(pos);
+    const ChunkPos chunkPos = ChunkPos::fromWorldPos(pos);
     Chunk* chunk = getChunk(chunkPos);
 
     if (!chunk) {
         return;
     }
 
-    int localX = pos.x - chunkPos.x * CHUNK_SIZE;
-    int localZ = pos.z - chunkPos.z * CHUNK_SIZE;
-
-    if (localX < 0)
-        localX += CHUNK_SIZE;
-    if (localZ < 0)
-        localZ += CHUNK_SIZE;
+    // Compute local coordinates more efficiently
+    const int localX = ((pos.x % CHUNK_SIZE) + CHUNK_SIZE) % CHUNK_SIZE;
+    const int localZ = ((pos.z % CHUNK_SIZE) + CHUNK_SIZE) % CHUNK_SIZE;
 
     chunk->setVoxel(localX, pos.y, localZ, voxel);
 }

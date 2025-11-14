@@ -40,7 +40,8 @@ public:
      * @param pos Chunk position
      * @return Pointer to chunk or nullptr if not loaded
      */
-    Chunk* getChunk(const ChunkPos& pos);
+    [[nodiscard]] Chunk* getChunk(const ChunkPos& pos) noexcept;
+    [[nodiscard]] const Chunk* getChunk(const ChunkPos& pos) const noexcept;
 
     /**
      * @brief Load chunk at position

@@ -34,7 +34,7 @@ public:
     // Lifecycle
     bool initialize();
     void shutdown();
-    bool isInitialized() const { return m_initialized; }
+    [[nodiscard]] bool isInitialized() const noexcept { return m_initialized; }
 
     // Script execution
     bool loadScript(const std::string& filepath);
@@ -72,18 +72,18 @@ public:
     T getGlobal(const std::string& name);
 
     // Hot-reload support
-    void enableHotReload(bool enable) { m_hotReloadEnabled = enable; }
-    bool isHotReloadEnabled() const { return m_hotReloadEnabled; }
+    void enableHotReload(bool enable) noexcept { m_hotReloadEnabled = enable; }
+    [[nodiscard]] bool isHotReloadEnabled() const noexcept { return m_hotReloadEnabled; }
     void checkForScriptChanges();
 
     // Mod loading system
     bool loadMod(const std::string& modDirectory);
-    std::vector<std::string> getLoadedMods() const { return m_loadedMods; }
+    [[nodiscard]] const std::vector<std::string>& getLoadedMods() const noexcept { return m_loadedMods; }
 
     // Error handling
-    std::string getLastError() const { return m_lastError; }
-    bool hasError() const { return !m_lastError.empty(); }
-    void clearError() { m_lastError.clear(); }
+    [[nodiscard]] const std::string& getLastError() const noexcept { return m_lastError; }
+    [[nodiscard]] bool hasError() const noexcept { return !m_lastError.empty(); }
+    void clearError() noexcept { m_lastError.clear(); }
 
     // Direct Lua state access (for advanced users)
     sol::state* getLuaState() { return m_lua; }

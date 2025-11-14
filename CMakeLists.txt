@@ -653,6 +653,17 @@ if(MSVC)
     # /W4: Warning level 4 (high)
     # /WX: Treat warnings as errors to maintain code quality
     target_compile_options(${PROJECT_NAME} PRIVATE /W4 /WX)
+    
+    # Release mode optimizations for MSVC
+    if(CMAKE_BUILD_TYPE STREQUAL "Release")
+        target_compile_options(${PROJECT_NAME} PRIVATE 
+            /O2          # Maximum optimization (speed)
+            /Oi          # Generate intrinsic functions
+            /Ot          # Favor fast code
+            /GL          # Whole program optimization
+        )
+        target_link_options(${PROJECT_NAME} PRIVATE /LTCG)  # Link-time code generation
+    endif()
 elseif(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
     # GCC/Clang specific options
     # -Wall: Enable most warnings
@@ -662,6 +673,17 @@ elseif(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
     target_compile_options(${PROJECT_NAME} PRIVATE 
         -Wall -Wextra -Werror -Wno-unused-parameter
     )
+    
+    # Release mode optimizations for GCC/Clang
+    if(CMAKE_BUILD_TYPE STREQUAL "Release")
+        target_compile_options(${PROJECT_NAME} PRIVATE 
+            -O3              # Maximum optimization
+            -march=native    # Optimize for current CPU (can use SIMD instructions)
+            -ffast-math      # Aggressive floating-point optimizations
+            -flto            # Link-time optimization
+        )
+        target_link_options(${PROJECT_NAME} PRIVATE -flto)
+    endif()
 endif()
 
 # Copy shaders to build directory
