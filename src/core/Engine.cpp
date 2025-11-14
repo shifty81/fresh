@@ -314,8 +314,14 @@ void Engine::initializeGameSystems()
     m_player->setPosition(glm::vec3(0.0f, 80.0f, 0.0f));
     std::cout << "Player initialized" << std::endl;
 
-    // Switch to game mode
+    // Switch to game mode and hide the editor/menu
     m_inputManager->setInputMode(InputMode::GameMode);
+#ifdef FRESH_IMGUI_AVAILABLE
+    // Hide the editor manager (including main menu) when entering game
+    if (m_editorManager) {
+        m_editorManager->setVisible(false);
+    }
+#endif
     m_inGame = true;
 }
 
@@ -362,7 +368,15 @@ void Engine::run()
                 auto* mainMenuPanel = m_editorManager->getMainMenuPanel();
                 bool worldActionRequested = false;
                 if (mainMenuPanel) {
-                    if (mainMenuPanel->shouldCreateNewWorld()) {
+                    if (mainMenuPanel->shouldExit()) {
+                        // End the current ImGui frame before exiting to avoid frame lifecycle issues
+                        m_editorManager->endFrame();
+                        
+                        // Exit the application
+                        m_running = false;
+                        mainMenuPanel->clearFlags();
+                        worldActionRequested = true;
+                    } else if (mainMenuPanel->shouldCreateNewWorld()) {
                         // End the current ImGui frame before world creation to avoid frame lifecycle issues
                         m_editorManager->endFrame();
                         

@@ -88,6 +88,12 @@ public:
      */
     void setMenuActive(bool active) { m_menuActive = active; }
 
+    /**
+     * @brief Check if exit was requested
+     * @return true if user clicked exit button
+     */
+    bool shouldExit() const { return m_exitRequested; }
+
 private:
     void renderWorldSelection();
     void renderNewWorldDialog();
@@ -97,6 +103,7 @@ private:
     bool m_menuActive;
     bool m_createNewWorld;
     bool m_loadWorld;
+    bool m_exitRequested;
     bool m_showNewWorldDialog;
     bool m_showLoadWorldDialog;
     
