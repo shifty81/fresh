@@ -20,7 +20,16 @@ void Player::update(float deltaTime)
     if (!world)
         return;
 
-    // Apply gravity
+    // In free flight mode, no gravity or collision
+    if (freeFlightMode) {
+        // Apply velocity directly in free flight mode
+        position = position + velocity * deltaTime;
+        // Update camera position to player position
+        camera.setPosition(position);
+        return;
+    }
+
+    // Apply gravity (only in normal play mode)
     applyGravity(deltaTime);
 
     // Apply velocity
@@ -47,6 +56,54 @@ void Player::handleInput(const InputManager& input, float deltaTime)
     if (!world)
         return;
 
+    // Free flight mode: 6DOF movement
+    if (freeFlightMode) {
+        // Get camera direction vectors (use full 3D vectors for free flight)
+        glm::vec3 forward = camera.getFront();
+        glm::vec3 right = camera.getRight();
+        glm::vec3 up = camera.getUp();
+
+        // Calculate movement direction
+        glm::vec3 moveDirection{0.0f};
+
+        if (input.isActionActive(InputAction::MoveForward)) {
+            moveDirection += forward;
+        }
+        if (input.isActionActive(InputAction::MoveBackward)) {
+            moveDirection -= forward;
+        }
+        if (input.isActionActive(InputAction::MoveRight)) {
+            moveDirection += right;
+        }
+        if (input.isActionActive(InputAction::MoveLeft)) {
+            moveDirection -= right;
+        }
+        
+        // Space bar for upward movement in free flight
+        if (input.isActionActive(InputAction::Jump)) {
+            moveDirection += up;
+        }
+        // Crouch for downward movement in free flight
+        if (input.isActionActive(InputAction::Crouch)) {
+            moveDirection -= up;
+        }
+
+        // Normalize if moving
+        if (glm::length(moveDirection) > 0.0f) {
+            moveDirection = glm::normalize(moveDirection);
+        }
+
+        // Determine speed
+        isSprinting = input.isActionActive(InputAction::Sprint);
+        float speed = isSprinting ? sprintSpeed : walkSpeed;
+
+        // Apply movement directly to velocity
+        velocity = moveDirection * speed;
+        
+        return;
+    }
+
+    // Normal play mode: ground-based movement with physics
     // Get camera direction vectors (ignore Y for horizontal movement)
     glm::vec3 forward = glm::normalize(glm::vec3(camera.getFront().x, 0.0f, camera.getFront().z));
     glm::vec3 right = glm::normalize(glm::vec3(camera.getRight().x, 0.0f, camera.getRight().z));

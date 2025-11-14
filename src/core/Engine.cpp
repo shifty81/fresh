@@ -25,6 +25,7 @@
 #include "renderer/GraphicsAPI.h"
 #include "renderer/RenderContext.h"
 #include "serialization/WorldSerializer.h"
+#include "ui/EditorToolbar.h"
 #include "ui/MainMenu.h"
 #include "ui/MainMenuPanel.h"
 #include "voxel/Chunk.h"
@@ -276,6 +277,28 @@ void Engine::initializeGameSystems()
         } else {
             m_editorManager->setVisible(true);
             std::cout << "Editor manager updated with world" << std::endl;
+            
+            // Set up play mode callback to toggle between free-flight editor mode and play mode
+            auto* toolbar = m_editorManager->getToolbar();
+            if (toolbar) {
+                toolbar->setPlayModeCallback([this](EditorToolbar::PlayMode mode) {
+                    if (m_player) {
+                        switch (mode) {
+                            case EditorToolbar::PlayMode::Playing:
+                                // Enter play mode - switch to normal character with physics
+                                m_player->setFreeFlightMode(false);
+                                LOG_INFO_C("Entered Play Mode - normal character gameplay", "Engine");
+                                break;
+                            case EditorToolbar::PlayMode::Stopped:
+                            case EditorToolbar::PlayMode::Paused:
+                                // Enter editor mode - switch to free-flying camera
+                                m_player->setFreeFlightMode(true);
+                                LOG_INFO_C("Entered Editor Mode - free-flying camera", "Engine");
+                                break;
+                        }
+                    }
+                });
+            }
         }
     }
 #endif
@@ -312,12 +335,12 @@ void Engine::initializeGameSystems()
     m_player->setPosition(glm::vec3(0.0f, 80.0f, 0.0f));
     std::cout << "Player initialized" << std::endl;
 
-    // Switch to game mode and hide the editor/menu
-    m_inputManager->setInputMode(InputMode::GameMode);
+    // Keep editor visible and stay in UI mode (editor-first approach)
+    m_inputManager->setInputMode(InputMode::UIMode);
 #ifdef FRESH_IMGUI_AVAILABLE
-    // Hide the editor manager (including main menu) when entering game
+    // Keep the editor manager visible when entering game
     if (m_editorManager) {
-        m_editorManager->setVisible(false);
+        m_editorManager->setVisible(true);
     }
 #endif
     m_inGame = true;
@@ -532,24 +555,25 @@ void Engine::processInput()
         bool guiCapturesKeyboard = false;
 #endif
 
-        // Toggle editor with 'T' key (only if GUI doesn't want keyboard)
-        if (!guiCapturesKeyboard &&
-            m_inputManager->isActionJustPressed(InputAction::ToggleEditor)) {
-#ifdef FRESH_IMGUI_AVAILABLE
-            if (m_editorManager) {
-                m_editorManager->toggle();
-                // Switch to UI mode when editor is visible, game mode when hidden
-                if (m_editorManager->isVisible()) {
-                    m_inputManager->setInputMode(InputMode::UIMode);
-                } else {
-                    m_inputManager->setInputMode(InputMode::GameMode);
-                }
-                LOG_INFO_C("Editor toggled", "Engine");
-            }
-#else
-            LOG_INFO_C("Editor not available (ImGui required)", "Engine");
-#endif
-        }
+        // T key disabled - editor is always visible in new editor-first mode
+        // Keeping this code commented out for reference
+        // if (!guiCapturesKeyboard &&
+        //     m_inputManager->isActionJustPressed(InputAction::ToggleEditor)) {
+        // #ifdef FRESH_IMGUI_AVAILABLE
+        //     if (m_editorManager) {
+        //         m_editorManager->toggle();
+        //         // Switch to UI mode when editor is visible, game mode when hidden
+        //         if (m_editorManager->isVisible()) {
+        //             m_inputManager->setInputMode(InputMode::UIMode);
+        //         } else {
+        //             m_inputManager->setInputMode(InputMode::GameMode);
+        //         }
+        //         LOG_INFO_C("Editor toggled", "Engine");
+        //     }
+        // #else
+        //     LOG_INFO_C("Editor not available (ImGui required)", "Engine");
+        // #endif
+        // }
 
         // Allow ESC to close the window (only if GUI doesn't want keyboard)
         if (!guiCapturesKeyboard && m_inputManager->isActionJustPressed(InputAction::OpenMenu)) {
@@ -575,21 +599,23 @@ void Engine::update(float deltaTime)
     bool guiCapturesKeyboard = false;
 #endif
 
-    // Check if we're in game mode (not UI/menu mode)
-    bool inGameMode = (m_inputManager->getInputMode() == InputMode::GameMode);
-
-    // Handle player input (only if GUI doesn't capture input and we're in game mode)
-    if (m_player && m_inputManager && !guiCapturesMouse && !guiCapturesKeyboard && inGameMode) {
+    // In editor-first mode, always allow player input unless GUI captures it
+    // (GUI capture means user is actively using a text field, slider, etc.)
+    
+    // Handle player input (only if GUI doesn't capture input)
+    if (m_player && m_inputManager && !guiCapturesMouse && !guiCapturesKeyboard) {
         m_player->handleInput(*m_inputManager, deltaTime);
 
-        // Handle mouse movement for camera
-        glm::vec2 mouseDelta = m_inputManager->getMouseDelta();
-        if (glm::length(mouseDelta) > 0.0f) {
-            m_player->handleMouseMovement(mouseDelta.x, mouseDelta.y);
+        // Handle mouse movement for camera (only if GUI doesn't want mouse)
+        if (!guiCapturesMouse) {
+            glm::vec2 mouseDelta = m_inputManager->getMouseDelta();
+            if (glm::length(mouseDelta) > 0.0f) {
+                m_player->handleMouseMovement(mouseDelta.x, mouseDelta.y);
+            }
         }
 
-        // Handle block placement/breaking
-        if (m_voxelInteraction) {
+        // Handle block placement/breaking (only if GUI doesn't want mouse)
+        if (!guiCapturesMouse && m_voxelInteraction) {
             // Perform raycast to find targeted block
             RayHit hit =
                 m_voxelInteraction->performRaycast(m_player->getCamera(), MAX_INTERACTION_DISTANCE);
