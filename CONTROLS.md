@@ -1,37 +1,62 @@
-# Fresh Voxel Engine - Controls Guide
+# Fresh Voxel Engine - Controls Guide (Editor-First Mode)
+
+## Overview
+
+Fresh Voxel Engine now operates in **Editor-First Mode** by default. This means:
+- The editor UI is always visible and accessible
+- You start in **Free-Flying Camera Mode** for world building and exploration
+- Press **Play** in the editor toolbar to switch to **Play Mode** with normal character physics
+- Mouse sensitivity has been increased 10x for better responsiveness
 
 ## Mouse Controls
 
 ### In-Game Mouse Controls
 - **Mouse Movement** - Look around / Camera control (first-person view)
+  - **Improved Sensitivity:** Mouse now responds 10x faster than before
 - **Left Mouse Button** - Break/remove blocks (aim at block and click)
 - **Right Mouse Button** - Place blocks (aim at adjacent surface and click)
 - **Mouse Wheel** - (Future: Block type selection)
 
 ### Editor Mouse Controls  
-When the editor is open (press **T** to toggle):
+The editor is **always visible** and provides:
 - **Mouse** - Navigate and interact with all editor UI panels
 - **Click** - Select tools, blocks, and options
 - **Drag** - Move sliders and adjust values
 - **Scroll** - Scroll through lists and options
 
-**Note:** Mouse cursor is automatically shown when editor is active, and captured during gameplay.
+**Note:** Mouse cursor is shown when interacting with editor UI panels. Camera control works when not hovering over UI.
 
 ## Keyboard Controls
 
-### Movement Controls
+### Free-Flying Camera Mode (Default/Editor Mode)
 
+When in **Editor Mode** (default state):
+- **W** - Move forward in camera direction
+- **S** - Move backward in camera direction
+- **A** - Strafe left
+- **D** - Strafe right
+- **Space** - Move up (ascend)
+- **Ctrl** - Move down (descend)
+- **Shift** - Move faster (sprint speed)
+- **No gravity** - Free 6-degrees-of-freedom movement
+- **No collision** - Fly through blocks and terrain
+
+### Play Mode (Via Editor Toolbar)
+
+When in **Play Mode** (click Play button in editor toolbar):
 - **W** - Move forward
 - **S** - Move backward
 - **A** - Strafe left
 - **D** - Strafe right
 - **Space** - Jump (when on ground)
 - **Shift** - Sprint (move faster)
-- **Ctrl** - Crouch (move slower, reduced height)
+- **Ctrl** - Crouch (move slower, reduced height, **prevents falling off edges**)
+- **Gravity enabled** - Normal physics simulation
+- **Collision enabled** - Cannot walk through blocks
 
 ### Action Controls
 
-- **T** - Toggle editor (shows/hides editor UI with mouse support)
+- **T** - Disabled (editor is always visible)
 - **ESC** - Pause game / Return to menu
 - **E** - Use/Interact (future feature)
 - **Tab** - Open inventory (future feature)
@@ -52,11 +77,14 @@ The initial main menu appears in the console before graphics initialization:
 
 **Note:** Currently places Stone blocks by default. Future versions will support block type selection.
 
-## Editor Controls (Mouse & Keyboard)
+## Editor Toolbar
 
-### Opening the Editor
-- Press **T** to toggle the editor on/off
-- Mouse cursor automatically appears when editor is visible
+The editor toolbar is **always visible** at the top of the screen and provides:
+
+### Mode Control
+- **Play Button** - Switch to Play Mode (normal character with physics)
+- **Stop Button** - Return to Editor Mode (free-flying camera)
+- **Pause Button** - Pause simulation (future feature)
 
 ### Editor Tools (All Mouse-Enabled)
 - **Tool Palette** - Click to select terraforming tools (brush, sphere, cube, etc.)
@@ -68,19 +96,18 @@ The initial main menu appears in the console before graphics initialization:
 - **Console Panel** - Click to execute commands
 
 ### Quick Actions
-- **Hold Alt** - Temporarily show mouse cursor in-game without opening editor
-- **T** - Toggle full editor interface
+- **Hold Alt** - Temporarily show mouse cursor focus on UI without losing camera control
 
 ## Gameplay Tips
 
 1. **Starting Position:** You spawn at coordinates (0, 80, 0) in the world
-2. **Movement:** Use WASD for standard FPS-style movement
+2. **Default Mode:** Free-flying camera mode for world building and exploration
 3. **Building:** Right-click places blocks, left-click removes them
 4. **Exploration:** The world generates terrain as you move around
-5. **Collision:** You cannot walk through solid blocks
-6. **Physics:** Gravity is active - you'll fall if there's no ground beneath you
-7. **Mouse Look:** Move mouse to look around freely in first-person view
-8. **Editor Access:** Press T anytime to access advanced tools with full mouse support
+5. **Mouse Look:** Move mouse to look around freely - 10x more responsive than before!
+6. **Editor Always On:** Editor UI is always visible - use Play button to test gameplay
+7. **Crouch Safety:** In Play Mode, crouching prevents you from falling off block edges
+8. **Free Flight:** In Editor Mode, use Space/Ctrl to fly up/down with no gravity
 
 ## World Creation
 
@@ -89,7 +116,7 @@ When you start the engine:
 2. Choose "Create New World" (press 1) or "Load Existing World" (press 2)
 3. Enter a world name using keyboard
 4. Optionally enter a seed number (or leave blank for random)
-5. The world will generate and you'll spawn with full mouse+keyboard controls
+5. The world will generate and you'll spawn in **Editor Mode** with the editor UI visible
 
 ## Performance
 
@@ -97,42 +124,53 @@ When you start the engine:
 - **Render Distance:** ~3-5 chunks in each direction
 - **Chunk Size:** 16x256x16 voxels
 
-## Input Modes
+## Modes
 
-The engine automatically switches between input modes:
+The engine now has two main modes accessible via the editor toolbar:
 
-### Game Mode (Default)
-- Mouse cursor is hidden and captured
-- Mouse controls camera (look around)
-- Left/Right click for block interaction
-- WASD for movement
+### Editor Mode (Default)
+- **Camera:** Free-flying camera with 6DOF movement
+- **Gravity:** Disabled
+- **Collision:** Disabled (fly through blocks)
+- **Purpose:** World building, exploration, asset placement
+- **Controls:** W/A/S/D + Space/Ctrl for 3D movement
+- **Editor UI:** Fully visible and interactive
 
-### UI Mode (Editor Open)
-- Mouse cursor is visible and free
-- Mouse interacts with UI elements
-- Click buttons, drag sliders, select items
-- Press T to return to Game Mode
-
-### Temporary UI Mode
-- Hold **Alt** to temporarily show cursor without opening full editor
-- Useful for quick adjustments
-- Release Alt to return to Game Mode
+### Play Mode (Via Toolbar)
+- **Camera:** First-person character controller
+- **Gravity:** Enabled
+- **Collision:** Enabled (realistic physics)
+- **Purpose:** Testing gameplay, character interactions
+- **Controls:** W/A/S/D + Space to jump, Ctrl to crouch
+- **Crouch Feature:** Prevents falling off edges for safety
+- **Editor UI:** Still visible for monitoring and adjustments
 
 ## Known Limitations
 
 - Pre-game console menu is keyboard-only (appears before graphics initialization)
-- No inventory system yet (can only place one block type)
-- No in-game HUD overlay yet (use editor for advanced features)
-- Mouse cursor capture may behave differently on different operating systems
+- No inventory system yet (can only place one block type via editor)
+- T key is disabled (editor is always visible)
+- Mouse cursor is always available for UI interaction
+
+## New Features
+
+- ✅ **10x Mouse Sensitivity** - Much more responsive camera control
+- ✅ **Editor Always On** - No need to toggle, always accessible
+- ✅ **Free-Flying Camera** - Default mode for world building
+- ✅ **Play/Stop Buttons** - Easy switching between editor and play modes
+- ✅ **Crouch Edge Detection** - Safety feature prevents falling off blocks in play mode
+- ✅ **6DOF Movement** - Full 3D movement in editor mode
+- ✅ **Persistent UI** - Editor panels always available
 
 ## Future Features (Planned)
 
 - [ ] Graphical main menu with full mouse support
 - [ ] Block type selection with mouse wheel or hotbar
-- [ ] In-game HUD with mouse-clickable elements
 - [ ] Inventory system with drag-and-drop
 - [ ] Context menus (right-click for options)
 - [ ] Mouse-based selection and multi-block operations
+- [ ] Save/load camera positions
+- [ ] Bookmarks for quick navigation
 
 ---
 

@@ -170,29 +170,36 @@ cmake --build . --config Release -j$(sysctl -n hw.ncpu)
 
 ### Controls
 
-**Mouse Controls:**
-- **Mouse Movement** - Look around (first-person camera)
+**Mouse Controls (10x More Responsive!):**
+- **Mouse Movement** - Look around (first-person camera with improved sensitivity)
 - **Left Click** - Break blocks
 - **Right Click** - Place blocks
-- **Hold Alt** - Show cursor temporarily without opening editor
+- **Editor UI** - Click, drag, and interact with all editor panels
 
-**Keyboard Controls:**
+**Editor Mode (Default - Free-Flying Camera):**
+- **WASD** - Move in camera direction
+- **Space** - Fly up (ascend)
+- **Ctrl** - Fly down (descend)
+- **Shift** - Move faster
+- **No gravity or collision** - Full 3D freedom
+
+**Play Mode (Via Editor Toolbar):**
 - **WASD** - Move (FPS-style)
 - **Space** - Jump
 - **Shift** - Sprint
-- **Ctrl** - Crouch
-- **T** - Toggle editor (full mouse-enabled UI)
-- **ESC** - Pause/Exit
+- **Ctrl** - Crouch (prevents falling off edges!)
+- **Physics enabled** - Gravity and collision active
 
-**See [CONTROLS.md](CONTROLS.md) for complete controls reference including all editor mouse controls.**
+**See [CONTROLS.md](CONTROLS.md) for complete controls reference.**
 
 ### Getting Started
 
 1. **Launch** - Run FreshVoxelEngine.exe
 2. **Main Menu** - Choose "Create New World" or "Load Existing World"
-3. **Explore** - Walk around procedurally generated terrain
-4. **Build** - Place and remove blocks with mouse
-5. **Edit** - Press T to open editor with advanced terraforming tools
+3. **Explore** - Fly around in free-camera mode to explore procedurally generated terrain
+4. **Build** - Place and remove blocks with mouse clicks
+5. **Edit** - Use the always-visible editor toolbar and panels for advanced features
+6. **Test** - Click **Play** in the editor toolbar to test gameplay with normal character physics
 
 **See [examples/README.md](examples/README.md) for 6 playable in-engine demo scenarios.**
 

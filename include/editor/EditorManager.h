@@ -151,6 +151,15 @@ public:
         return m_settingsPanel.get();
     }
 
+    /**
+     * @brief Get the toolbar
+     * @return Toolbar pointer
+     */
+    EditorToolbar* getToolbar() const
+    {
+        return m_toolbar.get();
+    }
+
 private:
     void setupDockspace();
 

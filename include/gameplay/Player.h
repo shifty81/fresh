@@ -90,6 +90,16 @@ public:
     {
         mouseSensitivity = sens;
     }
+    
+    // Free flight mode control
+    void setFreeFlightMode(bool enabled)
+    {
+        freeFlightMode = enabled;
+    }
+    bool isFreeFlightMode() const
+    {
+        return freeFlightMode;
+    }
 
 private:
     /**
@@ -118,6 +128,13 @@ private:
      */
     bool checkGrounded();
 
+    /**
+     * @brief Check if there's ground ahead at a position (for crouch edge detection)
+     * @param newPos Position to check
+     * @return true if ground exists below this position
+     */
+    bool checkGroundAhead(const glm::vec3& newPos);
+
     Camera camera;
     VoxelWorld* world = nullptr;
 
@@ -136,12 +153,13 @@ private:
     float crouchSpeed = 2.0f;
     float jumpVelocity = 8.0f;
     float gravity = 20.0f;
-    float mouseSensitivity = 1.0f;
+    float mouseSensitivity = 10.0f; // Increased from 1.0 for better responsiveness
 
     // State
     bool isGrounded = false;
     bool isSprinting = false;
     bool isCrouching = false;
+    bool freeFlightMode = true; // New: Enable free-flying camera by default
 };
 
 } // namespace fresh
