@@ -704,6 +704,37 @@ void Engine::processInput()
                 }
             }
         }
+        
+        // Handle keyboard shortcuts for editor actions (Ctrl+Z, Ctrl+Y, etc.)
+        if (!guiCapturesKeyboard) {
+            bool ctrlPressed = m_inputManager->isKeyPressed(GLFW_KEY_LEFT_CONTROL) || 
+                              m_inputManager->isKeyPressed(GLFW_KEY_RIGHT_CONTROL);
+            bool shiftPressed = m_inputManager->isKeyPressed(GLFW_KEY_LEFT_SHIFT) || 
+                               m_inputManager->isKeyPressed(GLFW_KEY_RIGHT_SHIFT);
+            
+            // Ctrl+Z for Undo
+            if (ctrlPressed && !shiftPressed && m_inputManager->isKeyJustPressed(GLFW_KEY_Z)) {
+                if (m_worldEditor && m_worldEditor->getTerraformingSystem()) {
+                    if (m_worldEditor->getTerraformingSystem()->undo()) {
+                        LOG_INFO_C("Undo performed (Ctrl+Z)", "Engine");
+                    } else {
+                        LOG_INFO_C("Nothing to undo", "Engine");
+                    }
+                }
+            }
+            
+            // Ctrl+Y for Redo (or Ctrl+Shift+Z)
+            if ((ctrlPressed && m_inputManager->isKeyJustPressed(GLFW_KEY_Y)) ||
+                (ctrlPressed && shiftPressed && m_inputManager->isKeyJustPressed(GLFW_KEY_Z))) {
+                if (m_worldEditor && m_worldEditor->getTerraformingSystem()) {
+                    if (m_worldEditor->getTerraformingSystem()->redo()) {
+                        LOG_INFO_C("Redo performed (Ctrl+Y)", "Engine");
+                    } else {
+                        LOG_INFO_C("Nothing to redo", "Engine");
+                    }
+                }
+            }
+        }
 #endif
 
         // F key to toggle mouse cursor capture (camera freelook vs GUI mode)
