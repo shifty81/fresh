@@ -234,23 +234,23 @@ TEST_F(AnimationClipTest, Factory_CreateCrouchAnimation_HasNonZeroDuration)
 
 TEST_F(AnimationClipTest, Factory_CreateAnimation_Idle_WorksCorrectly)
 {
-    auto clip = AnimationClipFactory::createAnimation(AnimationType::Idle);
-    EXPECT_EQ(clip.getName(), "Idle");
-    EXPECT_GT(clip.getDuration(), 0.0f);
+    auto idleClip = AnimationClipFactory::createAnimation(AnimationType::Idle);
+    EXPECT_EQ(idleClip.getName(), "Idle");
+    EXPECT_GT(idleClip.getDuration(), 0.0f);
 }
 
 TEST_F(AnimationClipTest, Factory_CreateAnimation_Walk_WorksCorrectly)
 {
-    auto clip = AnimationClipFactory::createAnimation(AnimationType::Walk);
-    EXPECT_EQ(clip.getName(), "Walk");
-    EXPECT_GT(clip.getDuration(), 0.0f);
+    auto walkClip = AnimationClipFactory::createAnimation(AnimationType::Walk);
+    EXPECT_EQ(walkClip.getName(), "Walk");
+    EXPECT_GT(walkClip.getDuration(), 0.0f);
 }
 
 TEST_F(AnimationClipTest, Factory_CreateAnimation_Run_WorksCorrectly)
 {
-    auto clip = AnimationClipFactory::createAnimation(AnimationType::Run);
-    EXPECT_EQ(clip.getName(), "Run");
-    EXPECT_GT(clip.getDuration(), 0.0f);
+    auto runClip = AnimationClipFactory::createAnimation(AnimationType::Run);
+    EXPECT_EQ(runClip.getName(), "Run");
+    EXPECT_GT(runClip.getDuration(), 0.0f);
 }
 
 TEST_F(AnimationClipTest, Factory_WalkAnimation_CanBeSampled)
