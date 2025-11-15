@@ -272,6 +272,7 @@ set(ENGINE_SOURCES
     src/voxel/ChunkStreamer.cpp
     src/generation/NoiseGenerator.cpp
     src/generation/TerrainGenerator.cpp
+    src/generation/World2DGenerator.cpp
     src/physics/PhysicsSystem.cpp
     src/physics/CollisionDetection.cpp
     src/physics/PhysicsComponent.cpp
