@@ -138,6 +138,12 @@ public:
     }
 
     /**
+     * @brief Toggle cursor capture mode
+     * Switches between captured (freelook) and free (UI) cursor
+     */
+    void toggleCursorCapture();
+
+    /**
      * @brief Check if mouse button is pressed
      * @param button GLFW mouse button code
      * @return true if pressed

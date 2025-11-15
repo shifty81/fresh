@@ -219,6 +219,16 @@ void InputManager::setCursorMode(bool captured)
     }
 }
 
+void InputManager::toggleCursorCapture()
+{
+    // Toggle between GameMode (cursor captured) and UIMode (cursor free)
+    if (currentMode == InputMode::GameMode) {
+        setInputMode(InputMode::UIMode, false);
+    } else {
+        setInputMode(InputMode::GameMode, false);
+    }
+}
+
 bool InputManager::isMouseButtonPressed(int button) const
 {
     auto it = mouseButtonStates.find(button);
