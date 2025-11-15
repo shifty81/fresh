@@ -26,6 +26,7 @@
 #include "renderer/RenderContext.h"
 #include "serialization/WorldSerializer.h"
 #include "ui/EditorToolbar.h"
+#include "ui/HotbarPanel.h"
 #include "ui/MainMenu.h"
 #include "ui/MainMenuPanel.h"
 #include "voxel/Chunk.h"
