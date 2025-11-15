@@ -159,6 +159,8 @@ bool ScriptEngine::executeString(const std::string& script)
 template <typename... Args>
 std::any ScriptEngine::callFunction(const std::string& functionName, Args&&... args)
 {
+    // Suppress unused parameter warning for variadic args - TODO: Pass args to scripting backend
+    ((void)args, ...);
     auto it = functions.find(functionName);
     if (it != functions.end()) {
         return it->second();
@@ -170,6 +172,7 @@ std::any ScriptEngine::callFunction(const std::string& functionName, Args&&... a
 template <typename Func>
 void ScriptEngine::registerFunction(const std::string& name, Func&& func)
 {
+    (void)func; // Suppress unused parameter warning - TODO: Register with scripting backend
     std::cout << "Registering script function: " << name << std::endl;
     // TODO: Register function with scripting backend
 }
@@ -177,6 +180,8 @@ void ScriptEngine::registerFunction(const std::string& name, Func&& func)
 template <typename T>
 void ScriptEngine::registerClass(const std::string& name)
 {
+    // Suppress unused template parameter warning - TODO: Use T to register class type info
+    (void)sizeof(T);
     std::cout << "Registering script class: " << name << std::endl;
     // TODO: Register class with scripting backend
 }
