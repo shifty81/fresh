@@ -11,9 +11,9 @@ World2DGenerator::World2DGenerator(const Settings& settings)
     : settings_(settings) {
     
     // Initialize noise generators
-    surfaceNoise_ = std::make_unique<Noise>(settings_.seed);
-    caveNoise_ = std::make_unique<Noise>(settings_.seed + 1);
-    oreNoise_ = std::make_unique<Noise>(settings_.seed + 2);
+    surfaceNoise_ = std::make_unique<NoiseGenerator>(settings_.seed);
+    caveNoise_ = std::make_unique<NoiseGenerator>(settings_.seed + 1);
+    oreNoise_ = std::make_unique<NoiseGenerator>(settings_.seed + 2);
     
     Logger::info("World2DGenerator", "Initialized 2D generator with style: " + 
                  std::to_string(static_cast<int>(settings_.style)));
@@ -27,9 +27,9 @@ void World2DGenerator::setDimensions(int width, int height, int depth) {
 
 void World2DGenerator::setSeed(uint64_t seed) {
     settings_.seed = seed;
-    surfaceNoise_ = std::make_unique<Noise>(seed);
-    caveNoise_ = std::make_unique<Noise>(seed + 1);
-    oreNoise_ = std::make_unique<Noise>(seed + 2);
+    surfaceNoise_ = std::make_unique<NoiseGenerator>(seed);
+    caveNoise_ = std::make_unique<NoiseGenerator>(seed + 1);
+    oreNoise_ = std::make_unique<NoiseGenerator>(seed + 2);
 }
 
 void World2DGenerator::generateChunk(Chunk& chunk, int chunkX, int chunkZ) {
@@ -68,7 +68,7 @@ void World2DGenerator::generatePlatformerSurface(Chunk& chunk, int chunkX) {
         int worldX = chunkX * 16 + localX;
         
         // Get surface height using Perlin noise
-        float noise = surfaceNoise_->get(worldX * 0.01f);
+        float noise = surfaceNoise_->perlin2D(worldX * 0.01f, 0.0f);
         int height = surfaceLevel + static_cast<int>(noise * settings_.surfaceVariation);
         
         // Clamp height to chunk bounds
@@ -127,7 +127,7 @@ void World2DGenerator::generateCaves(Chunk& chunk, int chunkX) {
         int worldX = chunkX * 16 + localX;
         
         for (int y = 20; y < 200; y++) {
-            float noise = caveNoise_->get(worldX * 0.05f, y * 0.05f);
+            float noise = caveNoise_->perlin2D(worldX * 0.05f, y * 0.05f);
             
             if (noise > (1.0f - settings_.caveFrequency)) {
                 for (int z = 0; z < settings_.worldDepth; z++) {
@@ -179,7 +179,7 @@ void World2DGenerator::generateOres(Chunk& chunk, int chunkX) {
             }
             
             // Use noise for ore placement
-            float noise = oreNoise_->get(worldX * 0.1f, y * 0.1f);
+            float noise = oreNoise_->perlin2D(worldX * 0.1f, y * 0.1f);
             
             if (noise > (1.0f - settings_.oreFrequency)) {
                 // Determine ore type based on depth

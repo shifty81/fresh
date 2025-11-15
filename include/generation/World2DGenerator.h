@@ -1,7 +1,7 @@
 #pragma once
 
 #include "generation/TerrainGenerator.h"
-#include "generation/Noise.h"
+#include "generation/NoiseGenerator.h"
 #include <memory>
 #include <vector>
 
@@ -94,9 +94,9 @@ public:
 
 private:
     Settings settings_;
-    std::unique_ptr<Noise> surfaceNoise_;
-    std::unique_ptr<Noise> caveNoise_;
-    std::unique_ptr<Noise> oreNoise_;
+    std::unique_ptr<NoiseGenerator> surfaceNoise_;
+    std::unique_ptr<NoiseGenerator> caveNoise_;
+    std::unique_ptr<NoiseGenerator> oreNoise_;
 
     /**
      * @brief Generate surface terrain for platformer style
