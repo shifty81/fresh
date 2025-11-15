@@ -219,9 +219,10 @@ bool EditorManager::initialize(Window* window, IRenderContext* renderContext, Vo
     // Initialize Windows Theme Manager
     m_windowsThemeManager = std::make_unique<WindowsThemeManager>();
     if (m_windowsThemeManager->initialize()) {
-        // Apply Windows theme to ImGui
-        m_windowsThemeManager->applyToImGui();
-        LOG_INFO_C("Windows Theme Manager initialized", "EditorManager");
+        // Force dark theme for better readability regardless of Windows settings
+        // This ensures consistent dark background with white text
+        m_windowsThemeManager->setTheme(WindowsTheme::Dark);
+        LOG_INFO_C("Windows Theme Manager initialized with Dark theme", "EditorManager");
     } else {
         LOG_WARNING_C("Failed to initialize Windows Theme Manager", "EditorManager");
     }

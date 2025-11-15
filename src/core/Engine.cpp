@@ -740,6 +740,7 @@ void Engine::processInput()
         // F key to toggle mouse cursor capture (camera freelook vs GUI mode)
         if (!guiCapturesKeyboard && m_inputManager->isKeyJustPressed(GLFW_KEY_F)) {
             m_inputManager->toggleCursorCapture();
+            m_userToggledCursor = true;  // Track that user explicitly toggled
             if (m_inputManager->isCursorCaptured()) {
                 LOG_INFO_C("Mouse captured - Camera freelook enabled", "Engine");
             } else {
@@ -800,9 +801,16 @@ void Engine::update(float deltaTime)
         // This is important when Alt-hold changes the cursor mode
         bool actualCursorCaptured = m_inputManager->isCursorCaptured();
         
+        // Clear user toggle flag when user explicitly interacts with GUI
+        // This allows automatic cursor management to resume
+        if (m_userToggledCursor && guiCapturesMouse) {
+            m_userToggledCursor = false;
+        }
+        
         // In UI/Editor mode, dynamically manage cursor based on GUI interaction
         // Don't interfere with Alt-hold temporary mode switching
-        if (currentMode == InputMode::UIMode && !m_inputManager->isAltHeld()) {
+        // Don't interfere with user's explicit F key toggle
+        if (currentMode == InputMode::UIMode && !m_inputManager->isAltHeld() && !m_userToggledCursor) {
             // Hide and capture cursor when NOT over GUI (to enable mouse look)
             // Show cursor when over GUI (to enable GUI interaction)
             bool shouldCapture = !guiCapturesMouse;
@@ -816,6 +824,9 @@ void Engine::update(float deltaTime)
             }
         } else if (currentMode == InputMode::GameMode) {
             // In Game mode, ensure cursor is captured (unless Alt is held, handled by InputManager)
+            // Clear user toggle flag when in game mode
+            m_userToggledCursor = false;
+            
             if (!m_inputManager->isAltHeld() && !actualCursorCaptured) {
                 m_inputManager->setCursorMode(true);
                 m_lastCursorCaptured = true;

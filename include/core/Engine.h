@@ -104,6 +104,10 @@ private:
     
     // Track cursor capture state to avoid unnecessary mode switches
     bool m_lastCursorCaptured = false;
+    
+    // Track if user explicitly toggled cursor mode with F key
+    // Prevents automatic cursor management from overriding user's explicit choice
+    bool m_userToggledCursor = false;
 
 #if defined(FRESH_OPENGL_SUPPORT) && defined(FRESH_GLEW_AVAILABLE)
     // OpenGL rendering state
