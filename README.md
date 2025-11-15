@@ -32,6 +32,7 @@ A modern **cross-platform** voxel game engine built with **C++20**, featuring **
 
 ### Editor & Tools
 - **Integrated Editor** - ImGui-based professional editor interface
+- **Windows Native Integration** - Native Windows 10/11 themes, dialogs, and taskbar features
 - **Terraforming Tools** - Brush, sphere, cube, flatten, smooth, paint
 - **Scene Hierarchy** - Visual world structure browser
 - **Content Browser** - Asset management system
@@ -316,6 +317,7 @@ fresh/
 ### Advanced
 - [DOTNET_INTEGRATION.md](DOTNET_INTEGRATION.md) - .NET 9 bindings
 - [LUA_INTEGRATION_GUIDE.md](LUA_INTEGRATION_GUIDE.md) - Lua scripting
+- [WINDOWS_INTEGRATION.md](WINDOWS_INTEGRATION.md) - Windows-native features
 - [TESTING.md](TESTING.md) - Testing guide
 - [WORKFLOWS.md](WORKFLOWS.md) - CI/CD workflows
 

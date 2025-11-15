@@ -99,6 +99,12 @@ public:
     {
         m_deselectAllCallback = callback;
     }
+#ifdef _WIN32
+    void setWindowsCustomizationCallback(MenuCallback callback)
+    {
+        m_windowsCustomizationCallback = callback;
+    }
+#endif
 
 private:
     void renderFileMenu();
@@ -128,6 +134,9 @@ private:
     MenuCallback m_importAssetsCallback;
     MenuCallback m_selectAllCallback;
     MenuCallback m_deselectAllCallback;
+#ifdef _WIN32
+    MenuCallback m_windowsCustomizationCallback;
+#endif
 
     // Window visibility flags (shared with other systems)
     bool* m_showSceneHierarchy;

@@ -21,6 +21,13 @@ class MainMenuPanel;
 class SettingsPanel;
 class HotbarPanel;
 
+#ifdef _WIN32
+class WindowsThemeManager;
+class WindowsDialogManager;
+class WindowsTaskbarManager;
+class WindowsCustomizationPanel;
+#endif
+
 /**
  * @brief Comprehensive Editor Manager
  *
@@ -170,6 +177,17 @@ public:
         return m_hotbar.get();
     }
 
+#ifdef _WIN32
+    /**
+     * @brief Get the Windows customization panel
+     * @return Windows customization panel pointer (nullptr if not on Windows)
+     */
+    WindowsCustomizationPanel* getWindowsCustomizationPanel() const
+    {
+        return m_windowsCustomizationPanel.get();
+    }
+#endif
+
 private:
     void setupDockspace();
 
@@ -191,6 +209,14 @@ private:
     std::unique_ptr<MainMenuPanel> m_mainMenuPanel;
     std::unique_ptr<SettingsPanel> m_settingsPanel;
     std::unique_ptr<HotbarPanel> m_hotbar;
+
+#ifdef _WIN32
+    // Windows-native integration managers
+    std::unique_ptr<WindowsThemeManager> m_windowsThemeManager;
+    std::unique_ptr<WindowsDialogManager> m_windowsDialogManager;
+    std::unique_ptr<WindowsTaskbarManager> m_windowsTaskbarManager;
+    std::unique_ptr<WindowsCustomizationPanel> m_windowsCustomizationPanel;
+#endif
 
     // References
     Window* m_window;

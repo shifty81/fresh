@@ -17,6 +17,13 @@
 #include "ui/VoxelToolPalette.h"
 #include "voxel/VoxelWorld.h"
 
+#ifdef _WIN32
+    #include "ui/WindowsThemeManager.h"
+    #include "ui/WindowsDialogManager.h"
+    #include "ui/WindowsTaskbarManager.h"
+    #include "ui/WindowsCustomizationPanel.h"
+#endif
+
 #ifdef FRESH_IMGUI_AVAILABLE
     #include <imgui.h>
 #endif
@@ -126,6 +133,15 @@ bool EditorManager::initialize(Window* window, IRenderContext* renderContext, Vo
             }
         });
 
+#ifdef _WIN32
+        // Set Windows customization callback
+        m_menuBar->setWindowsCustomizationCallback([this]() {
+            if (m_windowsCustomizationPanel) {
+                m_windowsCustomizationPanel->setVisible(true);
+            }
+        });
+#endif
+
         m_toolbar = std::make_unique<EditorToolbar>();
         if (!m_toolbar->initialize()) {
             LOG_ERROR_C("Failed to initialize Toolbar", "EditorManager");
@@ -174,6 +190,48 @@ bool EditorManager::initialize(Window* window, IRenderContext* renderContext, Vo
         return false;
     }
     m_hotbar->setVisible(false); // Hidden by default (shown only in play mode)
+
+#ifdef _WIN32
+    // Initialize Windows-native integration features
+    LOG_INFO_C("Initializing Windows-native integration features", "EditorManager");
+    
+    // Initialize Windows Theme Manager
+    m_windowsThemeManager = std::make_unique<WindowsThemeManager>();
+    if (m_windowsThemeManager->initialize()) {
+        // Apply Windows theme to ImGui
+        m_windowsThemeManager->applyToImGui();
+        LOG_INFO_C("Windows Theme Manager initialized", "EditorManager");
+    } else {
+        LOG_WARNING_C("Failed to initialize Windows Theme Manager", "EditorManager");
+    }
+    
+    // Initialize Windows Dialog Manager
+    m_windowsDialogManager = std::make_unique<WindowsDialogManager>();
+    void* nativeHandle = window->getNativeWindowHandle();
+    if (nativeHandle && m_windowsDialogManager->initialize(nativeHandle)) {
+        LOG_INFO_C("Windows Dialog Manager initialized", "EditorManager");
+    } else {
+        LOG_WARNING_C("Failed to initialize Windows Dialog Manager", "EditorManager");
+    }
+    
+    // Initialize Windows Taskbar Manager
+    m_windowsTaskbarManager = std::make_unique<WindowsTaskbarManager>();
+    if (nativeHandle && m_windowsTaskbarManager->initialize(nativeHandle)) {
+        LOG_INFO_C("Windows Taskbar Manager initialized", "EditorManager");
+    } else {
+        LOG_WARNING_C("Failed to initialize Windows Taskbar Manager", "EditorManager");
+    }
+    
+    // Initialize Windows Customization Panel
+    m_windowsCustomizationPanel = std::make_unique<WindowsCustomizationPanel>();
+    if (m_windowsCustomizationPanel->initialize(m_windowsThemeManager.get(),
+                                                 m_windowsDialogManager.get(),
+                                                 m_windowsTaskbarManager.get())) {
+        LOG_INFO_C("Windows Customization Panel initialized", "EditorManager");
+    } else {
+        LOG_WARNING_C("Failed to initialize Windows Customization Panel", "EditorManager");
+    }
+#endif
 
     // Connect scene hierarchy to inspector
     // When a node is selected in the hierarchy, show it in the inspector
@@ -266,6 +324,13 @@ void EditorManager::render()
     if (m_hotbar) {
         m_hotbar->render();
     }
+
+#ifdef _WIN32
+    // Render Windows customization panel if available
+    if (m_windowsCustomizationPanel) {
+        m_windowsCustomizationPanel->render();
+    }
+#endif
 #else
     // Console mode fallback
     LOG_INFO_C("Editor running in console mode (ImGui not available)", "EditorManager");
@@ -295,6 +360,7 @@ void EditorManager::shutdown()
 
 #ifdef FRESH_IMGUI_AVAILABLE
     // Shutdown in reverse order
+    m_hotbar.reset();
     m_settingsPanel.reset();
     m_mainMenuPanel.reset();
     m_voxelTools.reset();
@@ -304,6 +370,25 @@ void EditorManager::shutdown()
     m_menuBar.reset();
     m_inspector.reset();
     m_sceneHierarchy.reset();
+
+#ifdef _WIN32
+    // Shutdown Windows-native features
+    if (m_windowsCustomizationPanel) {
+        m_windowsCustomizationPanel.reset();
+    }
+    if (m_windowsTaskbarManager) {
+        m_windowsTaskbarManager->shutdown();
+        m_windowsTaskbarManager.reset();
+    }
+    if (m_windowsDialogManager) {
+        m_windowsDialogManager->shutdown();
+        m_windowsDialogManager.reset();
+    }
+    if (m_windowsThemeManager) {
+        m_windowsThemeManager->shutdown();
+        m_windowsThemeManager.reset();
+    }
+#endif
 
     if (m_imguiContext) {
         m_imguiContext->shutdown();
