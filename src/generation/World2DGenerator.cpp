@@ -1,0 +1,464 @@
+#include "generation/World2DGenerator.h"
+#include "voxel/VoxelWorld.h"
+#include "voxel/Chunk.h"
+#include "core/Logger.h"
+#include <algorithm>
+#include <random>
+
+namespace fresh {
+
+World2DGenerator::World2DGenerator(const Settings& settings)
+    : settings_(settings) {
+    
+    // Initialize noise generators
+    surfaceNoise_ = std::make_unique<Noise>(settings_.seed);
+    caveNoise_ = std::make_unique<Noise>(settings_.seed + 1);
+    oreNoise_ = std::make_unique<Noise>(settings_.seed + 2);
+    
+    Logger::info("World2DGenerator", "Initialized 2D generator with style: " + 
+                 std::to_string(static_cast<int>(settings_.style)));
+}
+
+void World2DGenerator::setDimensions(int width, int height, int depth) {
+    settings_.worldWidth = width;
+    settings_.worldHeight = height;
+    settings_.worldDepth = std::max(1, std::min(depth, 3)); // Clamp to 1-3
+}
+
+void World2DGenerator::setSeed(uint64_t seed) {
+    settings_.seed = seed;
+    surfaceNoise_ = std::make_unique<Noise>(seed);
+    caveNoise_ = std::make_unique<Noise>(seed + 1);
+    oreNoise_ = std::make_unique<Noise>(seed + 2);
+}
+
+void World2DGenerator::generateChunk(Chunk& chunk, int chunkX, int chunkZ) {
+    // For pure 2D generation, chunkZ should typically be 0
+    
+    switch (settings_.style) {
+        case Style::PLATFORMER:
+            generatePlatformerSurface(chunk, chunkX);
+            break;
+            
+        case Style::METROIDVANIA:
+            // Metroidvania uses room-based generation, not chunk-based
+            Logger::warning("World2DGenerator", 
+                          "Metroidvania style requires generateWorld(), not generateChunk()");
+            break;
+            
+        case Style::RUNNER:
+            // Endless runner generates segments on demand
+            Logger::warning("World2DGenerator", 
+                          "Runner style uses EndlessRunnerGenerator");
+            break;
+            
+        case Style::PUZZLE:
+            // Puzzle style uses room-based generation
+            Logger::warning("World2DGenerator", 
+                          "Puzzle style requires generateWorld(), not generateChunk()");
+            break;
+    }
+}
+
+void World2DGenerator::generatePlatformerSurface(Chunk& chunk, int chunkX) {
+    const int surfaceLevel = static_cast<int>(settings_.worldHeight * settings_.surfaceLevel);
+    
+    // Generate for each X position in chunk
+    for (int localX = 0; localX < 16; localX++) {
+        int worldX = chunkX * 16 + localX;
+        
+        // Get surface height using Perlin noise
+        float noise = surfaceNoise_->get(worldX * 0.01f);
+        int height = surfaceLevel + static_cast<int>(noise * settings_.surfaceVariation);
+        
+        // Clamp height to chunk bounds
+        height = std::max(0, std::min(height, 255));
+        
+        // Fill from bottom to surface for all depth layers
+        for (int z = 0; z < settings_.worldDepth; z++) {
+            for (int y = 0; y < height; y++) {
+                VoxelType type = getVoxelTypeForDepth(height - y);
+                chunk.setVoxel(localX, y, z, type);
+            }
+        }
+    }
+    
+    // Generate additional features
+    generateUnderground(chunk, chunkX, surfaceLevel);
+    generateCaves(chunk, chunkX);
+    generateOres(chunk, chunkX);
+    generateSurfaceFeatures(chunk, chunkX);
+    
+    if (settings_.generateBackgroundWalls) {
+        generateBackgroundWalls(chunk, chunkX);
+    }
+}
+
+void World2DGenerator::generateUnderground(Chunk& chunk, int chunkX, int surfaceHeight) {
+    // Underground is already filled by generatePlatformerSurface
+    // This method can add special underground layers or features
+    
+    for (int localX = 0; localX < 16; localX++) {
+        for (int z = 0; z < settings_.worldDepth; z++) {
+            // Add bedrock at bottom
+            chunk.setVoxel(localX, 0, z, VoxelType::Bedrock);
+            
+            // Deep stone layer
+            for (int y = 1; y < 20; y++) {
+                if (chunk.getVoxel(localX, y, z) == VoxelType::Stone) {
+                    // Keep as stone or could use a different type
+                }
+            }
+        }
+    }
+}
+
+void World2DGenerator::generateCaves(Chunk& chunk, int chunkX) {
+    if (settings_.caveFrequency <= 0.0f) {
+        return;
+    }
+    
+    // Use cellular automata for organic cave generation
+    std::mt19937 rng(settings_.seed + chunkX);
+    std::uniform_real_distribution<float> dist(0.0f, 1.0f);
+    
+    // Phase 1: Random initial state
+    for (int localX = 0; localX < 16; localX++) {
+        int worldX = chunkX * 16 + localX;
+        
+        for (int y = 20; y < 200; y++) {
+            float noise = caveNoise_->get(worldX * 0.05f, y * 0.05f);
+            
+            if (noise > (1.0f - settings_.caveFrequency)) {
+                for (int z = 0; z < settings_.worldDepth; z++) {
+                    chunk.setVoxel(localX, y, z, VoxelType::Air);
+                }
+            }
+        }
+    }
+    
+    // Phase 2: Apply cellular automata
+    // Note: This is simplified - full implementation would need
+    // access to neighboring chunks for proper edge handling
+    for (int iteration = 0; iteration < settings_.caveIterations; iteration++) {
+        auto chunkCopy = chunk;
+        
+        for (int localX = 1; localX < 15; localX++) {
+            for (int y = 21; y < 199; y++) {
+                int solidNeighbors = countSolidNeighbors(chunkCopy, localX, y, 0);
+                
+                // Birth/death rules
+                for (int z = 0; z < settings_.worldDepth; z++) {
+                    if (solidNeighbors >= 4) {
+                        chunk.setVoxel(localX, y, z, VoxelType::Stone);
+                    } else {
+                        chunk.setVoxel(localX, y, z, VoxelType::Air);
+                    }
+                }
+            }
+        }
+    }
+}
+
+void World2DGenerator::generateOres(Chunk& chunk, int chunkX) {
+    if (settings_.oreFrequency <= 0.0f) {
+        return;
+    }
+    
+    std::mt19937 rng(settings_.seed + chunkX + 1000);
+    std::uniform_real_distribution<float> dist(0.0f, 1.0f);
+    
+    for (int localX = 0; localX < 16; localX++) {
+        int worldX = chunkX * 16 + localX;
+        
+        for (int y = 1; y < 200; y++) {
+            // Check if this is solid stone
+            VoxelType currentType = chunk.getVoxel(localX, y, 0);
+            if (currentType != VoxelType::Stone) {
+                continue;
+            }
+            
+            // Use noise for ore placement
+            float noise = oreNoise_->get(worldX * 0.1f, y * 0.1f);
+            
+            if (noise > (1.0f - settings_.oreFrequency)) {
+                // Determine ore type based on depth
+                VoxelType oreType;
+                if (y < 30) {
+                    oreType = VoxelType::Diamond;
+                } else if (y < 60) {
+                    oreType = VoxelType::Gold;
+                } else if (y < 100) {
+                    oreType = VoxelType::Iron;
+                } else {
+                    oreType = VoxelType::Coal;
+                }
+                
+                // Place ore in all depth layers
+                for (int z = 0; z < settings_.worldDepth; z++) {
+                    chunk.setVoxel(localX, y, z, oreType);
+                }
+            }
+        }
+    }
+}
+
+void World2DGenerator::generateSurfaceFeatures(Chunk& chunk, int chunkX) {
+    std::mt19937 rng(settings_.seed + chunkX + 2000);
+    std::uniform_real_distribution<float> dist(0.0f, 1.0f);
+    
+    for (int localX = 0; localX < 16; localX++) {
+        // Find surface
+        int surfaceY = -1;
+        for (int y = 255; y >= 0; y--) {
+            if (chunk.getVoxel(localX, y, 0) != VoxelType::Air) {
+                surfaceY = y;
+                break;
+            }
+        }
+        
+        if (surfaceY < 0 || surfaceY > 250) {
+            continue;
+        }
+        
+        // Check if we should place a tree here
+        if (dist(rng) < settings_.treeFrequency) {
+            if (isValidTreePosition(chunk, localX, surfaceY + 1, 0)) {
+                generateTree(chunk, localX, surfaceY + 1, 0);
+            }
+        }
+    }
+}
+
+void World2DGenerator::generateBackgroundWalls(Chunk& chunk, int chunkX) {
+    // Background walls fill in behind the playable area
+    // This is useful for visual depth in 2D games
+    
+    // For now, this is a placeholder
+    // Full implementation would create wall tiles behind solid blocks
+}
+
+VoxelType World2DGenerator::getVoxelTypeForDepth(int depthFromSurface) const {
+    if (depthFromSurface == 0) {
+        return VoxelType::Grass;
+    } else if (depthFromSurface < 3) {
+        return VoxelType::Dirt;
+    } else {
+        return VoxelType::Stone;
+    }
+}
+
+int World2DGenerator::countSolidNeighbors(const Chunk& chunk, int x, int y, int z) const {
+    int count = 0;
+    
+    // Check 8 neighbors in 2D (or 26 in 3D if worldDepth > 1)
+    for (int dx = -1; dx <= 1; dx++) {
+        for (int dy = -1; dy <= 1; dy++) {
+            if (dx == 0 && dy == 0) continue;
+            
+            int nx = x + dx;
+            int ny = y + dy;
+            
+            if (nx < 0 || nx >= 16 || ny < 0 || ny >= 256) {
+                count++; // Treat out of bounds as solid
+                continue;
+            }
+            
+            VoxelType type = chunk.getVoxel(nx, ny, z);
+            if (type != VoxelType::Air) {
+                count++;
+            }
+        }
+    }
+    
+    return count;
+}
+
+void World2DGenerator::generateTree(Chunk& chunk, int x, int y, int z) {
+    // Simple tree: trunk + foliage
+    const int trunkHeight = 4 + (std::rand() % 3);
+    const int foliageRadius = 2;
+    
+    // Trunk
+    for (int i = 0; i < trunkHeight; i++) {
+        if (y + i < 256) {
+            chunk.setVoxel(x, y + i, z, VoxelType::Wood);
+        }
+    }
+    
+    // Foliage (circle of leaves)
+    int foliageY = y + trunkHeight;
+    for (int dx = -foliageRadius; dx <= foliageRadius; dx++) {
+        for (int dy = -foliageRadius; dy <= foliageRadius; dy++) {
+            if (dx * dx + dy * dy <= foliageRadius * foliageRadius) {
+                int leafX = x + dx;
+                int leafY = foliageY + dy;
+                
+                if (leafX >= 0 && leafX < 16 && leafY >= 0 && leafY < 256) {
+                    // Don't overwrite trunk
+                    if (chunk.getVoxel(leafX, leafY, z) == VoxelType::Air) {
+                        chunk.setVoxel(leafX, leafY, z, VoxelType::Leaves);
+                    }
+                }
+            }
+        }
+    }
+}
+
+bool World2DGenerator::isValidTreePosition(const Chunk& chunk, int x, int y, int z) const {
+    // Check if there's enough space above
+    for (int i = 0; i < 8; i++) {
+        if (y + i >= 256) return false;
+        if (chunk.getVoxel(x, y + i, z) != VoxelType::Air) {
+            return false;
+        }
+    }
+    
+    // Check if standing on grass
+    if (y > 0 && chunk.getVoxel(x, y - 1, z) == VoxelType::Grass) {
+        return true;
+    }
+    
+    return false;
+}
+
+void World2DGenerator::generateWorld(VoxelWorld& world) {
+    Logger::info("World2DGenerator", "Generating complete 2D world...");
+    
+    // Calculate number of chunks needed
+    int chunksNeeded = (settings_.worldWidth + 15) / 16;
+    
+    for (int chunkX = 0; chunkX < chunksNeeded; chunkX++) {
+        // Generate chunk at (chunkX, 0) - all 2D chunks are at Z=0
+        auto chunk = std::make_shared<Chunk>();
+        generateChunk(*chunk, chunkX, 0);
+        
+        // Add to world (assumes VoxelWorld has method to add chunks)
+        // world.addChunk(chunkX, 0, chunk);
+    }
+    
+    Logger::info("World2DGenerator", "2D world generation complete");
+}
+
+// MetroidvaniaGenerator implementation
+std::vector<MetroidvaniaGenerator::Room> MetroidvaniaGenerator::generate(int roomCount, uint64_t seed) {
+    std::vector<Room> rooms;
+    
+    // Generate main path
+    auto mainPath = generateMainPath(roomCount);
+    rooms.insert(rooms.end(), mainPath.begin(), mainPath.end());
+    
+    // Add side areas
+    auto sideAreas = generateSideAreas(mainPath);
+    rooms.insert(rooms.end(), sideAreas.begin(), sideAreas.end());
+    
+    // Connect rooms
+    connectRooms(rooms);
+    
+    return rooms;
+}
+
+std::vector<MetroidvaniaGenerator::Room> MetroidvaniaGenerator::generateMainPath(int roomCount) {
+    std::vector<Room> path;
+    
+    // Start room
+    path.push_back(createRoom(RoomType::START, 0));
+    
+    // Generate rooms along main path
+    for (int i = 1; i < roomCount; i++) {
+        path.push_back(createRoom(RoomType::NORMAL, i));
+    }
+    
+    return path;
+}
+
+std::vector<MetroidvaniaGenerator::Room> MetroidvaniaGenerator::generateSideAreas(
+    const std::vector<Room>& mainPath) {
+    std::vector<Room> sideAreas;
+    
+    // Generate treasure and ability rooms off the main path
+    // This is a placeholder implementation
+    
+    return sideAreas;
+}
+
+void MetroidvaniaGenerator::connectRooms(std::vector<Room>& rooms) {
+    // Create connections between adjacent rooms
+    // This is a placeholder implementation
+}
+
+MetroidvaniaGenerator::Room MetroidvaniaGenerator::createRoom(RoomType type, int difficulty) {
+    Room room;
+    room.type = type;
+    room.difficulty = difficulty;
+    room.size = glm::ivec2(20 + std::rand() % 30, 15 + std::rand() % 20);
+    room.requiredAbility = AbilityRequired::NONE;
+    
+    return room;
+}
+
+// EndlessRunnerGenerator implementation
+EndlessRunnerGenerator::Segment EndlessRunnerGenerator::generateNextSegment(float currentDifficulty) {
+    Segment segment;
+    segment.length = 50 + std::rand() % 50;
+    segment.difficulty = currentDifficulty;
+    
+    // Generate obstacles
+    int obstacleCount = static_cast<int>(currentDifficulty * 10);
+    for (int i = 0; i < obstacleCount; i++) {
+        segment.obstacles.push_back(generateObstacle(currentDifficulty));
+    }
+    
+    // Generate platforms
+    int platformCount = 3 + std::rand() % 5;
+    for (int i = 0; i < platformCount; i++) {
+        segment.platforms.push_back(generatePlatform());
+    }
+    
+    // Generate collectibles
+    int collectibleCount = 5 + std::rand() % 10;
+    for (int i = 0; i < collectibleCount; i++) {
+        segment.collectibles.push_back(generateCollectible());
+    }
+    
+    return segment;
+}
+
+void EndlessRunnerGenerator::buildSegment(VoxelWorld& world, const Segment& segment, int startX) {
+    // Build floor
+    for (int x = 0; x < segment.length; x++) {
+        // world.setVoxel(startX + x, 0, 0, VoxelType::Stone);
+    }
+    
+    // Place obstacles
+    // Place platforms
+    // Place collectibles
+}
+
+EndlessRunnerGenerator::Obstacle EndlessRunnerGenerator::generateObstacle(float difficulty) {
+    Obstacle obstacle;
+    obstacle.x = std::rand() % 50;
+    obstacle.y = 1;
+    obstacle.width = 1 + std::rand() % 2;
+    obstacle.height = 2 + static_cast<int>(difficulty * 3);
+    obstacle.type = VoxelType::Stone;
+    return obstacle;
+}
+
+EndlessRunnerGenerator::Platform EndlessRunnerGenerator::generatePlatform() {
+    Platform platform;
+    platform.x = std::rand() % 50;
+    platform.y = 3 + std::rand() % 5;
+    platform.width = 3 + std::rand() % 4;
+    platform.type = VoxelType::Stone;
+    return platform;
+}
+
+EndlessRunnerGenerator::Collectible EndlessRunnerGenerator::generateCollectible() {
+    Collectible collectible;
+    collectible.x = std::rand() % 50;
+    collectible.y = 2 + std::rand() % 6;
+    return collectible;
+}
+
+} // namespace fresh
