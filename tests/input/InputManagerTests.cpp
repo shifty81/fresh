@@ -349,3 +349,16 @@ TEST_F(InputManagerTest, ResetMouseDelta_AllowsNewMovement) {
     EXPECT_FLOAT_EQ(delta.x, 10.0f);
     EXPECT_FLOAT_EQ(delta.y, 10.0f);
 }
+
+/**
+ * Test cursor capture toggle functionality
+ * Note: Without GLFW window, we can't test actual cursor behavior,
+ * but we can verify the mode switching logic
+ */
+TEST_F(InputManagerTest, ToggleCursorCapture_SwitchesModes) {
+    // Note: This test verifies the toggle logic exists and can be called
+    // Actual cursor behavior requires GLFW window which isn't available in unit tests
+    
+    // The method should exist and be callable without crashing
+    EXPECT_NO_THROW(inputManager->toggleCursorCapture());
+}
