@@ -63,9 +63,39 @@ Provides Windows taskbar features for better system integration.
 
 **Access:** Settings → Windows Customization → Taskbar tab
 
-### 4. Windows Notifications
+### 4. Jump Lists
 
-Toast notifications that appear in the Windows Action Center (planned for future update).
+Recent files and quick actions accessible from the Windows taskbar.
+
+**Features:**
+- **Recent Worlds** - Quick access to recently opened worlds
+- **Custom Tasks** - Quick actions like "Create New World"
+- **Automatic Updates** - Jump list updates when worlds are opened/saved
+- **Windows 7+** - Works on Windows 7, 8, 10, and 11
+
+**Use Cases:**
+- Quick access to recent projects
+- Launch common tasks from taskbar
+- Improve workflow efficiency
+
+**Access:** Automatically managed, right-click taskbar icon to view
+
+### 5. Windows Toast Notifications
+
+Native toast notifications that appear in the Windows Action Center.
+
+**Features:**
+- **Multiple Types** - Info, Success, Warning, Error notifications
+- **Rich Content** - Support for images and buttons (planned)
+- **Action Center** - Notifications persist in Windows Action Center
+- **Windows 10+** - Requires Windows 10 or later
+
+**Use Cases:**
+- Notify about world save completion
+- Alert on build/generation errors
+- Inform about important events
+
+**Access:** Called programmatically when events occur
 
 ## How to Use
 
@@ -140,6 +170,77 @@ taskbarManager->setProgressState(TaskbarProgressState::Error);
 taskbarManager->setProgressState(TaskbarProgressState::NoProgress);
 ```
 
+### Using Jump Lists
+
+```cpp
+// Get jump list manager
+WindowsJumpListManager jumpListManager;
+jumpListManager.initialize("FreshVoxelEngine.VoxelEditor.1");
+
+// Add a recent world
+jumpListManager.addRecentWorld(
+    "My Awesome World",
+    "C:/Users/Username/Documents/FreshWorlds/awesome.world",
+    "A world with mountains and caves"
+);
+
+// Add custom tasks
+jumpListManager.addTask(
+    "Create New World",
+    "--new-world",
+    "Create a new voxel world"
+);
+
+jumpListManager.addTask(
+    "Open Documentation",
+    "--help",
+    "View documentation"
+);
+
+// Update the jump list
+jumpListManager.updateJumpList();
+```
+
+### Using Toast Notifications
+
+```cpp
+// Get toast manager
+WindowsToastManager toastManager;
+toastManager.initialize("FreshVoxelEngine.VoxelEditor.1");
+
+// Show a simple notification
+toastManager.showToast(
+    "World Saved",
+    "Your world has been saved successfully!",
+    WindowsToastManager::ToastType::Success
+);
+
+// Show error notification
+toastManager.showToast(
+    "Build Failed",
+    "Failed to generate world meshes. Check the console for details.",
+    WindowsToastManager::ToastType::Error
+);
+
+// Show notification with buttons (future)
+std::vector<WindowsToastManager::ToastButton> buttons = {
+    {"Open World", "--open-world"},
+    {"Dismiss", ""}
+};
+toastManager.showToastWithButtons(
+    "Generation Complete",
+    "World generation finished successfully!",
+    buttons,
+    [](const std::string& args) {
+        // Handle button click
+        if (args == "--open-world") {
+            // Open the world
+        }
+    },
+    WindowsToastManager::ToastType::Success
+);
+```
+
 ## Technical Details
 
 ### Architecture
@@ -157,12 +258,16 @@ include/ui/
 ├── WindowsThemeManager.h          # Theme detection and management
 ├── WindowsDialogManager.h         # Native dialog wrappers
 ├── WindowsTaskbarManager.h        # Taskbar integration
+├── WindowsJumpListManager.h       # Jump list integration
+├── WindowsToastManager.h          # Toast notifications
 └── WindowsCustomizationPanel.h    # UI for all Windows features
 
 src/ui/
 ├── WindowsThemeManager.cpp
 ├── WindowsDialogManager.cpp
 ├── WindowsTaskbarManager.cpp
+├── WindowsJumpListManager.cpp
+├── WindowsToastManager.cpp
 └── WindowsCustomizationPanel.cpp
 ```
 
@@ -170,19 +275,22 @@ src/ui/
 
 - **Windows API** - Core Win32 functions
 - **dwmapi.lib** - Desktop Window Manager API for theme detection
-- **shell32.lib** - Shell API for dialogs
-- **COM** - Component Object Model for taskbar integration
+- **shell32.lib** - Shell API for dialogs and jump lists
+- **propsys.lib** - Property system for jump list metadata
+- **COM** - Component Object Model for taskbar and notification integration
+- **Windows 10 SDK** - For toast notification APIs (Windows.UI.Notifications)
 
 All dependencies are standard Windows libraries included with the Windows SDK.
 
 ### Platform Compatibility
 
-| Feature | Windows 10 | Windows 11 | Linux | macOS |
-|---------|-----------|-----------|-------|-------|
-| Theme Manager | ✅ | ✅ | ❌ | ❌ |
-| Native Dialogs | ✅ | ✅ | ❌ | ❌ |
-| Taskbar Integration | ✅ | ✅ | ❌ | ❌ |
-| Notifications | 🔶 Planned | 🔶 Planned | ❌ | ❌ |
+| Feature | Windows 7 | Windows 10 | Windows 11 | Linux | macOS |
+|---------|-----------|-----------|-----------|-------|-------|
+| Theme Manager | ❌ | ✅ | ✅ | ❌ | ❌ |
+| Native Dialogs | ✅ | ✅ | ✅ | ❌ | ❌ |
+| Taskbar Integration | ✅ | ✅ | ✅ | ❌ | ❌ |
+| Jump Lists | ✅ | ✅ | ✅ | ❌ | ❌ |
+| Toast Notifications | ❌ | ✅ | ✅ | ❌ | ❌ |
 
 On non-Windows platforms, these features are automatically disabled at compile time, and the engine falls back to cross-platform alternatives (ImGui dialogs, etc.).
 
@@ -234,16 +342,26 @@ void performLongOperation(WindowsTaskbarManager* taskbar) {
 }
 ```
 
+## Recently Implemented
+
+These features have been recently added to Fresh Voxel Engine:
+
+1. ✅ **Jump Lists** - Recent files and quick actions in taskbar menu (IMPLEMENTED)
+2. ✅ **Toast Notifications** - Windows 10/11 toast notifications (BASIC IMPLEMENTATION)
+3. ✅ **AVX2 Optimizations** - SIMD instructions for improved performance
+4. ✅ **Enhanced Compiler Flags** - Whole program optimization, fast floating-point
+
 ## Future Enhancements
 
 Planned features for future releases:
 
-1. **Toast Notifications** - Windows 10/11 toast notifications with actions
-2. **Jump Lists** - Recent files and quick actions in taskbar menu
-3. **Thumbnail Toolbar** - Playback controls in taskbar preview
-4. **Live Tiles** - Dynamic Start menu tile (Windows 10)
-5. **Share Contract** - Windows Share integration
-6. **Windows Hello** - Biometric authentication integration
+1. **Full WinRT Toast Support** - Rich interactive toast notifications with images and buttons
+2. **Thumbnail Toolbar** - Playback controls in taskbar preview
+3. **Live Tiles** - Dynamic Start menu tile (Windows 10)
+4. **Share Contract** - Windows Share integration
+5. **Windows Hello** - Biometric authentication integration
+6. **High DPI Awareness** - Per-monitor DPI scaling support
+7. **Clipboard Integration** - Rich clipboard with world/voxel data
 
 ## Troubleshooting
 

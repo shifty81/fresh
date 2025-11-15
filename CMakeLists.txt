@@ -364,6 +364,8 @@ if(imgui_FOUND)
             src/ui/WindowsDialogManager.cpp
             src/ui/WindowsTaskbarManager.cpp
             src/ui/WindowsCustomizationPanel.cpp
+            src/ui/WindowsJumpListManager.cpp
+            src/ui/WindowsToastManager.cpp
         )
     endif()
 endif()
@@ -639,8 +641,34 @@ if(MSVC)
             /Oi          # Generate intrinsic functions
             /Ot          # Favor fast code
             /GL          # Whole program optimization
+            /Gy          # Enable function-level linking
+            /GS-         # Disable buffer security checks for performance
+            /fp:fast     # Fast floating-point model
+            /arch:AVX2   # Enable AVX2 instructions for modern CPUs (2013+)
         )
-        target_link_options(${PROJECT_NAME} PRIVATE /LTCG)  # Link-time code generation
+        target_link_options(${PROJECT_NAME} PRIVATE 
+            /LTCG        # Link-time code generation
+            /OPT:REF     # Eliminate unreferenced functions/data
+            /OPT:ICF     # Enable COMDAT folding
+        )
+        
+        # Windows subsystem optimization for GUI applications
+        target_link_options(${PROJECT_NAME} PRIVATE /SUBSYSTEM:WINDOWS)
+        
+        message(STATUS "Windows Release optimizations enabled:")
+        message(STATUS "  - AVX2 SIMD instructions")
+        message(STATUS "  - Whole program optimization")
+        message(STATUS "  - Fast floating-point model")
+        message(STATUS "  - Function-level linking")
+    endif()
+    
+    # Debug mode with optimized debugging experience
+    if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+        target_compile_options(${PROJECT_NAME} PRIVATE 
+            /ZI          # Edit and Continue support
+            /Od          # Disable optimizations
+            /RTC1        # Runtime checks
+        )
     endif()
 endif()
 
