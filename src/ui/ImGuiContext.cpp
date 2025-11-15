@@ -372,9 +372,14 @@ bool ImGuiContext::wantCaptureMouse() const
     }
 
     ImGuiIO& io = ::ImGui::GetIO();
-    // Only capture mouse if ImGui wants it AND we're actually hovering over a window
-    // This allows mouse interaction with the 3D viewport even when editor is open
-    return io.WantCaptureMouse || ::ImGui::IsWindowHovered(ImGuiHoveredFlags_AnyWindow);
+    // Only capture mouse when actively interacting with UI elements
+    // Check if mouse is over a window AND if that window wants input (not just hovering)
+    // This allows mouse look to work when not actively using UI controls
+    bool hoveringWindow = ::ImGui::IsWindowHovered(ImGuiHoveredFlags_AnyWindow | ImGuiHoveredFlags_AllowWhenBlockedByActiveItem);
+    bool activeItem = ::ImGui::IsAnyItemActive(); // User is actively using a control (dragging slider, typing, etc.)
+    
+    // Capture mouse only if ImGui wants it (hovering over interactive elements) or an item is active
+    return io.WantCaptureMouse && (hoveringWindow || activeItem);
 #else
     return false;
 #endif
