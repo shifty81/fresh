@@ -313,6 +313,16 @@ void EditorMenuBar::renderSettingsMenu()
 
         ImGui::Separator();
 
+#ifdef _WIN32
+        if (ImGui::MenuItem("Windows Customization...", "Ctrl+W")) {
+            if (m_windowsCustomizationCallback) {
+                m_windowsCustomizationCallback();
+            }
+        }
+
+        ImGui::Separator();
+#endif
+
         if (ImGui::MenuItem("Input Settings...")) {
             LOG_INFO_C("TODO: Open input settings dialog - would show key bindings, mouse sensitivity, etc.", "EditorMenuBar");
         }

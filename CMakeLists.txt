@@ -395,6 +395,16 @@ if(imgui_FOUND)
         src/ui/SettingsPanel.cpp
         src/ui/HotbarPanel.cpp
     )
+    
+    # Add Windows-native UI features on Windows
+    if(WIN32)
+        list(APPEND ENGINE_SOURCES
+            src/ui/WindowsThemeManager.cpp
+            src/ui/WindowsDialogManager.cpp
+            src/ui/WindowsTaskbarManager.cpp
+            src/ui/WindowsCustomizationPanel.cpp
+        )
+    endif()
 endif()
 
 # Header files
