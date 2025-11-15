@@ -101,6 +101,9 @@ private:
     std::unique_ptr<InputManager> m_inputManager;
     std::unique_ptr<VoxelInteraction> m_voxelInteraction;
     VoxelType m_selectedBlockType;
+    
+    // Track cursor capture state to avoid unnecessary mode switches
+    bool m_lastCursorCaptured = false;
 
 #if defined(FRESH_OPENGL_SUPPORT) && defined(FRESH_GLEW_AVAILABLE)
     // OpenGL rendering state
