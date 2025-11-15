@@ -736,7 +736,47 @@ bool ModularAssetSystem::validateAssetPack(const std::string& packPath) const
         return false;
     }
 
-    // TODO: Validate manifest structure and referenced files
+    // Validate manifest structure and referenced files
+#ifdef FRESH_JSON_AVAILABLE
+    try {
+        std::ifstream file(manifestPath);
+        json manifest = json::parse(file);
+        
+        // Validate required fields
+        if (!manifest.contains("name")) {
+            std::cerr << "Manifest validation failed: missing 'name' field" << std::endl;
+            return false;
+        }
+        if (!manifest.contains("version")) {
+            std::cerr << "Manifest validation failed: missing 'version' field" << std::endl;
+            return false;
+        }
+        if (!manifest.contains("assets")) {
+            std::cerr << "Manifest validation failed: missing 'assets' field" << std::endl;
+            return false;
+        }
+        
+        // Validate asset references
+        if (manifest["assets"].is_array()) {
+            for (const auto& asset : manifest["assets"]) {
+                if (asset.contains("path")) {
+                    std::string assetPath = packPath + "/" + asset["path"].get<std::string>();
+                    if (!std::filesystem::exists(assetPath)) {
+                        std::cerr << "Manifest validation warning: referenced file not found: " 
+                                  << assetPath << std::endl;
+                    }
+                }
+            }
+        }
+        
+        std::cout << "Manifest validation passed for: " << manifest["name"] << std::endl;
+    } catch (const json::exception& e) {
+        std::cerr << "Manifest validation failed: JSON parse error: " << e.what() << std::endl;
+        return false;
+    }
+#else
+    std::cout << "JSON library not available, skipping detailed manifest validation" << std::endl;
+#endif
 
     return true;
 }
