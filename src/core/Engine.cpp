@@ -287,12 +287,24 @@ void Engine::initializeGameSystems()
                             case EditorToolbar::PlayMode::Playing:
                                 // Enter play mode - switch to normal character with physics
                                 m_player->setFreeFlightMode(false);
+                                // In play mode, use game mode (cursor hidden unless Alt held)
+                                m_inputManager->setInputMode(InputMode::GameMode);
+                                // Show hotbar in play mode
+                                if (m_editorManager && m_editorManager->getHotbar()) {
+                                    m_editorManager->getHotbar()->setVisible(true);
+                                }
                                 LOG_INFO_C("Entered Play Mode - normal character gameplay", "Engine");
                                 break;
                             case EditorToolbar::PlayMode::Stopped:
                             case EditorToolbar::PlayMode::Paused:
                                 // Enter editor mode - switch to free-flying camera
                                 m_player->setFreeFlightMode(true);
+                                // In editor mode, keep UI mode (cursor visible for editor interaction)
+                                m_inputManager->setInputMode(InputMode::UIMode);
+                                // Hide hotbar in editor mode
+                                if (m_editorManager && m_editorManager->getHotbar()) {
+                                    m_editorManager->getHotbar()->setVisible(false);
+                                }
                                 LOG_INFO_C("Entered Editor Mode - free-flying camera", "Engine");
                                 break;
                         }
@@ -555,6 +567,24 @@ void Engine::processInput()
         bool guiCapturesKeyboard = false;
 #endif
 
+        // Handle hotbar key presses (1-0) when not in editor mode and GUI doesn't capture keyboard
+#ifdef FRESH_IMGUI_AVAILABLE
+        if (!guiCapturesKeyboard && m_editorManager && m_editorManager->getHotbar()) {
+            auto* hotbar = m_editorManager->getHotbar();
+            if (hotbar->isVisible()) {
+                // Check keys 1-9 and 0
+                for (int key = GLFW_KEY_1; key <= GLFW_KEY_9; ++key) {
+                    if (m_inputManager->isKeyJustPressed(key)) {
+                        hotbar->handleKeyPress(key);
+                    }
+                }
+                if (m_inputManager->isKeyJustPressed(GLFW_KEY_0)) {
+                    hotbar->handleKeyPress(GLFW_KEY_0);
+                }
+            }
+        }
+#endif
+
         // T key disabled - editor is always visible in new editor-first mode
         // Keeping this code commented out for reference
         // if (!guiCapturesKeyboard &&
@@ -598,6 +628,19 @@ void Engine::update(float deltaTime)
     bool guiCapturesMouse = false;
     bool guiCapturesKeyboard = false;
 #endif
+
+    // Dynamic cursor management based on mode and GUI interaction
+    if (m_inputManager) {
+        InputMode currentMode = m_inputManager->getInputMode();
+        
+        // In UI/Editor mode, dynamically manage cursor based on GUI interaction
+        if (currentMode == InputMode::UIMode && !m_inputManager->isAltHeld()) {
+            // Hide and capture cursor when NOT over GUI (to enable mouse look)
+            // Show cursor when over GUI (to enable GUI interaction)
+            m_inputManager->setCursorMode(!guiCapturesMouse);
+        }
+        // In Game mode, cursor is already managed by InputMode (hidden unless Alt held)
+    }
 
     // In editor-first mode, always allow player input unless GUI captures it
     // (GUI capture means user is actively using a text field, slider, etc.)

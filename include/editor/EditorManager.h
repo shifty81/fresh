@@ -19,6 +19,7 @@ class ConsolePanel;
 class VoxelToolPalette;
 class MainMenuPanel;
 class SettingsPanel;
+class HotbarPanel;
 
 /**
  * @brief Comprehensive Editor Manager
@@ -160,6 +161,15 @@ public:
         return m_toolbar.get();
     }
 
+    /**
+     * @brief Get the hotbar panel
+     * @return Hotbar panel pointer
+     */
+    HotbarPanel* getHotbar() const
+    {
+        return m_hotbar.get();
+    }
+
 private:
     void setupDockspace();
 
@@ -180,6 +190,7 @@ private:
     std::unique_ptr<VoxelToolPalette> m_voxelTools;
     std::unique_ptr<MainMenuPanel> m_mainMenuPanel;
     std::unique_ptr<SettingsPanel> m_settingsPanel;
+    std::unique_ptr<HotbarPanel> m_hotbar;
 
     // References
     Window* m_window;

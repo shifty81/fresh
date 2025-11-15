@@ -51,8 +51,19 @@ When in **Play Mode** (click Play button in editor toolbar):
 - **Space** - Jump (when on ground)
 - **Shift** - Sprint (move faster)
 - **Ctrl** - Crouch (move slower, reduced height, **prevents falling off edges**)
+- **1-9, 0** - Select hotbar slot (for quick item/tool access)
+- **Hold Alt** - Temporarily show cursor to interact with menus while in play mode
 - **Gravity enabled** - Normal physics simulation
 - **Collision enabled** - Cannot walk through blocks
+
+### Hotbar (Play Mode Only)
+
+In Play Mode, a hotbar with 10 slots appears at the bottom middle of the screen:
+- **Keys 1-9** - Select slots 1-9
+- **Key 0** - Select slot 10 (the last slot)
+- Selected slot is highlighted in blue
+- Each slot can be linked to an inventory item or tool
+- Press the slot number to quickly equip/use the assigned item
 
 ### Action Controls
 
@@ -143,17 +154,22 @@ The engine now has two main modes accessible via the editor toolbar:
 - **Purpose:** Testing gameplay, character interactions
 - **Controls:** W/A/S/D + Space to jump, Ctrl to crouch
 - **Crouch Feature:** Prevents falling off edges for safety
-- **Editor UI:** Still visible for monitoring and adjustments
+- **Hotbar:** 10-slot quick access bar at bottom (keys 1-0)
+- **Alt-Hold:** Temporarily access menus without exiting play mode
+- **Cursor:** Hidden for mouse look, shown when Alt held
+- **Editor UI:** Accessible via Alt key when needed
 
 ## Known Limitations
 
 - Pre-game console menu is keyboard-only (appears before graphics initialization)
-- No inventory system yet (can only place one block type via editor)
 - T key is disabled (editor is always visible)
-- Mouse cursor is always available for UI interaction
 
 ## New Features
 
+- ✅ **Smart Mouse Look** - Works in both editor and play mode when not using UI
+- ✅ **Dynamic Cursor** - Shows/hides automatically based on context
+- ✅ **Alt-Hold for Menus** - Access UI in play mode without stopping gameplay
+- ✅ **Hotbar System** - 10-slot quick access bar for items and tools (keys 1-0)
 - ✅ **10x Mouse Sensitivity** - Much more responsive camera control
 - ✅ **Editor Always On** - No need to toggle, always accessible
 - ✅ **Free-Flying Camera** - Default mode for world building
@@ -165,8 +181,9 @@ The engine now has two main modes accessible via the editor toolbar:
 ## Future Features (Planned)
 
 - [ ] Graphical main menu with full mouse support
-- [ ] Block type selection with mouse wheel or hotbar
-- [ ] Inventory system with drag-and-drop
+- [ ] Inventory system with drag-and-drop to hotbar
+- [ ] Block type selection with mouse wheel
+- [ ] Hotbar item/tool linking system
 - [ ] Context menus (right-click for options)
 - [ ] Mouse-based selection and multi-block operations
 - [ ] Save/load camera positions

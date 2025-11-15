@@ -8,6 +8,7 @@
 #include "ui/ContentBrowserPanel.h"
 #include "ui/EditorMenuBar.h"
 #include "ui/EditorToolbar.h"
+#include "ui/HotbarPanel.h"
 #include "ui/ImGuiContext.h"
 #include "ui/InspectorPanel.h"
 #include "ui/MainMenuPanel.h"
@@ -166,6 +167,14 @@ bool EditorManager::initialize(Window* window, IRenderContext* renderContext, Vo
         return false;
     }
 
+    // Initialize hotbar panel (for play mode)
+    m_hotbar = std::make_unique<HotbarPanel>();
+    if (!m_hotbar->initialize()) {
+        LOG_ERROR_C("Failed to initialize Hotbar Panel", "EditorManager");
+        return false;
+    }
+    m_hotbar->setVisible(false); // Hidden by default (shown only in play mode)
+
     // Connect scene hierarchy to inspector
     // When a node is selected in the hierarchy, show it in the inspector
     // This would require adding a callback system, but for now we'll handle it in render()
@@ -251,6 +260,11 @@ void EditorManager::render()
     // Render settings panel if visible
     if (m_settingsPanel) {
         m_settingsPanel->render();
+    }
+
+    // Render hotbar (shown in play mode)
+    if (m_hotbar) {
+        m_hotbar->render();
     }
 #else
     // Console mode fallback
