@@ -180,6 +180,8 @@ void ScriptEngine::registerFunction(const std::string& name, Func&& func)
 template <typename T>
 void ScriptEngine::registerClass(const std::string& name)
 {
+    // Suppress unused template parameter warning - TODO: Use T to register class type info
+    (void)sizeof(T);
     std::cout << "Registering script class: " << name << std::endl;
     // TODO: Register class with scripting backend
 }
