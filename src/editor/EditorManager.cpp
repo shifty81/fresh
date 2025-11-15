@@ -142,6 +142,27 @@ bool EditorManager::initialize(Window* window, IRenderContext* renderContext, Vo
         });
 #endif
 
+        // Set undo/redo callbacks for terraforming
+        m_menuBar->setUndoCallback([this, worldEditor]() {
+            if (worldEditor && worldEditor->getTerraformingSystem()) {
+                if (worldEditor->getTerraformingSystem()->undo()) {
+                    LOG_INFO_C("Undo performed", "EditorManager");
+                } else {
+                    LOG_INFO_C("Nothing to undo", "EditorManager");
+                }
+            }
+        });
+
+        m_menuBar->setRedoCallback([this, worldEditor]() {
+            if (worldEditor && worldEditor->getTerraformingSystem()) {
+                if (worldEditor->getTerraformingSystem()->redo()) {
+                    LOG_INFO_C("Redo performed", "EditorManager");
+                } else {
+                    LOG_INFO_C("Nothing to redo", "EditorManager");
+                }
+            }
+        });
+
         m_toolbar = std::make_unique<EditorToolbar>();
         if (!m_toolbar->initialize()) {
             LOG_ERROR_C("Failed to initialize Toolbar", "EditorManager");
@@ -484,6 +505,27 @@ bool EditorManager::updateWorld(VoxelWorld* world, WorldEditor* worldEditor)
     m_menuBar->setDeselectAllCallback([this]() {
         if (m_sceneHierarchy) {
             m_sceneHierarchy->deselectAll();
+        }
+    });
+
+    // Set undo/redo callbacks for terraforming
+    m_menuBar->setUndoCallback([this, worldEditor]() {
+        if (worldEditor && worldEditor->getTerraformingSystem()) {
+            if (worldEditor->getTerraformingSystem()->undo()) {
+                LOG_INFO_C("Undo performed", "EditorManager");
+            } else {
+                LOG_INFO_C("Nothing to undo", "EditorManager");
+            }
+        }
+    });
+
+    m_menuBar->setRedoCallback([this, worldEditor]() {
+        if (worldEditor && worldEditor->getTerraformingSystem()) {
+            if (worldEditor->getTerraformingSystem()->redo()) {
+                LOG_INFO_C("Redo performed", "EditorManager");
+            } else {
+                LOG_INFO_C("Nothing to redo", "EditorManager");
+            }
         }
     });
 
