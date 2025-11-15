@@ -127,6 +127,15 @@ public:
      * @param captured If true, hides and locks cursor
      */
     void setCursorMode(bool captured);
+    
+    /**
+     * @brief Get current cursor capture state
+     * @return true if cursor is captured
+     */
+    bool isCursorCaptured() const
+    {
+        return cursorCaptured;
+    }
 
     /**
      * @brief Check if mouse button is pressed

@@ -52,15 +52,15 @@ constexpr float MAX_INTERACTION_DISTANCE = 5.0f;
 constexpr float CROSSHAIR_SIZE = 0.02f;
 constexpr float CROSSHAIR_LINE_WIDTH = 2.0f;
 constexpr int SHADER_INFO_LOG_SIZE = 512;
-#ifdef FRESH_OPENGL_SUPPORT
-const char* VOXEL_VERTEX_SHADER = "shaders/voxel.vert";
-const char* VOXEL_FRAGMENT_SHADER = "shaders/voxel.frag";
-const char* CROSSHAIR_VERTEX_SHADER = "shaders/crosshair.vert";
-const char* CROSSHAIR_FRAGMENT_SHADER = "shaders/crosshair.frag";
+#if defined(FRESH_OPENGL_SUPPORT) && defined(FRESH_GLEW_AVAILABLE)
+[[maybe_unused]] const char* VOXEL_VERTEX_SHADER = "shaders/voxel.vert";
+[[maybe_unused]] const char* VOXEL_FRAGMENT_SHADER = "shaders/voxel.frag";
+[[maybe_unused]] const char* CROSSHAIR_VERTEX_SHADER = "shaders/crosshair.vert";
+[[maybe_unused]] const char* CROSSHAIR_FRAGMENT_SHADER = "shaders/crosshair.frag";
 #endif
 } // namespace
 
-Engine::Engine() : m_running(false), m_inGame(false), m_selectedBlockType(VoxelType::Stone) {}
+Engine::Engine() : m_running(false), m_inGame(false), m_selectedBlockType(VoxelType::Stone), m_lastCursorCaptured(false) {}
 
 Engine::~Engine()
 {
@@ -631,16 +631,40 @@ void Engine::update(float deltaTime)
 #endif
 
     // Dynamic cursor management based on mode and GUI interaction
+    // Only change cursor mode when the state actually changes to prevent stuttering
     if (m_inputManager) {
         InputMode currentMode = m_inputManager->getInputMode();
         
+        // Sync our tracking state with InputManager's actual state
+        // This is important when Alt-hold changes the cursor mode
+        bool actualCursorCaptured = m_inputManager->isCursorCaptured();
+        
         // In UI/Editor mode, dynamically manage cursor based on GUI interaction
+        // Don't interfere with Alt-hold temporary mode switching
         if (currentMode == InputMode::UIMode && !m_inputManager->isAltHeld()) {
             // Hide and capture cursor when NOT over GUI (to enable mouse look)
             // Show cursor when over GUI (to enable GUI interaction)
-            m_inputManager->setCursorMode(!guiCapturesMouse);
+            bool shouldCapture = !guiCapturesMouse;
+            
+            // Only call setCursorMode if the state changed to prevent mouse delta resets
+            if (shouldCapture != actualCursorCaptured) {
+                m_inputManager->setCursorMode(shouldCapture);
+                m_lastCursorCaptured = shouldCapture;
+            } else {
+                m_lastCursorCaptured = actualCursorCaptured;
+            }
+        } else if (currentMode == InputMode::GameMode) {
+            // In Game mode, ensure cursor is captured (unless Alt is held, handled by InputManager)
+            if (!m_inputManager->isAltHeld() && !actualCursorCaptured) {
+                m_inputManager->setCursorMode(true);
+                m_lastCursorCaptured = true;
+            } else {
+                m_lastCursorCaptured = actualCursorCaptured;
+            }
+        } else {
+            // For any other state (e.g., Alt being held), just sync our tracking
+            m_lastCursorCaptured = actualCursorCaptured;
         }
-        // In Game mode, cursor is already managed by InputMode (hidden unless Alt held)
     }
 
     // In editor-first mode, always allow player input unless GUI captures it
