@@ -1,20 +1,29 @@
 # Automated Build Script Guide
 
-This guide explains how to use the automated PowerShell script that sets up and builds Fresh Voxel Engine with a single command.
+This guide explains how to use the automated build scripts that set up and build Fresh Voxel Engine with a single command.
 
 ## Overview
 
-The `setup-and-build.ps1` script automates the entire build process:
+Fresh Voxel Engine provides automated build scripts for both Windows and Linux/macOS platforms:
 
-1. ✅ Checks prerequisites (Visual Studio 2022, CMake, Git)
-2. ✅ Sets up vcpkg for dependency management
-3. ✅ Generates Visual Studio 2022 solution
-4. ✅ Builds the project
-5. ✅ Opens Visual Studio for you to take over
+- **Windows:** `setup-and-build.ps1` (PowerShell)
+- **Linux/macOS:** `setup-and-build.sh` (Bash)
 
-## Quick Start
+These scripts automate the entire build process:
 
-### Option 1: Full Automated Build (Recommended)
+1. ✅ Check prerequisites (compiler, CMake, Git)
+2. ✅ Install/verify dependencies
+3. ✅ Generate build files (Visual Studio solution or Makefiles)
+4. ✅ Build the project
+5. ✅ (Optional) Run tests
+
+---
+
+## Windows: PowerShell Script
+
+### Quick Start
+
+#### Option 1: Full Automated Build (Recommended)
 
 Open PowerShell in the project root directory and run:
 
@@ -31,7 +40,7 @@ This will:
 
 **Time:** 10-20 minutes on first run (includes downloading dependencies)
 
-### Option 2: Setup Only (No Build)
+#### Option 2: Setup Only (No Build)
 
 If you want to just set up and generate the solution without building:
 
@@ -41,7 +50,7 @@ If you want to just set up and generate the solution without building:
 
 You can then build manually in Visual Studio.
 
-### Option 3: Build Debug Configuration
+#### Option 3: Build Debug Configuration
 
 To build the Debug configuration instead of Release:
 
@@ -49,11 +58,11 @@ To build the Debug configuration instead of Release:
 .\setup-and-build.ps1 -BuildConfig Debug
 ```
 
-## Prerequisites
+### Prerequisites
 
 The script will check for these prerequisites and guide you if anything is missing:
 
-### Required
+#### Required
 - **Windows 10/11** (x64)
 - **Visual Studio 2022** (Community, Professional, or Enterprise)
   - With "Desktop development with C++" workload
@@ -64,11 +73,11 @@ The script will check for these prerequisites and guide you if anything is missi
 - **Git for Windows**
   - Download: https://git-scm.com/download/win
 
-### Optional
+#### Optional
 - **.NET 9 SDK** (for C# bindings)
   - Download: https://dotnet.microsoft.com/download/dotnet/9.0
 
-## Script Parameters
+### Script Parameters
 
 The script supports several optional parameters:
 
@@ -106,7 +115,160 @@ The script supports several optional parameters:
 .\setup-and-build.ps1 -BuildConfig Debug -OpenVS $false
 ```
 
-## What Happens During Execution
+---
+
+## Linux/macOS: Bash Script
+
+### Quick Start
+
+#### Option 1: Full Automated Build (Recommended)
+
+Open a terminal in the project root directory and run:
+
+```bash
+./setup-and-build.sh
+```
+
+This will:
+- Check all prerequisites
+- Install missing dependencies (via apt-get or brew)
+- Generate Makefiles with CMake
+- Build the Release configuration
+- Display instructions for running the engine
+
+**Time:** 5-10 minutes on first run (includes installing dependencies)
+
+#### Option 2: Setup Only (No Build)
+
+If you want to just configure without building:
+
+```bash
+./setup-and-build.sh --skip-build
+```
+
+You can then build manually with `make`.
+
+#### Option 3: Build Debug Configuration
+
+To build the Debug configuration instead of Release:
+
+```bash
+./setup-and-build.sh --config Debug
+```
+
+#### Option 4: Build and Run Tests
+
+To build and automatically run the test suite:
+
+```bash
+./setup-and-build.sh --run-tests
+```
+
+### Prerequisites
+
+The script will check for these prerequisites and guide you if anything is missing:
+
+#### Required (Linux)
+- **Ubuntu 20.04+** or **Debian 11+** (or compatible distribution)
+- **GCC 11+** or **Clang 12+**
+- **CMake 3.20+**
+- **Git**
+- **Development libraries:** libglfw3-dev, libglm-dev, libglew-dev, libopenal-dev, libgtest-dev
+
+The script will attempt to install missing dependencies automatically using your system's package manager.
+
+#### Required (macOS)
+- **macOS 12.0+** (Monterey or later)
+- **Xcode Command Line Tools** or **Clang 12+**
+- **Homebrew** package manager
+- **CMake 3.20+**
+- **Git**
+- **Development libraries:** glfw, glm, openal-soft, googletest
+
+The script will install missing dependencies via Homebrew.
+
+### Script Options
+
+The script supports several optional parameters:
+
+| Option | Description |
+|--------|-------------|
+| `--skip-build` | Skip the build step, only configure with CMake |
+| `--config <type>` | Build configuration: "Debug" or "Release" (default: Release) |
+| `--skip-deps` | Skip dependency installation check |
+| `--run-tests` | Run test suite after successful build |
+| `--help` | Show help message with all options |
+
+### Examples
+
+**Build Release configuration (default):**
+```bash
+./setup-and-build.sh
+```
+
+**Build Debug configuration:**
+```bash
+./setup-and-build.sh --config Debug
+```
+
+**Build and run tests:**
+```bash
+./setup-and-build.sh --run-tests
+```
+
+**Configure only (no build):**
+```bash
+./setup-and-build.sh --skip-build
+```
+
+**Build without checking dependencies:**
+```bash
+./setup-and-build.sh --skip-deps
+```
+
+**Debug build with tests:**
+```bash
+./setup-and-build.sh --config Debug --run-tests
+```
+
+### After the Script Completes
+
+#### Running the Engine
+
+After a successful build:
+
+```bash
+# From project root
+cd build && ./FreshVoxelEngine
+
+# Or directly
+./build/FreshVoxelEngine
+```
+
+#### Running Tests
+
+```bash
+# From project root
+cd build && ./FreshVoxelEngineTests
+
+# Or directly
+./build/FreshVoxelEngineTests
+```
+
+#### Manual Building After Configuration
+
+If you used `--skip-build`, you can build manually:
+
+```bash
+cd build
+cmake --build . -j$(nproc)  # Linux
+# or
+cmake --build . -j$(sysctl -n hw.ncpu)  # macOS
+```
+
+---
+
+## What Happens During Execution (Windows)
 
 ### Phase 1: Prerequisites Check
 The script verifies:
@@ -148,7 +310,50 @@ The script (unless `-OpenVS $false` is used):
 - Opens the generated solution in Visual Studio 2022
 - You take over from here!
 
-## After the Script Completes
+## What Happens During Execution (Linux/macOS)
+
+### Phase 1: Prerequisites Check
+The script verifies:
+- Git is installed and in PATH
+- CMake 3.20+ is installed and in PATH
+- C++ compiler (GCC/Clang) is installed
+- Detects operating system and distribution
+
+### Phase 2: Dependency Installation
+The script (unless `--skip-deps` is used):
+- Checks for required development libraries
+- On Linux: Uses apt-get (Ubuntu/Debian) or dnf (Fedora/RHEL)
+- On macOS: Uses Homebrew
+- Installs missing dependencies automatically (requires sudo on Linux)
+
+**Note:** You may be prompted for your password to install system packages.
+
+### Phase 3: CMake Configuration
+The script:
+- Creates `build/` directory if it doesn't exist
+- Runs CMake to generate Makefiles
+- Uses OpenGL rendering (native on Linux/macOS)
+- Configures for Release or Debug build type
+- Creates build configuration files
+
+### Phase 4: Build
+The script (unless `--skip-build` is used):
+- Builds the project using CMake
+- Uses all available CPU cores for parallel compilation
+- Creates executable in `build/` directory
+- Shows progress and any warnings/errors
+
+**Note:** Build takes 2-5 minutes depending on your system.
+
+### Phase 5: Test Execution (Optional)
+The script (if `--run-tests` is used):
+- Runs the test executable
+- Displays test results
+- Reports pass/fail status
+
+---
+
+## After the Script Completes (Windows)
 
 ### Next Steps in Visual Studio
 
