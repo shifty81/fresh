@@ -124,7 +124,22 @@ Release\FreshVoxelEngine.exe
 
 **For complete step-by-step instructions, see [BUILD.md](BUILD.md).**
 
-#### Linux: Quick Build
+#### Linux/macOS: Automated Build (Recommended)
+
+```bash
+# Clone repository
+git clone https://github.com/shifty81/fresh.git
+cd fresh
+
+# Run automated setup script (installs dependencies, builds project)
+./setup-and-build.sh
+```
+
+This script handles everything: dependency installation, CMake configuration, and building (5-10 minutes first run).
+
+**See [AUTOMATED_BUILD.md](AUTOMATED_BUILD.md) for detailed options.**
+
+#### Linux: Manual Build
 
 ```bash
 # 1. Install dependencies (Ubuntu/Debian)
@@ -144,7 +159,7 @@ cmake --build . --config Release -j$(nproc)
 ./FreshVoxelEngine
 ```
 
-#### macOS: Quick Build
+#### macOS: Manual Build
 
 ```bash
 # 1. Install dependencies (Homebrew)
