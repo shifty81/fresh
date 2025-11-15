@@ -645,6 +645,16 @@ void Engine::processInput()
         }
 #endif
 
+        // F key to toggle mouse cursor capture (camera freelook vs GUI mode)
+        if (!guiCapturesKeyboard && m_inputManager->isKeyJustPressed(GLFW_KEY_F)) {
+            m_inputManager->toggleCursorCapture();
+            if (m_inputManager->isCursorCaptured()) {
+                LOG_INFO_C("Mouse captured - Camera freelook enabled", "Engine");
+            } else {
+                LOG_INFO_C("Mouse released - GUI mode enabled", "Engine");
+            }
+        }
+
         // T key disabled - editor is always visible in new editor-first mode
         // Keeping this code commented out for reference
         // if (!guiCapturesKeyboard &&

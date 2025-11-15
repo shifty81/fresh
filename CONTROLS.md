@@ -26,6 +26,12 @@ The editor is **always visible** and provides:
 
 **Note:** Mouse cursor is shown when interacting with editor UI panels. Camera control works when not hovering over UI.
 
+### Mouse Mode Toggle
+- **F Key** - Toggle between camera freelook and GUI mode
+  - **Camera Freelook Mode:** Mouse is captured and hidden for camera control
+  - **GUI Mode:** Mouse is free and visible for interacting with UI panels
+  - Alternative to Alt-hold for persistent mode switching
+
 ## Keyboard Controls
 
 ### Free-Flying Camera Mode (Default/Editor Mode)
@@ -67,6 +73,7 @@ In Play Mode, a hotbar with 10 slots appears at the bottom middle of the screen:
 
 ### Action Controls
 
+- **F** - Toggle mouse capture (camera freelook ↔ GUI mode)
 - **T** - Disabled (editor is always visible)
 - **ESC** - Pause game / Return to menu
 - **E** - Use/Interact (future feature)
@@ -166,6 +173,7 @@ The engine now has two main modes accessible via the editor toolbar:
 
 ## New Features
 
+- ✅ **Mouse Mode Toggle (F Key)** - Toggle between camera freelook and GUI mode
 - ✅ **Smart Mouse Look** - Works in both editor and play mode when not using UI
 - ✅ **Dynamic Cursor** - Shows/hides automatically based on context
 - ✅ **Alt-Hold for Menus** - Access UI in play mode without stopping gameplay
@@ -198,6 +206,7 @@ The engine now has two main modes accessible via the editor toolbar:
 
 ✅ **Fully Supported:**
 - Camera control (mouse look)
+- Mouse mode toggle (F key for camera freelook ↔ GUI mode)
 - Block placement and breaking (left/right click)
 - Editor UI (all panels, buttons, sliders, lists)
 - Temporary cursor access (hold Alt)
