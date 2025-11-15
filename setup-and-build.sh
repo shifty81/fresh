@@ -104,6 +104,7 @@ detect_os() {
     if [[ "$OSTYPE" == "linux-gnu"* ]]; then
         OS="linux"
         if [ -f /etc/os-release ]; then
+            # shellcheck source=/dev/null
             . /etc/os-release
             DISTRO=$ID
         fi
@@ -328,9 +329,7 @@ main() {
     echo ""
     
     cd "$BUILD_DIR"
-    cmake -DCMAKE_BUILD_TYPE="$BUILD_CONFIG" ..
-    
-    if [ $? -eq 0 ]; then
+    if cmake -DCMAKE_BUILD_TYPE="$BUILD_CONFIG" ..; then
         print_success "CMake configuration completed successfully"
     else
         print_error "CMake configuration failed"
@@ -359,9 +358,7 @@ main() {
             NCORES=$(sysctl -n hw.ncpu)
         fi
         
-        cmake --build . -j"$NCORES"
-        
-        if [ $? -eq 0 ]; then
+        if cmake --build . -j"$NCORES"; then
             print_success "Build completed successfully!"
         else
             print_error "Build failed"
@@ -384,9 +381,7 @@ main() {
             if [ -f "$BUILD_DIR/FreshVoxelEngineTests" ]; then
                 print_step "Executing tests..."
                 echo ""
-                "$BUILD_DIR/FreshVoxelEngineTests"
-                
-                if [ $? -eq 0 ]; then
+                if "$BUILD_DIR/FreshVoxelEngineTests"; then
                     print_success "All tests passed!"
                 else
                     print_error "Some tests failed"
