@@ -5,6 +5,17 @@
 #include <iostream>
 #include <sstream>
 #include <thread>
+#include <vector>
+
+#ifdef _WIN32
+    #include <windows.h>
+#elif defined(__APPLE__)
+    #include <mach-o/dyld.h>
+    #include <limits.h>
+#else
+    #include <unistd.h>
+    #include <linux/limits.h>
+#endif
 
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
@@ -58,6 +69,54 @@ constexpr int SHADER_INFO_LOG_SIZE = 512;
 [[maybe_unused]] const char* CROSSHAIR_VERTEX_SHADER = "shaders/crosshair.vert";
 [[maybe_unused]] const char* CROSSHAIR_FRAGMENT_SHADER = "shaders/crosshair.frag";
 #endif
+
+/**
+ * @brief Get the directory path where the executable is located
+ * @return Path to the executable's directory, or empty string on failure
+ */
+std::string getExecutableDirectory()
+{
+#ifdef _WIN32
+    char buffer[MAX_PATH];
+    DWORD length = GetModuleFileNameA(NULL, buffer, MAX_PATH);
+    if (length == 0 || length == MAX_PATH) {
+        return "";
+    }
+    std::string exePath(buffer);
+    // Find last slash or backslash
+    size_t lastSlash = exePath.find_last_of("\\/");
+    if (lastSlash != std::string::npos) {
+        return exePath.substr(0, lastSlash);
+    }
+    return "";
+#elif defined(__APPLE__)
+    char buffer[PATH_MAX];
+    uint32_t size = PATH_MAX;
+    if (_NSGetExecutablePath(buffer, &size) != 0) {
+        return "";
+    }
+    std::string exePath(buffer);
+    size_t lastSlash = exePath.find_last_of('/');
+    if (lastSlash != std::string::npos) {
+        return exePath.substr(0, lastSlash);
+    }
+    return "";
+#else // Linux
+    char buffer[PATH_MAX];
+    ssize_t length = readlink("/proc/self/exe", buffer, PATH_MAX - 1);
+    if (length == -1) {
+        return "";
+    }
+    buffer[length] = '\0';
+    std::string exePath(buffer);
+    size_t lastSlash = exePath.find_last_of('/');
+    if (lastSlash != std::string::npos) {
+        return exePath.substr(0, lastSlash);
+    }
+    return "";
+#endif
+}
+
 } // namespace
 
 Engine::Engine() : m_running(false), m_inGame(false), m_selectedBlockType(VoxelType::Stone), m_lastCursorCaptured(false) {}
@@ -862,17 +921,37 @@ void Engine::setupInputCallbacks()
 
 std::string Engine::loadShaderFile(const std::string& filepath)
 {
-    std::ifstream file(filepath);
-    if (!file.is_open()) {
-        LOG_ERROR_C("Failed to open shader file: " + filepath, "Engine");
-        LOG_ERROR_C("Make sure to run the executable from the build directory where shaders/ folder exists", "Engine");
-        LOG_ERROR_C("The shaders are copied to: <build_directory>/shaders/", "Engine");
-        return "";
+    // Try multiple paths to find the shader file
+    std::vector<std::string> searchPaths;
+    
+    // 1. Try relative to current working directory (for development builds)
+    searchPaths.push_back(filepath);
+    
+    // 2. Try relative to executable directory (for installed/deployed builds)
+    std::string exeDir = getExecutableDirectory();
+    if (!exeDir.empty()) {
+        searchPaths.push_back(exeDir + "/" + filepath);
     }
-
-    std::stringstream buffer;
-    buffer << file.rdbuf();
-    return buffer.str();
+    
+    // Try each path
+    for (const auto& path : searchPaths) {
+        std::ifstream file(path);
+        if (file.is_open()) {
+            std::stringstream buffer;
+            buffer << file.rdbuf();
+            LOG_INFO_C("Loaded shader from: " + path, "Engine");
+            return buffer.str();
+        }
+    }
+    
+    // If we get here, shader file was not found in any location
+    LOG_ERROR_C("Failed to open shader file: " + filepath, "Engine");
+    LOG_ERROR_C("Searched in the following locations:", "Engine");
+    for (const auto& path : searchPaths) {
+        LOG_ERROR_C("  - " + path, "Engine");
+    }
+    LOG_ERROR_C("Make sure the shaders/ folder exists in one of these locations", "Engine");
+    return "";
 }
 
 GLuint Engine::compileShader(const std::string& source, GLenum shaderType)
