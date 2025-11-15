@@ -18,6 +18,7 @@ IKSolution TwoBoneIK::solve(const glm::vec3& origin, float joint1Length, float j
     solution.success = false;
     solution.joint1Rotation = glm::vec3(0.0f);
     solution.joint2Rotation = glm::vec3(0.0f);
+    solution.endEffectorRotation = glm::vec3(0.0f);
 
     // Calculate distance to target
     glm::vec3 toTarget = target - origin;
@@ -138,8 +139,16 @@ IKSolution FootIK::solveFoot(const glm::vec3& hipPosition, const glm::vec3& targ
     solution = TwoBoneIK::solve(hipPosition, hipToKneeLength, kneeToFootLength,
                                 hipPosition + toTarget, poleVector);
 
-    // TODO: Adjust foot rotation to match surface normal
-    // (This would need additional bone for foot orientation)
+    // Adjust foot rotation to match surface normal
+    // Calculate rotation to align foot with surface
+    glm::vec3 up = glm::vec3(0, 1, 0);
+    glm::vec3 right = glm::normalize(glm::cross(up, surfaceNormal));
+    glm::vec3 forward = glm::normalize(glm::cross(surfaceNormal, right));
+    
+    // Convert to Euler angles (pitch and roll based on surface slope)
+    float pitch = std::asin(-forward.y);
+    float roll = std::atan2(right.y, surfaceNormal.y);
+    solution.endEffectorRotation = glm::vec3(pitch, 0.0f, roll);
 
     return solution;
 }

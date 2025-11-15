@@ -325,8 +325,30 @@ void SpatialHash::insert(CollisionBody* body)
 
 void SpatialHash::remove(CollisionBody* body)
 {
-    (void)body; // Parameter reserved for future implementation
-    // TODO: Implement removal
+    if (!body)
+        return;
+
+    // Remove from all cells the AABB overlaps
+    glm::ivec3 minCell = getCellCoords(body->aabb.min);
+    glm::ivec3 maxCell = getCellCoords(body->aabb.max);
+
+    for (int x = minCell.x; x <= maxCell.x; ++x) {
+        for (int y = minCell.y; y <= maxCell.y; ++y) {
+            for (int z = minCell.z; z <= maxCell.z; ++z) {
+                int hash = x * 73856093 ^ y * 19349663 ^ z * 83492791;
+                auto it = cells.find(hash);
+                if (it != cells.end()) {
+                    auto& bodies = it->second.bodies;
+                    bodies.erase(std::remove(bodies.begin(), bodies.end(), body), bodies.end());
+                    
+                    // Remove empty cells to save memory
+                    if (bodies.empty()) {
+                        cells.erase(it);
+                    }
+                }
+            }
+        }
+    }
 }
 
 std::vector<CollisionBody*> SpatialHash::query(const AABB& aabb)

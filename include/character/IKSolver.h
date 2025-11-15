@@ -10,6 +10,7 @@ namespace fresh
 struct IKSolution {
     glm::vec3 joint1Rotation; // First joint rotation (e.g., shoulder or hip)
     glm::vec3 joint2Rotation; // Second joint rotation (e.g., elbow or knee)
+    glm::vec3 endEffectorRotation; // End effector rotation (e.g., foot or hand orientation)
     bool success;             // Whether solution was found
 };
 
