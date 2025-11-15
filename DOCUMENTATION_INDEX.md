@@ -48,6 +48,14 @@ If you're new to Fresh Voxel Engine, follow this path:
 - **[PROJECT_STATUS.md](PROJECT_STATUS.md)** - Current implementation status
 - **[ROADMAP.md](ROADMAP.md)** - Development roadmap
 
+### 🆕 Project Analysis & Planning (NEW!)
+- **[COMPREHENSIVE_ROADMAP.md](COMPREHENSIVE_ROADMAP.md)** - 📋 Complete gap analysis and detailed roadmap (25KB)
+- **[MISSING_FEATURES_SUMMARY.md](MISSING_FEATURES_SUMMARY.md)** - ⚡ Quick reference for missing features (12KB)
+- **[IMPLEMENTATION_STATUS_MATRIX.md](IMPLEMENTATION_STATUS_MATRIX.md)** - 📊 Visual status dashboard (18KB)
+- **[IMMEDIATE_ACTION_PLAN.md](IMMEDIATE_ACTION_PLAN.md)** - 🎯 30-60-90 day action plan (16KB)
+- **[EDITOR_FEATURES_STATUS.md](EDITOR_FEATURES_STATUS.md)** - 🎨 Editor feature tracking
+- **[INCOMPLETE_FEATURES_COMPLETION.md](INCOMPLETE_FEATURES_COMPLETION.md)** - ✅ TODO analysis
+
 ### Contributing
 - **[CONTRIBUTING.md](CONTRIBUTING.md)** - How to contribute
 - **[CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md)** - Community guidelines
@@ -108,6 +116,14 @@ If you're new to Fresh Voxel Engine, follow this path:
 ### "What's completed and what's planned?"
 → Check **[PROJECT_STATUS.md](PROJECT_STATUS.md)** and **[ROADMAP.md](ROADMAP.md)**
 
+### 🆕 "What's missing and needs to be fleshed out?"
+→ See **[COMPREHENSIVE_ROADMAP.md](COMPREHENSIVE_ROADMAP.md)** for complete analysis  
+→ Or **[MISSING_FEATURES_SUMMARY.md](MISSING_FEATURES_SUMMARY.md)** for quick reference  
+→ Check **[IMPLEMENTATION_STATUS_MATRIX.md](IMPLEMENTATION_STATUS_MATRIX.md)** for visual status
+
+### 🆕 "What should I work on next?"
+→ Follow **[IMMEDIATE_ACTION_PLAN.md](IMMEDIATE_ACTION_PLAN.md)** for prioritized tasks
+
 ### "How do I use .NET bindings?"
 → See **[DOTNET_INTEGRATION.md](DOTNET_INTEGRATION.md)** and **[dotnet/README.md](dotnet/README.md)**
 
@@ -130,8 +146,10 @@ Everything else is reference material for specific needs.
 To start contributing:
 1. **[CONTRIBUTING.md](CONTRIBUTING.md)** - Guidelines
 2. **[ARCHITECTURE.md](ARCHITECTURE.md)** - Understanding the codebase
-3. **[PROJECT_STATUS.md](PROJECT_STATUS.md)** - What needs work
-4. **[docs/CPP_GUIDELINES.md](docs/CPP_GUIDELINES.md)** - Code standards
+3. **[IMMEDIATE_ACTION_PLAN.md](IMMEDIATE_ACTION_PLAN.md)** - 🆕 What to work on next (30-60-90 day plan)
+4. **[MISSING_FEATURES_SUMMARY.md](MISSING_FEATURES_SUMMARY.md)** - 🆕 Quick reference for gaps
+5. **[PROJECT_STATUS.md](PROJECT_STATUS.md)** - Current status
+6. **[docs/CPP_GUIDELINES.md](docs/CPP_GUIDELINES.md)** - Code standards
 
 ### For Advanced Users
 Exploring advanced features:
