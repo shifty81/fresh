@@ -744,6 +744,9 @@ if(BUILD_TESTS)
         tests/scripting/EventSystemTests.cpp
         tests/rpg/InventoryTests.cpp
         tests/rpg/CraftingSystemTests.cpp
+        tests/character/VoxelCharacterTests.cpp
+        tests/character/BodyPartLibraryTests.cpp
+        tests/character/AnimationClipTests.cpp
     )
     
     # Engine source files needed for tests (exclude main.cpp)
@@ -761,6 +764,10 @@ if(BUILD_TESTS)
         src/rpg/Inventory.cpp
         src/rpg/CraftingSystem.cpp
         src/assets/ModularAssetSystem.cpp
+        src/character/VoxelCharacter.cpp
+        src/character/BodyPartLibrary.cpp
+        src/character/AnimationClip.cpp
+        src/character/AnimationController.cpp
     )
     
     # Create test executable
