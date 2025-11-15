@@ -40,6 +40,7 @@
 #include "ui/HotbarPanel.h"
 #include "ui/MainMenu.h"
 #include "ui/MainMenuPanel.h"
+#include "ui/VoxelToolPalette.h"
 #include "voxel/Chunk.h"
 #include "voxel/VoxelTypes.h"
 #include "voxel/VoxelWorld.h"
@@ -371,6 +372,16 @@ void Engine::initializeGameSystems()
                     }
                 });
             }
+            
+            // Connect voxel tool palette voxel type changes to engine's selected block type
+            auto* voxelToolPalette = m_editorManager->getVoxelToolPalette();
+            if (voxelToolPalette) {
+                voxelToolPalette->setVoxelTypeCallback([this](VoxelType type) {
+                    m_selectedBlockType = type;
+                    LOG_INFO_C("Selected block type from tool palette: " + 
+                              std::to_string(static_cast<int>(type)), "Engine");
+                });
+            }
         }
     }
 #endif
@@ -406,6 +417,56 @@ void Engine::initializeGameSystems()
     m_player->setWorld(m_world.get());
     m_player->setPosition(glm::vec3(0.0f, 80.0f, 0.0f));
     std::cout << "Player initialized" << std::endl;
+
+    // Initialize hotbar with common block types
+#ifdef FRESH_IMGUI_AVAILABLE
+    if (m_editorManager && m_editorManager->getHotbar()) {
+        auto* hotbar = m_editorManager->getHotbar();
+        
+        // Set up common block types in hotbar slots
+        std::vector<VoxelType> commonBlocks = {
+            VoxelType::Stone,    // Slot 1
+            VoxelType::Dirt,     // Slot 2
+            VoxelType::Grass,    // Slot 3
+            VoxelType::Wood,     // Slot 4
+            VoxelType::Sand,     // Slot 5
+            VoxelType::Brick,    // Slot 6
+            VoxelType::Glass,    // Slot 7
+            VoxelType::Leaves,   // Slot 8
+            VoxelType::Water,    // Slot 9
+            VoxelType::Snow      // Slot 0
+        };
+        
+        for (size_t i = 0; i < commonBlocks.size() && i < HotbarPanel::HOTBAR_SIZE; ++i) {
+            HotbarPanel::HotbarSlot slot;
+            slot.isEmpty = false;
+            slot.voxelType = commonBlocks[i];
+            slot.count = 1;
+            hotbar->setSlot(static_cast<int>(i), slot);
+        }
+        
+        // Connect hotbar slot selection to block type change
+        hotbar->setSlotActivatedCallback([this](int slotIndex) {
+            if (m_editorManager && m_editorManager->getHotbar()) {
+                const auto& slot = m_editorManager->getHotbar()->getSlot(slotIndex);
+                if (!slot.isEmpty) {
+                    m_selectedBlockType = slot.voxelType;
+                    LOG_INFO_C("Selected block type: " + std::to_string(static_cast<int>(m_selectedBlockType)), 
+                              "Engine");
+                }
+            }
+        });
+        
+        // Set initial selected block to match slot 0 (Stone)
+        if (!commonBlocks.empty()) {
+            m_selectedBlockType = commonBlocks[0];
+            hotbar->setSelectedSlot(0);
+        }
+        
+        LOG_INFO_C("Hotbar initialized with " + std::to_string(commonBlocks.size()) + " block types", 
+                  "Engine");
+    }
+#endif
 
     // Keep editor visible and stay in UI mode (editor-first approach)
     m_inputManager->setInputMode(InputMode::UIMode);

@@ -177,6 +177,15 @@ public:
         return m_hotbar.get();
     }
 
+    /**
+     * @brief Get the voxel tool palette
+     * @return Voxel tool palette pointer
+     */
+    VoxelToolPalette* getVoxelToolPalette() const
+    {
+        return m_voxelTools.get();
+    }
+
 #ifdef _WIN32
     /**
      * @brief Get the Windows customization panel
