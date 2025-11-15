@@ -1,7 +1,15 @@
 # Fresh Voxel Engine - Development Roadmap
 
-> **Last Updated:** 2025-11-08  
+> **Last Updated:** 2025-11-15  
 > **Note:** This roadmap shows the historical development plan. For accurate current implementation status, see [ACTUAL_STATUS.md](ACTUAL_STATUS.md) which provides code-verified status of all systems.
+
+## Recent Updates (2025-11-15)
+
+### 🐛 Mouse Input System - FIXED
+- **Issue**: Mouse input was stuttery, laggy, and would cut out
+- **Root Cause**: Cursor mode was being set every frame, causing frequent resets
+- **Solution**: Implemented state tracking to only change cursor mode when necessary
+- **Status**: ✅ Fixed and tested
 
 ## Project Vision
 A high-performance C++ voxel game engine with multiplayer support, featuring procedural terrain generation, comprehensive gameplay systems, and modular architecture for easy extensibility.
@@ -674,6 +682,231 @@ A high-performance C++ voxel game engine with multiplayer support, featuring pro
 
 ---
 
+## 💡 System Improvement Suggestions & Brainstorming
+
+This section provides concrete suggestions for fleshing out and improving existing systems based on current implementation analysis.
+
+### Input System Enhancements
+
+#### Current Issues Resolved
+- ✅ Mouse stuttering fixed by implementing state-based cursor management
+- ✅ Input cutting out resolved by reducing unnecessary cursor mode switches
+- ✅ Alt-hold feature working properly for UI/Game mode switching
+
+#### Recommended Improvements
+1. **Input Smoothing & Interpolation**
+   - Add configurable mouse acceleration curves
+   - Implement input prediction for low-framerate scenarios
+   - Add dead zone customization per-axis for gamepads
+
+2. **Advanced Key Binding System**
+   - Support for key combinations (Ctrl+S, Alt+Tab, etc.)
+   - Profile-based key bindings (Builder profile, Combat profile, etc.)
+   - Save/load key bindings to file
+   - In-game key binding UI with conflict detection
+
+3. **Context-Aware Input**
+   - More granular input contexts (Building, Flying, Swimming, Inventory, Chat)
+   - Automatic context switching based on player state
+   - Context-specific input hints displayed in UI
+
+4. **Gesture Recognition**
+   - Mouse gesture support (draw patterns for quick actions)
+   - Touch screen gesture support for tablets
+   - Customizable gesture library
+
+### Editor System Enhancements
+
+#### Current Status
+- Editor UI is always visible (editor-first approach)
+- GUI properly passes input to 3D viewport when not hovering UI
+- Alt-hold provides temporary cursor access
+
+#### Recommended Improvements
+1. **Multi-Viewport Support**
+   - Split-screen editing with multiple camera angles
+   - Picture-in-picture viewport for detail work
+   - Synchronized camera movements across viewports
+
+2. **Visual Gizmos**
+   - 3D transform gizmos (move, rotate, scale)
+   - Snap-to-grid with adjustable grid size
+   - Visual indicators for raycasts and collisions
+
+3. **Selection System**
+   - Multi-voxel selection (box, sphere, cylinder, freeform)
+   - Selection persistence across sessions
+   - Selection groups and naming
+   - Quick selection history (last 10 selections)
+
+4. **Undo/Redo Improvements**
+   - Visual preview of undo/redo operations
+   - Branch-based undo (tree structure, not linear)
+   - Selective undo (undo specific operations, not just last)
+   - Undo history compression for large operations
+
+### Performance Optimization Strategies
+
+#### Input & Rendering Pipeline
+1. **Frame Pacing Improvements**
+   - Implement variable rate shading for less critical areas
+   - Add dynamic resolution scaling based on GPU load
+   - Per-chunk render distance adjustment based on visibility
+
+2. **Input Processing Optimization**
+   - Batch input events instead of processing individually
+   - Predict next frame's cursor position for reduced latency
+   - Cache frequently accessed input states
+
+3. **Cursor Mode Optimization**
+   - Hysteresis for cursor mode switching (prevent rapid toggling)
+   - Predictive cursor mode changes based on mouse trajectory
+   - Smooth cursor transitions with fade effects
+
+### Camera System Enhancements
+
+#### Current Implementation
+- First-person camera with smooth mouse look
+- Editor free-fly mode with no collision
+- Play mode with physics-based movement
+
+#### Recommended Improvements
+1. **Camera Modes**
+   - Third-person camera with orbit controls
+   - Isometric/orthographic camera for building
+   - Cinematic camera paths for showcases
+   - Free camera spectator mode (separate from player)
+
+2. **Camera Effects**
+   - Head bobbing (optional, with intensity slider)
+   - Camera shake for impacts and explosions
+   - Depth of field effects
+   - Motion blur (optional)
+   - Field of view transitions (sprint, aim down sights)
+
+3. **Camera Smoothing**
+   - Separate sensitivity for horizontal/vertical look
+   - Smooth camera lag when turning quickly
+   - Acceleration/deceleration curves for smooth movement
+
+### UI/UX Improvements
+
+#### Input Feedback
+1. **Visual Feedback**
+   - Highlight interactive elements on mouse hover
+   - Show current input mode in HUD (Game/UI/Build)
+   - Display active keybindings contextually
+   - Input buffering visualization
+
+2. **Audio Feedback**
+   - Sound effects for mode switches
+   - Audio cues for input acceptance/rejection
+   - Directional audio for off-screen events
+
+3. **Haptic Feedback**
+   - Controller vibration for important events
+   - Customizable vibration patterns per action
+   - Haptic feedback for building/mining
+
+### World Interaction Improvements
+
+#### Current Implementation
+- Raycast-based voxel interaction
+- Left-click to break, right-click to place
+- Max interaction distance: 5 blocks
+
+#### Recommended Enhancements
+1. **Advanced Interaction Modes**
+   - Continuous place/break (hold button)
+   - Area fill mode (paint entire surfaces)
+   - Line drawing mode (connect two points)
+   - Pattern stamping (save and reuse patterns)
+
+2. **Smart Placement**
+   - Auto-orient blocks based on surface normal
+   - Snap to existing blocks' faces
+   - Preview ghost blocks before placing
+   - Multi-block placement with shift-click
+
+3. **Context Actions**
+   - Right-click menu for blocks (edit, copy, delete)
+   - Quick-swap blocks without opening inventory
+   - Favorite blocks toolbar (beyond hotbar)
+
+### Editor Integration Improvements
+
+#### Current Issues & Solutions
+1. **Mouse Lock Behavior**
+   - ✅ Fixed: No longer locks when clicking UI
+   - Enhancement: Add visual indicator when cursor is captured
+   - Enhancement: Smooth cursor fade-in/out animations
+
+2. **UI Panel Management**
+   - Add collapsible panels to maximize viewport space
+   - Implement panel presets (save/load layouts)
+   - Add transparency controls per panel
+   - Floating vs. docked panel options
+
+3. **Workflow Enhancements**
+   - Quick access pie menu (hold key + mouse gesture)
+   - Customizable toolbars with drag-drop buttons
+   - Macro system for repeating complex operations
+   - Batch operations with progress indicators
+
+### Multiplayer Input Synchronization
+
+#### Recommendations for Future Implementation
+1. **Client-Side Prediction**
+   - Predict movement locally, reconcile with server
+   - Input buffering for network lag compensation
+   - Smooth interpolation for other players
+
+2. **Input Authority**
+   - Server-authoritative input validation
+   - Client sends input intent, not position
+   - Anti-cheat through input validation
+
+3. **Spectator Features**
+   - Follow other players' cameras
+   - Free-fly spectator mode
+   - Picture-in-picture for multiple player views
+
+### Testing & Debug Tools
+
+#### Input System Testing
+1. **Input Visualizer**
+   - Real-time display of all input events
+   - Mouse position and delta graphs
+   - Button press timing visualization
+   - Input lag measurement tool
+
+2. **Automated Testing**
+   - Synthetic input injection for testing
+   - Playback recorded input sequences
+   - Stress testing with rapid input changes
+
+3. **Performance Profiling**
+   - Input processing time per frame
+   - Cursor mode change frequency tracking
+   - Mouse delta smoothness metrics
+
+### Documentation Improvements
+
+#### Input System Documentation
+1. **User Guide**
+   - Complete list of default keybindings
+   - Tutorial on customizing controls
+   - Tips for optimal mouse settings
+   - Controller configuration guide
+
+2. **Developer Guide**
+   - Input system architecture diagram
+   - How to add new input actions
+   - Best practices for input handling
+   - Common pitfalls and solutions
+
+---
+
 ## 📊 Feature Comparison: Implemented vs. Required
 
 | Feature Category | Current Status | Target Status | Priority |
@@ -847,6 +1080,6 @@ This roadmap is a living document. As development progresses:
 
 ---
 
-**Last Updated**: 2025-11-08
-**Version**: 1.2.0
-**Status**: In Active Development (Phase 6 Ongoing: Rendering Backends | Phase 7 Starting: Procedural Voxel Character System)
+**Last Updated**: 2025-11-15  
+**Version**: 1.3.0  
+**Status**: In Active Development (Phase 6 Complete: Input System Enhanced | Phase 7 Starting: Procedural Voxel Character System)
