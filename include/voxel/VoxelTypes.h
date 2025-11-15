@@ -24,6 +24,10 @@ enum class VoxelType : uint8_t {
     Cobblestone,
     Planks,
     Glass,
+    Brick,
+    Gravel,
+    Coal,
+    Iron,
     // Add more types as needed
     Count
 };
