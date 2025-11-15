@@ -366,6 +366,7 @@ if(imgui_FOUND)
             src/ui/WindowsCustomizationPanel.cpp
             src/ui/WindowsJumpListManager.cpp
             src/ui/WindowsToastManager.cpp
+            src/ui/WindowsDPIManager.cpp
         )
     endif()
 endif()

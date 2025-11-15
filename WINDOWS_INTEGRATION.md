@@ -97,6 +97,23 @@ Native toast notifications that appear in the Windows Action Center.
 
 **Access:** Called programmatically when events occur
 
+### 6. High DPI Support
+
+Automatic per-monitor DPI awareness for crisp rendering on high-resolution displays.
+
+**Features:**
+- **Per-Monitor DPI V2** - Best quality on multi-monitor setups
+- **Automatic Scaling** - UI scales correctly on 4K/5K displays
+- **DPI Change Detection** - Updates when moving between monitors
+- **Windows 8.1+** - Works on Windows 8.1, 10, and 11
+
+**Use Cases:**
+- Optimal display on high-DPI monitors
+- Multi-monitor setups with different DPIs
+- Laptop + external 4K monitor configurations
+
+**Access:** Automatically enabled during engine initialization
+
 ## How to Use
 
 ### Opening Windows Customization Panel
@@ -241,6 +258,36 @@ toastManager.showToastWithButtons(
 );
 ```
 
+### Using High DPI Support
+
+```cpp
+// Initialize DPI manager at startup
+WindowsDPIManager dpiManager;
+dpiManager.initialize(WindowsDPIManager::DPIAwarenessMode::PerMonitorAwareV2);
+
+// Get DPI scale for current window
+void* hwnd = getWindowHandle();
+float dpiScale = dpiManager.getDPIScaleForWindow(hwnd);
+LOG_INFO("Current DPI scale: " + std::to_string(dpiScale)); // e.g., 1.5 for 144 DPI
+
+// Convert logical pixels to physical pixels for rendering
+int logicalWidth = 800;
+int physicalWidth = WindowsDPIManager::logicalToPhysical(logicalWidth, dpiScale);
+
+// Convert physical pixels back to logical for hit testing
+int physicalX = 1200;
+int logicalX = WindowsDPIManager::physicalToLogical(physicalX, dpiScale);
+
+// Get system DPI
+unsigned int systemDPI = dpiManager.getSystemDPI();
+LOG_INFO("System DPI: " + std::to_string(systemDPI)); // e.g., 144
+
+// The DPI manager automatically handles:
+// - Per-monitor DPI awareness
+// - DPI changes when moving windows between monitors
+// - Proper scaling for all UI elements
+```
+
 ## Technical Details
 
 ### Architecture
@@ -260,6 +307,7 @@ include/ui/
 ├── WindowsTaskbarManager.h        # Taskbar integration
 ├── WindowsJumpListManager.h       # Jump list integration
 ├── WindowsToastManager.h          # Toast notifications
+├── WindowsDPIManager.h            # High DPI awareness
 └── WindowsCustomizationPanel.h    # UI for all Windows features
 
 src/ui/
@@ -268,6 +316,7 @@ src/ui/
 ├── WindowsTaskbarManager.cpp
 ├── WindowsJumpListManager.cpp
 ├── WindowsToastManager.cpp
+├── WindowsDPIManager.cpp
 └── WindowsCustomizationPanel.cpp
 ```
 
@@ -277,6 +326,7 @@ src/ui/
 - **dwmapi.lib** - Desktop Window Manager API for theme detection
 - **shell32.lib** - Shell API for dialogs and jump lists
 - **propsys.lib** - Property system for jump list metadata
+- **shcore.lib** - Shell core for DPI awareness APIs
 - **COM** - Component Object Model for taskbar and notification integration
 - **Windows 10 SDK** - For toast notification APIs (Windows.UI.Notifications)
 
@@ -284,13 +334,14 @@ All dependencies are standard Windows libraries included with the Windows SDK.
 
 ### Platform Compatibility
 
-| Feature | Windows 7 | Windows 10 | Windows 11 | Linux | macOS |
-|---------|-----------|-----------|-----------|-------|-------|
-| Theme Manager | ❌ | ✅ | ✅ | ❌ | ❌ |
-| Native Dialogs | ✅ | ✅ | ✅ | ❌ | ❌ |
-| Taskbar Integration | ✅ | ✅ | ✅ | ❌ | ❌ |
-| Jump Lists | ✅ | ✅ | ✅ | ❌ | ❌ |
-| Toast Notifications | ❌ | ✅ | ✅ | ❌ | ❌ |
+| Feature | Windows 7 | Windows 8.1 | Windows 10 | Windows 11 | Linux | macOS |
+|---------|-----------|-------------|-----------|-----------|-------|-------|
+| Theme Manager | ❌ | ❌ | ✅ | ✅ | ❌ | ❌ |
+| Native Dialogs | ✅ | ✅ | ✅ | ✅ | ❌ | ❌ |
+| Taskbar Integration | ✅ | ✅ | ✅ | ✅ | ❌ | ❌ |
+| Jump Lists | ✅ | ✅ | ✅ | ✅ | ❌ | ❌ |
+| Toast Notifications | ❌ | ❌ | ✅ | ✅ | ❌ | ❌ |
+| High DPI Support | ❌ | ✅ | ✅ | ✅ | ❌ | ❌ |
 
 On non-Windows platforms, these features are automatically disabled at compile time, and the engine falls back to cross-platform alternatives (ImGui dialogs, etc.).
 
@@ -348,8 +399,9 @@ These features have been recently added to Fresh Voxel Engine:
 
 1. ✅ **Jump Lists** - Recent files and quick actions in taskbar menu (IMPLEMENTED)
 2. ✅ **Toast Notifications** - Windows 10/11 toast notifications (BASIC IMPLEMENTATION)
-3. ✅ **AVX2 Optimizations** - SIMD instructions for improved performance
-4. ✅ **Enhanced Compiler Flags** - Whole program optimization, fast floating-point
+3. ✅ **High DPI Support** - Per-monitor DPI awareness for crisp rendering (IMPLEMENTED)
+4. ✅ **AVX2 Optimizations** - SIMD instructions for improved performance
+5. ✅ **Enhanced Compiler Flags** - Whole program optimization, fast floating-point
 
 ## Future Enhancements
 
@@ -360,8 +412,8 @@ Planned features for future releases:
 3. **Live Tiles** - Dynamic Start menu tile (Windows 10)
 4. **Share Contract** - Windows Share integration
 5. **Windows Hello** - Biometric authentication integration
-6. **High DPI Awareness** - Per-monitor DPI scaling support
-7. **Clipboard Integration** - Rich clipboard with world/voxel data
+6. **Clipboard Integration** - Rich clipboard with world/voxel data
+7. **DirectStorage** - Ultra-fast asset loading on Windows 11
 
 ## Troubleshooting
 
