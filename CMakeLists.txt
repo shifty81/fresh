@@ -747,6 +747,7 @@ if(BUILD_TESTS)
         tests/character/BodyPartLibraryTests.cpp
         tests/character/AnimationClipTests.cpp
         tests/editor/SelectionManagerTests.cpp    # Tests for voxel selection system
+        tests/editor/SelectionRendererTests.cpp   # Tests for selection visualization
     )
     
     # Engine source files needed for tests (exclude main.cpp)
@@ -769,6 +770,8 @@ if(BUILD_TESTS)
         src/character/AnimationClip.cpp
         src/character/AnimationController.cpp
         src/editor/SelectionManager.cpp
+        src/editor/SelectionRenderer.cpp
+        src/devtools/DebugRenderer.cpp
     )
     
     # Create test executable
