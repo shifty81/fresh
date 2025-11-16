@@ -110,6 +110,14 @@ public:
      */
     void deselectAll();
 
+    /**
+     * @brief Add a new node to the hierarchy
+     * @param name Name of the node
+     * @param parent Parent node (nullptr for root)
+     * @return Pointer to the created node
+     */
+    HierarchyNode* addNode(const std::string& name, HierarchyNode* parent = nullptr);
+
 private:
     void renderNode(HierarchyNode* node);
     void buildHierarchyFromWorld();

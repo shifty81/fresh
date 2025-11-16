@@ -154,6 +154,7 @@ private:
     void loadWorld(const std::string& name);
     void setupInputCallbacks();
     void initializeGameSystems(); // Helper for common initialization
+    void createDemoEntities();    // Create demo entities for Inspector demonstration
 
 #ifndef _WIN32
     // User data for GLFW callbacks (not needed for Win32)

@@ -188,6 +188,15 @@ public:
     }
 
     /**
+     * @brief Get the scene hierarchy panel
+     * @return Scene hierarchy panel pointer
+     */
+    SceneHierarchyPanel* getSceneHierarchy() const
+    {
+        return m_sceneHierarchy.get();
+    }
+
+    /**
      * @brief Get the engine configuration panel
      * @return Engine configuration panel pointer
      */
