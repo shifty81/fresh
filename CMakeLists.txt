@@ -365,6 +365,7 @@ if(imgui_FOUND)
         src/ui/MainMenuPanel.cpp
         src/ui/SettingsPanel.cpp
         src/ui/HotbarPanel.cpp
+        src/ui/EngineConfigPanel.cpp
     )
     
     # Add Windows-native UI features on Windows
@@ -435,6 +436,7 @@ set(ENGINE_HEADERS
     include/ui/MainMenuPanel.h
     include/ui/SettingsPanel.h
     include/ui/HotbarPanel.h
+    include/ui/EngineConfigPanel.h
     include/input/InputManager.h
     include/gameplay/Camera.h
     include/gameplay/Player.h

@@ -24,6 +24,7 @@
 #include "ui/MainMenuPanel.h"
 #include "ui/SceneHierarchyPanel.h"
 #include "ui/SettingsPanel.h"
+#include "ui/EngineConfigPanel.h"
 #include "ui/VoxelToolPalette.h"
 #include "voxel/VoxelWorld.h"
 
@@ -130,6 +131,13 @@ bool EditorManager::initialize(WindowType* window, IRenderContext* renderContext
         m_menuBar->setSettingsCallback([this]() {
             if (m_settingsPanel) {
                 m_settingsPanel->setVisible(true);
+            }
+        });
+
+        // Set engine configuration callback to open engine config panel
+        m_menuBar->setEngineConfigCallback([this]() {
+            if (m_engineConfigPanel) {
+                m_engineConfigPanel->setVisible(true);
             }
         });
 
@@ -284,6 +292,13 @@ bool EditorManager::initialize(WindowType* window, IRenderContext* renderContext
     m_settingsPanel = std::make_unique<SettingsPanel>();
     if (!m_settingsPanel->initialize(window, inputManager)) {
         LOG_ERROR_C("Failed to initialize Settings Panel", "EditorManager");
+        return false;
+    }
+
+    // Initialize engine configuration panel
+    m_engineConfigPanel = std::make_unique<EngineConfigPanel>();
+    if (!m_engineConfigPanel->initialize(renderContext)) {
+        LOG_ERROR_C("Failed to initialize Engine Configuration Panel", "EditorManager");
         return false;
     }
 
@@ -625,6 +640,11 @@ void EditorManager::render()
     // Render settings panel if visible
     if (m_settingsPanel) {
         m_settingsPanel->render();
+    }
+
+    // Render engine configuration panel if visible
+    if (m_engineConfigPanel) {
+        m_engineConfigPanel->render();
     }
 
     // Render hotbar (shown in play mode)
