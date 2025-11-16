@@ -61,6 +61,12 @@ public:
     int getWorldSeed() const { return m_worldSeed; }
 
     /**
+     * @brief Get the world type (2D or 3D)
+     * @return true for 3D, false for 2D
+     */
+    bool isWorld3D() const { return m_isWorld3D; }
+
+    /**
      * @brief Clear the create/load flags
      */
     void clearFlags();
@@ -106,6 +112,7 @@ private:
     bool m_exitRequested;
     bool m_showNewWorldDialog;
     bool m_showLoadWorldDialog;
+    bool m_isWorld3D; // World type: true = 3D, false = 2D
     
     std::string m_newWorldName;
     std::string m_loadWorldName;

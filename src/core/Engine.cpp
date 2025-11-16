@@ -171,7 +171,8 @@ std::string getExecutableDirectory()
 
 } // namespace
 
-Engine::Engine() : m_running(false), m_inGame(false), m_selectedBlockType(VoxelType::Stone), m_lastCursorCaptured(false) {}
+Engine::Engine() : m_running(false), m_inGame(false), m_selectedBlockType(VoxelType::Stone), 
+                   m_lastCursorCaptured(false), m_rightMouseHeldForCamera(false) {}
 
 Engine::~Engine()
 {
@@ -276,9 +277,10 @@ bool Engine::initialize()
     return true;
 }
 
-void Engine::createNewWorld(const std::string& name, int seed)
+void Engine::createNewWorld(const std::string& name, int seed, bool is3D)
 {
-    std::cout << "\nCreating new world: " << name << " (seed: " << seed << ")" << std::endl;
+    std::cout << "\nCreating new " << (is3D ? "3D" : "2D") << " world: " << name 
+              << " (seed: " << seed << ")" << std::endl;
 
     // Create voxel world
     m_world = std::make_unique<VoxelWorld>();
@@ -604,7 +606,8 @@ void Engine::run()
                         m_editorManager->endFrame();
                         
                         createNewWorld(mainMenuPanel->getNewWorldName(),
-                                       mainMenuPanel->getWorldSeed());
+                                       mainMenuPanel->getWorldSeed(),
+                                       mainMenuPanel->isWorld3D());
                         mainMenuPanel->clearFlags();
                         worldActionRequested = true;
                     } else if (mainMenuPanel->shouldLoadWorld()) {
@@ -863,49 +866,63 @@ void Engine::update(float deltaTime)
     bool guiCapturesKeyboard = false;
 #endif
 
-    // Dynamic cursor management based on mode and GUI interaction
-    // Only change cursor mode when the state actually changes to prevent stuttering
+    // ========================================================================
+    // UNREAL-STYLE MOUSE CONTROL SYSTEM
+    // ========================================================================
+    // In Unreal Engine:
+    // - Right Mouse Button (RMB) held = Camera free look (cursor hidden & captured)
+    // - RMB released = Cursor visible, can interact with UI/menus
+    // - This prevents the cursor from "snapping" to camera control automatically
+    // ========================================================================
+    
     if (m_inputManager) {
         InputMode currentMode = m_inputManager->getInputMode();
-        
-        // Sync our tracking state with InputManager's actual state
-        // This is important when Alt-hold changes the cursor mode
         bool actualCursorCaptured = m_inputManager->isCursorCaptured();
         
-        // Clear user toggle flag when user explicitly interacts with GUI
-        // This allows automatic cursor management to resume
-        if (m_userToggledCursor && guiCapturesMouse) {
+        // Check if right mouse button is currently held (for Unreal-style camera control)
+        bool rightMousePressed = m_inputManager->isMouseButtonPressed(MOUSE_BUTTON_RIGHT);
+        
+        // Determine if we should capture cursor based on RMB state
+        // Only capture when RMB is held AND GUI doesn't want the mouse
+        bool shouldCaptureCursor = false;
+        
+        if (currentMode == InputMode::UIMode) {
+            // In UI mode (editor), only capture cursor when:
+            // 1. Right mouse button is held (Unreal-style free look)
+            // 2. GUI is not capturing mouse (not hovering over UI elements)
+            // 3. User hasn't explicitly toggled cursor with F key
+            if (!m_userToggledCursor && !guiCapturesMouse) {
+                shouldCaptureCursor = rightMousePressed;
+                
+                // Track if RMB is being used for camera control
+                m_rightMouseHeldForCamera = rightMousePressed;
+            } else if (m_userToggledCursor) {
+                // User explicitly toggled with F key - respect their choice
+                shouldCaptureCursor = actualCursorCaptured;
+                
+                // Clear user toggle if they start using GUI
+                if (guiCapturesMouse) {
+                    m_userToggledCursor = false;
+                }
+            }
+        } else if (currentMode == InputMode::GameMode) {
+            // In game mode, always capture cursor (traditional FPS style)
+            shouldCaptureCursor = true;
             m_userToggledCursor = false;
         }
         
-        // In UI/Editor mode, dynamically manage cursor based on GUI interaction
-        // Don't interfere with Alt-hold temporary mode switching
-        // Don't interfere with user's explicit F key toggle
-        if (currentMode == InputMode::UIMode && !m_inputManager->isAltHeld() && !m_userToggledCursor) {
-            // Hide and capture cursor when NOT over GUI (to enable mouse look)
-            // Show cursor when over GUI (to enable GUI interaction)
-            bool shouldCapture = !guiCapturesMouse;
+        // Only call setCursorMode if the state actually changed (prevents stuttering)
+        if (shouldCaptureCursor != actualCursorCaptured) {
+            m_inputManager->setCursorMode(shouldCaptureCursor);
+            m_lastCursorCaptured = shouldCaptureCursor;
             
-            // Only call setCursorMode if the state changed to prevent mouse delta resets
-            if (shouldCapture != actualCursorCaptured) {
-                m_inputManager->setCursorMode(shouldCapture);
-                m_lastCursorCaptured = shouldCapture;
+            // Log state changes for debugging
+            if (shouldCaptureCursor) {
+                LOG_INFO_C("Camera free look enabled (RMB held)", "Engine");
             } else {
-                m_lastCursorCaptured = actualCursorCaptured;
-            }
-        } else if (currentMode == InputMode::GameMode) {
-            // In Game mode, ensure cursor is captured (unless Alt is held, handled by InputManager)
-            // Clear user toggle flag when in game mode
-            m_userToggledCursor = false;
-            
-            if (!m_inputManager->isAltHeld() && !actualCursorCaptured) {
-                m_inputManager->setCursorMode(true);
-                m_lastCursorCaptured = true;
-            } else {
-                m_lastCursorCaptured = actualCursorCaptured;
+                LOG_INFO_C("Cursor released for UI interaction", "Engine");
             }
         } else {
-            // For any other state (e.g., Alt being held), just sync our tracking
             m_lastCursorCaptured = actualCursorCaptured;
         }
     }
@@ -917,27 +934,33 @@ void Engine::update(float deltaTime)
     if (m_player && m_inputManager && !guiCapturesMouse && !guiCapturesKeyboard) {
         m_player->handleInput(*m_inputManager, deltaTime);
 
-        // Handle mouse movement for camera (only if GUI doesn't want mouse)
-        if (!guiCapturesMouse) {
+        // UNREAL-STYLE: Handle mouse movement for camera ONLY when RMB is held
+        // This prevents camera from moving when user is trying to use menus
+        bool rightMousePressed = m_inputManager->isMouseButtonPressed(MOUSE_BUTTON_RIGHT);
+        if (!guiCapturesMouse && (rightMousePressed || m_rightMouseHeldForCamera)) {
             glm::vec2 mouseDelta = m_inputManager->getMouseDelta();
             if (glm::length(mouseDelta) > 0.0f) {
                 m_player->handleMouseMovement(mouseDelta.x, mouseDelta.y);
             }
         }
 
-        // Handle block placement/breaking (only if GUI doesn't want mouse)
+        // Handle block placement/breaking
         if (!guiCapturesMouse && m_voxelInteraction) {
             // Perform raycast to find targeted block
             RayHit hit =
                 m_voxelInteraction->performRaycast(m_player->getCamera(), MAX_INTERACTION_DISTANCE);
 
-            // Left click to break block
-            if (m_inputManager->isMouseButtonPressed(MOUSE_BUTTON_LEFT) && hit.hit) {
+            // Left click to break block (only when NOT using RMB for camera)
+            bool rightMousePressed = m_inputManager->isMouseButtonPressed(MOUSE_BUTTON_RIGHT);
+            if (m_inputManager->isMouseButtonPressed(MOUSE_BUTTON_LEFT) && hit.hit && !rightMousePressed) {
                 m_voxelInteraction->breakBlock(hit);
             }
 
-            // Right click to place block
-            if (m_inputManager->isMouseButtonPressed(MOUSE_BUTTON_RIGHT) && hit.hit) {
+            // Right click to place block (DISABLED during camera free look)
+            // In Unreal style, RMB is reserved for camera control, not block placement
+            // Block placement now requires Left-click with modifier or separate key
+            // Note: Keeping legacy behavior for now, but RMB won't place when held for camera
+            if (m_inputManager->isMouseButtonPressed(MOUSE_BUTTON_RIGHT) && hit.hit && !m_rightMouseHeldForCamera) {
                 m_voxelInteraction->placeBlock(hit, m_selectedBlockType);
             }
         }
