@@ -98,8 +98,16 @@ endif()
 # ImGui for UI
 find_package(imgui QUIET)
 if(NOT imgui_FOUND)
-    message(WARNING "ImGui not found. Editor UI features will be limited.")
-    message(WARNING "  vcpkg install imgui[glfw-binding,dx11-binding,dx12-binding]:x64-windows")
+    # Check if we have imgui in external directory
+    if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/external/imgui/CMakeLists.txt")
+        message(STATUS "Using ImGui from external/imgui")
+        add_subdirectory(external/imgui)
+        set(imgui_FOUND TRUE)
+        add_library(imgui::imgui ALIAS imgui)
+    else()
+        message(WARNING "ImGui not found. Editor UI features will be limited.")
+        message(WARNING "  vcpkg install imgui[glfw-binding,dx11-binding,dx12-binding]:x64-windows")
+    endif()
 endif()
 
 # OpenAL for audio
@@ -355,6 +363,36 @@ if(ENABLE_OPENGL)
     )
 endif()
 
+# Add Windows-native UI (independent of ImGui)
+if(WIN32)
+    list(APPEND ENGINE_SOURCES
+        # Core Windows components
+        src/core/Win32Window.cpp
+        src/input/Win32InputManager.cpp
+        
+        # Native Win32 UI panels and controls
+        src/ui/native/Win32Panel.cpp
+        src/ui/native/Win32MenuBar.cpp
+        src/ui/native/Win32Toolbar.cpp
+        src/ui/native/Win32HUD.cpp
+        src/ui/native/Win32TreeView.cpp
+        src/ui/native/Win32ListView.cpp
+        
+        # Windows integration features
+        src/ui/WindowsThemeManager.cpp
+        src/ui/WindowsDialogManager.cpp
+        src/ui/WindowsTaskbarManager.cpp
+        src/ui/WindowsCustomizationPanel.cpp
+        src/ui/WindowsJumpListManager.cpp
+        src/ui/WindowsToastManager.cpp
+        src/ui/WindowsDPIManager.cpp
+    )
+    
+    # Define that we're using native Win32 UI
+    add_definitions(-DFRESH_WIN32_UI)
+    message(STATUS "Win32 native UI enabled")
+endif()
+
 # Add ImGui-dependent UI sources only if ImGui is available
 if(imgui_FOUND)
     list(APPEND ENGINE_SOURCES
@@ -372,27 +410,7 @@ if(imgui_FOUND)
         src/ui/HotbarPanel.cpp
         src/ui/EngineConfigPanel.cpp
     )
-    
-    # Add Windows-native UI features on Windows
-    if(WIN32)
-        list(APPEND ENGINE_SOURCES
-            src/core/Win32Window.cpp
-            src/input/Win32InputManager.cpp
-            src/ui/WindowsThemeManager.cpp
-            src/ui/WindowsDialogManager.cpp
-            src/ui/WindowsTaskbarManager.cpp
-            src/ui/WindowsCustomizationPanel.cpp
-            src/ui/WindowsJumpListManager.cpp
-            src/ui/WindowsToastManager.cpp
-            src/ui/WindowsDPIManager.cpp
-            # Native Win32 UI Infrastructure
-            src/ui/native/Win32Panel.cpp
-            src/ui/native/Win32MenuBar.cpp
-            src/ui/native/Win32Toolbar.cpp
-            src/ui/native/Win32TreeView.cpp
-            src/ui/native/Win32ListView.cpp
-        )
-    endif()
+    message(STATUS "ImGui UI enabled")
 endif()
 
 # Header files
@@ -636,6 +654,20 @@ if(WIN32 AND ENABLE_DIRECTX)
         d3dcompiler.lib
     )
     message(STATUS "DirectX libraries linked")
+endif()
+
+# Link Win32 UI libraries (Windows only)
+if(WIN32)
+    target_link_libraries(${PROJECT_NAME} PRIVATE
+        comctl32.lib    # Common controls (toolbars, status bars, etc.)
+        user32.lib      # User interface functions
+        gdi32.lib       # Graphics Device Interface
+        gdiplus.lib     # GDI+ for advanced graphics
+        shell32.lib     # Shell integration (file dialogs, etc.)
+        ole32.lib       # OLE/COM support
+        dwmapi.lib      # Desktop Window Manager (Aero effects, etc.)
+    )
+    message(STATUS "Win32 UI libraries linked")
 endif()
 
 # Link OpenGL and GLEW (cross-platform)

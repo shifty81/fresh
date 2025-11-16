@@ -7,8 +7,10 @@
 #include <unordered_map>
 
 // Use tinyobjloader for OBJ file loading
+#ifdef FRESH_TINYOBJLOADER_AVAILABLE
 #define TINYOBJLOADER_IMPLEMENTATION
 #include <tiny_obj_loader.h>
+#endif
 
 namespace fresh
 {
@@ -92,6 +94,10 @@ std::shared_ptr<Model> ModelLoader::loadModelWithOptions(
     bool flipUVs,
     bool optimizeMeshes)
 {
+#ifndef FRESH_TINYOBJLOADER_AVAILABLE
+    Logger::getInstance().error("Model loading not available - tinyobjloader not found: " + path, "ModelLoader");
+    return nullptr;
+#else
     // Check if file exists
     std::ifstream file(path);
     if (!file.good()) {
@@ -234,6 +240,7 @@ std::shared_ptr<Model> ModelLoader::loadModelWithOptions(
                               "ModelLoader");
 
     return model;
+#endif // FRESH_TINYOBJLOADER_AVAILABLE
 }
 
 void ModelLoader::calculateTangents(std::vector<Vertex>& vertices,

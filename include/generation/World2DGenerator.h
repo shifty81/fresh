@@ -54,10 +54,15 @@ public:
     };
 
     /**
+     * @brief Construct a 2D world generator with default settings
+     */
+    World2DGenerator();
+    
+    /**
      * @brief Construct a 2D world generator
      * @param settings Generation settings
      */
-    explicit World2DGenerator(const Settings& settings = Settings());
+    explicit World2DGenerator(const Settings& settings);
 
     /**
      * @brief Set generation style
