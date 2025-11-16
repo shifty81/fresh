@@ -72,9 +72,35 @@ public:
         return m_enabled;
     }
 
+    /**
+     * @brief Render paste preview with ghost block effect
+     * @param selectionManager Selection manager with preview data
+     * @param alpha Transparency for ghost blocks (0.0 = fully transparent, 1.0 = opaque)
+     */
+    void renderPastePreview(const SelectionManager* selectionManager, float alpha = 0.5f);
+
+    /**
+     * @brief Set paste preview color
+     * @param color RGBA color for preview outline
+     */
+    void setPreviewColor(const glm::vec4& color)
+    {
+        m_previewColor = color;
+    }
+
+    /**
+     * @brief Get paste preview color
+     * @return Current preview color
+     */
+    const glm::vec4& getPreviewColor() const
+    {
+        return m_previewColor;
+    }
+
 private:
     devtools::DebugRenderer* m_debugRenderer;
     glm::vec4 m_selectionColor;
+    glm::vec4 m_previewColor;
     bool m_enabled;
 };
 

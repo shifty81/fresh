@@ -8,6 +8,7 @@ namespace fresh
 SelectionRenderer::SelectionRenderer()
     : m_debugRenderer(nullptr)
     , m_selectionColor(0.2f, 0.7f, 1.0f, 0.8f) // Light blue with some transparency
+    , m_previewColor(0.3f, 1.0f, 0.3f, 0.5f)    // Light green with transparency
     , m_enabled(true)
 {
 }
@@ -62,6 +63,66 @@ void SelectionRenderer::render(const SelectionManager* selectionManager)
             
             m_debugRenderer->drawBox(voxelCenter, voxelSize, voxelColor, 0.0f);
         }
+    }
+}
+
+void SelectionRenderer::renderPastePreview(const SelectionManager* selectionManager, float alpha)
+{
+    if (!m_enabled || m_debugRenderer == nullptr || selectionManager == nullptr) {
+        return;
+    }
+
+    // Check if paste preview is active
+    if (!selectionManager->isPastePreviewActive()) {
+        return;
+    }
+
+    // Get preview bounds
+    glm::ivec3 min, max;
+    if (!selectionManager->getPastePreviewBounds(min, max)) {
+        return;
+    }
+
+    // Calculate center and size for the preview bounding box
+    glm::vec3 center = glm::vec3(min + max) * 0.5f + glm::vec3(0.5f);
+    glm::vec3 size = glm::vec3(max - min) + glm::vec3(1.0f);
+
+    // Apply alpha to preview color
+    glm::vec4 previewColor = m_previewColor;
+    previewColor.a = alpha;
+
+    // Draw the preview box with ghost effect
+    m_debugRenderer->drawBox(center, size, previewColor, 0.0f);
+
+    // Get preview voxel positions and types
+    std::vector<VoxelPosition> positions;
+    std::vector<VoxelType> types;
+    
+    if (!selectionManager->getPastePreviewData(positions, types)) {
+        return;
+    }
+
+    // Draw individual preview voxels for smaller selections
+    if (positions.size() < 100) {
+        for (size_t i = 0; i < positions.size(); ++i) {
+            const auto& voxelPos = positions[i];
+            glm::vec3 voxelCenter = glm::vec3(voxelPos.x, voxelPos.y, voxelPos.z) + glm::vec3(0.5f);
+            glm::vec3 voxelSize = glm::vec3(1.0f);
+            
+            // Use preview color with specified alpha for ghost effect
+            glm::vec4 ghostColor = previewColor;
+            ghostColor.a = alpha * 0.5f; // Even more transparent for individual voxels
+            
+            m_debugRenderer->drawBox(voxelCenter, voxelSize, ghostColor, 0.0f);
+        }
+    }
+
+    // Optionally, log preview information
+    static int framesSinceLastLog = 0;
+    if (++framesSinceLastLog > 60) { // Log every 60 frames
+        Logger::getInstance().info("Paste preview active with " + 
+                                    std::to_string(positions.size()) + " voxels", "SelectionRenderer");
+        framesSinceLastLog = 0;
     }
 }
 

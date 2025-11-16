@@ -1,4 +1,5 @@
 #include "editor/SelectionManager.h"
+#include "editor/TerraformingSystem.h"
 #include "voxel/VoxelWorld.h"
 #include "core/Logger.h"
 #include <algorithm>
@@ -11,6 +12,9 @@ SelectionManager::SelectionManager()
     : m_isSelecting(false)
     , m_selectionStart(0.0f)
     , m_selectionEnd(0.0f)
+    , m_terraformingSystem(nullptr)
+    , m_pastePreviewActive(false)
+    , m_pastePreviewPosition(0)
 {
 }
 
@@ -112,9 +116,28 @@ void SelectionManager::deleteSelected(VoxelWorld* world)
         return;
     }
     
+    // Begin undo command group if terraforming system available
+    if (m_terraformingSystem) {
+        m_terraformingSystem->beginCommandGroup();
+    }
+    
     // Delete all selected voxels by setting them to Air
-    for (const auto& pos : m_selection.positions) {
-        world->setVoxel(pos.toWorldPos(), Voxel(VoxelType::Air));
+    for (size_t i = 0; i < m_selection.positions.size(); ++i) {
+        const auto& pos = m_selection.positions[i];
+        Voxel oldVoxel(m_selection.types[i]);
+        Voxel newVoxel(VoxelType::Air);
+        
+        // Record undo command before changing
+        if (m_terraformingSystem) {
+            m_terraformingSystem->recordVoxelChange(pos.toWorldPos(), oldVoxel, newVoxel);
+        }
+        
+        world->setVoxel(pos.toWorldPos(), newVoxel);
+    }
+    
+    // End undo command group
+    if (m_terraformingSystem) {
+        m_terraformingSystem->endCommandGroup();
     }
     
     Logger::getInstance().info("Deleted " + std::to_string(m_selection.size()) + " selected voxels", "SelectionManager");
@@ -132,9 +155,23 @@ void SelectionManager::moveSelection(const glm::ivec3& delta, VoxelWorld* world)
     // Store the voxel types before moving
     std::vector<VoxelType> voxelTypes = m_selection.types;
     
+    // Begin undo command group if terraforming system available
+    if (m_terraformingSystem) {
+        m_terraformingSystem->beginCommandGroup();
+    }
+    
     // First, clear the old positions
-    for (const auto& pos : m_selection.positions) {
-        world->setVoxel(pos.toWorldPos(), Voxel(VoxelType::Air));
+    for (size_t i = 0; i < m_selection.positions.size(); ++i) {
+        const auto& pos = m_selection.positions[i];
+        Voxel oldVoxel(voxelTypes[i]);
+        Voxel newVoxel(VoxelType::Air);
+        
+        // Record undo command
+        if (m_terraformingSystem) {
+            m_terraformingSystem->recordVoxelChange(pos.toWorldPos(), oldVoxel, newVoxel);
+        }
+        
+        world->setVoxel(pos.toWorldPos(), newVoxel);
     }
     
     // Then, place voxels at new positions
@@ -144,10 +181,24 @@ void SelectionManager::moveSelection(const glm::ivec3& delta, VoxelWorld* world)
             m_selection.positions[i].y + delta.y,
             m_selection.positions[i].z + delta.z
         );
-        world->setVoxel(newPos.toWorldPos(), Voxel(voxelTypes[i]));
+        
+        Voxel oldVoxel = world->getVoxel(newPos.toWorldPos());
+        Voxel newVoxel(voxelTypes[i]);
+        
+        // Record undo command
+        if (m_terraformingSystem) {
+            m_terraformingSystem->recordVoxelChange(newPos.toWorldPos(), oldVoxel, newVoxel);
+        }
+        
+        world->setVoxel(newPos.toWorldPos(), newVoxel);
         
         // Update selection position
         m_selection.positions[i] = newPos;
+    }
+    
+    // End undo command group
+    if (m_terraformingSystem) {
+        m_terraformingSystem->endCommandGroup();
     }
     
     // Update bounds
@@ -178,12 +229,31 @@ void SelectionManager::cutToClipboard(VoxelWorld* world)
         return;
     }
     
-    // Copy to clipboard
+    // Copy to clipboard first
     copyToClipboard(world);
     
+    // Begin undo command group if terraforming system available
+    if (m_terraformingSystem) {
+        m_terraformingSystem->beginCommandGroup();
+    }
+    
     // Delete selected voxels
-    for (const auto& pos : m_selection.positions) {
-        world->setVoxel(pos.toWorldPos(), Voxel(VoxelType::Air));
+    for (size_t i = 0; i < m_selection.positions.size(); ++i) {
+        const auto& pos = m_selection.positions[i];
+        Voxel oldVoxel(m_selection.types[i]);
+        Voxel newVoxel(VoxelType::Air);
+        
+        // Record undo command
+        if (m_terraformingSystem) {
+            m_terraformingSystem->recordVoxelChange(pos.toWorldPos(), oldVoxel, newVoxel);
+        }
+        
+        world->setVoxel(pos.toWorldPos(), newVoxel);
+    }
+    
+    // End undo command group
+    if (m_terraformingSystem) {
+        m_terraformingSystem->endCommandGroup();
     }
     
     Logger::getInstance().info("Cut " + std::to_string(m_clipboard.size()) + " voxels to clipboard", "SelectionManager");
@@ -206,6 +276,11 @@ void SelectionManager::pasteFromClipboard(const glm::ivec3& pastePos, VoxelWorld
     // Calculate offset from original bounds to paste position
     glm::ivec3 offset = pastePos - m_clipboard.boundsMin;
     
+    // Begin undo command group if terraforming system available
+    if (m_terraformingSystem) {
+        m_terraformingSystem->beginCommandGroup();
+    }
+    
     // Place all voxels from clipboard at new position
     for (size_t i = 0; i < m_clipboard.positions.size(); ++i) {
         VoxelPosition newPos(
@@ -213,7 +288,22 @@ void SelectionManager::pasteFromClipboard(const glm::ivec3& pastePos, VoxelWorld
             m_clipboard.positions[i].y + offset.y,
             m_clipboard.positions[i].z + offset.z
         );
-        world->setVoxel(newPos.toWorldPos(), Voxel(m_clipboard.types[i]));
+        
+        // Get old voxel before replacing
+        Voxel oldVoxel = world->getVoxel(newPos.toWorldPos());
+        Voxel newVoxel(m_clipboard.types[i]);
+        
+        // Record undo command
+        if (m_terraformingSystem) {
+            m_terraformingSystem->recordVoxelChange(newPos.toWorldPos(), oldVoxel, newVoxel);
+        }
+        
+        world->setVoxel(newPos.toWorldPos(), newVoxel);
+    }
+    
+    // End undo command group
+    if (m_terraformingSystem) {
+        m_terraformingSystem->endCommandGroup();
     }
     
     Logger::getInstance().info("Pasted " + std::to_string(m_clipboard.size()) + 
@@ -282,6 +372,88 @@ void SelectionManager::calculateBounds()
         m_selection.boundsMax.y = std::max(m_selection.boundsMax.y, pos.y);
         m_selection.boundsMax.z = std::max(m_selection.boundsMax.z, pos.z);
     }
+}
+
+void SelectionManager::enablePastePreview(const glm::ivec3& pastePos)
+{
+    if (m_clipboard.isEmpty()) {
+        Logger::getInstance().warning("Cannot enable paste preview - clipboard is empty", "SelectionManager");
+        return;
+    }
+    
+    m_pastePreviewActive = true;
+    m_pastePreviewPosition = pastePos;
+    
+    Logger::getInstance().info("Enabled paste preview at (" + 
+                                std::to_string(pastePos.x) + ", " + 
+                                std::to_string(pastePos.y) + ", " + 
+                                std::to_string(pastePos.z) + ")", "SelectionManager");
+}
+
+void SelectionManager::updatePastePreview(const glm::ivec3& pastePos)
+{
+    if (!m_pastePreviewActive) {
+        return;
+    }
+    
+    m_pastePreviewPosition = pastePos;
+}
+
+void SelectionManager::disablePastePreview()
+{
+    if (m_pastePreviewActive) {
+        Logger::getInstance().info("Disabled paste preview", "SelectionManager");
+    }
+    
+    m_pastePreviewActive = false;
+}
+
+bool SelectionManager::getPastePreviewData(std::vector<VoxelPosition>& positions,
+                                           std::vector<VoxelType>& types) const
+{
+    if (!m_pastePreviewActive || m_clipboard.isEmpty()) {
+        return false;
+    }
+    
+    // Calculate offset from clipboard bounds to preview position
+    glm::ivec3 offset = m_pastePreviewPosition - m_clipboard.boundsMin;
+    
+    // Clear output vectors
+    positions.clear();
+    types.clear();
+    
+    // Reserve space for efficiency
+    positions.reserve(m_clipboard.positions.size());
+    types.reserve(m_clipboard.types.size());
+    
+    // Transform clipboard positions to preview positions
+    for (size_t i = 0; i < m_clipboard.positions.size(); ++i) {
+        VoxelPosition previewPos(
+            m_clipboard.positions[i].x + offset.x,
+            m_clipboard.positions[i].y + offset.y,
+            m_clipboard.positions[i].z + offset.z
+        );
+        positions.push_back(previewPos);
+        types.push_back(m_clipboard.types[i]);
+    }
+    
+    return true;
+}
+
+bool SelectionManager::getPastePreviewBounds(glm::ivec3& min, glm::ivec3& max) const
+{
+    if (!m_pastePreviewActive || m_clipboard.isEmpty()) {
+        return false;
+    }
+    
+    // Calculate offset from clipboard bounds to preview position
+    glm::ivec3 offset = m_pastePreviewPosition - m_clipboard.boundsMin;
+    
+    // Transform clipboard bounds to preview bounds
+    min = m_clipboard.boundsMin + offset;
+    max = m_clipboard.boundsMax + offset;
+    
+    return true;
 }
 
 } // namespace fresh
