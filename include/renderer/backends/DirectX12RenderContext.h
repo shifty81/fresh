@@ -25,7 +25,7 @@ public:
     DirectX12RenderContext();
     ~DirectX12RenderContext() override;
 
-    bool initialize(Window* window) override;
+    bool initialize(void* window) override;
     void shutdown() override;
     bool beginFrame() override;
     void endFrame() override;
@@ -134,7 +134,7 @@ private:
     UINT currentFrame = 0;
     DXGI_FORMAT rtvFormat = DXGI_FORMAT_R8G8B8A8_UNORM; // Store actual format
 
-    Window* window = nullptr;
+    void* window = nullptr;  // Points to Window or Win32Window
     int width = 0;
     int height = 0;
     float clearColorValue[4] = {0.53f, 0.81f, 0.92f, 1.0f}; // Sky blue default

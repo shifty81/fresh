@@ -26,7 +26,7 @@ public:
     OpenGLRenderContext();
     ~OpenGLRenderContext() override;
 
-    bool initialize(Window* window) override;
+    bool initialize(void* window) override;
     void shutdown() override;
     bool beginFrame() override;
     void endFrame() override;
@@ -66,7 +66,7 @@ private:
     bool initializeGLEW();
     void checkGLErrors(const char* context);
 
-    Window* window = nullptr;
+    void* window = nullptr;  // Points to Window or Win32Window
     int width = 0;
     int height = 0;
 

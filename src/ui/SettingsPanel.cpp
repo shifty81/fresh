@@ -4,8 +4,13 @@
 #include <sstream>
 
 #include "core/Logger.h"
-#include "core/Window.h"
-#include "input/InputManager.h"
+#ifdef _WIN32
+    #include "core/Win32Window.h"
+    #include "input/Win32InputManager.h"
+#else
+    #include "core/Window.h"
+    #include "input/InputManager.h"
+#endif
 
 #ifdef FRESH_IMGUI_AVAILABLE
     #include <imgui.h>
@@ -49,7 +54,7 @@ SettingsPanel::~SettingsPanel()
     }
 }
 
-bool SettingsPanel::initialize(Window* window, InputManager* inputManager)
+bool SettingsPanel::initialize(WindowType* window, InputManagerType* inputManager)
 {
     if (!window || !inputManager) {
         LOG_ERROR_C("Invalid parameters for SettingsPanel", "SettingsPanel");

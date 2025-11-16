@@ -11,7 +11,6 @@
 namespace fresh
 {
 
-class Window;
 class RenderBuffer;
 class RenderTexture;
 class RenderShader;
@@ -30,10 +29,10 @@ public:
 
     /**
      * @brief Initialize rendering context
-     * @param window Window to render to
+     * @param window Window to render to (void* to support both Window and Win32Window)
      * @return true if successful
      */
-    virtual bool initialize(Window* window) = 0;
+    virtual bool initialize(void* window) = 0;
 
     /**
      * @brief Shutdown and cleanup

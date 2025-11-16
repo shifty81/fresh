@@ -12,7 +12,15 @@ class LightingSystem;
 class PostProcessing;
 class IRenderContext;
 class GraphicsAPI;
+
+#ifdef _WIN32
+class Win32InputManager;
+using InputManagerType = Win32InputManager;
+#else
 class InputManager;
+using InputManagerType = InputManager;
+#endif
+
 class Material;
 
 /**
@@ -75,7 +83,7 @@ public:
     {
         postProcessing = pp;
     }
-    void setInputManager(InputManager* im)
+    void setInputManager(InputManagerType* im)
     {
         inputManager = im;
     }
@@ -135,7 +143,7 @@ private:
     IRenderContext* renderContext = nullptr;
     LightingSystem* lightingSystem = nullptr;
     PostProcessing* postProcessing = nullptr;
-    InputManager* inputManager = nullptr;
+    InputManagerType* inputManager = nullptr;
 
     bool isVisible = false;
     int selectedTab = 0; // 0=Graphics, 1=Lighting, 2=Post-Processing, 3=Input, 4=Performance

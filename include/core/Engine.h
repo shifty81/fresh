@@ -13,7 +13,18 @@
 namespace fresh
 {
 
+#ifdef _WIN32
+class Win32Window;
+class Win32InputManager;
+using WindowType = Win32Window;
+using InputManagerType = Win32InputManager;
+#else
 class Window;
+class InputManager;
+using WindowType = Window;
+using InputManagerType = InputManager;
+#endif
+
 class IRenderContext;
 class VoxelWorld;
 class PhysicsSystem;
@@ -23,7 +34,6 @@ class EditorManager;
 class MainMenu;
 class WorldEditor;
 class Player;
-class InputManager;
 class VoxelInteraction;
 
 /**
@@ -86,7 +96,7 @@ private:
 private:
     bool m_running;
     bool m_inGame;
-    std::unique_ptr<Window> m_window;
+    std::unique_ptr<WindowType> m_window;
     std::unique_ptr<IRenderContext> m_renderer;
     std::unique_ptr<VoxelWorld> m_world;
     std::unique_ptr<PhysicsSystem> m_physics;
@@ -98,7 +108,7 @@ private:
     std::unique_ptr<MainMenu> m_mainMenu;
     std::unique_ptr<WorldEditor> m_worldEditor;
     std::unique_ptr<Player> m_player;
-    std::unique_ptr<InputManager> m_inputManager;
+    std::unique_ptr<InputManagerType> m_inputManager;
     std::unique_ptr<VoxelInteraction> m_voxelInteraction;
     VoxelType m_selectedBlockType;
     
@@ -126,12 +136,14 @@ private:
     void setupInputCallbacks();
     void initializeGameSystems(); // Helper for common initialization
 
-    // User data for GLFW callbacks
+#ifndef _WIN32
+    // User data for GLFW callbacks (not needed for Win32)
     struct CallbackUserData {
-        InputManager* inputManager;
-        Window* window;
+        InputManagerType* inputManager;
+        WindowType* window;
     };
     std::unique_ptr<CallbackUserData> m_callbackUserData;
+#endif
 };
 
 } // namespace fresh

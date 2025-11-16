@@ -5,7 +5,18 @@
 namespace fresh
 {
 
+#ifdef _WIN32
+class Win32Window;
+class Win32InputManager;
+using WindowType = Win32Window;
+using InputManagerType = Win32InputManager;
+#else
 class Window;
+class InputManager;
+using WindowType = Window;
+using InputManagerType = InputManager;
+#endif
+
 class IRenderContext;
 class VoxelWorld;
 class WorldEditor;
@@ -61,8 +72,8 @@ public:
      * @param inputManager Input manager for settings
      * @return true if successful
      */
-    bool initialize(Window* window, IRenderContext* renderContext, VoxelWorld* world = nullptr,
-                    WorldEditor* worldEditor = nullptr, class InputManager* inputManager = nullptr);
+    bool initialize(WindowType* window, IRenderContext* renderContext, VoxelWorld* world = nullptr,
+                    WorldEditor* worldEditor = nullptr, InputManagerType* inputManager = nullptr);
 
     /**
      * @brief Begin a new editor frame
@@ -258,7 +269,7 @@ private:
 #endif
 
     // References
-    Window* m_window;
+    WindowType* m_window;
     IRenderContext* m_renderContext;
     VoxelWorld* m_world;
     WorldEditor* m_worldEditor;
