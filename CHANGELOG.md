@@ -48,6 +48,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Platform-specific installation instructions
 
 ### Fixed
+- **ImGui Win32 Backend OpenGL Support** - Fixed ImGui initialization failure with Win32 and OpenGL
+  - Added OpenGL case to `initializeWin32` graphics backend switch statement
+  - Matches GLFW backend implementation for consistency
+  - Fixes error: "[ERROR][ImGuiContext] Unsupported graphics API for ImGui with Win32"
+  - Enables editor UI when using Win32 window with OpenGL renderer
 - **EditorManager Initialization** - Fixed engine initialization failure
   - EditorManager can now be initialized before a world is created
   - Made world and worldEditor optional parameters (can be nullptr)
