@@ -14,24 +14,31 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 # ==============================================================================
 
 # Fresh Voxel Engine is now Windows-only for gaming and professional editor development
+# Temporarily allow Linux builds for CI testing purposes
 if(NOT WIN32)
-    message(FATAL_ERROR "Fresh Voxel Engine now exclusively supports Windows 10/11 (x64).")
-    message(FATAL_ERROR "This project focuses on Windows gaming with DirectX and native Windows editor integration.")
+    message(WARNING "Fresh Voxel Engine is primarily designed for Windows 10/11 (x64).")
+    message(WARNING "Building on Linux for testing purposes only - some features may not work.")
+    set(ENABLE_DIRECTX OFF)
+    set(ENABLE_OPENGL ON)
+else()
+    message(STATUS "Configuring Fresh Voxel Engine for Windows Gaming Platform")
+    message(STATUS "  - Platform: Windows 10/11 (x64)")
+    message(STATUS "  - Primary Renderer: DirectX 12")
+    message(STATUS "  - Fallback Renderer: DirectX 11")
+    message(STATUS "  - Optional: OpenGL support (for compatibility)")
+    message(STATUS "  - Editor: Windows-native Unreal-like game development environment")
+    set(ENABLE_DIRECTX ON)
+    set(ENABLE_OPENGL ON)
 endif()
 
-message(STATUS "Configuring Fresh Voxel Engine for Windows Gaming Platform")
-message(STATUS "  - Platform: Windows 10/11 (x64) ONLY")
-message(STATUS "  - Primary Renderer: DirectX 12")
-message(STATUS "  - Fallback Renderer: DirectX 11")
-message(STATUS "  - Optional: OpenGL support (for compatibility)")
-message(STATUS "  - Editor: Windows-native Unreal-like game development environment")
-
-# Enable DirectX as the primary graphics backend
-set(ENABLE_DIRECTX ON)
-set(ENABLE_OPENGL ON)
-add_definitions(-DFRESH_DIRECTX_SUPPORT)
-add_definitions(-DFRESH_OPENGL_SUPPORT)
-add_definitions(-DFRESH_WINDOWS_ONLY)
+# Enable graphics backends based on platform
+if(WIN32)
+    add_definitions(-DFRESH_DIRECTX_SUPPORT)
+    add_definitions(-DFRESH_WINDOWS_ONLY)
+endif()
+if(ENABLE_OPENGL)
+    add_definitions(-DFRESH_OPENGL_SUPPORT)
+endif()
 
 # ==============================================================================
 # Dependencies
@@ -739,6 +746,7 @@ if(BUILD_TESTS)
         tests/character/VoxelCharacterTests.cpp
         tests/character/BodyPartLibraryTests.cpp
         tests/character/AnimationClipTests.cpp
+        tests/editor/SelectionManagerTests.cpp    # Tests for voxel selection system
     )
     
     # Engine source files needed for tests (exclude main.cpp)
@@ -760,6 +768,7 @@ if(BUILD_TESTS)
         src/character/BodyPartLibrary.cpp
         src/character/AnimationClip.cpp
         src/character/AnimationController.cpp
+        src/editor/SelectionManager.cpp
     )
     
     # Create test executable
@@ -782,6 +791,11 @@ if(BUILD_TESTS)
     elseif(GLFW_FOUND)
         target_include_directories(${PROJECT_NAME}Tests PRIVATE ${GLFW_INCLUDE_DIRS})
         target_link_libraries(${PROJECT_NAME}Tests PRIVATE ${GLFW_LIBRARIES})
+    else()
+        # Fallback: try to link glfw directly on Linux
+        if(UNIX AND NOT APPLE)
+            target_link_libraries(${PROJECT_NAME}Tests PRIVATE glfw)
+        endif()
     endif()
     
     # Link GLM if found
