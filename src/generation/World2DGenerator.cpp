@@ -122,7 +122,7 @@ void World2DGenerator::generateCaves(Chunk& chunk, int chunkX) {
     }
     
     // Use cellular automata for organic cave generation
-    std::mt19937 rng(settings_.seed + chunkX);
+    std::mt19937 rng(static_cast<unsigned int>(settings_.seed + chunkX));
     std::uniform_real_distribution<float> dist(0.0f, 1.0f);
     
     // Phase 1: Random initial state
@@ -168,7 +168,7 @@ void World2DGenerator::generateOres(Chunk& chunk, int chunkX) {
         return;
     }
     
-    std::mt19937 rng(settings_.seed + chunkX + 1000);
+    std::mt19937 rng(static_cast<unsigned int>(settings_.seed + chunkX + 1000));
     std::uniform_real_distribution<float> dist(0.0f, 1.0f);
     
     for (int localX = 0; localX < 16; localX++) {
@@ -207,7 +207,7 @@ void World2DGenerator::generateOres(Chunk& chunk, int chunkX) {
 }
 
 void World2DGenerator::generateSurfaceFeatures(Chunk& chunk, int chunkX) {
-    std::mt19937 rng(settings_.seed + chunkX + 2000);
+    std::mt19937 rng(static_cast<unsigned int>(settings_.seed + chunkX + 2000));
     std::uniform_real_distribution<float> dist(0.0f, 1.0f);
     
     for (int localX = 0; localX < 16; localX++) {
@@ -328,6 +328,7 @@ bool World2DGenerator::isValidTreePosition(const Chunk& chunk, int x, int y, int
 }
 
 void World2DGenerator::generateWorld(VoxelWorld& world) {
+    (void)world; // Unused parameter - reserved for future implementation
     Logger::getInstance().info("Generating complete 2D world...", "World2DGenerator");
     
     // Calculate number of chunks needed
@@ -335,7 +336,7 @@ void World2DGenerator::generateWorld(VoxelWorld& world) {
     
     for (int chunkX = 0; chunkX < chunksNeeded; chunkX++) {
         // Generate chunk at (chunkX, 0) - all 2D chunks are at Z=0
-        auto chunk = std::make_shared<Chunk>();
+        auto chunk = std::make_shared<Chunk>(ChunkPos(chunkX, 0));
         generateChunk(*chunk, chunkX, 0);
         
         // Add to world (assumes VoxelWorld has method to add chunks)
@@ -347,6 +348,7 @@ void World2DGenerator::generateWorld(VoxelWorld& world) {
 
 // MetroidvaniaGenerator implementation
 std::vector<MetroidvaniaGenerator::Room> MetroidvaniaGenerator::generate(int roomCount, uint64_t seed) {
+    (void)seed; // Unused parameter - reserved for future randomization
     std::vector<Room> rooms;
     
     // Generate main path
@@ -379,6 +381,7 @@ std::vector<MetroidvaniaGenerator::Room> MetroidvaniaGenerator::generateMainPath
 
 std::vector<MetroidvaniaGenerator::Room> MetroidvaniaGenerator::generateSideAreas(
     const std::vector<Room>& mainPath) {
+    (void)mainPath; // Unused parameter - reserved for future side area generation
     std::vector<Room> sideAreas;
     
     // Generate treasure and ability rooms off the main path
@@ -388,6 +391,7 @@ std::vector<MetroidvaniaGenerator::Room> MetroidvaniaGenerator::generateSideArea
 }
 
 void MetroidvaniaGenerator::connectRooms(std::vector<Room>& rooms) {
+    (void)rooms; // Unused parameter - reserved for future room connection logic
     // Create connections between adjacent rooms
     // This is a placeholder implementation
 }
@@ -430,6 +434,9 @@ EndlessRunnerGenerator::Segment EndlessRunnerGenerator::generateNextSegment(floa
 }
 
 void EndlessRunnerGenerator::buildSegment(VoxelWorld& world, const Segment& segment, int startX) {
+    (void)world;   // Unused parameter - reserved for future world building
+    (void)segment; // Unused parameter - reserved for future segment placement
+    (void)startX;  // Unused parameter - reserved for future positioning
     // Build floor
     for (int x = 0; x < segment.length; x++) {
         // world.setVoxel(startX + x, 0, 0, VoxelType::Stone);
