@@ -378,4 +378,24 @@ void SceneHierarchyPanel::deselectAll()
     LOG_INFO_C("Deselected all nodes in scene hierarchy", "SceneHierarchyPanel");
 }
 
+HierarchyNode* SceneHierarchyPanel::addNode(const std::string& name, HierarchyNode* parent)
+{
+    auto newNode = std::make_shared<HierarchyNode>(name);
+    
+    if (parent) {
+        // Add as child of specified parent
+        parent->children.push_back(newNode);
+    } else if (m_rootNode) {
+        // Add as child of root node
+        m_rootNode->children.push_back(newNode);
+    } else {
+        // No root node exists - this shouldn't happen in normal use
+        LOG_ERROR_C("Cannot add node: No root node exists", "SceneHierarchyPanel");
+        return nullptr;
+    }
+    
+    LOG_INFO_C("Added node '" + name + "' to scene hierarchy", "SceneHierarchyPanel");
+    return newNode.get();
+}
+
 } // namespace fresh

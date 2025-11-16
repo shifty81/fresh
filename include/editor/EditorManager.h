@@ -37,6 +37,11 @@ class SelectionManager;
 class SelectionRenderer;
 class WorldSerializer;
 
+namespace ecs
+{
+class EntityManager;
+}
+
 namespace devtools
 {
 class DebugRenderer;
@@ -72,10 +77,12 @@ public:
      * @param world Voxel world (optional, can be nullptr - world-dependent panels will be initialized later)
      * @param worldEditor World editor instance (optional, can be nullptr - world-dependent panels will be initialized later)
      * @param inputManager Input manager for settings
+     * @param entityManager Entity manager for component editing (optional)
      * @return true if successful
      */
     bool initialize(WindowType* window, IRenderContext* renderContext, VoxelWorld* world = nullptr,
-                    WorldEditor* worldEditor = nullptr, InputManagerType* inputManager = nullptr);
+                    WorldEditor* worldEditor = nullptr, InputManagerType* inputManager = nullptr,
+                    ecs::EntityManager* entityManager = nullptr);
 
     /**
      * @brief Begin a new editor frame
@@ -178,6 +185,15 @@ public:
     SettingsPanel* getSettingsPanel() const
     {
         return m_settingsPanel.get();
+    }
+
+    /**
+     * @brief Get the scene hierarchy panel
+     * @return Scene hierarchy panel pointer
+     */
+    SceneHierarchyPanel* getSceneHierarchy() const
+    {
+        return m_sceneHierarchy.get();
     }
 
     /**
@@ -285,6 +301,7 @@ private:
     IRenderContext* m_renderContext;
     VoxelWorld* m_world;
     WorldEditor* m_worldEditor;
+    ecs::EntityManager* m_entityManager;
 
     // Panel visibility flags
     bool m_showSceneHierarchy;

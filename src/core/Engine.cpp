@@ -34,12 +34,17 @@
 
 #include "ai/AISystem.h"
 #include "core/Logger.h"
+#include "ecs/EntityManager.h"
+#include "ecs/TransformComponent.h"
+#include "ecs/RendererComponent.h"
+#include "ecs/MaterialComponent.h"
 #include "editor/EditorGUI.h"
 #include "editor/EditorManager.h"
 #include "editor/WorldEditor.h"
 #include "gameplay/Player.h"
 #include "generation/TerrainGenerator.h"
 #include "interaction/VoxelInteraction.h"
+#include "physics/PhysicsComponent.h"
 #include "physics/PhysicsSystem.h"
 #include "renderer/GraphicsAPI.h"
 #include "renderer/RenderContext.h"
@@ -48,6 +53,7 @@
 #include "ui/HotbarPanel.h"
 #include "ui/MainMenu.h"
 #include "ui/MainMenuPanel.h"
+#include "ui/SceneHierarchyPanel.h"
 #include "ui/VoxelToolPalette.h"
 #include "voxel/Chunk.h"
 #include "voxel/VoxelTypes.h"
@@ -266,12 +272,17 @@ bool Engine::initialize()
     std::cout << "Main menu initialized" << std::endl;
     LOG_INFO_C("Main menu initialized", "Engine");
 
+    // Create entity manager for ECS
+    m_entityManager = std::make_unique<ecs::EntityManager>();
+    std::cout << "Entity manager initialized" << std::endl;
+    LOG_INFO_C("Entity manager initialized", "Engine");
+
 #ifdef FRESH_IMGUI_AVAILABLE
     // Create comprehensive editor manager (requires ImGui) - show immediately
     m_editorManager = std::make_unique<EditorManager>();
     // Initialize with nullptr for world and worldEditor initially
     if (!m_editorManager->initialize(m_window.get(), m_renderer.get(), nullptr, nullptr,
-                                     m_inputManager.get())) {
+                                     m_inputManager.get(), m_entityManager.get())) {
         std::cerr << "Failed to initialize editor manager" << std::endl;
         LOG_ERROR_C("Failed to initialize editor manager", "Engine");
         return false;
@@ -594,6 +605,9 @@ void Engine::initializeGameSystems()
     if (m_editorManager) {
         m_editorManager->setVisible(true);
     }
+    
+    // Create demo entities for Inspector demonstration
+    createDemoEntities();
 #endif
     m_inGame = true;
 }
@@ -1959,5 +1973,138 @@ void Engine::setupNativeToolbar()
     LOG_INFO_C("Unreal-style native Win32 toolbar initialized with comprehensive tools", "Engine");
 }
 #endif
+
+void Engine::createDemoEntities()
+{
+    if (!m_entityManager) {
+        LOG_WARNING_C("Cannot create demo entities: EntityManager not available", "Engine");
+        return;
+    }
+
+#ifdef FRESH_IMGUI_AVAILABLE
+    if (!m_editorManager) {
+        LOG_WARNING_C("Cannot create demo entities: EditorManager not available", "Engine");
+        return;
+    }
+
+    auto* sceneHierarchy = m_editorManager->getSceneHierarchy();
+    if (!sceneHierarchy) {
+        LOG_WARNING_C("Cannot create demo entities: SceneHierarchy not available", "Engine");
+        return;
+    }
+
+    LOG_INFO_C("Creating demo entities for Inspector demonstration...", "Engine");
+
+    // Create Entity 1: A cube with transform, renderer, and material
+    {
+        auto entity = m_entityManager->createEntity();
+        
+        // Add transform
+        auto* transform = new ecs::TransformComponent(
+            glm::vec3(0.0f, 85.0f, -5.0f),  // position
+            glm::quat(1.0f, 0.0f, 0.0f, 0.0f),  // rotation
+            glm::vec3(2.0f, 2.0f, 2.0f)      // scale
+        );
+        m_entityManager->addComponent(entity, transform);
+        
+        // Add renderer
+        auto* renderer = new ecs::RendererComponent();
+        renderer->castShadows = true;
+        renderer->receiveShadows = true;
+        renderer->renderLayer = 0;
+        m_entityManager->addComponent(entity, renderer);
+        
+        // Add material
+        auto* material = new ecs::MaterialComponent();
+        material->shaderType = ecs::MaterialComponent::ShaderType::Standard;
+        material->color = glm::vec4(0.8f, 0.2f, 0.2f, 1.0f);  // Red
+        material->metallic = 0.5f;
+        material->smoothness = 0.8f;
+        m_entityManager->addComponent(entity, material);
+        
+        // Add to scene hierarchy
+        auto node = sceneHierarchy->addNode("Red Cube", nullptr);
+        if (node) {
+            node->userData = new ecs::Entity(entity);
+        }
+        
+        LOG_INFO_C("Created demo entity: Red Cube", "Engine");
+    }
+
+    // Create Entity 2: A sphere with physics
+    {
+        auto entity = m_entityManager->createEntity();
+        
+        // Add transform
+        auto* transform = new ecs::TransformComponent(
+            glm::vec3(5.0f, 90.0f, -5.0f),  // position
+            glm::quat(1.0f, 0.0f, 0.0f, 0.0f),
+            glm::vec3(1.5f, 1.5f, 1.5f)
+        );
+        m_entityManager->addComponent(entity, transform);
+        
+        // Add physics
+        auto* physics = new physics::PhysicsComponent();
+        physics->mass = 10.0f;
+        physics->useGravity = true;
+        physics->friction = 0.6f;
+        physics->restitution = 0.4f;
+        m_entityManager->addComponent(entity, physics);
+        
+        // Add renderer
+        auto* renderer = new ecs::RendererComponent();
+        m_entityManager->addComponent(entity, renderer);
+        
+        // Add material
+        auto* material = new ecs::MaterialComponent();
+        material->color = glm::vec4(0.2f, 0.8f, 0.2f, 1.0f);  // Green
+        material->smoothness = 0.9f;
+        m_entityManager->addComponent(entity, material);
+        
+        // Add to scene hierarchy
+        auto node = sceneHierarchy->addNode("Green Sphere (Physics)", nullptr);
+        if (node) {
+            node->userData = new ecs::Entity(entity);
+        }
+        
+        LOG_INFO_C("Created demo entity: Green Sphere with Physics", "Engine");
+    }
+
+    // Create Entity 3: A light source
+    {
+        auto entity = m_entityManager->createEntity();
+        
+        // Add transform
+        auto* transform = new ecs::TransformComponent(
+            glm::vec3(-5.0f, 95.0f, -5.0f),
+            glm::quat(1.0f, 0.0f, 0.0f, 0.0f),
+            glm::vec3(0.5f, 0.5f, 0.5f)
+        );
+        m_entityManager->addComponent(entity, transform);
+        
+        // Add material with emission
+        auto* material = new ecs::MaterialComponent();
+        material->shaderType = ecs::MaterialComponent::ShaderType::Unlit;
+        material->color = glm::vec4(1.0f, 1.0f, 0.5f, 1.0f);  // Yellow
+        material->emission = 3.0f;  // Emissive
+        m_entityManager->addComponent(entity, material);
+        
+        // Add renderer
+        auto* renderer = new ecs::RendererComponent();
+        renderer->castShadows = false;
+        m_entityManager->addComponent(entity, renderer);
+        
+        // Add to scene hierarchy
+        auto node = sceneHierarchy->addNode("Yellow Light", nullptr);
+        if (node) {
+            node->userData = new ecs::Entity(entity);
+        }
+        
+        LOG_INFO_C("Created demo entity: Yellow Light (Emissive)", "Engine");
+    }
+
+    LOG_INFO_C("Demo entities created successfully! Select them in Scene Hierarchy to inspect.", "Engine");
+#endif
+}
 
 } // namespace fresh

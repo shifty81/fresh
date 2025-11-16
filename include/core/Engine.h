@@ -36,6 +36,11 @@ class WorldEditor;
 class Player;
 class VoxelInteraction;
 
+namespace ecs
+{
+class EntityManager;
+}
+
 /**
  * @brief Main engine class that orchestrates all subsystems
  *
@@ -107,6 +112,7 @@ private:
     std::unique_ptr<VoxelWorld> m_world;
     std::unique_ptr<PhysicsSystem> m_physics;
     std::unique_ptr<AISystem> m_aiSystem;
+    std::unique_ptr<ecs::EntityManager> m_entityManager;
     std::unique_ptr<EditorGUI> m_editor;
 #ifdef FRESH_IMGUI_AVAILABLE
     std::unique_ptr<EditorManager> m_editorManager;
@@ -148,6 +154,7 @@ private:
     void loadWorld(const std::string& name);
     void setupInputCallbacks();
     void initializeGameSystems(); // Helper for common initialization
+    void createDemoEntities();    // Create demo entities for Inspector demonstration
 
 #ifndef _WIN32
     // User data for GLFW callbacks (not needed for Win32)

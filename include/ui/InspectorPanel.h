@@ -5,6 +5,11 @@ namespace fresh
 
 struct HierarchyNode;
 
+namespace ecs
+{
+class EntityManager;
+}
+
 /**
  * @brief Inspector/Details Panel
  *
@@ -19,9 +24,10 @@ public:
 
     /**
      * @brief Initialize the panel
+     * @param entityManager Optional entity manager for component editing
      * @return true if successful
      */
-    bool initialize();
+    bool initialize(ecs::EntityManager* entityManager = nullptr);
 
     /**
      * @brief Render the panel UI
@@ -59,10 +65,13 @@ private:
     void renderTransformProperties();
     void renderComponentProperties();
     void renderMaterialProperties();
+    void renderPhysicsProperties();
+    void renderRendererProperties();
 
 private:
     bool m_visible;
     HierarchyNode* m_inspectedNode;
+    ecs::EntityManager* m_entityManager;
 };
 
 } // namespace fresh
