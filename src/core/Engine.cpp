@@ -1012,7 +1012,7 @@ void Engine::update(float deltaTime)
                 m_voxelInteraction->performRaycast(m_player->getCamera(), MAX_INTERACTION_DISTANCE);
 
             // Left click to break block (only when NOT using RMB for camera)
-            if (m_inputManager->isMouseButtonPressed(MOUSE_BUTTON_LEFT) && hit.hit && !rightMousePressed) {
+            if (m_inputManager->isMouseButtonPressed(MOUSE_BUTTON_LEFT) && hit.hit && !m_rightMouseHeldForCamera) {
                 m_voxelInteraction->breakBlock(hit);
             }
 
