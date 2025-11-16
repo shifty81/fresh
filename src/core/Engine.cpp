@@ -34,6 +34,7 @@
 
 #include "ai/AISystem.h"
 #include "core/Logger.h"
+#include "ecs/EntityManager.h"
 #include "editor/EditorGUI.h"
 #include "editor/EditorManager.h"
 #include "editor/WorldEditor.h"
@@ -266,12 +267,17 @@ bool Engine::initialize()
     std::cout << "Main menu initialized" << std::endl;
     LOG_INFO_C("Main menu initialized", "Engine");
 
+    // Create entity manager for ECS
+    m_entityManager = std::make_unique<ecs::EntityManager>();
+    std::cout << "Entity manager initialized" << std::endl;
+    LOG_INFO_C("Entity manager initialized", "Engine");
+
 #ifdef FRESH_IMGUI_AVAILABLE
     // Create comprehensive editor manager (requires ImGui) - show immediately
     m_editorManager = std::make_unique<EditorManager>();
     // Initialize with nullptr for world and worldEditor initially
     if (!m_editorManager->initialize(m_window.get(), m_renderer.get(), nullptr, nullptr,
-                                     m_inputManager.get())) {
+                                     m_inputManager.get(), m_entityManager.get())) {
         std::cerr << "Failed to initialize editor manager" << std::endl;
         LOG_ERROR_C("Failed to initialize editor manager", "Engine");
         return false;
