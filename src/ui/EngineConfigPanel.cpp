@@ -46,14 +46,14 @@ EngineConfigPanel::~EngineConfigPanel()
     shutdown();
 }
 
-bool EngineConfigPanel::initialize(IRenderContext* renderContext)
+bool EngineConfigPanel::initialize(IRenderContext* ctx)
 {
-    if (!renderContext) {
+    if (!ctx) {
         LOG_ERROR_C("Invalid render context for EngineConfigPanel", "EngineConfigPanel");
         return false;
     }
 
-    this->renderContext = renderContext;
+    this->renderContext = ctx;
 
     // Load configuration from file
     loadConfig("engine_config.cfg");
