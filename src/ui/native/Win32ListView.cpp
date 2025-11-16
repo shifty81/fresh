@@ -59,7 +59,7 @@ bool Win32ListView::create(HWND parent, int x, int y, int width, int height)
     // Create list view control
     m_hwnd = CreateWindowExW(
         WS_EX_CLIENTEDGE,
-        WC_LISTVIEW,
+        WC_LISTVIEWW,
         L"",
         WS_CHILD | WS_VISIBLE | WS_BORDER | LVS_REPORT | LVS_SHOWSELALWAYS | LVS_SINGLESEL,
         x, y, width, height,
@@ -88,10 +88,11 @@ int Win32ListView::addColumn(const std::string& text, int width)
 
     int columnCount = Header_GetItemCount(ListView_GetHeader(m_hwnd));
 
+    std::wstring wideText = toWideString(text);
     LVCOLUMNW column = {};
     column.mask = LVCF_TEXT | LVCF_WIDTH;
     column.cx = width;
-    column.pszText = (LPWSTR)toWideString(text).c_str();
+    column.pszText = const_cast<LPWSTR>(wideText.c_str());
 
     return ListView_InsertColumn(m_hwnd, columnCount, &column);
 }
@@ -102,11 +103,12 @@ int Win32ListView::addItem(const std::string& text, int icon, void* userData)
         return -1;
     }
 
+    std::wstring wideText = toWideString(text);
     LVITEMW item = {};
     item.mask = LVIF_TEXT | LVIF_PARAM;
     item.iItem = ListView_GetItemCount(m_hwnd);
     item.iSubItem = 0;
-    item.pszText = (LPWSTR)toWideString(text).c_str();
+    item.pszText = const_cast<LPWSTR>(wideText.c_str());
     item.lParam = (LPARAM)userData;
 
     if (icon >= 0) {
@@ -123,7 +125,8 @@ void Win32ListView::setItemText(int itemIndex, int columnIndex, const std::strin
         return;
     }
 
-    ListView_SetItemText(m_hwnd, itemIndex, columnIndex, (LPWSTR)toWideString(text).c_str());
+    std::wstring wideText = toWideString(text);
+    ListView_SetItemText(m_hwnd, itemIndex, columnIndex, const_cast<LPWSTR>(wideText.c_str()));
 }
 
 void Win32ListView::removeItem(int index)
