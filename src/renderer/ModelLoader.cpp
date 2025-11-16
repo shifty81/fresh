@@ -355,21 +355,21 @@ std::shared_ptr<Model> ModelLoader::createPlane(float width, float height)
     return model;
 }
 
-std::shared_ptr<Model> ModelLoader::createSphere(float radius, int segments)
+std::shared_ptr<Model> ModelLoader::createSphere(float radius, int /* segments */)
 {
     // TODO: Implement sphere generation
     Logger::getInstance().warning("Sphere primitive not yet implemented", "ModelLoader");
     return createCube(radius * 2.0f);
 }
 
-std::shared_ptr<Model> ModelLoader::createCylinder(float radius, float height, int segments)
+std::shared_ptr<Model> ModelLoader::createCylinder(float radius, float /* height */, int /* segments */)
 {
     // TODO: Implement cylinder generation
     Logger::getInstance().warning("Cylinder primitive not yet implemented", "ModelLoader");
     return createCube(radius * 2.0f);
 }
 
-std::shared_ptr<Model> ModelLoader::createCone(float radius, float height, int segments)
+std::shared_ptr<Model> ModelLoader::createCone(float radius, float /* height */, int /* segments */)
 {
     // TODO: Implement cone generation
     Logger::getInstance().warning("Cone primitive not yet implemented", "ModelLoader");
