@@ -182,7 +182,8 @@ void SelectionManager::moveSelection(const glm::ivec3& delta, VoxelWorld* world)
             m_selection.positions[i].z + delta.z
         );
         
-        Voxel oldVoxel = world->getVoxel(newPos.toWorldPos());
+        Voxel* oldVoxelPtr = world->getVoxel(newPos.toWorldPos());
+        Voxel oldVoxel = oldVoxelPtr ? *oldVoxelPtr : Voxel();
         Voxel newVoxel(voxelTypes[i]);
         
         // Record undo command
@@ -290,7 +291,8 @@ void SelectionManager::pasteFromClipboard(const glm::ivec3& pastePos, VoxelWorld
         );
         
         // Get old voxel before replacing
-        Voxel oldVoxel = world->getVoxel(newPos.toWorldPos());
+        Voxel* oldVoxelPtr = world->getVoxel(newPos.toWorldPos());
+        Voxel oldVoxel = oldVoxelPtr ? *oldVoxelPtr : Voxel();
         Voxel newVoxel(m_clipboard.types[i]);
         
         // Record undo command

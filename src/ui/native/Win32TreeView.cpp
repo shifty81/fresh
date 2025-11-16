@@ -59,7 +59,7 @@ bool Win32TreeView::create(HWND parent, int x, int y, int width, int height)
     // Create tree view control
     m_hwnd = CreateWindowExW(
         WS_EX_CLIENTEDGE,
-        WC_TREEVIEW,
+        WC_TREEVIEWW,
         L"",
         WS_CHILD | WS_VISIBLE | WS_BORDER | TVS_HASLINES | TVS_LINESATROOT | TVS_HASBUTTONS | TVS_SHOWSELALWAYS,
         x, y, width, height,
@@ -83,11 +83,12 @@ HTREEITEM Win32TreeView::addRootItem(const std::string& text, void* userData)
         return nullptr;
     }
 
+    std::wstring wideText = toWideString(text);
     TVINSERTSTRUCTW tvins = {};
     tvins.hParent = TVI_ROOT;
     tvins.hInsertAfter = TVI_LAST;
     tvins.item.mask = TVIF_TEXT | TVIF_PARAM;
-    tvins.item.pszText = (LPWSTR)toWideString(text).c_str();
+    tvins.item.pszText = const_cast<LPWSTR>(wideText.c_str());
     tvins.item.lParam = (LPARAM)userData;
 
     return TreeView_InsertItem(m_hwnd, &tvins);
@@ -99,11 +100,12 @@ HTREEITEM Win32TreeView::addChildItem(HTREEITEM parent, const std::string& text,
         return nullptr;
     }
 
+    std::wstring wideText = toWideString(text);
     TVINSERTSTRUCTW tvins = {};
     tvins.hParent = parent;
     tvins.hInsertAfter = TVI_LAST;
     tvins.item.mask = TVIF_TEXT | TVIF_PARAM;
-    tvins.item.pszText = (LPWSTR)toWideString(text).c_str();
+    tvins.item.pszText = const_cast<LPWSTR>(wideText.c_str());
     tvins.item.lParam = (LPARAM)userData;
 
     return TreeView_InsertItem(m_hwnd, &tvins);
@@ -195,10 +197,11 @@ void Win32TreeView::setItemText(HTREEITEM item, const std::string& text)
         return;
     }
 
+    std::wstring wideText = toWideString(text);
     TVITEMW tvitem = {};
     tvitem.hItem = item;
     tvitem.mask = TVIF_TEXT;
-    tvitem.pszText = (LPWSTR)toWideString(text).c_str();
+    tvitem.pszText = const_cast<LPWSTR>(wideText.c_str());
 
     TreeView_SetItem(m_hwnd, &tvitem);
 }
