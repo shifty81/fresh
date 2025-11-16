@@ -383,6 +383,8 @@ if(imgui_FOUND)
             src/ui/native/Win32Panel.cpp
             src/ui/native/Win32MenuBar.cpp
             src/ui/native/Win32Toolbar.cpp
+            src/ui/native/Win32TreeView.cpp
+            src/ui/native/Win32ListView.cpp
         )
     endif()
 endif()
