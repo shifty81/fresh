@@ -207,6 +207,9 @@ bool EditorManager::initialize(Window* window, IRenderContext* renderContext, Vo
             }
         });
 
+        // Note: File dialog callbacks will be set up after WindowsDialogManager is initialized
+        // See below in Windows-specific initialization section
+
         m_toolbar = std::make_unique<EditorToolbar>();
         if (!m_toolbar->initialize()) {
             LOG_ERROR_C("Failed to initialize Toolbar", "EditorManager");
@@ -313,6 +316,118 @@ bool EditorManager::initialize(Window* window, IRenderContext* renderContext, Vo
         LOG_INFO_C("Windows Customization Panel initialized", "EditorManager");
     } else {
         LOG_WARNING_C("Failed to initialize Windows Customization Panel", "EditorManager");
+    }
+    
+    // Set up file dialog callbacks now that WindowsDialogManager is initialized
+    if (m_menuBar && m_windowsDialogManager && m_windowsDialogManager->isInitialized()) {
+        // Set Load World callback - Show Open File dialog
+        m_menuBar->setLoadWorldCallback([this]() {
+            LOG_INFO_C("Opening Load World dialog", "EditorManager");
+            
+            std::vector<FileFilter> filters = {
+                {"Fresh World Files", "*.world"},
+                {"All Files", "*.*"}
+            };
+            
+            auto selectedFiles = m_windowsDialogManager->showOpenFileDialog(
+                "Open World", filters, false);
+            
+            if (!selectedFiles.empty()) {
+                const std::string& worldPath = selectedFiles[0];
+                LOG_INFO_C("User selected world file: " + worldPath, "EditorManager");
+                
+                // TODO: Call actual world loading function
+                // For now, just show confirmation
+                m_windowsDialogManager->showMessageBox(
+                    "Load World",
+                    "World loading will be implemented here.\nSelected: " + worldPath,
+                    MessageBoxButtons::OK,
+                    MessageBoxIcon::Information
+                );
+            } else {
+                LOG_INFO_C("Load World dialog cancelled", "EditorManager");
+            }
+        });
+        
+        // Set Save World As callback - Show Save File dialog
+        m_menuBar->setSaveWorldAsCallback([this]() {
+            LOG_INFO_C("Opening Save World As dialog", "EditorManager");
+            
+            std::vector<FileFilter> filters = {
+                {"Fresh World Files", "*.world"},
+                {"All Files", "*.*"}
+            };
+            
+            std::string savePath = m_windowsDialogManager->showSaveFileDialog(
+                "Save World As", "NewWorld.world", filters);
+            
+            if (!savePath.empty()) {
+                LOG_INFO_C("User selected save location: " + savePath, "EditorManager");
+                
+                // TODO: Call actual world saving function
+                // For now, just show confirmation
+                m_windowsDialogManager->showMessageBox(
+                    "Save World",
+                    "World saving will be implemented here.\nSave to: " + savePath,
+                    MessageBoxButtons::OK,
+                    MessageBoxIcon::Information
+                );
+            } else {
+                LOG_INFO_C("Save World As dialog cancelled", "EditorManager");
+            }
+        });
+        
+        // Set Save World callback - Quick save to current file
+        m_menuBar->setSaveWorldCallback([this]() {
+            LOG_INFO_C("Quick save triggered", "EditorManager");
+            
+            // TODO: If world has a file path, save to it directly
+            // Otherwise, show Save As dialog
+            
+            m_windowsDialogManager->showMessageBox(
+                "Save World",
+                "Quick save will be implemented here.\nThis will save to the current world file.",
+                MessageBoxButtons::OK,
+                MessageBoxIcon::Information
+            );
+        });
+        
+        // Override Import Assets callback to use Windows dialog
+        m_menuBar->setImportAssetsCallback([this]() {
+            LOG_INFO_C("Opening Import Assets dialog", "EditorManager");
+            
+            std::vector<FileFilter> filters = {
+                {"Image Files", "*.png;*.jpg;*.jpeg;*.bmp;*.tga"},
+                {"3D Models", "*.obj;*.fbx;*.gltf;*.glb"},
+                {"Audio Files", "*.wav;*.ogg;*.mp3"},
+                {"All Files", "*.*"}
+            };
+            
+            auto selectedFiles = m_windowsDialogManager->showOpenFileDialog(
+                "Import Assets", filters, true); // multiselect = true
+            
+            if (!selectedFiles.empty()) {
+                LOG_INFO_C("User selected " + std::to_string(selectedFiles.size()) + " file(s) to import", "EditorManager");
+                
+                // TODO: Call actual asset import function
+                // For now, just show confirmation
+                std::string fileList;
+                for (const auto& file : selectedFiles) {
+                    fileList += file + "\n";
+                }
+                
+                m_windowsDialogManager->showMessageBox(
+                    "Import Assets",
+                    "Asset import will be implemented here.\nSelected files:\n" + fileList,
+                    MessageBoxButtons::OK,
+                    MessageBoxIcon::Information
+                );
+            } else {
+                LOG_INFO_C("Import Assets dialog cancelled", "EditorManager");
+            }
+        });
+        
+        LOG_INFO_C("File dialog callbacks configured successfully", "EditorManager");
     }
 #endif
 
