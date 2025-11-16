@@ -332,6 +332,16 @@ set(ENGINE_SOURCES
     src/ecs/TransformComponent.cpp
     src/ecs/RendererComponent.cpp
     src/ecs/MaterialComponent.cpp
+    src/ecs/Transform2DComponent.cpp
+    src/ecs/Sprite2DComponent.cpp
+    src/ecs/RigidBody2DComponent.cpp
+    src/ecs/Collider2DComponent.cpp
+    src/ecs/Animation2DComponent.cpp
+    src/ecs/Camera2DComponent.cpp
+    src/ecs/Physics2DSystem.cpp
+    src/ecs/Collision2DSystem.cpp
+    src/ecs/Animation2DSystem.cpp
+    src/ecs/Camera2DSystem.cpp
     src/voxelship/VoxelBlock.cpp
     src/voxelship/VoxelStructureComponent.cpp
     src/galaxy/GalaxySector.cpp
