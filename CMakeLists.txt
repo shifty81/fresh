@@ -98,8 +98,16 @@ endif()
 # ImGui for UI
 find_package(imgui QUIET)
 if(NOT imgui_FOUND)
-    message(WARNING "ImGui not found. Editor UI features will be limited.")
-    message(WARNING "  vcpkg install imgui[glfw-binding,dx11-binding,dx12-binding]:x64-windows")
+    # Check if we have imgui in external directory
+    if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/external/imgui/CMakeLists.txt")
+        message(STATUS "Using ImGui from external/imgui")
+        add_subdirectory(external/imgui)
+        set(imgui_FOUND TRUE)
+        add_library(imgui::imgui ALIAS imgui)
+    else()
+        message(WARNING "ImGui not found. Editor UI features will be limited.")
+        message(WARNING "  vcpkg install imgui[glfw-binding,dx11-binding,dx12-binding]:x64-windows")
+    endif()
 endif()
 
 # OpenAL for audio

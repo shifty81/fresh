@@ -7,6 +7,10 @@
 
 namespace fresh {
 
+World2DGenerator::World2DGenerator()
+    : World2DGenerator(Settings{}) {
+}
+
 World2DGenerator::World2DGenerator(const Settings& settings)
     : settings_(settings) {
     
