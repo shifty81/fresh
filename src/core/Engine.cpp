@@ -295,6 +295,10 @@ void Engine::createNewWorld(const std::string& name, int seed, bool is3D, int ga
     }
     std::cout << " (seed: " << seed << ")" << std::endl;
 
+    // Store world type and style for camera setup
+    m_isWorld3D = is3D;
+    m_world2DStyle = gameStyle2D;
+
     // Create voxel world
     m_world = std::make_unique<VoxelWorld>();
     if (!m_world->initialize()) {
@@ -506,6 +510,32 @@ void Engine::initializeGameSystems()
     m_player->setWorld(m_world.get());
     m_player->setPosition(glm::vec3(0.0f, 80.0f, 0.0f));
     std::cout << "Player initialized" << std::endl;
+    
+    // Set up camera mode based on world type
+    if (!m_isWorld3D) {
+        Camera& camera = m_player->getCamera();
+        if (m_world2DStyle == 0) {
+            // Platformer/Terraria style - side-scrolling
+            camera.setCameraMode(CameraMode::Orthographic2D);
+            camera.setOrthographicZoom(1.0f);
+            // Position camera for side view
+            m_player->setPosition(glm::vec3(0.0f, 10.0f, 50.0f));
+            std::cout << "Camera set to 2D side-scrolling mode (Platformer/Terraria)" << std::endl;
+        } else {
+            // Top-down Zelda style
+            camera.setCameraMode(CameraMode::OrthographicTopDown);
+            camera.setOrthographicZoom(1.0f);
+            // Position camera above the world
+            m_player->setPosition(glm::vec3(0.0f, 50.0f, 0.0f));
+            std::cout << "Camera set to 2D top-down mode (Zelda-like)" << std::endl;
+        }
+    } else {
+        // Standard 3D perspective camera
+        Camera& camera = m_player->getCamera();
+        camera.setCameraMode(CameraMode::Perspective3D);
+        m_player->setPosition(glm::vec3(0.0f, 80.0f, 0.0f));
+        std::cout << "Camera set to 3D perspective mode" << std::endl;
+    }
 
     // Initialize hotbar with common block types
 #ifdef FRESH_IMGUI_AVAILABLE
