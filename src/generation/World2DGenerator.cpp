@@ -15,8 +15,8 @@ World2DGenerator::World2DGenerator(const Settings& settings)
     caveNoise_ = std::make_unique<NoiseGenerator>(settings_.seed + 1);
     oreNoise_ = std::make_unique<NoiseGenerator>(settings_.seed + 2);
     
-    Logger::info("World2DGenerator", "Initialized 2D generator with style: " + 
-                 std::to_string(static_cast<int>(settings_.style)));
+    Logger::getInstance().info("Initialized 2D generator with style: " + 
+                 std::to_string(static_cast<int>(settings_.style)), "World2DGenerator");
 }
 
 void World2DGenerator::setDimensions(int width, int height, int depth) {
@@ -42,20 +42,20 @@ void World2DGenerator::generateChunk(Chunk& chunk, int chunkX, int chunkZ) {
             
         case Style::METROIDVANIA:
             // Metroidvania uses room-based generation, not chunk-based
-            Logger::warning("World2DGenerator", 
-                          "Metroidvania style requires generateWorld(), not generateChunk()");
+            Logger::getInstance().warning("Metroidvania style requires generateWorld(), not generateChunk()", 
+                          "World2DGenerator");
             break;
             
         case Style::RUNNER:
             // Endless runner generates segments on demand
-            Logger::warning("World2DGenerator", 
-                          "Runner style uses EndlessRunnerGenerator");
+            Logger::getInstance().warning("Runner style uses EndlessRunnerGenerator", 
+                          "World2DGenerator");
             break;
             
         case Style::PUZZLE:
             // Puzzle style uses room-based generation
-            Logger::warning("World2DGenerator", 
-                          "Puzzle style requires generateWorld(), not generateChunk()");
+            Logger::getInstance().warning("Puzzle style requires generateWorld(), not generateChunk()", 
+                          "World2DGenerator");
             break;
     }
 }
@@ -78,7 +78,7 @@ void World2DGenerator::generatePlatformerSurface(Chunk& chunk, int chunkX) {
         for (int z = 0; z < settings_.worldDepth; z++) {
             for (int y = 0; y < height; y++) {
                 VoxelType type = getVoxelTypeForDepth(height - y);
-                chunk.setVoxel(localX, y, z, type);
+                chunk.setVoxel(localX, y, z, Voxel(type));
             }
         }
     }
@@ -101,7 +101,7 @@ void World2DGenerator::generateUnderground(Chunk& chunk, int chunkX, int surface
     for (int localX = 0; localX < 16; localX++) {
         for (int z = 0; z < settings_.worldDepth; z++) {
             // Add bedrock at bottom
-            chunk.setVoxel(localX, 0, z, VoxelType::Bedrock);
+            chunk.setVoxel(localX, 0, z, Voxel(VoxelType::Bedrock));
             
             // Deep stone layer
             for (int y = 1; y < 20; y++) {
@@ -131,7 +131,7 @@ void World2DGenerator::generateCaves(Chunk& chunk, int chunkX) {
             
             if (noise > (1.0f - settings_.caveFrequency)) {
                 for (int z = 0; z < settings_.worldDepth; z++) {
-                    chunk.setVoxel(localX, y, z, VoxelType::Air);
+                    chunk.setVoxel(localX, y, z, Voxel(VoxelType::Air));
                 }
             }
         }
@@ -150,9 +150,9 @@ void World2DGenerator::generateCaves(Chunk& chunk, int chunkX) {
                 // Birth/death rules
                 for (int z = 0; z < settings_.worldDepth; z++) {
                     if (solidNeighbors >= 4) {
-                        chunk.setVoxel(localX, y, z, VoxelType::Stone);
+                        chunk.setVoxel(localX, y, z, Voxel(VoxelType::Stone));
                     } else {
-                        chunk.setVoxel(localX, y, z, VoxelType::Air);
+                        chunk.setVoxel(localX, y, z, Voxel(VoxelType::Air));
                     }
                 }
             }
@@ -173,8 +173,8 @@ void World2DGenerator::generateOres(Chunk& chunk, int chunkX) {
         
         for (int y = 1; y < 200; y++) {
             // Check if this is solid stone
-            VoxelType currentType = chunk.getVoxel(localX, y, 0);
-            if (currentType != VoxelType::Stone) {
+            Voxel currentVoxel = chunk.getVoxel(localX, y, 0);
+            if (currentVoxel != VoxelType::Stone) {
                 continue;
             }
             
@@ -196,7 +196,7 @@ void World2DGenerator::generateOres(Chunk& chunk, int chunkX) {
                 
                 // Place ore in all depth layers
                 for (int z = 0; z < settings_.worldDepth; z++) {
-                    chunk.setVoxel(localX, y, z, oreType);
+                    chunk.setVoxel(localX, y, z, Voxel(oreType));
                 }
             }
         }
@@ -282,7 +282,7 @@ void World2DGenerator::generateTree(Chunk& chunk, int x, int y, int z) {
     // Trunk
     for (int i = 0; i < trunkHeight; i++) {
         if (y + i < 256) {
-            chunk.setVoxel(x, y + i, z, VoxelType::Wood);
+            chunk.setVoxel(x, y + i, z, Voxel(VoxelType::Wood));
         }
     }
     
@@ -297,7 +297,7 @@ void World2DGenerator::generateTree(Chunk& chunk, int x, int y, int z) {
                 if (leafX >= 0 && leafX < 16 && leafY >= 0 && leafY < 256) {
                     // Don't overwrite trunk
                     if (chunk.getVoxel(leafX, leafY, z) == VoxelType::Air) {
-                        chunk.setVoxel(leafX, leafY, z, VoxelType::Leaves);
+                        chunk.setVoxel(leafX, leafY, z, Voxel(VoxelType::Leaves));
                     }
                 }
             }
@@ -323,7 +323,7 @@ bool World2DGenerator::isValidTreePosition(const Chunk& chunk, int x, int y, int
 }
 
 void World2DGenerator::generateWorld(VoxelWorld& world) {
-    Logger::info("World2DGenerator", "Generating complete 2D world...");
+    Logger::getInstance().info("Generating complete 2D world...", "World2DGenerator");
     
     // Calculate number of chunks needed
     int chunksNeeded = (settings_.worldWidth + 15) / 16;
@@ -337,7 +337,7 @@ void World2DGenerator::generateWorld(VoxelWorld& world) {
         // world.addChunk(chunkX, 0, chunk);
     }
     
-    Logger::info("World2DGenerator", "2D world generation complete");
+    Logger::getInstance().info("2D world generation complete", "World2DGenerator");
 }
 
 // MetroidvaniaGenerator implementation

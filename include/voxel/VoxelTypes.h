@@ -28,6 +28,8 @@ enum class VoxelType : uint8_t {
     Gravel,
     Coal,
     Iron,
+    Gold,
+    Diamond,
     // Add more types as needed
     Count
 };
@@ -55,6 +57,26 @@ struct Voxel {
     [[nodiscard]] bool isSolid() const noexcept
     {
         return type != VoxelType::Air;
+    }
+
+    bool operator==(const Voxel& other) const noexcept
+    {
+        return type == other.type;
+    }
+
+    bool operator!=(const Voxel& other) const noexcept
+    {
+        return type != other.type;
+    }
+
+    bool operator==(VoxelType voxelType) const noexcept
+    {
+        return type == voxelType;
+    }
+
+    bool operator!=(VoxelType voxelType) const noexcept
+    {
+        return type != voxelType;
     }
 };
 
