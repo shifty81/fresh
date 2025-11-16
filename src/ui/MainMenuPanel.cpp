@@ -24,6 +24,7 @@ MainMenuPanel::MainMenuPanel()
       m_showNewWorldDialog(false),
       m_showLoadWorldDialog(false),
       m_isWorld3D(true), // Default to 3D world
+      m_2dGameStyle(0),  // Default to Platformer/Terraria style
       m_worldSeed(0),
       m_selectedWorldIndex(0)
 {
@@ -151,7 +152,7 @@ void MainMenuPanel::renderNewWorldDialog()
     ImGuiIO& io = ImGui::GetIO();
     ImGui::SetNextWindowPos(ImVec2(io.DisplaySize.x * 0.5f, io.DisplaySize.y * 0.5f),
                             ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
-    ImGui::SetNextWindowSize(ImVec2(550, 350), ImGuiCond_Appearing); // Increased height for world type option
+    ImGui::SetNextWindowSize(ImVec2(550, 450), ImGuiCond_Appearing); // Increased height for 2D game style option
 
     ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize;
 
@@ -185,15 +186,27 @@ void MainMenuPanel::renderNewWorldDialog()
         ImGui::Text("World Type:");
         int worldType = m_isWorld3D ? 1 : 0;
         ImGui::RadioButton("3D World (Full Voxel)", &worldType, 1);
-        ImGui::SameLine();
-        ImGui::RadioButton("2D World (Platformer/Terraria-style)", &worldType, 0);
+        ImGui::RadioButton("2D World", &worldType, 0);
         m_isWorld3D = (worldType == 1);
         
         ImGui::Spacing();
-        if (m_isWorld3D) {
-            ImGui::TextDisabled("Full 3D voxel world with height and depth");
+        
+        // Show 2D game style selection only when 2D is selected
+        if (!m_isWorld3D) {
+            ImGui::Indent(20.0f);
+            ImGui::Text("2D Game Style:");
+            ImGui::RadioButton("Platformer (Terraria-style side-scrolling)", &m_2dGameStyle, 0);
+            ImGui::RadioButton("Top-down (Zelda-style exploration)", &m_2dGameStyle, 1);
+            ImGui::Unindent(20.0f);
+            
+            ImGui::Spacing();
+            if (m_2dGameStyle == 0) {
+                ImGui::TextDisabled("Side-scrolling platformer world with caves and terrain");
+            } else {
+                ImGui::TextDisabled("Top-down exploration world with dungeons and obstacles");
+            }
         } else {
-            ImGui::TextDisabled("2D side-scrolling world, single layer depth");
+            ImGui::TextDisabled("Full 3D voxel world with height and depth");
         }
 
         ImGui::Spacing();
@@ -220,9 +233,11 @@ void MainMenuPanel::renderNewWorldDialog()
             m_createNewWorld = true;
             m_showNewWorldDialog = false;
             m_menuActive = false; // Hide menu after world creation
-            LOG_INFO_C("Creating new world: " + m_newWorldName + " with seed: " +
-                           std::to_string(m_worldSeed),
-                       "MainMenuPanel");
+            
+            std::string worldTypeStr = m_isWorld3D ? "3D" : 
+                                      (m_2dGameStyle == 0 ? "2D Platformer" : "2D Top-down");
+            LOG_INFO_C("Creating new " + worldTypeStr + " world: " + m_newWorldName + 
+                       " with seed: " + std::to_string(m_worldSeed), "MainMenuPanel");
         }
 
         ImGui::SameLine();

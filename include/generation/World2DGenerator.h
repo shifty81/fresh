@@ -22,6 +22,7 @@ public:
      */
     enum class Style {
         PLATFORMER,     ///< Terraria-style horizontal exploration
+        TOPDOWN,        ///< Zelda-style top-down exploration
         METROIDVANIA,   ///< Connected rooms requiring abilities to progress
         RUNNER,         ///< Endless runner with procedural segments
         PUZZLE          ///< Room-based puzzle platformer
@@ -103,6 +104,11 @@ private:
      * @brief Generate surface terrain for platformer style
      */
     void generatePlatformerSurface(Chunk& chunk, int chunkX);
+
+    /**
+     * @brief Generate top-down world (Zelda-style)
+     */
+    void generateTopDownWorld(Chunk& chunk, int chunkX, int chunkZ);
 
     /**
      * @brief Generate underground layers

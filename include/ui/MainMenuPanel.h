@@ -67,6 +67,12 @@ public:
     bool isWorld3D() const { return m_isWorld3D; }
 
     /**
+     * @brief Get the 2D game style (0=Platformer/Terraria, 1=Top-down/Zelda)
+     * @return 2D game style index
+     */
+    int get2DGameStyle() const { return m_2dGameStyle; }
+
+    /**
      * @brief Clear the create/load flags
      */
     void clearFlags();
@@ -113,6 +119,7 @@ private:
     bool m_showNewWorldDialog;
     bool m_showLoadWorldDialog;
     bool m_isWorld3D; // World type: true = 3D, false = 2D
+    int m_2dGameStyle; // 2D game style: 0 = Platformer/Terraria, 1 = Top-down/Zelda
     
     std::string m_newWorldName;
     std::string m_loadWorldName;

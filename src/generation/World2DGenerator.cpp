@@ -33,12 +33,15 @@ void World2DGenerator::setSeed(uint64_t seed) {
 }
 
 void World2DGenerator::generateChunk(Chunk& chunk, int chunkX, int chunkZ) {
-    // For pure 2D generation, chunkZ should typically be 0
-    (void)chunkZ; // Unused parameter - 2D generation doesn't use Z coordinate
-    
     switch (settings_.style) {
         case Style::PLATFORMER:
+            // For pure 2D platformer, chunkZ should typically be 0
             generatePlatformerSurface(chunk, chunkX);
+            break;
+            
+        case Style::TOPDOWN:
+            // Top-down Zelda-style uses both X and Z coordinates
+            generateTopDownWorld(chunk, chunkX, chunkZ);
             break;
             
         case Style::METROIDVANIA:
@@ -93,6 +96,71 @@ void World2DGenerator::generatePlatformerSurface(Chunk& chunk, int chunkX) {
     if (settings_.generateBackgroundWalls) {
         generateBackgroundWalls(chunk, chunkX);
     }
+}
+
+void World2DGenerator::generateTopDownWorld(Chunk& chunk, int chunkX, int chunkZ) {
+    // Top-down Zelda-style world generation
+    // World is viewed from above, Y is a single layer (like height 1)
+    // X and Z form the playable ground plane
+    
+    const int groundLevel = 1; // Single layer at Y=1
+    
+    // Generate terrain for each XZ position in the chunk
+    for (int localX = 0; localX < 16; localX++) {
+        for (int localZ = 0; localZ < 16; localZ++) {
+            int worldX = chunkX * 16 + localX;
+            int worldZ = chunkZ * 16 + localZ;
+            
+            // Use Perlin noise to determine terrain type
+            float terrainNoise = surfaceNoise_->perlin2D(worldX * 0.05f, worldZ * 0.05f);
+            float detailNoise = surfaceNoise_->perlin2D(worldX * 0.1f, worldZ * 0.1f);
+            
+            // Base ground layer (grass or dirt)
+            chunk.setVoxel(localX, 0, localZ, Voxel(VoxelType::Bedrock)); // Base layer
+            
+            // Determine ground type based on noise
+            VoxelType groundType = VoxelType::Grass;
+            if (terrainNoise > 0.6f) {
+                groundType = VoxelType::Stone; // Rocky areas
+            } else if (terrainNoise < -0.3f) {
+                groundType = VoxelType::Sand; // Sandy areas
+            } else if (terrainNoise < 0.0f) {
+                groundType = VoxelType::Dirt; // Dirt patches
+            }
+            
+            chunk.setVoxel(localX, groundLevel, localZ, Voxel(groundType));
+            
+            // Add obstacles/walls for dungeon-like areas
+            if (detailNoise > 0.7f) {
+                // Create walls/obstacles
+                chunk.setVoxel(localX, groundLevel + 1, localZ, Voxel(VoxelType::Stone));
+                if (detailNoise > 0.85f) {
+                    // Taller walls
+                    chunk.setVoxel(localX, groundLevel + 2, localZ, Voxel(VoxelType::Stone));
+                }
+            }
+            
+            // Add trees/decorations
+            if (groundType == VoxelType::Grass && detailNoise > 0.4f && detailNoise < 0.5f) {
+                // Place tree trunk
+                chunk.setVoxel(localX, groundLevel + 1, localZ, Voxel(VoxelType::Wood));
+                // Tree foliage on top
+                if (detailNoise > 0.45f) {
+                    chunk.setVoxel(localX, groundLevel + 2, localZ, Voxel(VoxelType::Leaves));
+                }
+            }
+            
+            // Add water areas
+            float waterNoise = caveNoise_->perlin2D(worldX * 0.03f, worldZ * 0.03f);
+            if (waterNoise < -0.5f) {
+                // Remove ground to create water/holes
+                chunk.setVoxel(localX, groundLevel, localZ, Voxel(VoxelType::Water));
+            }
+        }
+    }
+    
+    // Generate dungeons/rooms if appropriate noise threshold
+    // This could be expanded to create Zelda-style dungeons and rooms
 }
 
 void World2DGenerator::generateUnderground(Chunk& chunk, int chunkX, int surfaceHeight) {
