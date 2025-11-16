@@ -3,6 +3,7 @@
 #include "core/Win32Window.h"
 #include "core/Logger.h"
 #include "ui/native/Win32MenuBar.h"
+#include "ui/native/Win32Toolbar.h"
 
 #include <windowsx.h>
 
@@ -232,6 +233,19 @@ Win32MenuBar* Win32Window::getMenuBar()
     return m_menuBar.get();
 }
 
+Win32Toolbar* Win32Window::getToolbar()
+{
+    if (!m_toolbar && m_hwnd) {
+        m_toolbar = std::make_unique<Win32Toolbar>();
+        if (!m_toolbar->create(m_hwnd)) {
+            LOG_ERROR_C("Failed to create toolbar", "Win32Window");
+            m_toolbar.reset();
+            return nullptr;
+        }
+    }
+    return m_toolbar.get();
+}
+
 LRESULT CALLBACK Win32Window::WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
     // Let ImGui handle the message first if it's available
@@ -258,6 +272,10 @@ LRESULT CALLBACK Win32Window::WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LP
             // Handle menu commands
             int commandId = LOWORD(wParam);
             if (window->m_menuBar && window->m_menuBar->handleCommand(commandId)) {
+                return 0;
+            }
+            // Handle toolbar commands
+            if (window->m_toolbar && window->m_toolbar->handleCommand(commandId)) {
                 return 0;
             }
             break;

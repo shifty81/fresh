@@ -213,6 +213,8 @@ bool Engine::initialize()
 #ifdef _WIN32
     // Set up native Win32 menu bar
     setupNativeMenuBar();
+    // Set up native Win32 toolbar
+    setupNativeToolbar();
 #endif
 
     // Initialize renderer with the window
@@ -1540,6 +1542,68 @@ void Engine::setupNativeMenuBar()
     });
 
     LOG_INFO_C("Native Win32 menu bar initialized", "Engine");
+}
+
+void Engine::setupNativeToolbar()
+{
+    if (!m_window) {
+        LOG_ERROR_C("Cannot setup toolbar: window not initialized", "Engine");
+        return;
+    }
+
+    auto* toolbar = m_window->getToolbar();
+    if (!toolbar) {
+        LOG_ERROR_C("Failed to create toolbar", "Engine");
+        return;
+    }
+
+    // Add toolbar buttons
+    // Note: For actual icons, you would load them from resources
+    // For now, using nullptr for icons - buttons will show as text
+    
+    // File operations
+    toolbar->addButton(5001, "New", nullptr, [this]() {
+        LOG_INFO_C("New button clicked", "Engine");
+        // TODO: New world dialog
+    });
+    
+    toolbar->addButton(5002, "Open", nullptr, [this]() {
+        LOG_INFO_C("Open button clicked", "Engine");
+        // TODO: Open world dialog
+    });
+    
+    toolbar->addButton(5003, "Save", nullptr, [this]() {
+        LOG_INFO_C("Save button clicked", "Engine");
+        // TODO: Save current world
+    });
+    
+    toolbar->addSeparator();
+    
+    // Edit operations
+    toolbar->addButton(5004, "Undo", nullptr, [this]() {
+        LOG_INFO_C("Undo button clicked", "Engine");
+        // TODO: Implement undo
+    });
+    
+    toolbar->addButton(5005, "Redo", nullptr, [this]() {
+        LOG_INFO_C("Redo button clicked", "Engine");
+        // TODO: Implement redo
+    });
+    
+    toolbar->addSeparator();
+    
+    // View operations
+    toolbar->addButton(5006, "Camera", nullptr, [this]() {
+        LOG_INFO_C("Camera button clicked", "Engine");
+        // TODO: Reset camera
+    });
+    
+    toolbar->addButton(5007, "Fullscreen", nullptr, [this]() {
+        LOG_INFO_C("Fullscreen button clicked", "Engine");
+        // TODO: Toggle fullscreen
+    });
+
+    LOG_INFO_C("Native Win32 toolbar initialized", "Engine");
 }
 #endif
 

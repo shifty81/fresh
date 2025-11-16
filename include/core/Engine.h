@@ -96,6 +96,7 @@ private:
 #ifdef _WIN32
     // Native Win32 menu bar setup
     void setupNativeMenuBar();
+    void setupNativeToolbar();
 #endif
 
 private:

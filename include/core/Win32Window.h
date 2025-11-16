@@ -12,6 +12,7 @@ namespace fresh
 {
 
 class Win32MenuBar;
+class Win32Toolbar;
 
 /**
  * @brief Native Win32 window management class
@@ -168,6 +169,12 @@ public:
      */
     Win32MenuBar* getMenuBar();
 
+    /**
+     * @brief Get or create the native toolbar
+     * @return Pointer to Win32Toolbar instance
+     */
+    Win32Toolbar* getToolbar();
+
 private:
     static LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
@@ -194,8 +201,9 @@ private:
     MouseMoveCallback m_mouseMoveCallback;
     MouseButtonCallback m_mouseButtonCallback;
     
-    // Native menu bar
+    // Native UI components
     std::unique_ptr<Win32MenuBar> m_menuBar;
+    std::unique_ptr<Win32Toolbar> m_toolbar;
     
     static constexpr const wchar_t* WINDOW_CLASS_NAME = L"FreshVoxelEngineWindow";
 };
