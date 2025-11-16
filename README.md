@@ -19,7 +19,7 @@ A professional **Windows-exclusive** voxel game development platform built with 
 
 ### Professional Game Development Platform
 - **Unreal Engine-Like Editor** - Professional ImGui-based editor with comprehensive game development tools
-- **Windows-Native GUI** - Fully native Win32 windowing system (optional, replaces GLFW for true Windows-native experience)
+- **Windows-Native GUI** - Native Win32 windowing and input on Windows (uses Win32 APIs directly, not GLFW)
 - **Windows-Native Integration** - Full Windows 10/11 themes, native dialogs, jump lists, toast notifications, and taskbar features
 - **High DPI Support** - Per-monitor DPI awareness for crisp rendering on 4K/5K displays
 - **AVX2 Optimized** - SIMD instructions for 15-30% performance improvement on modern CPUs
