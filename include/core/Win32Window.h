@@ -5,10 +5,14 @@
 #include <cstdint>
 #include <string>
 #include <functional>
+#include <memory>
 #include <Windows.h>
 
 namespace fresh
 {
+
+class Win32MenuBar;
+class Win32Toolbar;
 
 /**
  * @brief Native Win32 window management class
@@ -159,6 +163,18 @@ public:
         m_mouseButtonCallback = callback;
     }
 
+    /**
+     * @brief Get or create the native menu bar
+     * @return Pointer to Win32MenuBar instance
+     */
+    Win32MenuBar* getMenuBar();
+
+    /**
+     * @brief Get or create the native toolbar
+     * @return Pointer to Win32Toolbar instance
+     */
+    Win32Toolbar* getToolbar();
+
 private:
     static LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
@@ -184,6 +200,10 @@ private:
     KeyCallback m_keyCallback;
     MouseMoveCallback m_mouseMoveCallback;
     MouseButtonCallback m_mouseButtonCallback;
+    
+    // Native UI components
+    std::unique_ptr<Win32MenuBar> m_menuBar;
+    std::unique_ptr<Win32Toolbar> m_toolbar;
     
     static constexpr const wchar_t* WINDOW_CLASS_NAME = L"FreshVoxelEngineWindow";
 };

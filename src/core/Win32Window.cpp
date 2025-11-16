@@ -2,6 +2,8 @@
 
 #include "core/Win32Window.h"
 #include "core/Logger.h"
+#include "ui/native/Win32MenuBar.h"
+#include "ui/native/Win32Toolbar.h"
 
 #include <windowsx.h>
 
@@ -218,6 +220,32 @@ void Win32Window::swapBuffers()
     }
 }
 
+Win32MenuBar* Win32Window::getMenuBar()
+{
+    if (!m_menuBar && m_hwnd) {
+        m_menuBar = std::make_unique<Win32MenuBar>();
+        if (!m_menuBar->create(m_hwnd)) {
+            LOG_ERROR_C("Failed to create menu bar", "Win32Window");
+            m_menuBar.reset();
+            return nullptr;
+        }
+    }
+    return m_menuBar.get();
+}
+
+Win32Toolbar* Win32Window::getToolbar()
+{
+    if (!m_toolbar && m_hwnd) {
+        m_toolbar = std::make_unique<Win32Toolbar>();
+        if (!m_toolbar->create(m_hwnd)) {
+            LOG_ERROR_C("Failed to create toolbar", "Win32Window");
+            m_toolbar.reset();
+            return nullptr;
+        }
+    }
+    return m_toolbar.get();
+}
+
 LRESULT CALLBACK Win32Window::WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
     // Let ImGui handle the message first if it's available
@@ -240,6 +268,19 @@ LRESULT CALLBACK Win32Window::WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LP
 
     if (window) {
         switch (uMsg) {
+        case WM_COMMAND: {
+            // Handle menu commands
+            int commandId = LOWORD(wParam);
+            if (window->m_menuBar && window->m_menuBar->handleCommand(commandId)) {
+                return 0;
+            }
+            // Handle toolbar commands
+            if (window->m_toolbar && window->m_toolbar->handleCommand(commandId)) {
+                return 0;
+            }
+            break;
+        }
+
         case WM_CLOSE:
             window->m_shouldClose = true;
             return 0;
