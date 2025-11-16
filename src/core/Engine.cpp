@@ -901,6 +901,11 @@ void Engine::update(float deltaTime)
         // Check if right mouse button is currently held (for Unreal-style camera control)
         bool rightMousePressed = m_inputManager->isMouseButtonPressed(MOUSE_BUTTON_RIGHT);
         
+        // Always update m_rightMouseHeldForCamera based on current RMB state
+        // This ensures the flag is properly cleared when button is released
+        bool wasHoldingForCamera = m_rightMouseHeldForCamera;
+        m_rightMouseHeldForCamera = rightMousePressed && !guiCapturesMouse;
+        
         // Determine if we should capture cursor based on RMB state
         // Only capture when RMB is held AND GUI doesn't want the mouse
         bool shouldCaptureCursor = false;
@@ -910,12 +915,9 @@ void Engine::update(float deltaTime)
             // 1. Right mouse button is held (Unreal-style free look)
             // 2. GUI is not capturing mouse (not hovering over UI elements)
             // 3. User hasn't explicitly toggled cursor with F key
-            if (!m_userToggledCursor && !guiCapturesMouse) {
-                shouldCaptureCursor = rightMousePressed;
-                
-                // Track if RMB is being used for camera control
-                m_rightMouseHeldForCamera = rightMousePressed;
-            } else if (m_userToggledCursor) {
+            if (!m_userToggledCursor) {
+                shouldCaptureCursor = m_rightMouseHeldForCamera;
+            } else {
                 // User explicitly toggled with F key - respect their choice
                 shouldCaptureCursor = actualCursorCaptured;
                 
@@ -928,6 +930,7 @@ void Engine::update(float deltaTime)
             // In game mode, always capture cursor (traditional FPS style)
             shouldCaptureCursor = true;
             m_userToggledCursor = false;
+            m_rightMouseHeldForCamera = false;
         }
         
         // Only call setCursorMode if the state actually changed (prevents stuttering)
@@ -944,6 +947,15 @@ void Engine::update(float deltaTime)
         } else {
             m_lastCursorCaptured = actualCursorCaptured;
         }
+        
+        // Log when RMB state changes (for debugging free look issues)
+        if (wasHoldingForCamera != m_rightMouseHeldForCamera) {
+            if (m_rightMouseHeldForCamera) {
+                LOG_INFO_C("Right mouse button pressed - free look active", "Engine");
+            } else {
+                LOG_INFO_C("Right mouse button released - free look inactive", "Engine");
+            }
+        }
     }
 
     // In editor-first mode, always allow player input unless GUI captures it
@@ -955,8 +967,8 @@ void Engine::update(float deltaTime)
 
         // UNREAL-STYLE: Handle mouse movement for camera ONLY when RMB is held
         // This prevents camera from moving when user is trying to use menus
-        bool rightMousePressed = m_inputManager->isMouseButtonPressed(MOUSE_BUTTON_RIGHT);
-        if (!guiCapturesMouse && (rightMousePressed || m_rightMouseHeldForCamera)) {
+        // m_rightMouseHeldForCamera is already updated above based on RMB state and GUI capture
+        if (m_rightMouseHeldForCamera) {
             glm::vec2 mouseDelta = m_inputManager->getMouseDelta();
             if (glm::length(mouseDelta) > 0.0f) {
                 m_player->handleMouseMovement(mouseDelta.x, mouseDelta.y);
