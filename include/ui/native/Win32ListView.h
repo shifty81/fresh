@@ -188,7 +188,7 @@ private:
     ActivationCallback m_activationCallback;
 
     std::wstring toWideString(const std::string& str);
-    std::string toUtf8String(const std::wstring& wstr);
+    std::string toUtf8String(const std::wstring& wstr) const;
 };
 
 } // namespace fresh

@@ -11,7 +11,7 @@ namespace fresh
 class LightingSystem;
 class PostProcessing;
 class IRenderContext;
-class GraphicsAPI;
+enum class GraphicsAPI;
 
 #ifdef _WIN32
 class Win32InputManager;

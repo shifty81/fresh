@@ -89,7 +89,7 @@ protected:
      * Override to perform custom drawing
      * @param hdc Device context for drawing
      */
-    virtual void onPaint(HDC hdc) {}
+    virtual void onPaint(HDC hdc) { (void)hdc; }
 
     /**
      * @brief Called when panel is resized
@@ -97,7 +97,7 @@ protected:
      * @param width New width
      * @param height New height
      */
-    virtual void onResize(int width, int height) {}
+    virtual void onResize(int width, int height) { (void)width; (void)height; }
 
     /**
      * @brief Called when panel is destroyed
