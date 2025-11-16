@@ -125,6 +125,10 @@ void Win32Panel::setSize(int width, int height)
 bool Win32Panel::handleMessage(UINT msg, WPARAM wParam, LPARAM lParam, LRESULT& result)
 {
     // Default implementation - derived classes can override
+    (void)msg;
+    (void)wParam;
+    (void)lParam;
+    (void)result;
     return false;
 }
 

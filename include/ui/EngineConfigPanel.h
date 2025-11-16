@@ -11,7 +11,7 @@ namespace fresh
 class LightingSystem;
 class PostProcessing;
 class IRenderContext;
-class GraphicsAPI;
+enum class GraphicsAPI;
 
 #ifdef _WIN32
 class Win32InputManager;
@@ -37,10 +37,10 @@ public:
 
     /**
      * @brief Initialize configuration panel
-     * @param renderContext Render context for ImGui
+     * @param ctx Render context for ImGui
      * @return true if successful
      */
-    bool initialize(IRenderContext* renderContext);
+    bool initialize(IRenderContext* ctx);
 
     /**
      * @brief Shutdown and cleanup

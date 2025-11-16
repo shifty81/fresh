@@ -31,7 +31,7 @@ std::wstring Win32ListView::toWideString(const std::string& str)
     return wstr;
 }
 
-std::string Win32ListView::toUtf8String(const std::wstring& wstr)
+std::string Win32ListView::toUtf8String(const std::wstring& wstr) const
 {
     if (wstr.empty()) return std::string();
     
@@ -57,7 +57,7 @@ bool Win32ListView::create(HWND parent, int x, int y, int width, int height)
     m_parent = parent;
 
     // Create list view control
-    m_hwnd = CreateWindowEx(
+    m_hwnd = CreateWindowExW(
         WS_EX_CLIENTEDGE,
         WC_LISTVIEW,
         L"",

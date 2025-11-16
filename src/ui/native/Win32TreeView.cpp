@@ -31,7 +31,7 @@ std::wstring Win32TreeView::toWideString(const std::string& str)
     return wstr;
 }
 
-std::string Win32TreeView::toUtf8String(const std::wstring& wstr)
+std::string Win32TreeView::toUtf8String(const std::wstring& wstr) const
 {
     if (wstr.empty()) return std::string();
     
@@ -57,7 +57,7 @@ bool Win32TreeView::create(HWND parent, int x, int y, int width, int height)
     m_parent = parent;
 
     // Create tree view control
-    m_hwnd = CreateWindowEx(
+    m_hwnd = CreateWindowExW(
         WS_EX_CLIENTEDGE,
         WC_TREEVIEW,
         L"",

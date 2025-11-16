@@ -101,12 +101,20 @@ bool Win32Toolbar::addButton(int id, const std::string& text, HICON icon, Button
     button.fsState = TBSTATE_ENABLED;
     button.fsStyle = BTNS_BUTTON;
     button.dwData = 0;
-    button.iString = (INT_PTR)toWideString(text).c_str();
+    button.iString = 0; // Will set later with TB_SETBUTTONINFO
 
     if (!SendMessage(m_hwnd, TB_ADDBUTTONS, 1, (LPARAM)&button)) {
         LOG_ERROR_C("Failed to add button: " + text, "Win32Toolbar");
         return false;
     }
+
+    // Set button text using TB_SETBUTTONINFO to avoid string lifetime issues
+    std::wstring wtext = toWideString(text);
+    TBBUTTONINFOW btnInfo = {};
+    btnInfo.cbSize = sizeof(TBBUTTONINFOW);
+    btnInfo.dwMask = TBIF_TEXT;
+    btnInfo.pszText = const_cast<LPWSTR>(wtext.c_str());
+    SendMessage(m_hwnd, TB_SETBUTTONINFOW, id, (LPARAM)&btnInfo);
 
     // Store button info
     ButtonInfo info;
