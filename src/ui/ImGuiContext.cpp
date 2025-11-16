@@ -505,11 +505,23 @@ bool ImGuiContext::initializeWin32(Win32Window* window, IRenderContext* renderCo
         return false;
     }
 
-    // Initialize DirectX graphics backend
+    // Initialize graphics backend
     GraphicsAPI api = renderContext->getAPI();
     bool backendInitialized = false;
 
     switch (api) {
+    #if defined(FRESH_OPENGL_SUPPORT) && defined(FRESH_GLEW_AVAILABLE)
+    case GraphicsAPI::OpenGL:
+        // ImGui expects GLSL version string
+        backendInitialized = ImGui_ImplOpenGL3_Init("#version 450");
+        if (backendInitialized) {
+            LOG_INFO_C("ImGui OpenGL backend initialized", "ImGuiContext");
+        } else {
+            LOG_ERROR_C("Failed to initialize ImGui OpenGL backend", "ImGuiContext");
+        }
+        break;
+    #endif
+
     #ifdef FRESH_DIRECTX_SUPPORT
     case GraphicsAPI::DirectX11: {
         DirectX11RenderContext* dx11Context =
