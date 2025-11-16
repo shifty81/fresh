@@ -1536,65 +1536,291 @@ void Engine::setupNativeMenuBar()
         return;
     }
 
-    // Create File menu
+    // ========== FILE MENU (Unreal-style) ==========
     int fileMenu = menuBar->addMenu("File");
-    menuBar->addMenuItem(fileMenu, "New World...", [this]() {
+    menuBar->addMenuItem(fileMenu, "New World...\tCtrl+N", [this]() {
         LOG_INFO_C("New World menu item clicked", "Engine");
         // TODO: Show new world dialog
     });
-    menuBar->addMenuItem(fileMenu, "Open World...", [this]() {
+    menuBar->addMenuItem(fileMenu, "Open World...\tCtrl+O", [this]() {
         LOG_INFO_C("Open World menu item clicked", "Engine");
         // TODO: Show open world dialog
     });
-    menuBar->addMenuItem(fileMenu, "Save World", [this]() {
-        LOG_INFO_C("Save World menu item clicked", "Engine");
+    menuBar->addSeparator(fileMenu);
+    menuBar->addMenuItem(fileMenu, "Save\tCtrl+S", [this]() {
+        LOG_INFO_C("Save menu item clicked", "Engine");
         // TODO: Save current world
     });
+    menuBar->addMenuItem(fileMenu, "Save As...\tCtrl+Shift+S", [this]() {
+        LOG_INFO_C("Save As menu item clicked", "Engine");
+        // TODO: Show save as dialog
+    });
+    menuBar->addMenuItem(fileMenu, "Save All\tCtrl+Shift+A", [this]() {
+        LOG_INFO_C("Save All menu item clicked", "Engine");
+        // TODO: Save all open assets
+    });
     menuBar->addSeparator(fileMenu);
-    menuBar->addMenuItem(fileMenu, "Exit", [this]() {
+    menuBar->addMenuItem(fileMenu, "Import...\tCtrl+I", [this]() {
+        LOG_INFO_C("Import menu item clicked", "Engine");
+        // TODO: Import assets
+    });
+    menuBar->addMenuItem(fileMenu, "Export...\tCtrl+E", [this]() {
+        LOG_INFO_C("Export menu item clicked", "Engine");
+        // TODO: Export world/assets
+    });
+    menuBar->addSeparator(fileMenu);
+    menuBar->addMenuItem(fileMenu, "Project Settings...", [this]() {
+        LOG_INFO_C("Project Settings menu item clicked", "Engine");
+        // TODO: Show project settings
+    });
+    menuBar->addSeparator(fileMenu);
+    menuBar->addMenuItem(fileMenu, "Exit\tAlt+F4", [this]() {
         LOG_INFO_C("Exit menu item clicked", "Engine");
         m_running = false;
     });
 
-    // Create Edit menu
+    // ========== EDIT MENU (Unreal-style) ==========
     int editMenu = menuBar->addMenu("Edit");
-    menuBar->addMenuItem(editMenu, "Undo", [this]() {
+    menuBar->addMenuItem(editMenu, "Undo\tCtrl+Z", [this]() {
         LOG_INFO_C("Undo menu item clicked", "Engine");
         // TODO: Implement undo
     });
-    menuBar->addMenuItem(editMenu, "Redo", [this]() {
+    menuBar->addMenuItem(editMenu, "Redo\tCtrl+Y", [this]() {
         LOG_INFO_C("Redo menu item clicked", "Engine");
         // TODO: Implement redo
     });
     menuBar->addSeparator(editMenu);
-    menuBar->addMenuItem(editMenu, "Settings...", [this]() {
-        LOG_INFO_C("Settings menu item clicked", "Engine");
-        // TODO: Show settings dialog
+    menuBar->addMenuItem(editMenu, "Cut\tCtrl+X", [this]() {
+        LOG_INFO_C("Cut menu item clicked", "Engine");
+        // TODO: Cut selection
+    });
+    menuBar->addMenuItem(editMenu, "Copy\tCtrl+C", [this]() {
+        LOG_INFO_C("Copy menu item clicked", "Engine");
+        // TODO: Copy selection
+    });
+    menuBar->addMenuItem(editMenu, "Paste\tCtrl+V", [this]() {
+        LOG_INFO_C("Paste menu item clicked", "Engine");
+        // TODO: Paste
+    });
+    menuBar->addMenuItem(editMenu, "Delete\tDel", [this]() {
+        LOG_INFO_C("Delete menu item clicked", "Engine");
+        // TODO: Delete selection
+    });
+    menuBar->addSeparator(editMenu);
+    menuBar->addMenuItem(editMenu, "Select All\tCtrl+A", [this]() {
+        LOG_INFO_C("Select All menu item clicked", "Engine");
+        // TODO: Select all
+    });
+    menuBar->addMenuItem(editMenu, "Deselect All\tCtrl+D", [this]() {
+        LOG_INFO_C("Deselect All menu item clicked", "Engine");
+        // TODO: Deselect all
+    });
+    menuBar->addSeparator(editMenu);
+    menuBar->addMenuItem(editMenu, "Find...\tCtrl+F", [this]() {
+        LOG_INFO_C("Find menu item clicked", "Engine");
+        // TODO: Show find dialog
+    });
+    menuBar->addSeparator(editMenu);
+    menuBar->addMenuItem(editMenu, "Editor Preferences...", [this]() {
+        LOG_INFO_C("Editor Preferences menu item clicked", "Engine");
+        // TODO: Show editor preferences
     });
 
-    // Create View menu
+    // ========== VIEW MENU (Unreal-style) ==========
     int viewMenu = menuBar->addMenu("View");
-    menuBar->addMenuItem(viewMenu, "Toggle Fullscreen", [this]() {
-        LOG_INFO_C("Toggle Fullscreen menu item clicked", "Engine");
-        // TODO: Toggle fullscreen
+    menuBar->addMenuItem(viewMenu, "Perspective\t1", [this]() {
+        LOG_INFO_C("Perspective view selected", "Engine");
+        // TODO: Switch to perspective view
     });
-    menuBar->addMenuItem(viewMenu, "Reset Camera", [this]() {
+    menuBar->addMenuItem(viewMenu, "Top\t2", [this]() {
+        LOG_INFO_C("Top view selected", "Engine");
+        // TODO: Switch to top view
+    });
+    menuBar->addMenuItem(viewMenu, "Front\t3", [this]() {
+        LOG_INFO_C("Front view selected", "Engine");
+        // TODO: Switch to front view
+    });
+    menuBar->addMenuItem(viewMenu, "Side\t4", [this]() {
+        LOG_INFO_C("Side view selected", "Engine");
+        // TODO: Switch to side view
+    });
+    menuBar->addMenuItem(viewMenu, "Reset Camera\tHome", [this]() {
         LOG_INFO_C("Reset Camera menu item clicked", "Engine");
         // TODO: Reset camera position
     });
+    menuBar->addSeparator(viewMenu);
+    menuBar->addMenuItem(viewMenu, "Content Browser\tCtrl+B", [this]() {
+        LOG_INFO_C("Content Browser toggled", "Engine");
+        // TODO: Toggle content browser panel
+    });
+    menuBar->addMenuItem(viewMenu, "Scene Hierarchy\tCtrl+H", [this]() {
+        LOG_INFO_C("Scene Hierarchy toggled", "Engine");
+        // TODO: Toggle scene hierarchy panel
+    });
+    menuBar->addMenuItem(viewMenu, "Inspector\tCtrl+I", [this]() {
+        LOG_INFO_C("Inspector toggled", "Engine");
+        // TODO: Toggle inspector panel
+    });
+    menuBar->addMenuItem(viewMenu, "Console\t~", [this]() {
+        LOG_INFO_C("Console toggled", "Engine");
+        // TODO: Toggle console panel
+    });
+    menuBar->addSeparator(viewMenu);
+    menuBar->addMenuItem(viewMenu, "Toggle Fullscreen\tF11", [this]() {
+        LOG_INFO_C("Toggle Fullscreen menu item clicked", "Engine");
+        // TODO: Toggle fullscreen
+    });
+    menuBar->addMenuItem(viewMenu, "Toggle UI\tU", [this]() {
+        LOG_INFO_C("Toggle UI menu item clicked", "Engine");
+        // TODO: Toggle all UI visibility
+    });
+    menuBar->addMenuItem(viewMenu, "Show Stats\tCtrl+Shift+S", [this]() {
+        LOG_INFO_C("Show Stats toggled", "Engine");
+        // TODO: Toggle stats overlay
+    });
 
-    // Create Help menu
+    // ========== WORLD MENU (Unreal-style) ==========
+    int worldMenu = menuBar->addMenu("World");
+    menuBar->addMenuItem(worldMenu, "Play\tAlt+P", [this]() {
+        LOG_INFO_C("Play mode started", "Engine");
+        // TODO: Enter play mode
+    });
+    menuBar->addMenuItem(worldMenu, "Pause\tAlt+Pause", [this]() {
+        LOG_INFO_C("Play mode paused", "Engine");
+        // TODO: Pause game
+    });
+    menuBar->addMenuItem(worldMenu, "Stop\tEsc", [this]() {
+        LOG_INFO_C("Play mode stopped", "Engine");
+        // TODO: Stop play mode
+    });
+    menuBar->addSeparator(worldMenu);
+    menuBar->addMenuItem(worldMenu, "Generate Terrain...", [this]() {
+        LOG_INFO_C("Generate Terrain selected", "Engine");
+        // TODO: Show terrain generation dialog
+    });
+    menuBar->addMenuItem(worldMenu, "Clear World", [this]() {
+        LOG_INFO_C("Clear World selected", "Engine");
+        // TODO: Clear world confirmation
+    });
+    menuBar->addMenuItem(worldMenu, "Regenerate Chunks", [this]() {
+        LOG_INFO_C("Regenerate Chunks selected", "Engine");
+        // TODO: Regenerate visible chunks
+    });
+    menuBar->addSeparator(worldMenu);
+    menuBar->addMenuItem(worldMenu, "World Settings...", [this]() {
+        LOG_INFO_C("World Settings selected", "Engine");
+        // TODO: Show world settings dialog
+    });
+
+    // ========== TOOLS MENU (Unreal-style) ==========
+    int toolsMenu = menuBar->addMenu("Tools");
+    menuBar->addMenuItem(toolsMenu, "Brush\tB", [this]() {
+        LOG_INFO_C("Brush tool selected", "Engine");
+        // TODO: Activate brush tool
+    });
+    menuBar->addMenuItem(toolsMenu, "Paint\tP", [this]() {
+        LOG_INFO_C("Paint tool selected", "Engine");
+        // TODO: Activate paint tool
+    });
+    menuBar->addMenuItem(toolsMenu, "Sculpt\tS", [this]() {
+        LOG_INFO_C("Sculpt tool selected", "Engine");
+        // TODO: Activate sculpt tool
+    });
+    menuBar->addMenuItem(toolsMenu, "Smooth\tM", [this]() {
+        LOG_INFO_C("Smooth tool selected", "Engine");
+        // TODO: Activate smooth tool
+    });
+    menuBar->addSeparator(toolsMenu);
+    menuBar->addMenuItem(toolsMenu, "Select\tV", [this]() {
+        LOG_INFO_C("Select tool activated", "Engine");
+        // TODO: Activate selection tool
+    });
+    menuBar->addMenuItem(toolsMenu, "Move\tW", [this]() {
+        LOG_INFO_C("Move tool activated", "Engine");
+        // TODO: Activate move tool
+    });
+    menuBar->addMenuItem(toolsMenu, "Rotate\tE", [this]() {
+        LOG_INFO_C("Rotate tool activated", "Engine");
+        // TODO: Activate rotate tool
+    });
+    menuBar->addMenuItem(toolsMenu, "Scale\tR", [this]() {
+        LOG_INFO_C("Scale tool activated", "Engine");
+        // TODO: Activate scale tool
+    });
+    menuBar->addSeparator(toolsMenu);
+    menuBar->addMenuItem(toolsMenu, "Asset Manager...", [this]() {
+        LOG_INFO_C("Asset Manager opened", "Engine");
+        // TODO: Show asset manager
+    });
+    menuBar->addMenuItem(toolsMenu, "Material Editor...", [this]() {
+        LOG_INFO_C("Material Editor opened", "Engine");
+        // TODO: Show material editor
+    });
+
+    // ========== WINDOW MENU (Unreal-style) ==========
+    int windowMenu = menuBar->addMenu("Window");
+    menuBar->addMenuItem(windowMenu, "Content Browser\tCtrl+B", [this]() {
+        LOG_INFO_C("Content Browser toggled", "Engine");
+        // TODO: Toggle content browser
+    });
+    menuBar->addMenuItem(windowMenu, "Scene Hierarchy\tCtrl+H", [this]() {
+        LOG_INFO_C("Scene Hierarchy toggled", "Engine");
+        // TODO: Toggle scene hierarchy
+    });
+    menuBar->addMenuItem(windowMenu, "Inspector\tCtrl+I", [this]() {
+        LOG_INFO_C("Inspector toggled", "Engine");
+        // TODO: Toggle inspector
+    });
+    menuBar->addMenuItem(windowMenu, "Console\t~", [this]() {
+        LOG_INFO_C("Console toggled", "Engine");
+        // TODO: Toggle console
+    });
+    menuBar->addSeparator(windowMenu);
+    menuBar->addMenuItem(windowMenu, "Reset Layout", [this]() {
+        LOG_INFO_C("Layout reset", "Engine");
+        // TODO: Reset window layout
+    });
+    menuBar->addSeparator(windowMenu);
+    menuBar->addMenuItem(windowMenu, "Preferences...", [this]() {
+        LOG_INFO_C("Preferences opened", "Engine");
+        // TODO: Show preferences dialog
+    });
+
+    // ========== HELP MENU (Unreal-style) ==========
     int helpMenu = menuBar->addMenu("Help");
-    menuBar->addMenuItem(helpMenu, "Documentation", [this]() {
+    menuBar->addMenuItem(helpMenu, "Documentation\tF1", [this]() {
         LOG_INFO_C("Documentation menu item clicked", "Engine");
         // TODO: Open documentation
     });
-    menuBar->addMenuItem(helpMenu, "About", [this]() {
+    menuBar->addMenuItem(helpMenu, "Keyboard Shortcuts\tCtrl+?", [this]() {
+        LOG_INFO_C("Keyboard Shortcuts displayed", "Engine");
+        // TODO: Show shortcuts reference
+    });
+    menuBar->addSeparator(helpMenu);
+    menuBar->addMenuItem(helpMenu, "Report Bug...", [this]() {
+        LOG_INFO_C("Report Bug selected", "Engine");
+        // TODO: Open bug report
+    });
+    menuBar->addMenuItem(helpMenu, "Feature Request...", [this]() {
+        LOG_INFO_C("Feature Request selected", "Engine");
+        // TODO: Open feature request
+    });
+    menuBar->addSeparator(helpMenu);
+    menuBar->addMenuItem(helpMenu, "Check for Updates...", [this]() {
+        LOG_INFO_C("Check for Updates selected", "Engine");
+        // TODO: Check for updates
+    });
+    menuBar->addMenuItem(helpMenu, "Release Notes", [this]() {
+        LOG_INFO_C("Release Notes selected", "Engine");
+        // TODO: Show release notes
+    });
+    menuBar->addSeparator(helpMenu);
+    menuBar->addMenuItem(helpMenu, "About Fresh Voxel Engine", [this]() {
         LOG_INFO_C("About menu item clicked", "Engine");
         // TODO: Show about dialog
     });
 
-    LOG_INFO_C("Native Win32 menu bar initialized", "Engine");
+    LOG_INFO_C("Unreal-style native Win32 menu bar initialized with comprehensive menus", "Engine");
 }
 
 void Engine::setupNativeToolbar()
@@ -1610,11 +1836,11 @@ void Engine::setupNativeToolbar()
         return;
     }
 
-    // Add toolbar buttons
+    // Add toolbar buttons in Unreal-style grouping
     // Note: For actual icons, you would load them from resources
     // For now, using nullptr for icons - buttons will show as text
     
-    // File operations
+    // ========== FILE OPERATIONS GROUP ==========
     toolbar->addButton(5001, "New", nullptr, [this]() {
         LOG_INFO_C("New button clicked", "Engine");
         // TODO: New world dialog
@@ -1632,7 +1858,7 @@ void Engine::setupNativeToolbar()
     
     toolbar->addSeparator();
     
-    // Edit operations
+    // ========== EDIT OPERATIONS GROUP ==========
     toolbar->addButton(5004, "Undo", nullptr, [this]() {
         LOG_INFO_C("Undo button clicked", "Engine");
         // TODO: Implement undo
@@ -1645,7 +1871,35 @@ void Engine::setupNativeToolbar()
     
     toolbar->addSeparator();
     
-    // View operations
+    // ========== PLAY CONTROLS GROUP (Unreal-style) ==========
+    toolbar->addButton(5010, "Play", nullptr, [this]() {
+        LOG_INFO_C("Play button clicked - entering play mode", "Engine");
+        // TODO: Enter play mode
+    });
+    
+    toolbar->addButton(5011, "Pause", nullptr, [this]() {
+        LOG_INFO_C("Pause button clicked", "Engine");
+        // TODO: Pause game
+    });
+    
+    toolbar->addButton(5012, "Stop", nullptr, [this]() {
+        LOG_INFO_C("Stop button clicked - exiting play mode", "Engine");
+        // TODO: Stop play mode
+    });
+    
+    toolbar->addSeparator();
+    
+    // ========== VIEW CONTROLS GROUP ==========
+    toolbar->addButton(5020, "Perspective", nullptr, [this]() {
+        LOG_INFO_C("Perspective view selected", "Engine");
+        // TODO: Switch to perspective view
+    });
+    
+    toolbar->addButton(5021, "Top", nullptr, [this]() {
+        LOG_INFO_C("Top view selected", "Engine");
+        // TODO: Switch to top view
+    });
+    
     toolbar->addButton(5006, "Camera", nullptr, [this]() {
         LOG_INFO_C("Camera button clicked", "Engine");
         // TODO: Reset camera
@@ -1655,8 +1909,54 @@ void Engine::setupNativeToolbar()
         LOG_INFO_C("Fullscreen button clicked", "Engine");
         // TODO: Toggle fullscreen
     });
+    
+    toolbar->addSeparator();
+    
+    // ========== TRANSFORMATION TOOLS GROUP (Unreal-style) ==========
+    toolbar->addButton(5030, "Select", nullptr, [this]() {
+        LOG_INFO_C("Select tool activated", "Engine");
+        // TODO: Activate selection tool
+    });
+    
+    toolbar->addButton(5031, "Move", nullptr, [this]() {
+        LOG_INFO_C("Move tool activated", "Engine");
+        // TODO: Activate move tool
+    });
+    
+    toolbar->addButton(5032, "Rotate", nullptr, [this]() {
+        LOG_INFO_C("Rotate tool activated", "Engine");
+        // TODO: Activate rotate tool
+    });
+    
+    toolbar->addButton(5033, "Scale", nullptr, [this]() {
+        LOG_INFO_C("Scale tool activated", "Engine");
+        // TODO: Activate scale tool
+    });
+    
+    toolbar->addSeparator();
+    
+    // ========== VOXEL TOOLS GROUP ==========
+    toolbar->addButton(5040, "Brush", nullptr, [this]() {
+        LOG_INFO_C("Brush tool activated", "Engine");
+        // TODO: Activate brush tool
+    });
+    
+    toolbar->addButton(5041, "Paint", nullptr, [this]() {
+        LOG_INFO_C("Paint tool activated", "Engine");
+        // TODO: Activate paint tool
+    });
+    
+    toolbar->addButton(5042, "Sculpt", nullptr, [this]() {
+        LOG_INFO_C("Sculpt tool activated", "Engine");
+        // TODO: Activate sculpt tool
+    });
+    
+    toolbar->addButton(5043, "Smooth", nullptr, [this]() {
+        LOG_INFO_C("Smooth tool activated", "Engine");
+        // TODO: Activate smooth tool
+    });
 
-    LOG_INFO_C("Native Win32 toolbar initialized", "Engine");
+    LOG_INFO_C("Unreal-style native Win32 toolbar initialized with comprehensive tools", "Engine");
 }
 #endif
 
