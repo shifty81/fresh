@@ -210,6 +210,11 @@ bool Engine::initialize()
     std::cout << "Window created" << std::endl;
     LOG_INFO_C("Window created", "Engine");
 
+#ifdef _WIN32
+    // Set up native Win32 menu bar
+    setupNativeMenuBar();
+#endif
+
     // Initialize renderer with the window
     if (!m_renderer->initialize(m_window.get())) {
         std::cerr << "Failed to initialize renderer" << std::endl;
@@ -1461,5 +1466,81 @@ void Engine::renderCrosshair()
 }
 
 #endif // FRESH_OPENGL_SUPPORT && FRESH_GLEW_AVAILABLE
+
+#ifdef _WIN32
+void Engine::setupNativeMenuBar()
+{
+    if (!m_window) {
+        LOG_ERROR_C("Cannot setup menu bar: window not initialized", "Engine");
+        return;
+    }
+
+    auto* menuBar = m_window->getMenuBar();
+    if (!menuBar) {
+        LOG_ERROR_C("Failed to create menu bar", "Engine");
+        return;
+    }
+
+    // Create File menu
+    int fileMenu = menuBar->addMenu("File");
+    menuBar->addMenuItem(fileMenu, "New World...", [this]() {
+        LOG_INFO_C("New World menu item clicked", "Engine");
+        // TODO: Show new world dialog
+    });
+    menuBar->addMenuItem(fileMenu, "Open World...", [this]() {
+        LOG_INFO_C("Open World menu item clicked", "Engine");
+        // TODO: Show open world dialog
+    });
+    menuBar->addMenuItem(fileMenu, "Save World", [this]() {
+        LOG_INFO_C("Save World menu item clicked", "Engine");
+        // TODO: Save current world
+    });
+    menuBar->addSeparator(fileMenu);
+    menuBar->addMenuItem(fileMenu, "Exit", [this]() {
+        LOG_INFO_C("Exit menu item clicked", "Engine");
+        m_running = false;
+    });
+
+    // Create Edit menu
+    int editMenu = menuBar->addMenu("Edit");
+    menuBar->addMenuItem(editMenu, "Undo", [this]() {
+        LOG_INFO_C("Undo menu item clicked", "Engine");
+        // TODO: Implement undo
+    });
+    menuBar->addMenuItem(editMenu, "Redo", [this]() {
+        LOG_INFO_C("Redo menu item clicked", "Engine");
+        // TODO: Implement redo
+    });
+    menuBar->addSeparator(editMenu);
+    menuBar->addMenuItem(editMenu, "Settings...", [this]() {
+        LOG_INFO_C("Settings menu item clicked", "Engine");
+        // TODO: Show settings dialog
+    });
+
+    // Create View menu
+    int viewMenu = menuBar->addMenu("View");
+    menuBar->addMenuItem(viewMenu, "Toggle Fullscreen", [this]() {
+        LOG_INFO_C("Toggle Fullscreen menu item clicked", "Engine");
+        // TODO: Toggle fullscreen
+    });
+    menuBar->addMenuItem(viewMenu, "Reset Camera", [this]() {
+        LOG_INFO_C("Reset Camera menu item clicked", "Engine");
+        // TODO: Reset camera position
+    });
+
+    // Create Help menu
+    int helpMenu = menuBar->addMenu("Help");
+    menuBar->addMenuItem(helpMenu, "Documentation", [this]() {
+        LOG_INFO_C("Documentation menu item clicked", "Engine");
+        // TODO: Open documentation
+    });
+    menuBar->addMenuItem(helpMenu, "About", [this]() {
+        LOG_INFO_C("About menu item clicked", "Engine");
+        // TODO: Show about dialog
+    });
+
+    LOG_INFO_C("Native Win32 menu bar initialized", "Engine");
+}
+#endif
 
 } // namespace fresh

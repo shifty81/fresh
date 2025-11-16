@@ -93,6 +93,11 @@ private:
     GLuint createShaderProgram(const std::string& vertPath, const std::string& fragPath);
 #endif
 
+#ifdef _WIN32
+    // Native Win32 menu bar setup
+    void setupNativeMenuBar();
+#endif
+
 private:
     bool m_running;
     bool m_inGame;

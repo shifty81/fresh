@@ -2,6 +2,7 @@
 
 #include "core/Win32Window.h"
 #include "core/Logger.h"
+#include "ui/native/Win32MenuBar.h"
 
 #include <windowsx.h>
 
@@ -218,6 +219,19 @@ void Win32Window::swapBuffers()
     }
 }
 
+Win32MenuBar* Win32Window::getMenuBar()
+{
+    if (!m_menuBar && m_hwnd) {
+        m_menuBar = std::make_unique<Win32MenuBar>();
+        if (!m_menuBar->create(m_hwnd)) {
+            LOG_ERROR_C("Failed to create menu bar", "Win32Window");
+            m_menuBar.reset();
+            return nullptr;
+        }
+    }
+    return m_menuBar.get();
+}
+
 LRESULT CALLBACK Win32Window::WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
     // Let ImGui handle the message first if it's available
@@ -240,6 +254,15 @@ LRESULT CALLBACK Win32Window::WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LP
 
     if (window) {
         switch (uMsg) {
+        case WM_COMMAND: {
+            // Handle menu commands
+            int commandId = LOWORD(wParam);
+            if (window->m_menuBar && window->m_menuBar->handleCommand(commandId)) {
+                return 0;
+            }
+            break;
+        }
+
         case WM_CLOSE:
             window->m_shouldClose = true;
             return 0;
