@@ -320,7 +320,12 @@ void OpenGLRenderContext::endFrame()
 {
     // Swap the front and back buffers to display the rendered frame
     if (window) {
-        window->swapBuffers();
+#ifdef _WIN32
+        auto* w = static_cast<Win32Window*>(window);
+#else
+        auto* w = static_cast<Window*>(window);
+#endif
+        w->swapBuffers();
     }
     checkGLErrors("End frame");
 }

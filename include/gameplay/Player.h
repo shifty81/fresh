@@ -3,11 +3,17 @@
 
 #include "Camera.h"
 
+// Include the appropriate input manager header for the template implementation
+#ifdef _WIN32
+#include "input/Win32InputManager.h"
+#else
+#include "input/InputManager.h"
+#endif
+
 namespace fresh
 {
 
 class VoxelWorld;
-class InputManager;
 
 /**
  * @brief Player controller with FPS movement and physics
@@ -31,7 +37,8 @@ public:
      * @param input Input manager to read controls from
      * @param deltaTime Time since last frame
      */
-    void handleInput(const InputManager& input, float deltaTime);
+    template<typename InputManagerT>
+    void handleInput(const InputManagerT& input, float deltaTime);
 
     /**
      * @brief Process mouse movement for camera control
@@ -161,5 +168,108 @@ private:
     bool isCrouching = false;
     bool freeFlightMode = true; // New: Enable free-flying camera by default
 };
+
+// Template implementation must be in header
+template<typename InputManagerT>
+void Player::handleInput(const InputManagerT& input, float deltaTime)
+{
+    if (!world)
+        return;
+
+    // Free flight mode: 6DOF movement
+    if (freeFlightMode) {
+        // Get camera direction vectors (use full 3D vectors for free flight)
+        glm::vec3 forward = camera.getFront();
+        glm::vec3 right = camera.getRight();
+        glm::vec3 up = camera.getUp();
+
+        // Calculate movement direction
+        glm::vec3 moveDirection{0.0f};
+
+        if (input.isActionActive(InputAction::MoveForward)) {
+            moveDirection += forward;
+        }
+        if (input.isActionActive(InputAction::MoveBackward)) {
+            moveDirection -= forward;
+        }
+        if (input.isActionActive(InputAction::MoveRight)) {
+            moveDirection += right;
+        }
+        if (input.isActionActive(InputAction::MoveLeft)) {
+            moveDirection -= right;
+        }
+        
+        // Space bar for upward movement in free flight
+        if (input.isActionActive(InputAction::Jump)) {
+            moveDirection += up;
+        }
+        // Crouch for downward movement in free flight
+        if (input.isActionActive(InputAction::Crouch)) {
+            moveDirection -= up;
+        }
+
+        // Normalize if moving
+        if (glm::length(moveDirection) > 0.0f) {
+            moveDirection = glm::normalize(moveDirection);
+        }
+
+        // Determine speed
+        isSprinting = input.isActionActive(InputAction::Sprint);
+        float speed = isSprinting ? sprintSpeed : walkSpeed;
+
+        // Apply movement directly to velocity
+        velocity = moveDirection * speed;
+        
+        return;
+    }
+
+    // Normal play mode: ground-based movement with physics
+    // Get camera direction vectors (ignore Y for horizontal movement)
+    glm::vec3 forward = glm::normalize(glm::vec3(camera.getFront().x, 0.0f, camera.getFront().z));
+    glm::vec3 right = glm::normalize(glm::vec3(camera.getRight().x, 0.0f, camera.getRight().z));
+
+    // Calculate movement direction
+    glm::vec3 moveDirection{0.0f};
+
+    if (input.isActionActive(InputAction::MoveForward)) {
+        moveDirection += forward;
+    }
+    if (input.isActionActive(InputAction::MoveBackward)) {
+        moveDirection -= forward;
+    }
+    if (input.isActionActive(InputAction::MoveRight)) {
+        moveDirection += right;
+    }
+    if (input.isActionActive(InputAction::MoveLeft)) {
+        moveDirection -= right;
+    }
+
+    // Normalize if moving diagonally
+    if (glm::length(moveDirection) > 0.0f) {
+        moveDirection = glm::normalize(moveDirection);
+    }
+
+    // Determine speed
+    isSprinting = input.isActionActive(InputAction::Sprint) && !isCrouching;
+    isCrouching = input.isActionActive(InputAction::Crouch);
+
+    float speed = walkSpeed;
+    if (isSprinting) {
+        speed = sprintSpeed;
+    } else if (isCrouching) {
+        speed = crouchSpeed;
+    }
+
+    // Apply movement
+    if (glm::length(moveDirection) > 0.0f) {
+        handleMovement(moveDirection, speed, deltaTime);
+    }
+
+    // Jump
+    if (input.isActionJustPressed(InputAction::Jump) && isGrounded && !isCrouching) {
+        velocity.y = jumpVelocity;
+        isGrounded = false;
+    }
+}
 
 } // namespace fresh
