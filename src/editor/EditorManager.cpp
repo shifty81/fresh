@@ -343,8 +343,15 @@ bool EditorManager::initialize(Window* window, IRenderContext* renderContext, Vo
                 
                 // Use WorldSerializer to load the world
                 if (m_worldSerializer && world) {
-                    // Clear existing world
-                    world->clear();
+                    // Clear existing world by unloading all chunks
+                    auto& chunks = world->getChunks();
+                    std::vector<ChunkPos> chunksToUnload;
+                    for (const auto& [pos, chunk] : chunks) {
+                        chunksToUnload.push_back(pos);
+                    }
+                    for (const auto& pos : chunksToUnload) {
+                        world->unloadChunk(pos);
+                    }
                     
                     // Load the world
                     if (m_worldSerializer->loadWorld(world, worldPath)) {
