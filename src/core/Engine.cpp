@@ -20,6 +20,8 @@
 #ifdef _WIN32
     #include "core/Win32Window.h"
     #include "input/Win32InputManager.h"
+    #include "ui/native/Win32MenuBar.h"
+    #include "ui/native/Win32Toolbar.h"
 #else
     #include <GLFW/glfw3.h>
     #include "core/Window.h"
