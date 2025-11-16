@@ -5,6 +5,14 @@
 
 #include <windowsx.h>
 
+// Forward declare ImGui Win32 handler if ImGui is available
+#ifdef FRESH_IMGUI_AVAILABLE
+    #ifndef IMGUI_IMPL_API
+        #define IMGUI_IMPL_API
+    #endif
+    extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
+#endif
+
 namespace fresh
 {
 
@@ -212,6 +220,13 @@ void Win32Window::swapBuffers()
 
 LRESULT CALLBACK Win32Window::WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
+    // Let ImGui handle the message first if it's available
+#ifdef FRESH_IMGUI_AVAILABLE
+    if (ImGui_ImplWin32_WndProcHandler(hwnd, uMsg, wParam, lParam)) {
+        return true;
+    }
+#endif
+
     Win32Window* window = nullptr;
 
     if (uMsg == WM_CREATE) {
@@ -236,6 +251,65 @@ LRESULT CALLBACK Win32Window::WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LP
                 window->m_width = width;
                 window->m_height = height;
                 window->m_framebufferResized = true;
+            }
+            return 0;
+        }
+
+        case WM_KEYDOWN:
+        case WM_SYSKEYDOWN:
+            if (window->m_keyCallback) {
+                window->m_keyCallback(static_cast<int>(wParam), true);
+            }
+            return 0;
+
+        case WM_KEYUP:
+        case WM_SYSKEYUP:
+            if (window->m_keyCallback) {
+                window->m_keyCallback(static_cast<int>(wParam), false);
+            }
+            return 0;
+
+        case WM_LBUTTONDOWN:
+            if (window->m_mouseButtonCallback) {
+                window->m_mouseButtonCallback(VK_LBUTTON, true);
+            }
+            return 0;
+
+        case WM_LBUTTONUP:
+            if (window->m_mouseButtonCallback) {
+                window->m_mouseButtonCallback(VK_LBUTTON, false);
+            }
+            return 0;
+
+        case WM_RBUTTONDOWN:
+            if (window->m_mouseButtonCallback) {
+                window->m_mouseButtonCallback(VK_RBUTTON, true);
+            }
+            return 0;
+
+        case WM_RBUTTONUP:
+            if (window->m_mouseButtonCallback) {
+                window->m_mouseButtonCallback(VK_RBUTTON, false);
+            }
+            return 0;
+
+        case WM_MBUTTONDOWN:
+            if (window->m_mouseButtonCallback) {
+                window->m_mouseButtonCallback(VK_MBUTTON, true);
+            }
+            return 0;
+
+        case WM_MBUTTONUP:
+            if (window->m_mouseButtonCallback) {
+                window->m_mouseButtonCallback(VK_MBUTTON, false);
+            }
+            return 0;
+
+        case WM_MOUSEMOVE: {
+            int x = GET_X_LPARAM(lParam);
+            int y = GET_Y_LPARAM(lParam);
+            if (window->m_mouseMoveCallback) {
+                window->m_mouseMoveCallback(x, y);
             }
             return 0;
         }

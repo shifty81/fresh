@@ -4,6 +4,7 @@
 
 #include <cstdint>
 #include <string>
+#include <functional>
 #include <Windows.h>
 
 namespace fresh
@@ -18,6 +19,11 @@ namespace fresh
 class Win32Window
 {
 public:
+    // Input callback types
+    using KeyCallback = std::function<void(int vkCode, bool isDown)>;
+    using MouseMoveCallback = std::function<void(int x, int y)>;
+    using MouseButtonCallback = std::function<void(int button, bool isDown)>;
+    
     Win32Window(uint32_t width, uint32_t height, const std::string& title);
     ~Win32Window();
 
@@ -129,6 +135,30 @@ public:
         m_framebufferResized = false;
     }
 
+    /**
+     * @brief Set keyboard input callback
+     */
+    void setKeyCallback(KeyCallback callback)
+    {
+        m_keyCallback = callback;
+    }
+
+    /**
+     * @brief Set mouse move callback
+     */
+    void setMouseMoveCallback(MouseMoveCallback callback)
+    {
+        m_mouseMoveCallback = callback;
+    }
+
+    /**
+     * @brief Set mouse button callback
+     */
+    void setMouseButtonCallback(MouseButtonCallback callback)
+    {
+        m_mouseButtonCallback = callback;
+    }
+
 private:
     static LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
@@ -149,6 +179,11 @@ private:
     bool m_shouldClose;
     bool m_framebufferResized;
     bool m_useOpenGL;
+    
+    // Input callbacks
+    KeyCallback m_keyCallback;
+    MouseMoveCallback m_mouseMoveCallback;
+    MouseButtonCallback m_mouseButtonCallback;
     
     static constexpr const wchar_t* WINDOW_CLASS_NAME = L"FreshVoxelEngineWindow";
 };
