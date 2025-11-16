@@ -425,7 +425,6 @@ static ALuint loadAudioFile(const std::string& path)
     // Default to WAV
     return loadWAVFile(path);
 }
-#endif
 
 int AudioEngine::play2D(const std::string& path, float volume, bool loop)
 {

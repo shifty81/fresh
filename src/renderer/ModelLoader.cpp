@@ -95,6 +95,12 @@ std::shared_ptr<Model> ModelLoader::loadModelWithOptions(
     bool optimizeMeshes)
 {
 #ifndef FRESH_TINYOBJLOADER_AVAILABLE
+    // Mark parameters as unused when tinyobjloader is not available
+    (void)triangulate;
+    (void)generateNormals;
+    (void)generateTangents;
+    (void)flipUVs;
+    (void)optimizeMeshes;
     Logger::getInstance().error("Model loading not available - tinyobjloader not found: " + path, "ModelLoader");
     return nullptr;
 #else
