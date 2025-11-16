@@ -272,6 +272,7 @@ set(ENGINE_SOURCES
     src/renderer/Material.cpp
     src/renderer/Texture.cpp
     src/renderer/stb_image_impl.cpp
+    src/renderer/ModelLoader.cpp
     src/renderer/TextureManager.cpp
     src/renderer/VoxelTextureLoader.cpp
     src/voxel/Chunk.cpp

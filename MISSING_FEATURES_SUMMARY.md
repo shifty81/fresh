@@ -81,25 +81,33 @@
 
 ---
 
-### 5. Resource Loading Libraries ⚠️ 40%
-**Status:** Framework exists, needs actual file loaders  
-**Effort:** 2-3 weeks  
+### 5. Resource Loading Libraries ⚠️ 70%
+**Status:** Image and model loading implemented, needs GPU integration and audio codecs  
+**Effort:** 1-2 weeks remaining  
 **Files:** `core/ResourceManager.cpp`, `renderer/Texture.cpp`, `renderer/ModelLoader.cpp`
 
-**What's Missing:**
-- stb_image integration for texture loading (3 TODOs)
-- tinyobjloader integration for mesh loading (1 TODO)
-- Audio codec libraries (OGG/Vorbis, MP3) - AudioEngine is complete but needs codec support
-- GPU texture upload from loaded images
-- Model mesh buffer creation from loaded models
-- Async loading support
-
-**What's Working:**
+**What's Implemented:**
+- ✅ stb_image integration for texture loading (PNG, JPG, TGA, BMP, etc.)
+- ✅ tinyobjloader integration for OBJ model loading
+- ✅ Texture::loadFromFile() with error handling
+- ✅ ModelLoader::loadModel() with full OBJ support
+- ✅ Primitive shape generation (cube, plane)
+- ✅ Mesh data structures and bounding boxes
+- ✅ Tangent space calculation for normal mapping
 - ✅ AudioEngine fully implemented with OpenAL
 - ✅ Resource management framework
-- ✅ Texture and Model class structures
 
-**Dependencies:** stb_image (header-only), tinyobjloader, libvorbis, libmpg123
+**What's Missing:**
+- GPU texture upload from loaded images (backend-specific)
+- GPU mesh buffer creation from loaded models (backend-specific)
+- Audio codec libraries (OGG/Vorbis, MP3) - AudioEngine ready but needs codec support
+- Async loading support
+- Sphere, cylinder, cone primitive generation
+
+**Dependencies:** 
+- ✅ stb_image (header-only) - DONE
+- ✅ tinyobjloader - DONE (added to vcpkg.json)
+- ⚠️ libvorbis, libmpg123 (audio codecs) - TODO
 
 ---
 
