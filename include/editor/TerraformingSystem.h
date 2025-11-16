@@ -190,6 +190,33 @@ public:
         return m_undoStack.size();
     }
 
+    /**
+     * @brief Begin a command group for multi-voxel operations
+     * 
+     * This allows external systems like SelectionManager to record
+     * multiple voxel changes as a single undoable operation.
+     */
+    void beginCommandGroup();
+
+    /**
+     * @brief Record a single voxel change command
+     * 
+     * Can be called standalone or as part of a command group.
+     * 
+     * @param pos Position of voxel
+     * @param oldVoxel Previous voxel state
+     * @param newVoxel New voxel state
+     */
+    void recordVoxelChange(const WorldPos& pos, const Voxel& oldVoxel, const Voxel& newVoxel);
+
+    /**
+     * @brief End command group and commit to undo stack
+     * 
+     * All commands recorded since beginCommandGroup() are grouped
+     * as a single undoable operation.
+     */
+    void endCommandGroup();
+
 private:
     void applySingle(const WorldPos& pos);
     void applyBrush(const WorldPos& pos);
@@ -213,6 +240,10 @@ private:
     std::vector<std::vector<TerraformCommand>> m_undoStack;
     std::vector<std::vector<TerraformCommand>> m_redoStack;
     std::vector<TerraformCommand> m_currentOperation;
+    
+    // Command grouping state
+    bool m_inCommandGroup;
+    std::vector<TerraformCommand> m_commandGroup;
 
     const size_t MAX_UNDO_STACK_SIZE = 100;
 };

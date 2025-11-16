@@ -1,4 +1,5 @@
 #include "editor/SelectionManager.h"
+#include "editor/TerraformingSystem.h"
 #include "voxel/VoxelWorld.h"
 #include "core/Logger.h"
 #include <algorithm>
@@ -11,6 +12,7 @@ SelectionManager::SelectionManager()
     : m_isSelecting(false)
     , m_selectionStart(0.0f)
     , m_selectionEnd(0.0f)
+    , m_terraformingSystem(nullptr)
 {
 }
 
@@ -112,9 +114,28 @@ void SelectionManager::deleteSelected(VoxelWorld* world)
         return;
     }
     
+    // Begin undo command group if terraforming system available
+    if (m_terraformingSystem) {
+        m_terraformingSystem->beginCommandGroup();
+    }
+    
     // Delete all selected voxels by setting them to Air
-    for (const auto& pos : m_selection.positions) {
-        world->setVoxel(pos.toWorldPos(), Voxel(VoxelType::Air));
+    for (size_t i = 0; i < m_selection.positions.size(); ++i) {
+        const auto& pos = m_selection.positions[i];
+        Voxel oldVoxel(m_selection.types[i]);
+        Voxel newVoxel(VoxelType::Air);
+        
+        // Record undo command before changing
+        if (m_terraformingSystem) {
+            m_terraformingSystem->recordVoxelChange(pos.toWorldPos(), oldVoxel, newVoxel);
+        }
+        
+        world->setVoxel(pos.toWorldPos(), newVoxel);
+    }
+    
+    // End undo command group
+    if (m_terraformingSystem) {
+        m_terraformingSystem->endCommandGroup();
     }
     
     Logger::getInstance().info("Deleted " + std::to_string(m_selection.size()) + " selected voxels", "SelectionManager");
@@ -132,9 +153,23 @@ void SelectionManager::moveSelection(const glm::ivec3& delta, VoxelWorld* world)
     // Store the voxel types before moving
     std::vector<VoxelType> voxelTypes = m_selection.types;
     
+    // Begin undo command group if terraforming system available
+    if (m_terraformingSystem) {
+        m_terraformingSystem->beginCommandGroup();
+    }
+    
     // First, clear the old positions
-    for (const auto& pos : m_selection.positions) {
-        world->setVoxel(pos.toWorldPos(), Voxel(VoxelType::Air));
+    for (size_t i = 0; i < m_selection.positions.size(); ++i) {
+        const auto& pos = m_selection.positions[i];
+        Voxel oldVoxel(voxelTypes[i]);
+        Voxel newVoxel(VoxelType::Air);
+        
+        // Record undo command
+        if (m_terraformingSystem) {
+            m_terraformingSystem->recordVoxelChange(pos.toWorldPos(), oldVoxel, newVoxel);
+        }
+        
+        world->setVoxel(pos.toWorldPos(), newVoxel);
     }
     
     // Then, place voxels at new positions
@@ -144,10 +179,24 @@ void SelectionManager::moveSelection(const glm::ivec3& delta, VoxelWorld* world)
             m_selection.positions[i].y + delta.y,
             m_selection.positions[i].z + delta.z
         );
-        world->setVoxel(newPos.toWorldPos(), Voxel(voxelTypes[i]));
+        
+        Voxel oldVoxel = world->getVoxel(newPos.toWorldPos());
+        Voxel newVoxel(voxelTypes[i]);
+        
+        // Record undo command
+        if (m_terraformingSystem) {
+            m_terraformingSystem->recordVoxelChange(newPos.toWorldPos(), oldVoxel, newVoxel);
+        }
+        
+        world->setVoxel(newPos.toWorldPos(), newVoxel);
         
         // Update selection position
         m_selection.positions[i] = newPos;
+    }
+    
+    // End undo command group
+    if (m_terraformingSystem) {
+        m_terraformingSystem->endCommandGroup();
     }
     
     // Update bounds
@@ -178,12 +227,31 @@ void SelectionManager::cutToClipboard(VoxelWorld* world)
         return;
     }
     
-    // Copy to clipboard
+    // Copy to clipboard first
     copyToClipboard(world);
     
+    // Begin undo command group if terraforming system available
+    if (m_terraformingSystem) {
+        m_terraformingSystem->beginCommandGroup();
+    }
+    
     // Delete selected voxels
-    for (const auto& pos : m_selection.positions) {
-        world->setVoxel(pos.toWorldPos(), Voxel(VoxelType::Air));
+    for (size_t i = 0; i < m_selection.positions.size(); ++i) {
+        const auto& pos = m_selection.positions[i];
+        Voxel oldVoxel(m_selection.types[i]);
+        Voxel newVoxel(VoxelType::Air);
+        
+        // Record undo command
+        if (m_terraformingSystem) {
+            m_terraformingSystem->recordVoxelChange(pos.toWorldPos(), oldVoxel, newVoxel);
+        }
+        
+        world->setVoxel(pos.toWorldPos(), newVoxel);
+    }
+    
+    // End undo command group
+    if (m_terraformingSystem) {
+        m_terraformingSystem->endCommandGroup();
     }
     
     Logger::getInstance().info("Cut " + std::to_string(m_clipboard.size()) + " voxels to clipboard", "SelectionManager");
@@ -206,6 +274,11 @@ void SelectionManager::pasteFromClipboard(const glm::ivec3& pastePos, VoxelWorld
     // Calculate offset from original bounds to paste position
     glm::ivec3 offset = pastePos - m_clipboard.boundsMin;
     
+    // Begin undo command group if terraforming system available
+    if (m_terraformingSystem) {
+        m_terraformingSystem->beginCommandGroup();
+    }
+    
     // Place all voxels from clipboard at new position
     for (size_t i = 0; i < m_clipboard.positions.size(); ++i) {
         VoxelPosition newPos(
@@ -213,7 +286,22 @@ void SelectionManager::pasteFromClipboard(const glm::ivec3& pastePos, VoxelWorld
             m_clipboard.positions[i].y + offset.y,
             m_clipboard.positions[i].z + offset.z
         );
-        world->setVoxel(newPos.toWorldPos(), Voxel(m_clipboard.types[i]));
+        
+        // Get old voxel before replacing
+        Voxel oldVoxel = world->getVoxel(newPos.toWorldPos());
+        Voxel newVoxel(m_clipboard.types[i]);
+        
+        // Record undo command
+        if (m_terraformingSystem) {
+            m_terraformingSystem->recordVoxelChange(newPos.toWorldPos(), oldVoxel, newVoxel);
+        }
+        
+        world->setVoxel(newPos.toWorldPos(), newVoxel);
+    }
+    
+    // End undo command group
+    if (m_terraformingSystem) {
+        m_terraformingSystem->endCommandGroup();
     }
     
     Logger::getInstance().info("Pasted " + std::to_string(m_clipboard.size()) + 

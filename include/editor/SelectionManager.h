@@ -183,6 +183,15 @@ public:
      */
     void pasteFromClipboard(const glm::ivec3& pastePos, VoxelWorld* world);
 
+    /**
+     * @brief Set terraforming system for undo/redo integration
+     * @param system Pointer to terraforming system (can be nullptr to disable)
+     */
+    void setTerraformingSystem(class TerraformingSystem* system)
+    {
+        m_terraformingSystem = system;
+    }
+
 private:
     /**
      * @brief Build selection from box defined by start and end points
@@ -206,6 +215,9 @@ private:
     
     // Clipboard data
     VoxelSelection m_clipboard;
+    
+    // Undo/redo integration
+    class TerraformingSystem* m_terraformingSystem;
 };
 
 } // namespace fresh

@@ -15,7 +15,8 @@ TerraformingSystem::TerraformingSystem(VoxelWorld* world)
       m_currentTool(TerraformTool::SingleBlock),
       m_currentMode(TerraformMode::Place),
       m_selectedVoxelType(VoxelType::Stone),
-      m_toolSize(1)
+      m_toolSize(1),
+      m_inCommandGroup(false)
 {
 }
 
@@ -435,6 +436,72 @@ void TerraformingSystem::clearHistory()
     m_undoStack.clear();
     m_redoStack.clear();
     std::cout << "Cleared undo/redo history" << std::endl;
+}
+
+void TerraformingSystem::beginCommandGroup()
+{
+    if (m_inCommandGroup) {
+        std::cerr << "Warning: beginCommandGroup() called while already in a command group" << std::endl;
+        return;
+    }
+    
+    m_inCommandGroup = true;
+    m_commandGroup.clear();
+    std::cout << "Started command group" << std::endl;
+}
+
+void TerraformingSystem::recordVoxelChange(const WorldPos& pos, const Voxel& oldVoxel, const Voxel& newVoxel)
+{
+    TerraformCommand cmd;
+    cmd.position = pos;
+    cmd.oldVoxel = oldVoxel;
+    cmd.newVoxel = newVoxel;
+    
+    if (m_inCommandGroup) {
+        // Add to current group
+        m_commandGroup.push_back(cmd);
+    } else {
+        // Create a single-command operation
+        std::vector<TerraformCommand> singleOp;
+        singleOp.push_back(cmd);
+        
+        m_undoStack.push_back(singleOp);
+        
+        // Clear redo stack when new command is added
+        m_redoStack.clear();
+        
+        // Limit undo stack size
+        if (m_undoStack.size() > MAX_UNDO_STACK_SIZE) {
+            m_undoStack.erase(m_undoStack.begin());
+        }
+    }
+}
+
+void TerraformingSystem::endCommandGroup()
+{
+    if (!m_inCommandGroup) {
+        std::cerr << "Warning: endCommandGroup() called without matching beginCommandGroup()" << std::endl;
+        return;
+    }
+    
+    m_inCommandGroup = false;
+    
+    if (!m_commandGroup.empty()) {
+        // Push the group to undo stack
+        m_undoStack.push_back(m_commandGroup);
+        
+        // Clear redo stack when new command is added
+        m_redoStack.clear();
+        
+        // Limit undo stack size
+        if (m_undoStack.size() > MAX_UNDO_STACK_SIZE) {
+            m_undoStack.erase(m_undoStack.begin());
+        }
+        
+        std::cout << "Ended command group with " << m_commandGroup.size() << " commands" << std::endl;
+    }
+    
+    m_commandGroup.clear();
 }
 
 } // namespace fresh
