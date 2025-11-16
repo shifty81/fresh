@@ -95,6 +95,12 @@ public:
      */
     void setSeed(int seed);
 
+    /**
+     * @brief Set the 2D game style (0=Platformer, 1=Top-down)
+     * @param style 2D game style index
+     */
+    void set2DStyle(int style);
+
 private:
     std::unordered_map<ChunkPos, std::unique_ptr<Chunk>> m_chunks;
     std::unique_ptr<TerrainGenerator> m_terrainGenerator;

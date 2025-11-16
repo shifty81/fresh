@@ -15,7 +15,25 @@ Camera::Camera(float fov, float nearPlane, float farPlane)
 
 void Camera::updateVectors()
 {
-    // Calculate front vector from yaw and pitch
+    // For orthographic top-down camera, lock the view direction
+    if (m_cameraMode == CameraMode::OrthographicTopDown) {
+        // Looking straight down
+        front = glm::vec3(0.0f, -1.0f, 0.0f);
+        right = glm::vec3(1.0f, 0.0f, 0.0f);
+        up = glm::vec3(0.0f, 0.0f, -1.0f); // Forward in world space
+        return;
+    }
+    
+    // For 2D side-scrolling, lock camera to side view
+    if (m_cameraMode == CameraMode::Orthographic2D) {
+        // Looking from the side (along Z axis)
+        front = glm::vec3(0.0f, 0.0f, -1.0f);
+        right = glm::vec3(1.0f, 0.0f, 0.0f);
+        up = glm::vec3(0.0f, 1.0f, 0.0f);
+        return;
+    }
+    
+    // Standard 3D camera - calculate front vector from yaw and pitch
     glm::vec3 newFront;
     newFront.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
     newFront.y = sin(glm::radians(pitch));
@@ -29,6 +47,22 @@ void Camera::updateVectors()
 
 void Camera::processMouseMovement(float xOffset, float yOffset, float sensitivity)
 {
+    // For 2D cameras, mouse movement pans the camera instead of rotating
+    if (m_cameraMode == CameraMode::Orthographic2D) {
+        // Pan in X and Y for side-scrolling
+        position.x -= xOffset * sensitivity * 50.0f / m_orthoZoom;
+        position.y += yOffset * sensitivity * 50.0f / m_orthoZoom;
+        return;
+    }
+    
+    if (m_cameraMode == CameraMode::OrthographicTopDown) {
+        // Pan in X and Z for top-down
+        position.x -= xOffset * sensitivity * 50.0f / m_orthoZoom;
+        position.z += yOffset * sensitivity * 50.0f / m_orthoZoom;
+        return;
+    }
+    
+    // Standard 3D camera rotation
     xOffset *= sensitivity;
     yOffset *= sensitivity;
 
@@ -53,13 +87,54 @@ void Camera::setRotation(float newPitch, float newYaw)
     updateVectors();
 }
 
+void Camera::setCameraMode(CameraMode mode)
+{
+    m_cameraMode = mode;
+    
+    // Reset camera orientation based on mode
+    if (mode == CameraMode::OrthographicTopDown) {
+        // For top-down, position camera above the world
+        pitch = -90.0f; // Look down
+        yaw = 0.0f;
+    } else if (mode == CameraMode::Orthographic2D) {
+        // For side-scrolling, position camera to the side
+        pitch = 0.0f;
+        yaw = -90.0f;
+    }
+    
+    updateVectors();
+}
+
 glm::mat4 Camera::getViewMatrix() const
 {
+    if (m_cameraMode == CameraMode::OrthographicTopDown) {
+        // Look straight down from above
+        return glm::lookAt(position, position + glm::vec3(0.0f, -1.0f, 0.0f), 
+                          glm::vec3(0.0f, 0.0f, -1.0f));
+    } else if (m_cameraMode == CameraMode::Orthographic2D) {
+        // Look from the side
+        return glm::lookAt(position, position + glm::vec3(0.0f, 0.0f, -1.0f),
+                          glm::vec3(0.0f, 1.0f, 0.0f));
+    }
+    
+    // Standard 3D view
     return glm::lookAt(position, position + front, up);
 }
 
 glm::mat4 Camera::getProjectionMatrix(float aspectRatio) const
 {
+    if (m_cameraMode == CameraMode::Orthographic2D || 
+        m_cameraMode == CameraMode::OrthographicTopDown) {
+        // Orthographic projection for 2D games
+        float orthoHeight = 30.0f / m_orthoZoom; // Adjustable view height
+        float orthoWidth = orthoHeight * aspectRatio;
+        
+        return glm::ortho(-orthoWidth, orthoWidth,   // left, right
+                         -orthoHeight, orthoHeight,  // bottom, top
+                         nearPlane, farPlane);       // near, far
+    }
+    
+    // Perspective projection for 3D
     return glm::perspective(glm::radians(fov), aspectRatio, nearPlane, farPlane);
 }
 

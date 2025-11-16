@@ -104,4 +104,11 @@ void VoxelWorld::setSeed(int seed)
     }
 }
 
+void VoxelWorld::set2DStyle(int style)
+{
+    if (m_terrainGenerator) {
+        m_terrainGenerator->set2DStyle(style);
+    }
+}
+
 } // namespace fresh

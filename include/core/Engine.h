@@ -118,6 +118,10 @@ private:
     std::unique_ptr<VoxelInteraction> m_voxelInteraction;
     VoxelType m_selectedBlockType;
     
+    // Track world type for camera setup
+    bool m_isWorld3D = true;
+    int m_world2DStyle = 0; // 0 = Platformer, 1 = Top-down
+    
     // Track cursor capture state to avoid unnecessary mode switches
     bool m_lastCursorCaptured = false;
     
@@ -140,7 +144,7 @@ private:
     std::unordered_map<ChunkPos, size_t> m_chunkIndexCounts;
 #endif
 
-    void createNewWorld(const std::string& name, int seed, bool is3D = true);
+    void createNewWorld(const std::string& name, int seed, bool is3D = true, int gameStyle2D = 0);
     void loadWorld(const std::string& name);
     void setupInputCallbacks();
     void initializeGameSystems(); // Helper for common initialization

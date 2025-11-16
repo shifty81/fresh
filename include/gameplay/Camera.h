@@ -6,10 +6,20 @@ namespace fresh
 {
 
 /**
+ * @brief Camera modes for different game types
+ */
+enum class CameraMode {
+    Perspective3D,      ///< Standard 3D first-person camera
+    Orthographic2D,     ///< 2D side-scrolling camera (Terraria-style)
+    OrthographicTopDown ///< 2D top-down camera (Zelda-style)
+};
+
+/**
  * @brief First-person camera system for the player
  *
  * Handles view and projection matrices, mouse look controls,
  * and camera positioning. Works in conjunction with Player class.
+ * Supports multiple camera modes for 3D and 2D game types.
  */
 class Camera
 {
@@ -47,6 +57,21 @@ public:
      * @param yaw Yaw angle in degrees
      */
     void setRotation(float pitch, float yaw);
+
+    /**
+     * @brief Set camera mode
+     * @param mode Camera mode to use
+     */
+    void setCameraMode(CameraMode mode);
+
+    /**
+     * @brief Get current camera mode
+     * @return Current camera mode
+     */
+    [[nodiscard]] CameraMode getCameraMode() const noexcept
+    {
+        return m_cameraMode;
+    }
 
     /**
      * @brief Get view matrix for rendering
@@ -97,6 +122,20 @@ public:
         fov = newFov;
     }
 
+    /**
+     * @brief Set orthographic zoom for 2D cameras
+     * @param zoom Zoom level (higher = zoomed in)
+     */
+    void setOrthographicZoom(float zoom)
+    {
+        m_orthoZoom = zoom;
+    }
+
+    [[nodiscard]] float getOrthographicZoom() const noexcept
+    {
+        return m_orthoZoom;
+    }
+
 private:
     glm::vec3 position{0.0f, 80.0f, 0.0f};
     glm::vec3 front{0.0f, 0.0f, -1.0f};
@@ -109,6 +148,9 @@ private:
     float fov;          // Field of view in degrees
     float nearPlane;    // Near clipping plane
     float farPlane;     // Far clipping plane
+    
+    CameraMode m_cameraMode = CameraMode::Perspective3D;
+    float m_orthoZoom = 1.0f; // Zoom level for orthographic cameras
 };
 
 } // namespace fresh

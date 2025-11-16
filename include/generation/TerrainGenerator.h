@@ -2,12 +2,14 @@
 
 #include "NoiseGenerator.h"
 #include "voxel/VoxelTypes.h"
+#include <memory>
 
 namespace fresh
 {
 
 class Chunk;
 class VoxelWorld;
+class World2DGenerator;
 
 /**
  * @brief Generates terrain using procedural algorithms
@@ -42,6 +44,12 @@ public:
     void setSeed(int seed);
 
     /**
+     * @brief Set 2D game style (0=Platformer, 1=Top-down)
+     * @param style 2D game style index
+     */
+    void set2DStyle(int style);
+
+    /**
      * @brief Get height at world position
      * @param x World X coordinate
      * @param z World Z coordinate
@@ -56,6 +64,9 @@ private:
 private:
     NoiseGenerator m_noiseGenerator;
     int m_seed;
+    int m_2dStyle; // 0 = Platformer/Terraria, 1 = Top-down/Zelda
+    bool m_use2DGenerator; // Whether to use 2D generator instead of 3D
+    std::unique_ptr<World2DGenerator> m_2dGenerator;
 };
 
 } // namespace fresh

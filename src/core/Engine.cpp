@@ -286,10 +286,18 @@ bool Engine::initialize()
     return true;
 }
 
-void Engine::createNewWorld(const std::string& name, int seed, bool is3D)
+void Engine::createNewWorld(const std::string& name, int seed, bool is3D, int gameStyle2D)
 {
-    std::cout << "\nCreating new " << (is3D ? "3D" : "2D") << " world: " << name 
-              << " (seed: " << seed << ")" << std::endl;
+    const char* styleNames[] = {"Platformer/Terraria", "Top-down/Zelda"};
+    std::cout << "\nCreating new " << (is3D ? "3D" : "2D") << " world: " << name;
+    if (!is3D) {
+        std::cout << " (Style: " << styleNames[gameStyle2D] << ")";
+    }
+    std::cout << " (seed: " << seed << ")" << std::endl;
+
+    // Store world type and style for camera setup
+    m_isWorld3D = is3D;
+    m_world2DStyle = gameStyle2D;
 
     // Create voxel world
     m_world = std::make_unique<VoxelWorld>();
@@ -301,6 +309,11 @@ void Engine::createNewWorld(const std::string& name, int seed, bool is3D)
 
     // Set custom seed for terrain generator
     m_world->setSeed(seed);
+    
+    // Set 2D world style if applicable
+    if (!is3D) {
+        m_world->set2DStyle(gameStyle2D);
+    }
 
     // Generate initial chunks around spawn
     std::cout << "Generating initial terrain..." << std::endl;
@@ -497,6 +510,32 @@ void Engine::initializeGameSystems()
     m_player->setWorld(m_world.get());
     m_player->setPosition(glm::vec3(0.0f, 80.0f, 0.0f));
     std::cout << "Player initialized" << std::endl;
+    
+    // Set up camera mode based on world type
+    if (!m_isWorld3D) {
+        Camera& camera = m_player->getCamera();
+        if (m_world2DStyle == 0) {
+            // Platformer/Terraria style - side-scrolling
+            camera.setCameraMode(CameraMode::Orthographic2D);
+            camera.setOrthographicZoom(1.0f);
+            // Position camera for side view
+            m_player->setPosition(glm::vec3(0.0f, 10.0f, 50.0f));
+            std::cout << "Camera set to 2D side-scrolling mode (Platformer/Terraria)" << std::endl;
+        } else {
+            // Top-down Zelda style
+            camera.setCameraMode(CameraMode::OrthographicTopDown);
+            camera.setOrthographicZoom(1.0f);
+            // Position camera above the world
+            m_player->setPosition(glm::vec3(0.0f, 50.0f, 0.0f));
+            std::cout << "Camera set to 2D top-down mode (Zelda-like)" << std::endl;
+        }
+    } else {
+        // Standard 3D perspective camera
+        Camera& camera = m_player->getCamera();
+        camera.setCameraMode(CameraMode::Perspective3D);
+        m_player->setPosition(glm::vec3(0.0f, 80.0f, 0.0f));
+        std::cout << "Camera set to 3D perspective mode" << std::endl;
+    }
 
     // Initialize hotbar with common block types
 #ifdef FRESH_IMGUI_AVAILABLE
@@ -616,7 +655,8 @@ void Engine::run()
                         
                         createNewWorld(mainMenuPanel->getNewWorldName(),
                                        mainMenuPanel->getWorldSeed(),
-                                       mainMenuPanel->isWorld3D());
+                                       mainMenuPanel->isWorld3D(),
+                                       mainMenuPanel->get2DGameStyle());
                         mainMenuPanel->clearFlags();
                         worldActionRequested = true;
                     } else if (mainMenuPanel->shouldLoadWorld()) {
@@ -891,6 +931,11 @@ void Engine::update(float deltaTime)
         // Check if right mouse button is currently held (for Unreal-style camera control)
         bool rightMousePressed = m_inputManager->isMouseButtonPressed(MOUSE_BUTTON_RIGHT);
         
+        // Always update m_rightMouseHeldForCamera based on current RMB state
+        // This ensures the flag is properly cleared when button is released
+        bool wasHoldingForCamera = m_rightMouseHeldForCamera;
+        m_rightMouseHeldForCamera = rightMousePressed && !guiCapturesMouse;
+        
         // Determine if we should capture cursor based on RMB state
         // Only capture when RMB is held AND GUI doesn't want the mouse
         bool shouldCaptureCursor = false;
@@ -900,12 +945,9 @@ void Engine::update(float deltaTime)
             // 1. Right mouse button is held (Unreal-style free look)
             // 2. GUI is not capturing mouse (not hovering over UI elements)
             // 3. User hasn't explicitly toggled cursor with F key
-            if (!m_userToggledCursor && !guiCapturesMouse) {
-                shouldCaptureCursor = rightMousePressed;
-                
-                // Track if RMB is being used for camera control
-                m_rightMouseHeldForCamera = rightMousePressed;
-            } else if (m_userToggledCursor) {
+            if (!m_userToggledCursor) {
+                shouldCaptureCursor = m_rightMouseHeldForCamera;
+            } else {
                 // User explicitly toggled with F key - respect their choice
                 shouldCaptureCursor = actualCursorCaptured;
                 
@@ -918,6 +960,7 @@ void Engine::update(float deltaTime)
             // In game mode, always capture cursor (traditional FPS style)
             shouldCaptureCursor = true;
             m_userToggledCursor = false;
+            m_rightMouseHeldForCamera = false;
         }
         
         // Only call setCursorMode if the state actually changed (prevents stuttering)
@@ -934,6 +977,15 @@ void Engine::update(float deltaTime)
         } else {
             m_lastCursorCaptured = actualCursorCaptured;
         }
+        
+        // Log when RMB state changes (for debugging free look issues)
+        if (wasHoldingForCamera != m_rightMouseHeldForCamera) {
+            if (m_rightMouseHeldForCamera) {
+                LOG_INFO_C("Right mouse button pressed - free look active", "Engine");
+            } else {
+                LOG_INFO_C("Right mouse button released - free look inactive", "Engine");
+            }
+        }
     }
 
     // In editor-first mode, always allow player input unless GUI captures it
@@ -945,8 +997,8 @@ void Engine::update(float deltaTime)
 
         // UNREAL-STYLE: Handle mouse movement for camera ONLY when RMB is held
         // This prevents camera from moving when user is trying to use menus
-        bool rightMousePressed = m_inputManager->isMouseButtonPressed(MOUSE_BUTTON_RIGHT);
-        if (!guiCapturesMouse && (rightMousePressed || m_rightMouseHeldForCamera)) {
+        // m_rightMouseHeldForCamera is already updated above based on RMB state and GUI capture
+        if (m_rightMouseHeldForCamera) {
             glm::vec2 mouseDelta = m_inputManager->getMouseDelta();
             if (glm::length(mouseDelta) > 0.0f) {
                 m_player->handleMouseMovement(mouseDelta.x, mouseDelta.y);
