@@ -4,6 +4,8 @@
 #include "core/Window.h"
 #include "editor/WorldEditor.h"
 #include "editor/SelectionManager.h"
+#include "editor/SelectionRenderer.h"
+#include "devtools/DebugRenderer.h"
 #include "renderer/RenderContext.h"
 #include "ui/ConsolePanel.h"
 #include "ui/ContentBrowserPanel.h"
@@ -229,9 +231,22 @@ bool EditorManager::initialize(Window* window, IRenderContext* renderContext, Vo
             return false;
         }
 
+        // Initialize debug renderer for selection visualization
+        m_debugRenderer = std::make_unique<devtools::DebugRenderer>();
+        m_debugRenderer->setEnabled(true);
+        LOG_INFO_C("Debug Renderer initialized", "EditorManager");
+
         // Initialize selection manager
         m_selectionManager = std::make_unique<SelectionManager>();
         LOG_INFO_C("Selection Manager initialized", "EditorManager");
+
+        // Initialize selection renderer
+        m_selectionRenderer = std::make_unique<SelectionRenderer>();
+        if (!m_selectionRenderer->initialize(m_debugRenderer.get())) {
+            LOG_ERROR_C("Failed to initialize Selection Renderer", "EditorManager");
+            return false;
+        }
+        LOG_INFO_C("Selection Renderer initialized", "EditorManager");
     } else {
         LOG_INFO_C("World and WorldEditor not provided, deferring initialization of world-dependent panels", "EditorManager");
     }
@@ -391,6 +406,16 @@ void EditorManager::render()
     // Render hotbar (shown in play mode)
     if (m_hotbar) {
         m_hotbar->render();
+    }
+
+    // Render selection visualization (3D rendering, not UI)
+    if (m_selectionRenderer && m_selectionManager) {
+        m_selectionRenderer->render(m_selectionManager.get());
+    }
+
+    // Update and render debug visualization
+    if (m_debugRenderer) {
+        m_debugRenderer->render();
     }
 
 #ifdef _WIN32
