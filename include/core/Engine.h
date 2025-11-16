@@ -140,7 +140,7 @@ private:
     std::unordered_map<ChunkPos, size_t> m_chunkIndexCounts;
 #endif
 
-    void createNewWorld(const std::string& name, int seed, bool is3D = true);
+    void createNewWorld(const std::string& name, int seed, bool is3D = true, int gameStyle2D = 0);
     void loadWorld(const std::string& name);
     void setupInputCallbacks();
     void initializeGameSystems(); // Helper for common initialization

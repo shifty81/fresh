@@ -286,10 +286,14 @@ bool Engine::initialize()
     return true;
 }
 
-void Engine::createNewWorld(const std::string& name, int seed, bool is3D)
+void Engine::createNewWorld(const std::string& name, int seed, bool is3D, int gameStyle2D)
 {
-    std::cout << "\nCreating new " << (is3D ? "3D" : "2D") << " world: " << name 
-              << " (seed: " << seed << ")" << std::endl;
+    const char* styleNames[] = {"Platformer/Terraria", "Top-down/Zelda"};
+    std::cout << "\nCreating new " << (is3D ? "3D" : "2D") << " world: " << name;
+    if (!is3D) {
+        std::cout << " (Style: " << styleNames[gameStyle2D] << ")";
+    }
+    std::cout << " (seed: " << seed << ")" << std::endl;
 
     // Create voxel world
     m_world = std::make_unique<VoxelWorld>();
@@ -301,6 +305,11 @@ void Engine::createNewWorld(const std::string& name, int seed, bool is3D)
 
     // Set custom seed for terrain generator
     m_world->setSeed(seed);
+    
+    // Set 2D world style if applicable
+    if (!is3D) {
+        m_world->set2DStyle(gameStyle2D);
+    }
 
     // Generate initial chunks around spawn
     std::cout << "Generating initial terrain..." << std::endl;
@@ -616,7 +625,8 @@ void Engine::run()
                         
                         createNewWorld(mainMenuPanel->getNewWorldName(),
                                        mainMenuPanel->getWorldSeed(),
-                                       mainMenuPanel->isWorld3D());
+                                       mainMenuPanel->isWorld3D(),
+                                       mainMenuPanel->get2DGameStyle());
                         mainMenuPanel->clearFlags();
                         worldActionRequested = true;
                     } else if (mainMenuPanel->shouldLoadWorld()) {
