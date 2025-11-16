@@ -20,6 +20,13 @@ class VoxelToolPalette;
 class MainMenuPanel;
 class SettingsPanel;
 class HotbarPanel;
+class SelectionManager;
+class SelectionRenderer;
+
+namespace devtools
+{
+class DebugRenderer;
+}
 
 #ifdef _WIN32
 class WindowsThemeManager;
@@ -186,6 +193,24 @@ public:
         return m_voxelTools.get();
     }
 
+    /**
+     * @brief Get the selection manager
+     * @return Selection manager pointer
+     */
+    SelectionManager* getSelectionManager() const
+    {
+        return m_selectionManager.get();
+    }
+
+    /**
+     * @brief Get the selection renderer
+     * @return Selection renderer pointer
+     */
+    SelectionRenderer* getSelectionRenderer() const
+    {
+        return m_selectionRenderer.get();
+    }
+
 #ifdef _WIN32
     /**
      * @brief Get the Windows customization panel
@@ -218,6 +243,9 @@ private:
     std::unique_ptr<MainMenuPanel> m_mainMenuPanel;
     std::unique_ptr<SettingsPanel> m_settingsPanel;
     std::unique_ptr<HotbarPanel> m_hotbar;
+    std::unique_ptr<SelectionManager> m_selectionManager;
+    std::unique_ptr<SelectionRenderer> m_selectionRenderer;
+    std::unique_ptr<devtools::DebugRenderer> m_debugRenderer;
 
 #ifdef _WIN32
     // Windows-native integration managers

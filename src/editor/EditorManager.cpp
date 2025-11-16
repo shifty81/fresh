@@ -3,6 +3,9 @@
 #include "core/Logger.h"
 #include "core/Window.h"
 #include "editor/WorldEditor.h"
+#include "editor/SelectionManager.h"
+#include "editor/SelectionRenderer.h"
+#include "devtools/DebugRenderer.h"
 #include "renderer/RenderContext.h"
 #include "ui/ConsolePanel.h"
 #include "ui/ContentBrowserPanel.h"
@@ -16,6 +19,8 @@
 #include "ui/SettingsPanel.h"
 #include "ui/VoxelToolPalette.h"
 #include "voxel/VoxelWorld.h"
+
+#include <glm/glm.hpp>
 
 #ifdef _WIN32
     #include "ui/WindowsThemeManager.h"
@@ -163,6 +168,45 @@ bool EditorManager::initialize(Window* window, IRenderContext* renderContext, Vo
             }
         });
 
+        // Set Cut/Copy/Paste/Delete callbacks for selection manager
+        m_menuBar->setCutCallback([this, world]() {
+            if (m_selectionManager && m_selectionManager->hasSelection()) {
+                m_selectionManager->cutToClipboard(world);
+                LOG_INFO_C("Cut selection to clipboard", "EditorManager");
+            } else {
+                LOG_INFO_C("No selection to cut", "EditorManager");
+            }
+        });
+
+        m_menuBar->setCopyCallback([this, world]() {
+            if (m_selectionManager && m_selectionManager->hasSelection()) {
+                m_selectionManager->copyToClipboard(world);
+                LOG_INFO_C("Copied selection to clipboard", "EditorManager");
+            } else {
+                LOG_INFO_C("No selection to copy", "EditorManager");
+            }
+        });
+
+        m_menuBar->setPasteCallback([this, world]() {
+            if (m_selectionManager && m_selectionManager->hasClipboardData()) {
+                // TODO: Get paste position from camera/cursor
+                // For now, paste at origin as placeholder
+                m_selectionManager->pasteFromClipboard(glm::ivec3(0, 64, 0), world);
+                LOG_INFO_C("Pasted clipboard content", "EditorManager");
+            } else {
+                LOG_INFO_C("Clipboard is empty", "EditorManager");
+            }
+        });
+
+        m_menuBar->setDeleteCallback([this, world]() {
+            if (m_selectionManager && m_selectionManager->hasSelection()) {
+                m_selectionManager->deleteSelected(world);
+                LOG_INFO_C("Deleted selection", "EditorManager");
+            } else {
+                LOG_INFO_C("No selection to delete", "EditorManager");
+            }
+        });
+
         m_toolbar = std::make_unique<EditorToolbar>();
         if (!m_toolbar->initialize()) {
             LOG_ERROR_C("Failed to initialize Toolbar", "EditorManager");
@@ -186,6 +230,23 @@ bool EditorManager::initialize(Window* window, IRenderContext* renderContext, Vo
             LOG_ERROR_C("Failed to initialize Voxel Tool Palette", "EditorManager");
             return false;
         }
+
+        // Initialize debug renderer for selection visualization
+        m_debugRenderer = std::make_unique<devtools::DebugRenderer>();
+        m_debugRenderer->setEnabled(true);
+        LOG_INFO_C("Debug Renderer initialized", "EditorManager");
+
+        // Initialize selection manager
+        m_selectionManager = std::make_unique<SelectionManager>();
+        LOG_INFO_C("Selection Manager initialized", "EditorManager");
+
+        // Initialize selection renderer
+        m_selectionRenderer = std::make_unique<SelectionRenderer>();
+        if (!m_selectionRenderer->initialize(m_debugRenderer.get())) {
+            LOG_ERROR_C("Failed to initialize Selection Renderer", "EditorManager");
+            return false;
+        }
+        LOG_INFO_C("Selection Renderer initialized", "EditorManager");
     } else {
         LOG_INFO_C("World and WorldEditor not provided, deferring initialization of world-dependent panels", "EditorManager");
     }
@@ -345,6 +406,16 @@ void EditorManager::render()
     // Render hotbar (shown in play mode)
     if (m_hotbar) {
         m_hotbar->render();
+    }
+
+    // Render selection visualization (3D rendering, not UI)
+    if (m_selectionRenderer && m_selectionManager) {
+        m_selectionRenderer->render(m_selectionManager.get());
+    }
+
+    // Update and render debug visualization
+    if (m_debugRenderer) {
+        m_debugRenderer->render();
     }
 
 #ifdef _WIN32
