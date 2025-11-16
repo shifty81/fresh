@@ -1,6 +1,7 @@
 #include "editor/EditorManager.h"
 
 #include "core/Logger.h"
+#include "ecs/EntityManager.h"
 #ifdef _WIN32
     #include "core/Win32Window.h"
     #include "input/Win32InputManager.h"
@@ -51,6 +52,7 @@ EditorManager::EditorManager()
       m_renderContext(nullptr),
       m_world(nullptr),
       m_worldEditor(nullptr),
+      m_entityManager(nullptr),
       m_showSceneHierarchy(true),
       m_showInspector(true),
       m_showContentBrowser(true),
@@ -65,7 +67,8 @@ EditorManager::~EditorManager()
 }
 
 bool EditorManager::initialize(WindowType* window, IRenderContext* renderContext, VoxelWorld* world,
-                               WorldEditor* worldEditor, InputManagerType* inputManager)
+                               WorldEditor* worldEditor, InputManagerType* inputManager,
+                               ecs::EntityManager* entityManager)
 {
     if (m_initialized) {
         LOG_WARNING_C("EditorManager already initialized", "EditorManager");
@@ -81,6 +84,7 @@ bool EditorManager::initialize(WindowType* window, IRenderContext* renderContext
     m_renderContext = renderContext;
     m_world = world;
     m_worldEditor = worldEditor;
+    m_entityManager = entityManager;
 
 #ifdef FRESH_IMGUI_AVAILABLE
     // Initialize ImGui context
@@ -109,7 +113,7 @@ bool EditorManager::initialize(WindowType* window, IRenderContext* renderContext
         }
 
         m_inspector = std::make_unique<InspectorPanel>();
-        if (!m_inspector->initialize()) {
+        if (!m_inspector->initialize(m_entityManager)) {
             LOG_ERROR_C("Failed to initialize Inspector panel", "EditorManager");
             return false;
         }
@@ -779,7 +783,7 @@ bool EditorManager::updateWorld(VoxelWorld* world, WorldEditor* worldEditor)
     }
 
     m_inspector = std::make_unique<InspectorPanel>();
-    if (!m_inspector->initialize()) {
+    if (!m_inspector->initialize(m_entityManager)) {
         LOG_ERROR_C("Failed to initialize Inspector panel", "EditorManager");
         return false;
     }
