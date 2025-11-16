@@ -1,7 +1,13 @@
 #include "editor/EditorManager.h"
 
 #include "core/Logger.h"
-#include "core/Window.h"
+#ifdef _WIN32
+    #include "core/Win32Window.h"
+    #include "input/Win32InputManager.h"
+#else
+    #include "core/Window.h"
+    #include "input/InputManager.h"
+#endif
 #include "editor/WorldEditor.h"
 #include "editor/SelectionManager.h"
 #include "editor/SelectionRenderer.h"
@@ -57,8 +63,8 @@ EditorManager::~EditorManager()
     shutdown();
 }
 
-bool EditorManager::initialize(Window* window, IRenderContext* renderContext, VoxelWorld* world,
-                               WorldEditor* worldEditor, InputManager* inputManager)
+bool EditorManager::initialize(WindowType* window, IRenderContext* renderContext, VoxelWorld* world,
+                               WorldEditor* worldEditor, InputManagerType* inputManager)
 {
     if (m_initialized) {
         LOG_WARNING_C("EditorManager already initialized", "EditorManager");
@@ -78,11 +84,19 @@ bool EditorManager::initialize(Window* window, IRenderContext* renderContext, Vo
 #ifdef FRESH_IMGUI_AVAILABLE
     // Initialize ImGui context
     m_imguiContext = std::make_unique<ImGuiContext>();
+#ifdef _WIN32
+    if (!m_imguiContext->initializeWin32(window, renderContext)) {
+        LOG_ERROR_C("Failed to initialize ImGui context with Win32 backend", "EditorManager");
+        return false;
+    }
+    LOG_INFO_C("ImGui context initialized with Win32 backend", "EditorManager");
+#else
     if (!m_imguiContext->initialize(window, renderContext)) {
         LOG_ERROR_C("Failed to initialize ImGui context", "EditorManager");
         return false;
     }
     LOG_INFO_C("ImGui context initialized", "EditorManager");
+#endif
 
     // Initialize UI panels that require world/worldEditor
     // Only initialize these if world and worldEditor are available

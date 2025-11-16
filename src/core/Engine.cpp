@@ -17,20 +17,26 @@
     #include <linux/limits.h>
 #endif
 
-#include <GLFW/glfw3.h>
+#ifdef _WIN32
+    #include "core/Win32Window.h"
+    #include "input/Win32InputManager.h"
+#else
+    #include <GLFW/glfw3.h>
+    #include "core/Window.h"
+    #include "input/InputManager.h"
+#endif
+
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
 #include "ai/AISystem.h"
 #include "core/Logger.h"
-#include "core/Window.h"
 #include "editor/EditorGUI.h"
 #include "editor/EditorManager.h"
 #include "editor/WorldEditor.h"
 #include "gameplay/Player.h"
 #include "generation/TerrainGenerator.h"
-#include "input/InputManager.h"
 #include "interaction/VoxelInteraction.h"
 #include "physics/PhysicsSystem.h"
 #include "renderer/GraphicsAPI.h"
@@ -56,6 +62,51 @@
 
 namespace fresh
 {
+
+// Platform-specific key code definitions
+#ifdef _WIN32
+    // Win32 virtual key codes
+    constexpr int KEY_0 = '0';
+    constexpr int KEY_1 = '1';
+    constexpr int KEY_2 = '2';
+    constexpr int KEY_3 = '3';
+    constexpr int KEY_4 = '4';
+    constexpr int KEY_5 = '5';
+    constexpr int KEY_6 = '6';
+    constexpr int KEY_7 = '7';
+    constexpr int KEY_8 = '8';
+    constexpr int KEY_9 = '9';
+    constexpr int KEY_F = 'F';
+    constexpr int KEY_Y = 'Y';
+    constexpr int KEY_Z = 'Z';
+    constexpr int KEY_LEFT_CONTROL = VK_LCONTROL;
+    constexpr int KEY_RIGHT_CONTROL = VK_RCONTROL;
+    constexpr int KEY_LEFT_SHIFT = VK_LSHIFT;
+    constexpr int KEY_RIGHT_SHIFT = VK_RSHIFT;
+    constexpr int MOUSE_BUTTON_LEFT = VK_LBUTTON;
+    constexpr int MOUSE_BUTTON_RIGHT = VK_RBUTTON;
+#else
+    // GLFW key codes
+    constexpr int KEY_0 = GLFW_KEY_0;
+    constexpr int KEY_1 = GLFW_KEY_1;
+    constexpr int KEY_2 = GLFW_KEY_2;
+    constexpr int KEY_3 = GLFW_KEY_3;
+    constexpr int KEY_4 = GLFW_KEY_4;
+    constexpr int KEY_5 = GLFW_KEY_5;
+    constexpr int KEY_6 = GLFW_KEY_6;
+    constexpr int KEY_7 = GLFW_KEY_7;
+    constexpr int KEY_8 = GLFW_KEY_8;
+    constexpr int KEY_9 = GLFW_KEY_9;
+    constexpr int KEY_F = GLFW_KEY_F;
+    constexpr int KEY_Y = GLFW_KEY_Y;
+    constexpr int KEY_Z = GLFW_KEY_Z;
+    constexpr int KEY_LEFT_CONTROL = GLFW_KEY_LEFT_CONTROL;
+    constexpr int KEY_RIGHT_CONTROL = GLFW_KEY_RIGHT_CONTROL;
+    constexpr int KEY_LEFT_SHIFT = GLFW_KEY_LEFT_SHIFT;
+    constexpr int KEY_RIGHT_SHIFT = GLFW_KEY_RIGHT_SHIFT;
+    constexpr int MOUSE_BUTTON_LEFT = GLFW_MOUSE_BUTTON_LEFT;
+    constexpr int MOUSE_BUTTON_RIGHT = GLFW_MOUSE_BUTTON_RIGHT;
+#endif
 
 // Rendering constants
 namespace
@@ -149,7 +200,7 @@ bool Engine::initialize()
     bool useOpenGL = (m_renderer->getAPI() == GraphicsAPI::OpenGL);
 
     // Create window FIRST so we can show the GUI
-    m_window = std::make_unique<Window>(1280, 720, "Fresh Voxel Engine");
+    m_window = std::make_unique<WindowType>(1280, 720, "Fresh Voxel Engine");
     if (!m_window->initialize(useOpenGL)) {
         std::cerr << "Failed to initialize window" << std::endl;
         LOG_ERROR_C("Failed to initialize window", "Engine");
@@ -170,8 +221,26 @@ bool Engine::initialize()
                "Engine");
 
     // Create input manager and set up callbacks
-    m_inputManager = std::make_unique<InputManager>();
+    m_inputManager = std::make_unique<InputManagerType>();
+#ifdef _WIN32
+    // Win32: Initialize with window pointer and set up callbacks
+    m_inputManager->initialize(m_window.get());
+    
+    m_window->setKeyCallback([this](int vk, bool isDown) {
+        m_inputManager->processKeyEvent(vk, isDown);
+    });
+    
+    m_window->setMouseMoveCallback([this](int x, int y) {
+        m_inputManager->processMouseMovement(x, y);
+    });
+    
+    m_window->setMouseButtonCallback([this](int button, bool isDown) {
+        m_inputManager->processMouseButton(button, isDown);
+    });
+#else
+    // GLFW: Initialize with window handle
     m_inputManager->initialize(m_window->getHandle());
+#endif
     m_inputManager->setInputMode(InputMode::UIMode); // Start in UI mode for menu
     setupInputCallbacks();
     std::cout << "Input manager initialized" << std::endl;
@@ -638,8 +707,10 @@ void Engine::shutdown()
         m_renderer->waitIdle();
     }
 
+#ifndef _WIN32
     // Clean up GLFW callback user data
     m_callbackUserData.reset();
+#endif
 
 #ifdef FRESH_IMGUI_AVAILABLE
     // Explicitly shutdown editor manager BEFORE resetting renderer
@@ -694,26 +765,26 @@ void Engine::processInput()
             auto* hotbar = m_editorManager->getHotbar();
             if (hotbar->isVisible()) {
                 // Check keys 1-9 and 0
-                for (int key = GLFW_KEY_1; key <= GLFW_KEY_9; ++key) {
+                for (int key = KEY_1; key <= KEY_9; ++key) {
                     if (m_inputManager->isKeyJustPressed(key)) {
                         hotbar->handleKeyPress(key);
                     }
                 }
-                if (m_inputManager->isKeyJustPressed(GLFW_KEY_0)) {
-                    hotbar->handleKeyPress(GLFW_KEY_0);
+                if (m_inputManager->isKeyJustPressed(KEY_0)) {
+                    hotbar->handleKeyPress(KEY_0);
                 }
             }
         }
         
         // Handle keyboard shortcuts for editor actions (Ctrl+Z, Ctrl+Y, etc.)
         if (!guiCapturesKeyboard) {
-            bool ctrlPressed = m_inputManager->isKeyPressed(GLFW_KEY_LEFT_CONTROL) || 
-                              m_inputManager->isKeyPressed(GLFW_KEY_RIGHT_CONTROL);
-            bool shiftPressed = m_inputManager->isKeyPressed(GLFW_KEY_LEFT_SHIFT) || 
-                               m_inputManager->isKeyPressed(GLFW_KEY_RIGHT_SHIFT);
+            bool ctrlPressed = m_inputManager->isKeyPressed(KEY_LEFT_CONTROL) || 
+                              m_inputManager->isKeyPressed(KEY_RIGHT_CONTROL);
+            bool shiftPressed = m_inputManager->isKeyPressed(KEY_LEFT_SHIFT) || 
+                               m_inputManager->isKeyPressed(KEY_RIGHT_SHIFT);
             
             // Ctrl+Z for Undo
-            if (ctrlPressed && !shiftPressed && m_inputManager->isKeyJustPressed(GLFW_KEY_Z)) {
+            if (ctrlPressed && !shiftPressed && m_inputManager->isKeyJustPressed(KEY_Z)) {
                 if (m_worldEditor && m_worldEditor->getTerraformingSystem()) {
                     if (m_worldEditor->getTerraformingSystem()->undo()) {
                         LOG_INFO_C("Undo performed (Ctrl+Z)", "Engine");
@@ -724,8 +795,8 @@ void Engine::processInput()
             }
             
             // Ctrl+Y for Redo (or Ctrl+Shift+Z)
-            if ((ctrlPressed && m_inputManager->isKeyJustPressed(GLFW_KEY_Y)) ||
-                (ctrlPressed && shiftPressed && m_inputManager->isKeyJustPressed(GLFW_KEY_Z))) {
+            if ((ctrlPressed && m_inputManager->isKeyJustPressed(KEY_Y)) ||
+                (ctrlPressed && shiftPressed && m_inputManager->isKeyJustPressed(KEY_Z))) {
                 if (m_worldEditor && m_worldEditor->getTerraformingSystem()) {
                     if (m_worldEditor->getTerraformingSystem()->redo()) {
                         LOG_INFO_C("Redo performed (Ctrl+Y)", "Engine");
@@ -738,7 +809,7 @@ void Engine::processInput()
 #endif
 
         // F key to toggle mouse cursor capture (camera freelook vs GUI mode)
-        if (!guiCapturesKeyboard && m_inputManager->isKeyJustPressed(GLFW_KEY_F)) {
+        if (!guiCapturesKeyboard && m_inputManager->isKeyJustPressed(KEY_F)) {
             m_inputManager->toggleCursorCapture();
             m_userToggledCursor = true;  // Track that user explicitly toggled
             if (m_inputManager->isCursorCaptured()) {
@@ -861,12 +932,12 @@ void Engine::update(float deltaTime)
                 m_voxelInteraction->performRaycast(m_player->getCamera(), MAX_INTERACTION_DISTANCE);
 
             // Left click to break block
-            if (m_inputManager->isMouseButtonPressed(GLFW_MOUSE_BUTTON_LEFT) && hit.hit) {
+            if (m_inputManager->isMouseButtonPressed(MOUSE_BUTTON_LEFT) && hit.hit) {
                 m_voxelInteraction->breakBlock(hit);
             }
 
             // Right click to place block
-            if (m_inputManager->isMouseButtonPressed(GLFW_MOUSE_BUTTON_RIGHT) && hit.hit) {
+            if (m_inputManager->isMouseButtonPressed(MOUSE_BUTTON_RIGHT) && hit.hit) {
                 m_voxelInteraction->placeBlock(hit, m_selectedBlockType);
             }
         }
@@ -985,10 +1056,18 @@ void Engine::setupInputCallbacks()
         return;
     }
 
+#ifdef _WIN32
+    // Win32: Callbacks are already set up in initialize() with lambdas
+    // No additional setup needed
+    LOG_INFO_C("Win32 input callbacks already configured", "Engine");
+#else
+    // GLFW: Set up traditional GLFW callbacks
     GLFWwindow* window = m_window->getHandle();
 
     // Create user data for callbacks
-    m_callbackUserData = std::make_unique<CallbackUserData>(m_inputManager.get(), m_window.get());
+    m_callbackUserData = std::make_unique<CallbackUserData>();
+    m_callbackUserData->inputManager = m_inputManager.get();
+    m_callbackUserData->window = m_window.get();
     glfwSetWindowUserPointer(window, m_callbackUserData.get());
 
     // Keyboard callback
@@ -1028,6 +1107,7 @@ void Engine::setupInputCallbacks()
             (void)height;
         }
     });
+#endif
 }
 
 #if defined(FRESH_OPENGL_SUPPORT) && defined(FRESH_GLEW_AVAILABLE)
