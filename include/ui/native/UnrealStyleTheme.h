@@ -94,6 +94,7 @@ struct UnrealStyleTheme
     static COLORREF WithAlpha(COLORREF color, int alpha) {
         // Note: Use AlphaBlend or layered windows for true transparency
         // This is a helper for documentation purposes
+        (void)alpha;  // Mark as unused - functionality not implemented yet
         return color;
     }
     

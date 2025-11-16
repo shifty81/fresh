@@ -62,13 +62,13 @@ bool Win32HUD::initialize(HWND parentHwnd)
     m_crosshairPen = CreatePen(PS_SOLID, 2, UnrealStyleTheme::Crosshair);
     
     // Create fonts - Unreal uses Roboto, but we'll use Segoe UI on Windows
-    m_textFont = CreateFont(
+    m_textFont = CreateFontW(
         14, 0, 0, 0, FW_MEDIUM, FALSE, FALSE, FALSE,
         DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS,
         CLEARTYPE_QUALITY, DEFAULT_PITCH | FF_DONTCARE, L"Segoe UI"
     );
     
-    m_debugFont = CreateFont(
+    m_debugFont = CreateFontW(
         12, 0, 0, 0, FW_NORMAL, FALSE, FALSE, FALSE,
         DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS,
         CLEARTYPE_QUALITY, DEFAULT_PITCH | FF_DONTCARE, L"Consolas"
@@ -170,7 +170,7 @@ void Win32HUD::renderSlot(HDC hdc, int x, int y, int size,
     
     WCHAR slotNumText[3];
     swprintf_s(slotNumText, 3, L"%d", slotNumber);
-    TextOut(hdc, x + 4, y + 4, slotNumText, (int)wcslen(slotNumText));
+    TextOutW(hdc, x + 4, y + 4, slotNumText, (int)wcslen(slotNumText));
     
     // Draw item if slot is not empty
     if (!slot.isEmpty) {
@@ -183,11 +183,11 @@ void Win32HUD::renderSlot(HDC hdc, int x, int y, int size,
         SetTextColor(hdc, UnrealStyleTheme::TextPrimary);
         std::wstring itemName(slot.itemName.begin(), slot.itemName.end());
         SIZE textSize;
-        GetTextExtentPoint32(hdc, itemName.c_str(), (int)itemName.length(), &textSize);
+        GetTextExtentPoint32W(hdc, itemName.c_str(), (int)itemName.length(), &textSize);
         
         int textX = x + (size - textSize.cx) / 2;
         int textY = y + (size - textSize.cy) / 2;
-        TextOut(hdc, textX, textY, itemName.c_str(), (int)itemName.length());
+        TextOutW(hdc, textX, textY, itemName.c_str(), (int)itemName.length());
         
         // Draw count badge in bottom-right (Unreal-style)
         if (slot.count > 1) {
@@ -195,7 +195,7 @@ void Win32HUD::renderSlot(HDC hdc, int x, int y, int size,
             WCHAR countText[16];
             swprintf_s(countText, 16, L"x%d", slot.count);
             SIZE countSize;
-            GetTextExtentPoint32(hdc, countText, (int)wcslen(countText), &countSize);
+            GetTextExtentPoint32W(hdc, countText, (int)wcslen(countText), &countSize);
             
             // Draw semi-transparent background for count
             int countX = x + size - countSize.cx - 4;
@@ -205,7 +205,7 @@ void Win32HUD::renderSlot(HDC hdc, int x, int y, int size,
             FillRect(hdc, &countBg, countBgBrush);
             DeleteObject(countBgBrush);
             
-            TextOut(hdc, countX, countY, countText, (int)wcslen(countText));
+            TextOutW(hdc, countX, countY, countText, (int)wcslen(countText));
         }
     }
     
@@ -232,7 +232,7 @@ void Win32HUD::renderHealthBar(HDC hdc, const RECT& clientRect)
     
     WCHAR healthText[32];
     swprintf_s(healthText, 32, L"HEALTH  %.0f / %.0f", m_stats.health, m_stats.maxHealth);
-    TextOut(hdc, x + 8, y + 2, healthText, (int)wcslen(healthText));
+    TextOutW(hdc, x + 8, y + 2, healthText, (int)wcslen(healthText));
     
     SelectObject(hdc, oldFont);
 }
@@ -257,7 +257,7 @@ void Win32HUD::renderStaminaBar(HDC hdc, const RECT& clientRect)
     
     WCHAR staminaText[32];
     swprintf_s(staminaText, 32, L"STAMINA  %.0f / %.0f", m_stats.stamina, m_stats.maxStamina);
-    TextOut(hdc, x + 8, y + 2, staminaText, (int)wcslen(staminaText));
+    TextOutW(hdc, x + 8, y + 2, staminaText, (int)wcslen(staminaText));
     
     SelectObject(hdc, oldFont);
 }
@@ -337,7 +337,7 @@ void Win32HUD::renderMinimap(HDC hdc, const RECT& clientRect)
     // Add "MINIMAP" label in Unreal style
     HFONT oldFont = (HFONT)SelectObject(hdc, m_debugFont);
     SetTextColor(hdc, UnrealStyleTheme::TextSecondary);
-    TextOut(hdc, x + 6, y + 6, L"MINIMAP", 7);
+    TextOutW(hdc, x + 6, y + 6, L"MINIMAP", 7);
     SelectObject(hdc, oldFont);
 }
 
@@ -353,19 +353,19 @@ void Win32HUD::renderDebugInfo(HDC hdc, const RECT& clientRect)
     SetTextColor(hdc, UnrealStyleTheme::AccentBlue);
     WCHAR fpsText[32];
     swprintf_s(fpsText, 32, L"FPS: %d", m_stats.fps);
-    TextOut(hdc, x, y, fpsText, (int)wcslen(fpsText));
+    TextOutW(hdc, x, y, fpsText, (int)wcslen(fpsText));
     
     // Position in secondary text color
     SetTextColor(hdc, UnrealStyleTheme::TextSecondary);
     WCHAR posText[64];
     swprintf_s(posText, 64, L"X:%.1f Y:%.1f Z:%.1f", 
               m_stats.posX, m_stats.posY, m_stats.posZ);
-    TextOut(hdc, x, y + 16, posText, (int)wcslen(posText));
+    TextOutW(hdc, x, y + 16, posText, (int)wcslen(posText));
     
     // Memory/performance info
     WCHAR perfText[64];
     swprintf_s(perfText, 64, L"Render: %.2fms", 1000.0f / (m_stats.fps > 0 ? m_stats.fps : 1));
-    TextOut(hdc, x, y + 32, perfText, (int)wcslen(perfText));
+    TextOutW(hdc, x, y + 32, perfText, (int)wcslen(perfText));
     
     SelectObject(hdc, oldFont);
 }
