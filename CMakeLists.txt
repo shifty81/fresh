@@ -293,6 +293,7 @@ set(ENGINE_SOURCES
     src/editor/WorldEditor.cpp
     src/editor/TerraformingSystem.cpp
     src/editor/BlockBuilder.cpp
+    src/editor/SelectionManager.cpp
     src/serialization/WorldSerializer.cpp
     src/ui/MainMenu.cpp
     src/input/InputManager.cpp
@@ -405,6 +406,7 @@ set(ENGINE_HEADERS
     include/editor/WorldEditor.h
     include/editor/TerraformingSystem.h
     include/editor/EditorManager.h
+    include/editor/SelectionManager.h
     include/serialization/WorldSerializer.h
     include/ui/MainMenu.h
     include/ui/ImGuiContext.h
