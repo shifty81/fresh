@@ -8,36 +8,41 @@
 
 ## 🔴 CRITICAL (Blocks Core Functionality)
 
-### 1. Voxel Selection System ❌ 0%
+### 1. Voxel Selection System ✅ 100%
 **Why Critical:** Required for Cut/Copy/Paste functionality  
-**Status:** Not started  
-**Effort:** 2-3 weeks  
-**Files:** New files needed in `editor/`
+**Status:** **COMPLETE** ✅  
+**Effort:** 2-3 weeks (COMPLETED)  
+**Files:** `editor/SelectionManager.h/cpp`, `editor/SelectionRenderer.h/cpp`
 
-**What's Missing:**
-- Box selection with mouse drag
-- Selection visualization (outline, highlight)
-- Selection data structure and storage
-- Selection manipulation (move, rotate, scale)
-- Selection clipboard
+**Implemented Features:**
+- ✅ Box selection with mouse drag
+- ✅ Selection visualization (outline, highlight) via SelectionRenderer
+- ✅ Selection data structure and storage (VoxelSelection, VoxelPosition)
+- ✅ Selection manipulation (move, delete)
+- ✅ Selection clipboard (copy, cut, paste)
+- ✅ Paste preview functionality
+- ✅ Undo/redo integration via TerraformingSystem
 
 **Dependencies:** None
 
 ---
 
-### 2. File Dialog Integration ❌ 0%
+### 2. File Dialog Integration ✅ 100% (Windows)
 **Why Critical:** Required for Open/Save/Import workflows  
-**Status:** Not started  
-**Effort:** 1 week  
-**Files:** `ui/EditorMenuBar.cpp`, new dialog implementations
+**Status:** **COMPLETE** ✅ (Windows-native implementation)  
+**Effort:** 1 week (COMPLETED)  
+**Files:** `ui/WindowsDialogManager.h/cpp`, integrated in EditorManager
 
-**What's Missing:**
-- Open file dialog for "Open World"
-- Save file dialog for "Save World As"
-- Multi-file dialog for "Import Assets"
-- NFD library integration
+**Implemented Features:**
+- ✅ Open file dialog (native Windows IFileOpenDialog)
+- ✅ Save file dialog (native Windows IFileSaveDialog)
+- ✅ Multi-file selection support
+- ✅ Folder browser dialog
+- ✅ File filters and default directory support
+- ✅ Message boxes (OK, Yes/No, etc.)
 
-**Dependencies:** Native File Dialog (NFD) library
+**Note:** Uses Windows-native dialogs instead of NFD for better OS integration  
+**Dependencies:** Windows Shell API (Windows only)
 
 ---
 
@@ -76,54 +81,80 @@
 
 ---
 
-### 5. Resource Loading Libraries ⚠️ 60%
-**Status:** Framework exists, needs actual loaders  
-**Effort:** 2-3 weeks  
-**Files:** `core/ResourceManager.cpp`, `renderer/Texture.cpp`
+### 5. Resource Loading Libraries ⚠️ 70%
+**Status:** Image and model loading implemented, needs GPU integration and audio codecs  
+**Effort:** 1-2 weeks remaining  
+**Files:** `core/ResourceManager.cpp`, `renderer/Texture.cpp`, `renderer/ModelLoader.cpp`
+
+**What's Implemented:**
+- ✅ stb_image integration for texture loading (PNG, JPG, TGA, BMP, etc.)
+- ✅ tinyobjloader integration for OBJ model loading
+- ✅ Texture::loadFromFile() with error handling
+- ✅ ModelLoader::loadModel() with full OBJ support
+- ✅ Primitive shape generation (cube, plane)
+- ✅ Mesh data structures and bounding boxes
+- ✅ Tangent space calculation for normal mapping
+- ✅ AudioEngine fully implemented with OpenAL
+- ✅ Resource management framework
 
 **What's Missing:**
-- stb_image integration for texture loading
-- tinyobjloader integration for mesh loading
-- Audio codec libraries (OGG/Vorbis, MP3)
-- GPU texture upload implementations
+- GPU texture upload from loaded images (backend-specific)
+- GPU mesh buffer creation from loaded models (backend-specific)
+- Audio codec libraries (OGG/Vorbis, MP3) - AudioEngine ready but needs codec support
 - Async loading support
+- Sphere, cylinder, cone primitive generation
 
-**Dependencies:** stb_image, tinyobjloader, libvorbis, libmpg123
+**Dependencies:** 
+- ✅ stb_image (header-only) - DONE
+- ✅ tinyobjloader - DONE (added to vcpkg.json)
+- ⚠️ libvorbis, libmpg123 (audio codecs) - TODO
 
 ---
 
-### 6. Inventory System ❌ 0%
-**Status:** Component structure exists  
+### 6. Inventory System ⚠️ 30%
+**Status:** Basic framework exists, needs UI and game integration  
 **Effort:** 2-3 weeks  
-**Files:** New files needed in `gameplay/` and `ui/`
+**Files:** `rpg/Inventory.h/cpp`, `rpg/InventoryComponent.h/cpp`, new UI files
+
+**What's Implemented:**
+- ✅ Basic Inventory class with resource management
+- ✅ Resource types (Iron, Titanium, etc.)
+- ✅ Capacity management
+- ✅ InventoryComponent for ECS
 
 **What's Missing:**
-- Complete item data structures
-- Inventory UI with drag-and-drop
-- Item stacking logic
-- Quick slots/hotbar
+- Complete item data structures (beyond resources)
+- Inventory UI with drag-and-drop (ImGui panels)
+- Item stacking logic for discrete items
+- Quick slots/hotbar UI
 - Equipment slots
 - Container support (chests, bags)
-- Integration with player
+- Full integration with player gameplay
 
-**Dependencies:** None
+**Dependencies:** None (ImGui already available)
 
 ---
 
-### 7. Crafting System ❌ 0%
-**Status:** RPG component structure exists  
+### 7. Crafting System ⚠️ 30%
+**Status:** Basic framework exists, needs recipes and UI  
 **Effort:** 2-3 weeks  
-**Files:** `rpg/CraftingSystem.cpp`, new UI files
+**Files:** `rpg/CraftingSystem.h/cpp`, new UI files
+
+**What's Implemented:**
+- ✅ CraftingSystem class structure
+- ✅ Basic crafting logic framework
+- ✅ Integration with inventory
 
 **What's Missing:**
-- Recipe system implementation
-- Crafting stations
-- Crafting UI panel
+- Recipe system implementation (data structures, JSON loading)
+- Crafting stations (workbench, furnace, etc.)
+- Crafting UI panel (ImGui)
 - Recipe discovery mechanics
 - Skill-based crafting quality
-- Integration with inventory
+- Initial set of recipes (20+ recipes)
+- Full integration with gameplay
 
-**Dependencies:** Inventory system
+**Dependencies:** Inventory system (partial)
 
 ---
 
