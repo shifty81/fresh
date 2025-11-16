@@ -2,6 +2,7 @@
 
 #include "generation/TerrainGenerator.h"
 #include "generation/NoiseGenerator.h"
+#include <glm/glm.hpp>
 #include <memory>
 #include <vector>
 

@@ -105,6 +105,9 @@ bool WindowsToastManager::showToastWithButtons(const std::string& title,
                                                ToastCallback callback,
                                                ToastType type)
 {
+    // Silence unused parameter warning
+    (void)callback;
+    
     if (!m_initialized) {
         LOG_ERROR_C("Toast Manager not initialized", "WindowsToastManager");
         return false;
@@ -177,6 +180,9 @@ std::string WindowsToastManager::buildToastXml(const std::string& title,
                                                const std::string& imagePath,
                                                const std::vector<ToastButton>& buttons)
 {
+    // Silence unused parameter warning
+    (void)type;
+    
     // Build XML for Windows toast notification
     // This is a simplified version - full implementation would use proper XML builder
     
