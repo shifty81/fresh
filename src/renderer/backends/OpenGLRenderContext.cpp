@@ -4,13 +4,41 @@
 
     #include <iostream>
 
+#ifdef _WIN32
+    // Win32 doesn't use GLFW for OpenGL in this implementation
+#else
     #include <GLFW/glfw3.h>
+#endif
 
     #include "core/Logger.h"
+#ifdef _WIN32
+    #include "core/Win32Window.h"
+#endif
     #include "core/Window.h"
 
 namespace fresh
 {
+
+// Helper struct to abstract window operations (OpenGL context is handled by window)
+struct WindowAdapter {
+    static uint32_t getWidth(void* win) {
+#ifdef _WIN32
+        auto* w = static_cast<Win32Window*>(win);
+#else
+        auto* w = static_cast<Window*>(win);
+#endif
+        return w->getWidth();
+    }
+    
+    static uint32_t getHeight(void* win) {
+#ifdef _WIN32
+        auto* w = static_cast<Win32Window*>(win);
+#else
+        auto* w = static_cast<Window*>(win);
+#endif
+        return w->getHeight();
+    }
+};
 
 // Helper classes for OpenGL resources
 class GLBuffer : public RenderBuffer
@@ -191,7 +219,7 @@ OpenGLRenderContext::~OpenGLRenderContext()
     shutdown();
 }
 
-bool OpenGLRenderContext::initialize(Window* win)
+bool OpenGLRenderContext::initialize(void* win)
 {
     LOG_INFO_C("Initializing OpenGL render context...", "OpenGLRenderContext");
 
@@ -201,8 +229,8 @@ bool OpenGLRenderContext::initialize(Window* win)
     }
 
     window = win;
-    width = window->getWidth();
-    height = window->getHeight();
+    width = WindowAdapter::getWidth(window);
+    height = WindowAdapter::getHeight(window);
 
     // Initialize GLEW for OpenGL extension loading
     if (!initializeGLEW()) {

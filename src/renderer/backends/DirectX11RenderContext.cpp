@@ -9,6 +9,9 @@
     #include <glm/gtc/type_ptr.hpp>
 
     #include "core/Logger.h"
+    #ifdef _WIN32
+        #include "core/Win32Window.h"
+    #endif
     #include "core/Window.h"
     #include "gameplay/Camera.h"
     #include "gameplay/Player.h"
@@ -24,6 +27,36 @@
 
 namespace fresh
 {
+
+// Helper struct to abstract window operations
+struct WindowAdapter {
+    static uint32_t getWidth(void* win) {
+#ifdef _WIN32
+        auto* w = static_cast<Win32Window*>(win);
+#else
+        auto* w = static_cast<Window*>(win);
+#endif
+        return w->getWidth();
+    }
+    
+    static uint32_t getHeight(void* win) {
+#ifdef _WIN32
+        auto* w = static_cast<Win32Window*>(win);
+#else
+        auto* w = static_cast<Window*>(win);
+#endif
+        return w->getHeight();
+    }
+    
+    static void* getNativeHandle(void* win) {
+#ifdef _WIN32
+        auto* w = static_cast<Win32Window*>(win);
+#else
+        auto* w = static_cast<Window*>(win);
+#endif
+        return w->getNativeWindowHandle();
+    }
+};
 
 // Helper classes for DirectX 11 resources
 class D3D11Buffer : public RenderBuffer
@@ -196,7 +229,7 @@ DirectX11RenderContext::~DirectX11RenderContext()
     shutdown();
 }
 
-bool DirectX11RenderContext::initialize(Window* win)
+bool DirectX11RenderContext::initialize(void* win)
 {
     LOG_INFO_C("Initializing DirectX 11 render context...", "DirectX11");
 
@@ -206,8 +239,8 @@ bool DirectX11RenderContext::initialize(Window* win)
     }
 
     window = win;
-    width = static_cast<int>(window->getWidth());
-    height = static_cast<int>(window->getHeight());
+    width = static_cast<int>(WindowAdapter::getWidth(window));
+    height = static_cast<int>(WindowAdapter::getHeight(window));
 
     if (!createDevice()) {
         LOG_ERROR_C("Failed to create device", "DirectX11");
@@ -548,7 +581,7 @@ bool DirectX11RenderContext::createDevice()
 bool DirectX11RenderContext::createSwapchain()
 {
     // Get native window handle
-    HWND hwnd = static_cast<HWND>(window->getNativeWindowHandle());
+    HWND hwnd = static_cast<HWND>(WindowAdapter::getNativeHandle(window));
     if (!hwnd) {
         std::cerr << "[DirectX 11] Failed to get native window handle" << std::endl;
         return false;

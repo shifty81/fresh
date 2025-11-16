@@ -24,7 +24,7 @@ public:
     DirectX11RenderContext();
     ~DirectX11RenderContext() override;
 
-    bool initialize(Window* window) override;
+    bool initialize(void* window) override;
     void shutdown() override;
     bool beginFrame() override;
     void endFrame() override;
@@ -88,7 +88,7 @@ private:
     ComPtr<ID3D11DepthStencilView> depthStencilView;
     ComPtr<ID3D11Texture2D> depthStencilBuffer;
 
-    Window* window = nullptr;
+    void* window = nullptr;  // Points to Window or Win32Window
     int width = 0;
     int height = 0;
     float clearColorValue[4] = {0.53f, 0.81f, 0.92f, 1.0f}; // Sky blue default
