@@ -11,7 +11,7 @@
     "glm",
     {
       "name": "imgui",
-      "features": ["glfw-binding", "opengl3-binding", "dx11-binding", "dx12-binding", "docking-experimental"]
+      "features": ["win32-binding", "glfw-binding", "opengl3-binding", "dx11-binding", "dx12-binding", "docking-experimental"]
     },
     "openal-soft",
     "luajit",

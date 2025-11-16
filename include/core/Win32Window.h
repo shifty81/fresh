@@ -1,0 +1,158 @@
+#pragma once
+
+#ifdef _WIN32
+
+#include <cstdint>
+#include <string>
+#include <Windows.h>
+
+namespace fresh
+{
+
+/**
+ * @brief Native Win32 window management class
+ *
+ * Handles window creation, event processing, and input management using
+ * native Win32 APIs for a fully Windows-native GUI experience.
+ */
+class Win32Window
+{
+public:
+    Win32Window(uint32_t width, uint32_t height, const std::string& title);
+    ~Win32Window();
+
+    // Prevent copying
+    Win32Window(const Win32Window&) = delete;
+    Win32Window& operator=(const Win32Window&) = delete;
+
+    /**
+     * @brief Initialize the window
+     * @param useOpenGL If true, creates an OpenGL context. If false, uses no API (for DirectX)
+     * @return true if initialization was successful, false otherwise
+     */
+    bool initialize(bool useOpenGL = false);
+
+    /**
+     * @brief Poll window events
+     */
+    void pollEvents();
+
+    /**
+     * @brief Check if window should close
+     * @return true if window should close, false otherwise
+     */
+    bool shouldClose() const
+    {
+        return m_shouldClose;
+    }
+
+    /**
+     * @brief Get the native window handle (HWND)
+     * @return HWND window handle
+     */
+    HWND getHandle() const
+    {
+        return m_hwnd;
+    }
+
+    /**
+     * @brief Get window width
+     * @return window width in pixels
+     */
+    uint32_t getWidth() const
+    {
+        return m_width;
+    }
+
+    /**
+     * @brief Get window height
+     * @return window height in pixels
+     */
+    uint32_t getHeight() const
+    {
+        return m_height;
+    }
+
+    /**
+     * @brief Get window title
+     * @return window title string
+     */
+    const std::string& getTitle() const
+    {
+        return m_title;
+    }
+
+    /**
+     * @brief Set window size
+     * @param width New width in pixels
+     * @param height New height in pixels
+     */
+    void setSize(uint32_t width, uint32_t height);
+
+    /**
+     * @brief Swap front and back buffers (for OpenGL if applicable)
+     */
+    void swapBuffers();
+
+    /**
+     * @brief Get native window handle (same as getHandle for Win32)
+     * @return Pointer to the native window handle
+     */
+    void* getNativeWindowHandle() const
+    {
+        return m_hwnd;
+    }
+
+    /**
+     * @brief Get HINSTANCE module handle
+     * @return HINSTANCE handle
+     */
+    HINSTANCE getInstance() const
+    {
+        return m_hinstance;
+    }
+
+    /**
+     * @brief Check if framebuffer was resized
+     * @return true if resized
+     */
+    bool wasFramebufferResized() const
+    {
+        return m_framebufferResized;
+    }
+
+    /**
+     * @brief Reset framebuffer resized flag
+     */
+    void resetFramebufferResizedFlag()
+    {
+        m_framebufferResized = false;
+    }
+
+private:
+    static LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+
+    bool registerWindowClass();
+    bool createWindow();
+    bool initializeOpenGL();
+
+private:
+    HWND m_hwnd;
+    HINSTANCE m_hinstance;
+    HDC m_hdc;
+    HGLRC m_hglrc; // OpenGL rendering context (if used)
+    
+    uint32_t m_width;
+    uint32_t m_height;
+    std::string m_title;
+    
+    bool m_shouldClose;
+    bool m_framebufferResized;
+    bool m_useOpenGL;
+    
+    static constexpr const wchar_t* WINDOW_CLASS_NAME = L"FreshVoxelEngineWindow";
+};
+
+} // namespace fresh
+
+#endif // _WIN32
