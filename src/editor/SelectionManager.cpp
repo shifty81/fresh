@@ -23,8 +23,10 @@ void SelectionManager::startSelection(const glm::vec3& worldPos)
     m_isSelecting = true;
     m_selection.clear();
     
-    Logger::info("Started voxel selection at ({}, {}, {})", 
-                 worldPos.x, worldPos.y, worldPos.z);
+    Logger::getInstance().info("Started voxel selection at (" + 
+                                std::to_string(worldPos.x) + ", " + 
+                                std::to_string(worldPos.y) + ", " + 
+                                std::to_string(worldPos.z) + ")", "SelectionManager");
 }
 
 void SelectionManager::updateSelection(const glm::vec3& worldPos)
@@ -48,7 +50,8 @@ void SelectionManager::finalizeSelection(VoxelWorld* world)
         buildBoxSelection(world);
         calculateBounds();
         
-        Logger::info("Finalized selection: {} voxels selected", m_selection.size());
+        Logger::getInstance().info("Finalized selection: " + 
+                                    std::to_string(m_selection.size()) + " voxels selected", "SelectionManager");
     }
 }
 
@@ -59,7 +62,7 @@ void SelectionManager::clearSelection()
     m_selectionStart = glm::vec3(0.0f);
     m_selectionEnd = glm::vec3(0.0f);
     
-    Logger::info("Cleared voxel selection");
+    Logger::getInstance().info("Cleared voxel selection", "SelectionManager");
 }
 
 bool SelectionManager::hasSelection() const
@@ -114,7 +117,7 @@ void SelectionManager::deleteSelected(VoxelWorld* world)
         world->setVoxel(pos.toWorldPos(), Voxel(VoxelType::Air));
     }
     
-    Logger::info("Deleted {} selected voxels", m_selection.size());
+    Logger::getInstance().info("Deleted " + std::to_string(m_selection.size()) + " selected voxels", "SelectionManager");
     
     // Clear selection after deletion
     clearSelection();
@@ -151,7 +154,10 @@ void SelectionManager::moveSelection(const glm::ivec3& delta, VoxelWorld* world)
     m_selection.boundsMin += delta;
     m_selection.boundsMax += delta;
     
-    Logger::info("Moved selection by ({}, {}, {})", delta.x, delta.y, delta.z);
+    Logger::getInstance().info("Moved selection by (" + 
+                                std::to_string(delta.x) + ", " + 
+                                std::to_string(delta.y) + ", " + 
+                                std::to_string(delta.z) + ")", "SelectionManager");
 }
 
 void SelectionManager::copyToClipboard(VoxelWorld* world)
@@ -163,7 +169,7 @@ void SelectionManager::copyToClipboard(VoxelWorld* world)
     // Copy selection to clipboard
     m_clipboard = m_selection;
     
-    Logger::info("Copied {} voxels to clipboard", m_clipboard.size());
+    Logger::getInstance().info("Copied " + std::to_string(m_clipboard.size()) + " voxels to clipboard", "SelectionManager");
 }
 
 void SelectionManager::cutToClipboard(VoxelWorld* world)
@@ -180,7 +186,7 @@ void SelectionManager::cutToClipboard(VoxelWorld* world)
         world->setVoxel(pos.toWorldPos(), Voxel(VoxelType::Air));
     }
     
-    Logger::info("Cut {} voxels to clipboard", m_clipboard.size());
+    Logger::getInstance().info("Cut " + std::to_string(m_clipboard.size()) + " voxels to clipboard", "SelectionManager");
     
     // Clear selection after cut
     clearSelection();
@@ -210,8 +216,11 @@ void SelectionManager::pasteFromClipboard(const glm::ivec3& pastePos, VoxelWorld
         world->setVoxel(newPos.toWorldPos(), Voxel(m_clipboard.types[i]));
     }
     
-    Logger::info("Pasted {} voxels at ({}, {}, {})", 
-                 m_clipboard.size(), pastePos.x, pastePos.y, pastePos.z);
+    Logger::getInstance().info("Pasted " + std::to_string(m_clipboard.size()) + 
+                                " voxels at (" + 
+                                std::to_string(pastePos.x) + ", " + 
+                                std::to_string(pastePos.y) + ", " + 
+                                std::to_string(pastePos.z) + ")", "SelectionManager");
 }
 
 void SelectionManager::buildBoxSelection(VoxelWorld* world)

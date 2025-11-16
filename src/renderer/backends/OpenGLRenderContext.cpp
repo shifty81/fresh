@@ -291,7 +291,14 @@ bool OpenGLRenderContext::beginFrame()
     // Update viewport size from actual framebuffer size (handles window resize)
     if (window) {
         int framebufferWidth, framebufferHeight;
-        glfwGetFramebufferSize(window->getHandle(), &framebufferWidth, &framebufferHeight);
+#ifdef _WIN32
+        auto* w = static_cast<Win32Window*>(window);
+        framebufferWidth = static_cast<int>(w->getWidth());
+        framebufferHeight = static_cast<int>(w->getHeight());
+#else
+        auto* w = static_cast<Window*>(window);
+        glfwGetFramebufferSize(w->getHandle(), &framebufferWidth, &framebufferHeight);
+#endif
         width = framebufferWidth;
         height = framebufferHeight;
     }
