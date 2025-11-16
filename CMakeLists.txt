@@ -117,6 +117,13 @@ if(NOT OpenAL_FOUND)
     message(WARNING "  vcpkg install openal-soft:x64-windows")
 endif()
 
+# Vorbis for OGG audio support
+find_package(Vorbis QUIET CONFIG)
+if(NOT Vorbis_FOUND)
+    message(WARNING "libvorbis not found. OGG audio support will be disabled.")
+    message(WARNING "  vcpkg install libvorbis:x64-windows")
+endif()
+
 # Lua for scripting
 # On Windows with vcpkg, prefer CONFIG mode to get proper target
 if(USING_VCPKG)
@@ -541,6 +548,13 @@ if(OpenAL_FOUND)
     target_link_libraries(${PROJECT_NAME} PRIVATE OpenAL::OpenAL)
     add_definitions(-DFRESH_OPENAL_AVAILABLE)
     message(STATUS "OpenAL enabled for audio support")
+endif()
+
+# Link libvorbis (OGG audio support)
+if(Vorbis_FOUND)
+    target_link_libraries(${PROJECT_NAME} PRIVATE Vorbis::vorbisfile Vorbis::vorbis Ogg::ogg)
+    add_definitions(-DFRESH_VORBIS_AVAILABLE)
+    message(STATUS "libvorbis enabled for OGG audio support")
 endif()
 
 # Link Lua (Scripting)

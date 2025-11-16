@@ -13,6 +13,11 @@
     #include <AL/alc.h>
 #endif
 
+#ifdef FRESH_VORBIS_AVAILABLE
+    #include <vorbis/codec.h>
+    #include <vorbis/vorbisfile.h>
+#endif
+
 namespace fresh
 {
 
@@ -307,6 +312,119 @@ static ALuint loadWAVFile(const std::string& path)
 
     return buffer;
 }
+
+// Helper function to load OGG file into OpenAL buffer
+#ifdef FRESH_VORBIS_AVAILABLE
+static ALuint loadOGGFile(const std::string& path)
+{
+    // Open the OGG file
+    OggVorbis_File oggFile;
+    FILE* file = nullptr;
+    
+    #ifdef _WIN32
+    errno_t err = fopen_s(&file, path.c_str(), "rb");
+    if (err != 0 || !file) {
+    #else
+    file = fopen(path.c_str(), "rb");
+    if (!file) {
+    #endif
+        std::cerr << "  Failed to open OGG file: " << path << std::endl;
+        return 0;
+    }
+    
+    // Initialize vorbis file for reading
+    if (ov_open_callbacks(file, &oggFile, nullptr, 0, OV_CALLBACKS_DEFAULT) < 0) {
+        std::cerr << "  Invalid OGG file: " << path << std::endl;
+        fclose(file);
+        return 0;
+    }
+    
+    // Get file information
+    vorbis_info* info = ov_info(&oggFile, -1);
+    if (!info) {
+        std::cerr << "  Failed to get OGG file info: " << path << std::endl;
+        ov_clear(&oggFile);
+        return 0;
+    }
+    
+    // Determine OpenAL format
+    ALenum format = 0;
+    if (info->channels == 1) {
+        format = AL_FORMAT_MONO16;
+    } else if (info->channels == 2) {
+        format = AL_FORMAT_STEREO16;
+    } else {
+        std::cerr << "  Unsupported number of channels in OGG: " << info->channels << std::endl;
+        ov_clear(&oggFile);
+        return 0;
+    }
+    
+    // Decode entire file into memory
+    std::vector<char> audioData;
+    const size_t BUFFER_SIZE = 4096;
+    char buffer[BUFFER_SIZE];
+    int bitstream;
+    long bytesRead = 0;
+    
+    do {
+        bytesRead = ov_read(&oggFile, buffer, BUFFER_SIZE, 0, 2, 1, &bitstream);
+        if (bytesRead > 0) {
+            audioData.insert(audioData.end(), buffer, buffer + bytesRead);
+        }
+    } while (bytesRead > 0);
+    
+    // Create OpenAL buffer
+    ALuint alBuffer;
+    alGenBuffers(1, &alBuffer);
+    if (alGetError() != AL_NO_ERROR) {
+        std::cerr << "  Failed to generate OpenAL buffer for OGG" << std::endl;
+        ov_clear(&oggFile);
+        return 0;
+    }
+    
+    // Upload audio data to buffer
+    alBufferData(alBuffer, format, audioData.data(), static_cast<ALsizei>(audioData.size()), 
+                 info->rate);
+    if (alGetError() != AL_NO_ERROR) {
+        std::cerr << "  Failed to upload OGG audio data to buffer" << std::endl;
+        alDeleteBuffers(1, &alBuffer);
+        ov_clear(&oggFile);
+        return 0;
+    }
+    
+    std::cout << "  Loaded OGG file: " << path << " (" << info->rate << " Hz, "
+              << info->channels << " channel(s))" << std::endl;
+    
+    // Clean up
+    ov_clear(&oggFile); // This also closes the file
+    
+    return alBuffer;
+}
+#endif
+
+#endif
+
+// Helper function to load audio file (supports WAV and OGG)
+static ALuint loadAudioFile(const std::string& path)
+{
+    // Determine file type by extension
+    std::string ext;
+    size_t dotPos = path.find_last_of('.');
+    if (dotPos != std::string::npos) {
+        ext = path.substr(dotPos + 1);
+        // Convert to lowercase for comparison
+        std::transform(ext.begin(), ext.end(), ext.begin(), ::tolower);
+    }
+    
+    #ifdef FRESH_VORBIS_AVAILABLE
+    if (ext == "ogg") {
+        return loadOGGFile(path);
+    }
+    #endif
+    
+    // Default to WAV
+    return loadWAVFile(path);
+}
 #endif
 
 int AudioEngine::play2D(const std::string& path, float volume, bool loop)
@@ -317,12 +435,10 @@ int AudioEngine::play2D(const std::string& path, float volume, bool loop)
     std::cout << "Playing 2D audio: " << path << std::endl;
 
 #ifdef FRESH_OPENAL_AVAILABLE
-    // Load audio buffer (stub for now - would need proper WAV loader)
-    ALuint buffer = loadWAVFile(path);
+    // Load audio buffer (supports WAV and OGG formats)
+    ALuint buffer = loadAudioFile(path);
     if (buffer == 0) {
         std::cerr << "  Failed to load audio file: " << path << std::endl;
-        std::cerr << "  Note: Audio file loading not yet implemented" << std::endl;
-        // Return -1 since we can't actually play without a buffer
         return -1;
     }
 
@@ -385,12 +501,10 @@ int AudioEngine::play3D(const std::string& path, const glm::vec3& position, floa
               << position.z << ")" << std::endl;
 
 #ifdef FRESH_OPENAL_AVAILABLE
-    // Load audio buffer (stub for now - would need proper WAV loader)
-    ALuint buffer = loadWAVFile(path);
+    // Load audio buffer (supports WAV and OGG formats)
+    ALuint buffer = loadAudioFile(path);
     if (buffer == 0) {
         std::cerr << "  Failed to load audio file: " << path << std::endl;
-        std::cerr << "  Note: Audio file loading not yet implemented" << std::endl;
-        // Return -1 since we can't actually play without a buffer
         return -1;
     }
 
@@ -542,12 +656,10 @@ void AudioEngine::playMusic(const std::string& path, float volume, bool loop)
     std::cout << "Playing music: " << path << std::endl;
 
 #ifdef FRESH_OPENAL_AVAILABLE
-    // Load audio buffer for music
-    ALuint buffer = loadWAVFile(path);
+    // Load audio buffer for music (supports WAV and OGG formats)
+    ALuint buffer = loadAudioFile(path);
     if (buffer == 0) {
         std::cerr << "  Failed to load music file: " << path << std::endl;
-        std::cerr << "  Note: Audio file loading not yet implemented" << std::endl;
-        // Can't play music without a valid buffer
         return;
     }
 
