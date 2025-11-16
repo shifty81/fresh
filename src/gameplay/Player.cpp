@@ -66,7 +66,7 @@ void Player::applyGravity(float deltaTime)
     if (!isGrounded) {
         velocity.y -= gravity * deltaTime;
         // Terminal velocity
-        velocity.y = std::max(velocity.y, -50.0f);
+        velocity.y = (std::max)(velocity.y, -50.0f);
     } else {
         // Small downward velocity when grounded to stick to terrain
         velocity.y = -0.1f;
