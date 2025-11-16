@@ -32,6 +32,7 @@ If you're new to Fresh Voxel Engine, follow this path:
 - **[CONTROLS.md](CONTROLS.md)** - Complete control reference
 - **[docs/EDITOR_INTEGRATION.md](docs/EDITOR_INTEGRATION.md)** - Editor UI and usage
 - **[docs/TERRAFORMING.md](docs/TERRAFORMING.md)** - World editing tools
+- **[VOXEL_SELECTION_SYSTEM.md](VOXEL_SELECTION_SYSTEM.md)** - 🆕 Voxel selection, Cut/Copy/Paste
 - **[textures/USAGE.md](textures/USAGE.md)** - Texture system and assets
 
 ### System Documentation
