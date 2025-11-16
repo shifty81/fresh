@@ -7,8 +7,17 @@
 namespace fresh
 {
 
+#ifdef _WIN32
+class Win32Window;
+class Win32InputManager;
+using WindowType = Win32Window;
+using InputManagerType = Win32InputManager;
+#else
 class Window;
 class InputManager;
+using WindowType = Window;
+using InputManagerType = InputManager;
+#endif
 
 /**
  * @brief Settings Panel for game configuration
@@ -30,7 +39,7 @@ public:
      * @param inputManager Input manager reference for sensitivity changes
      * @return true if successful
      */
-    bool initialize(Window* window, InputManager* inputManager);
+    bool initialize(WindowType* window, InputManagerType* inputManager);
 
     /**
      * @brief Render the settings panel UI
@@ -82,8 +91,8 @@ private:
 
 private:
     bool m_visible;
-    Window* m_window;
-    InputManager* m_inputManager;
+    WindowType* m_window;
+    InputManagerType* m_inputManager;
 
     // Video Settings
     struct Resolution
