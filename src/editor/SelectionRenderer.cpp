@@ -17,12 +17,12 @@ SelectionRenderer::~SelectionRenderer() = default;
 bool SelectionRenderer::initialize(devtools::DebugRenderer* debugRenderer)
 {
     if (debugRenderer == nullptr) {
-        Logger::error("Cannot initialize SelectionRenderer with null DebugRenderer");
+        Logger::getInstance().error("Cannot initialize SelectionRenderer with null DebugRenderer", "SelectionRenderer");
         return false;
     }
 
     m_debugRenderer = debugRenderer;
-    Logger::info("SelectionRenderer initialized");
+    Logger::getInstance().info("SelectionRenderer initialized", "SelectionRenderer");
     return true;
 }
 
