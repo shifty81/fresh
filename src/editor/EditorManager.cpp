@@ -5,6 +5,7 @@
 #include "editor/WorldEditor.h"
 #include "editor/SelectionManager.h"
 #include "editor/SelectionRenderer.h"
+#include "serialization/WorldSerializer.h"
 #include "devtools/DebugRenderer.h"
 #include "renderer/RenderContext.h"
 #include "ui/ConsolePanel.h"
@@ -250,6 +251,10 @@ bool EditorManager::initialize(Window* window, IRenderContext* renderContext, Vo
             return false;
         }
         LOG_INFO_C("Selection Renderer initialized", "EditorManager");
+        
+        // Initialize world serializer
+        m_worldSerializer = std::make_unique<WorldSerializer>();
+        LOG_INFO_C("World Serializer initialized", "EditorManager");
     } else {
         LOG_INFO_C("World and WorldEditor not provided, deferring initialization of world-dependent panels", "EditorManager");
     }
@@ -321,7 +326,7 @@ bool EditorManager::initialize(Window* window, IRenderContext* renderContext, Vo
     // Set up file dialog callbacks now that WindowsDialogManager is initialized
     if (m_menuBar && m_windowsDialogManager && m_windowsDialogManager->isInitialized()) {
         // Set Load World callback - Show Open File dialog
-        m_menuBar->setLoadWorldCallback([this]() {
+        m_menuBar->setLoadWorldCallback([this, world]() {
             LOG_INFO_C("Opening Load World dialog", "EditorManager");
             
             std::vector<FileFilter> filters = {
@@ -336,21 +341,42 @@ bool EditorManager::initialize(Window* window, IRenderContext* renderContext, Vo
                 const std::string& worldPath = selectedFiles[0];
                 LOG_INFO_C("User selected world file: " + worldPath, "EditorManager");
                 
-                // TODO: Call actual world loading function
-                // For now, just show confirmation
-                m_windowsDialogManager->showMessageBox(
-                    "Load World",
-                    "World loading will be implemented here.\nSelected: " + worldPath,
-                    MessageBoxButtons::OK,
-                    MessageBoxIcon::Information
-                );
+                // Use WorldSerializer to load the world
+                if (m_worldSerializer && world) {
+                    // Clear existing world
+                    world->clear();
+                    
+                    // Load the world
+                    if (m_worldSerializer->loadWorld(world, worldPath)) {
+                        m_currentWorldPath = worldPath;
+                        LOG_INFO_C("World loaded successfully from: " + worldPath, "EditorManager");
+                        
+                        m_windowsDialogManager->showMessageBox(
+                            "Load World",
+                            "World loaded successfully!",
+                            MessageBoxButtons::OK,
+                            MessageBoxIcon::Information
+                        );
+                    } else {
+                        LOG_ERROR_C("Failed to load world from: " + worldPath, "EditorManager");
+                        
+                        m_windowsDialogManager->showMessageBox(
+                            "Load World Error",
+                            "Failed to load world file.\nPlease check the console for details.",
+                            MessageBoxButtons::OK,
+                            MessageBoxIcon::Error
+                        );
+                    }
+                } else {
+                    LOG_ERROR_C("WorldSerializer or World not available", "EditorManager");
+                }
             } else {
                 LOG_INFO_C("Load World dialog cancelled", "EditorManager");
             }
         });
         
         // Set Save World As callback - Show Save File dialog
-        m_menuBar->setSaveWorldAsCallback([this]() {
+        m_menuBar->setSaveWorldAsCallback([this, world]() {
             LOG_INFO_C("Opening Save World As dialog", "EditorManager");
             
             std::vector<FileFilter> filters = {
@@ -362,34 +388,96 @@ bool EditorManager::initialize(Window* window, IRenderContext* renderContext, Vo
                 "Save World As", "NewWorld.world", filters);
             
             if (!savePath.empty()) {
+                // Ensure .world extension
+                if (savePath.find(".world") == std::string::npos) {
+                    savePath += ".world";
+                }
+                
                 LOG_INFO_C("User selected save location: " + savePath, "EditorManager");
                 
-                // TODO: Call actual world saving function
-                // For now, just show confirmation
-                m_windowsDialogManager->showMessageBox(
-                    "Save World",
-                    "World saving will be implemented here.\nSave to: " + savePath,
-                    MessageBoxButtons::OK,
-                    MessageBoxIcon::Information
-                );
+                // Use WorldSerializer to save the world
+                if (m_worldSerializer && world) {
+                    if (m_worldSerializer->saveWorld(world, savePath)) {
+                        m_currentWorldPath = savePath;
+                        LOG_INFO_C("World saved successfully to: " + savePath, "EditorManager");
+                        
+                        m_windowsDialogManager->showMessageBox(
+                            "Save World",
+                            "World saved successfully!",
+                            MessageBoxButtons::OK,
+                            MessageBoxIcon::Information
+                        );
+                    } else {
+                        LOG_ERROR_C("Failed to save world to: " + savePath, "EditorManager");
+                        
+                        m_windowsDialogManager->showMessageBox(
+                            "Save World Error",
+                            "Failed to save world file.\nPlease check the console for details.",
+                            MessageBoxButtons::OK,
+                            MessageBoxIcon::Error
+                        );
+                    }
+                } else {
+                    LOG_ERROR_C("WorldSerializer or World not available", "EditorManager");
+                }
             } else {
                 LOG_INFO_C("Save World As dialog cancelled", "EditorManager");
             }
         });
         
         // Set Save World callback - Quick save to current file
-        m_menuBar->setSaveWorldCallback([this]() {
+        m_menuBar->setSaveWorldCallback([this, world]() {
             LOG_INFO_C("Quick save triggered", "EditorManager");
             
-            // TODO: If world has a file path, save to it directly
-            // Otherwise, show Save As dialog
-            
-            m_windowsDialogManager->showMessageBox(
-                "Save World",
-                "Quick save will be implemented here.\nThis will save to the current world file.",
-                MessageBoxButtons::OK,
-                MessageBoxIcon::Information
-            );
+            // If we have a current world path, save directly
+            if (!m_currentWorldPath.empty() && m_worldSerializer && world) {
+                if (m_worldSerializer->saveWorld(world, m_currentWorldPath)) {
+                    LOG_INFO_C("World saved successfully to: " + m_currentWorldPath, "EditorManager");
+                } else {
+                    LOG_ERROR_C("Failed to save world to: " + m_currentWorldPath, "EditorManager");
+                    
+                    m_windowsDialogManager->showMessageBox(
+                        "Save World Error",
+                        "Failed to save world file.\nPlease check the console for details.",
+                        MessageBoxButtons::OK,
+                        MessageBoxIcon::Error
+                    );
+                }
+            } else {
+                // No current path, trigger Save As dialog
+                LOG_INFO_C("No current world path, opening Save As dialog", "EditorManager");
+                
+                std::vector<FileFilter> filters = {
+                    {"Fresh World Files", "*.world"},
+                    {"All Files", "*.*"}
+                };
+                
+                std::string savePath = m_windowsDialogManager->showSaveFileDialog(
+                    "Save World", "NewWorld.world", filters);
+                
+                if (!savePath.empty()) {
+                    // Ensure .world extension
+                    if (savePath.find(".world") == std::string::npos) {
+                        savePath += ".world";
+                    }
+                    
+                    if (m_worldSerializer && world) {
+                        if (m_worldSerializer->saveWorld(world, savePath)) {
+                            m_currentWorldPath = savePath;
+                            LOG_INFO_C("World saved successfully to: " + savePath, "EditorManager");
+                        } else {
+                            LOG_ERROR_C("Failed to save world to: " + savePath, "EditorManager");
+                            
+                            m_windowsDialogManager->showMessageBox(
+                                "Save World Error",
+                                "Failed to save world file.\nPlease check the console for details.",
+                                MessageBoxButtons::OK,
+                                MessageBoxIcon::Error
+                            );
+                        }
+                    }
+                }
+            }
         });
         
         // Override Import Assets callback to use Windows dialog

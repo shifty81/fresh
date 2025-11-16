@@ -22,6 +22,7 @@ class SettingsPanel;
 class HotbarPanel;
 class SelectionManager;
 class SelectionRenderer;
+class WorldSerializer;
 
 namespace devtools
 {
@@ -246,6 +247,7 @@ private:
     std::unique_ptr<SelectionManager> m_selectionManager;
     std::unique_ptr<SelectionRenderer> m_selectionRenderer;
     std::unique_ptr<devtools::DebugRenderer> m_debugRenderer;
+    std::unique_ptr<WorldSerializer> m_worldSerializer;
 
 #ifdef _WIN32
     // Windows-native integration managers
@@ -267,6 +269,9 @@ private:
     bool m_showContentBrowser;
     bool m_showConsole;
     bool m_showToolPalette;
+    
+    // World file path
+    std::string m_currentWorldPath;
 };
 
 } // namespace fresh
