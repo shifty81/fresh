@@ -13,6 +13,8 @@ SelectionManager::SelectionManager()
     , m_selectionStart(0.0f)
     , m_selectionEnd(0.0f)
     , m_terraformingSystem(nullptr)
+    , m_pastePreviewActive(false)
+    , m_pastePreviewPosition(0)
 {
 }
 
@@ -370,6 +372,88 @@ void SelectionManager::calculateBounds()
         m_selection.boundsMax.y = std::max(m_selection.boundsMax.y, pos.y);
         m_selection.boundsMax.z = std::max(m_selection.boundsMax.z, pos.z);
     }
+}
+
+void SelectionManager::enablePastePreview(const glm::ivec3& pastePos)
+{
+    if (m_clipboard.isEmpty()) {
+        Logger::getInstance().warning("Cannot enable paste preview - clipboard is empty", "SelectionManager");
+        return;
+    }
+    
+    m_pastePreviewActive = true;
+    m_pastePreviewPosition = pastePos;
+    
+    Logger::getInstance().info("Enabled paste preview at (" + 
+                                std::to_string(pastePos.x) + ", " + 
+                                std::to_string(pastePos.y) + ", " + 
+                                std::to_string(pastePos.z) + ")", "SelectionManager");
+}
+
+void SelectionManager::updatePastePreview(const glm::ivec3& pastePos)
+{
+    if (!m_pastePreviewActive) {
+        return;
+    }
+    
+    m_pastePreviewPosition = pastePos;
+}
+
+void SelectionManager::disablePastePreview()
+{
+    if (m_pastePreviewActive) {
+        Logger::getInstance().info("Disabled paste preview", "SelectionManager");
+    }
+    
+    m_pastePreviewActive = false;
+}
+
+bool SelectionManager::getPastePreviewData(std::vector<VoxelPosition>& positions,
+                                           std::vector<VoxelType>& types) const
+{
+    if (!m_pastePreviewActive || m_clipboard.isEmpty()) {
+        return false;
+    }
+    
+    // Calculate offset from clipboard bounds to preview position
+    glm::ivec3 offset = m_pastePreviewPosition - m_clipboard.boundsMin;
+    
+    // Clear output vectors
+    positions.clear();
+    types.clear();
+    
+    // Reserve space for efficiency
+    positions.reserve(m_clipboard.positions.size());
+    types.reserve(m_clipboard.types.size());
+    
+    // Transform clipboard positions to preview positions
+    for (size_t i = 0; i < m_clipboard.positions.size(); ++i) {
+        VoxelPosition previewPos(
+            m_clipboard.positions[i].x + offset.x,
+            m_clipboard.positions[i].y + offset.y,
+            m_clipboard.positions[i].z + offset.z
+        );
+        positions.push_back(previewPos);
+        types.push_back(m_clipboard.types[i]);
+    }
+    
+    return true;
+}
+
+bool SelectionManager::getPastePreviewBounds(glm::ivec3& min, glm::ivec3& max) const
+{
+    if (!m_pastePreviewActive || m_clipboard.isEmpty()) {
+        return false;
+    }
+    
+    // Calculate offset from clipboard bounds to preview position
+    glm::ivec3 offset = m_pastePreviewPosition - m_clipboard.boundsMin;
+    
+    // Transform clipboard bounds to preview bounds
+    min = m_clipboard.boundsMin + offset;
+    max = m_clipboard.boundsMax + offset;
+    
+    return true;
 }
 
 } // namespace fresh

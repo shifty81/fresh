@@ -192,6 +192,50 @@ public:
         m_terraformingSystem = system;
     }
 
+    // Paste preview functionality
+    /**
+     * @brief Enable paste preview mode
+     * @param pastePos Position where paste will occur
+     */
+    void enablePastePreview(const glm::ivec3& pastePos);
+
+    /**
+     * @brief Update paste preview position
+     * @param pastePos New position for preview
+     */
+    void updatePastePreview(const glm::ivec3& pastePos);
+
+    /**
+     * @brief Disable paste preview mode
+     */
+    void disablePastePreview();
+
+    /**
+     * @brief Check if paste preview is active
+     * @return true if preview is showing
+     */
+    bool isPastePreviewActive() const
+    {
+        return m_pastePreviewActive;
+    }
+
+    /**
+     * @brief Get paste preview data for rendering
+     * @param positions Output vector of preview positions
+     * @param types Output vector of preview voxel types
+     * @return true if preview is active and has data
+     */
+    bool getPastePreviewData(std::vector<VoxelPosition>& positions,
+                             std::vector<VoxelType>& types) const;
+
+    /**
+     * @brief Get paste preview bounds for rendering
+     * @param min Output minimum corner
+     * @param max Output maximum corner
+     * @return true if preview is active
+     */
+    bool getPastePreviewBounds(glm::ivec3& min, glm::ivec3& max) const;
+
 private:
     /**
      * @brief Build selection from box defined by start and end points
@@ -218,6 +262,10 @@ private:
     
     // Undo/redo integration
     class TerraformingSystem* m_terraformingSystem;
+    
+    // Paste preview state
+    bool m_pastePreviewActive;
+    glm::ivec3 m_pastePreviewPosition;
 };
 
 } // namespace fresh
