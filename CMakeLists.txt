@@ -361,6 +361,8 @@ if(imgui_FOUND)
     # Add Windows-native UI features on Windows
     if(WIN32)
         list(APPEND ENGINE_SOURCES
+            src/core/Win32Window.cpp
+            src/input/Win32InputManager.cpp
             src/ui/WindowsThemeManager.cpp
             src/ui/WindowsDialogManager.cpp
             src/ui/WindowsTaskbarManager.cpp

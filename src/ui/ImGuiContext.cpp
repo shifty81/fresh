@@ -5,10 +5,19 @@
 #include "renderer/GraphicsAPI.h"
 #include "renderer/RenderContext.h"
 
+#ifdef _WIN32
+    #include "core/Win32Window.h"
+#endif
+
 #ifdef FRESH_IMGUI_AVAILABLE
     // ImGui headers
     #include <imgui.h>
+    
+    // Platform backends
     #include <imgui_impl_glfw.h>
+    #ifdef _WIN32
+        #include <imgui_impl_win32.h>
+    #endif
 
     // Backend-specific headers
     #if defined(FRESH_OPENGL_SUPPORT) && defined(FRESH_GLEW_AVAILABLE)
@@ -34,6 +43,10 @@ ImGuiContext::ImGuiContext()
       m_window(nullptr),
       m_renderContext(nullptr),
       m_backendRenderContext(nullptr)
+#ifdef _WIN32
+      ,m_win32Window(nullptr),
+      m_usingWin32(false)
+#endif
 {
 }
 
@@ -324,6 +337,241 @@ bool ImGuiContext::initialize(Window* window, IRenderContext* renderContext)
 #endif // FRESH_IMGUI_AVAILABLE
 }
 
+#ifdef _WIN32
+bool ImGuiContext::initializeWin32(Win32Window* window, IRenderContext* renderContext)
+{
+#ifndef FRESH_IMGUI_AVAILABLE
+    (void)window;
+    (void)renderContext;
+    LOG_WARNING_C("ImGui not available - Editor UI disabled", "ImGuiContext");
+    return false;
+#else
+    if (m_initialized) {
+        LOG_WARNING_C("ImGuiContext already initialized", "ImGuiContext");
+        return true;
+    }
+
+    if (!window || !renderContext) {
+        LOG_ERROR_C("Invalid window or render context", "ImGuiContext");
+        return false;
+    }
+
+    m_win32Window = window;
+    m_renderContext = renderContext;
+    m_usingWin32 = true;
+
+    // Setup Dear ImGui context
+    IMGUI_CHECKVERSION();
+    ::ImGui::CreateContext();
+    ImGuiIO& io = ::ImGui::GetIO();
+
+    // Enable keyboard and gamepad navigation
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;
+
+    // Enable docking (optional, for advanced layouts)
+    #ifdef IMGUI_HAS_DOCK
+    io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+    #endif
+
+    // Setup Dear ImGui style - Modern Dark Theme with readable text
+    ::ImGui::StyleColorsDark();
+
+    // Customize style for modern game engine look with better readability
+    ImGuiStyle& style = ::ImGui::GetStyle();
+    
+    // Rounding
+    style.WindowRounding = 6.0f;
+    style.FrameRounding = 4.0f;
+    style.ScrollbarRounding = 4.0f;
+    style.GrabRounding = 4.0f;
+    style.TabRounding = 4.0f;
+    style.ChildRounding = 4.0f;
+    style.PopupRounding = 4.0f;
+    
+    // Borders
+    style.WindowBorderSize = 1.0f;
+    style.FrameBorderSize = 1.0f;
+    style.PopupBorderSize = 1.0f;
+    style.TabBorderSize = 0.0f;
+    
+    // Spacing
+    style.WindowPadding = ImVec2(12.0f, 12.0f);
+    style.FramePadding = ImVec2(8.0f, 4.0f);
+    style.ItemSpacing = ImVec2(8.0f, 6.0f);
+    style.ItemInnerSpacing = ImVec2(6.0f, 6.0f);
+    
+    // Apply the same color scheme as GLFW version
+    ImVec4* colors = style.Colors;
+    
+    // Background colors - Very dark with slight blue tint
+    colors[ImGuiCol_WindowBg] = ImVec4(0.10f, 0.11f, 0.13f, 1.00f);
+    colors[ImGuiCol_ChildBg] = ImVec4(0.12f, 0.13f, 0.15f, 1.00f);
+    colors[ImGuiCol_PopupBg] = ImVec4(0.10f, 0.11f, 0.13f, 0.98f);
+    colors[ImGuiCol_MenuBarBg] = ImVec4(0.08f, 0.09f, 0.11f, 1.00f);
+    
+    // Border colors
+    colors[ImGuiCol_Border] = ImVec4(0.25f, 0.28f, 0.35f, 0.50f);
+    colors[ImGuiCol_BorderShadow] = ImVec4(0.00f, 0.00f, 0.00f, 0.00f);
+    
+    // Frame/input colors
+    colors[ImGuiCol_FrameBg] = ImVec4(0.15f, 0.16f, 0.19f, 1.00f);
+    colors[ImGuiCol_FrameBgHovered] = ImVec4(0.18f, 0.20f, 0.24f, 1.00f);
+    colors[ImGuiCol_FrameBgActive] = ImVec4(0.20f, 0.22f, 0.27f, 1.00f);
+    
+    // Title bar
+    colors[ImGuiCol_TitleBg] = ImVec4(0.08f, 0.09f, 0.11f, 1.00f);
+    colors[ImGuiCol_TitleBgActive] = ImVec4(0.12f, 0.14f, 0.18f, 1.00f);
+    colors[ImGuiCol_TitleBgCollapsed] = ImVec4(0.08f, 0.09f, 0.11f, 0.75f);
+    
+    // Tabs
+    colors[ImGuiCol_Tab] = ImVec4(0.12f, 0.13f, 0.16f, 1.00f);
+    colors[ImGuiCol_TabHovered] = ImVec4(0.28f, 0.48f, 0.70f, 0.80f);
+    colors[ImGuiCol_TabActive] = ImVec4(0.22f, 0.38f, 0.58f, 1.00f);
+    colors[ImGuiCol_TabUnfocused] = ImVec4(0.10f, 0.11f, 0.13f, 1.00f);
+    colors[ImGuiCol_TabUnfocusedActive] = ImVec4(0.15f, 0.18f, 0.22f, 1.00f);
+    
+    // Buttons
+    colors[ImGuiCol_Button] = ImVec4(0.20f, 0.35f, 0.55f, 1.00f);
+    colors[ImGuiCol_ButtonHovered] = ImVec4(0.28f, 0.48f, 0.70f, 1.00f);
+    colors[ImGuiCol_ButtonActive] = ImVec4(0.18f, 0.32f, 0.50f, 1.00f);
+    
+    // Headers
+    colors[ImGuiCol_Header] = ImVec4(0.20f, 0.25f, 0.30f, 1.00f);
+    colors[ImGuiCol_HeaderHovered] = ImVec4(0.28f, 0.48f, 0.70f, 0.80f);
+    colors[ImGuiCol_HeaderActive] = ImVec4(0.28f, 0.48f, 0.70f, 1.00f);
+    
+    // Separators
+    colors[ImGuiCol_Separator] = ImVec4(0.25f, 0.28f, 0.35f, 0.50f);
+    colors[ImGuiCol_SeparatorHovered] = ImVec4(0.28f, 0.48f, 0.70f, 0.78f);
+    colors[ImGuiCol_SeparatorActive] = ImVec4(0.28f, 0.48f, 0.70f, 1.00f);
+    
+    // Scrollbar
+    colors[ImGuiCol_ScrollbarBg] = ImVec4(0.10f, 0.11f, 0.13f, 1.00f);
+    colors[ImGuiCol_ScrollbarGrab] = ImVec4(0.25f, 0.28f, 0.35f, 1.00f);
+    colors[ImGuiCol_ScrollbarGrabHovered] = ImVec4(0.35f, 0.38f, 0.45f, 1.00f);
+    colors[ImGuiCol_ScrollbarGrabActive] = ImVec4(0.45f, 0.48f, 0.55f, 1.00f);
+    
+    // Sliders
+    colors[ImGuiCol_SliderGrab] = ImVec4(0.28f, 0.48f, 0.70f, 1.00f);
+    colors[ImGuiCol_SliderGrabActive] = ImVec4(0.35f, 0.58f, 0.85f, 1.00f);
+    
+    // Checkboxes
+    colors[ImGuiCol_CheckMark] = ImVec4(0.35f, 0.65f, 0.95f, 1.00f);
+    
+    // Resize grip
+    colors[ImGuiCol_ResizeGrip] = ImVec4(0.20f, 0.35f, 0.55f, 0.50f);
+    colors[ImGuiCol_ResizeGripHovered] = ImVec4(0.28f, 0.48f, 0.70f, 0.67f);
+    colors[ImGuiCol_ResizeGripActive] = ImVec4(0.28f, 0.48f, 0.70f, 0.95f);
+    
+    // Text colors
+    colors[ImGuiCol_Text] = ImVec4(0.95f, 0.96f, 0.98f, 1.00f);
+    colors[ImGuiCol_TextDisabled] = ImVec4(0.50f, 0.52f, 0.55f, 1.00f);
+    colors[ImGuiCol_TextSelectedBg] = ImVec4(0.28f, 0.48f, 0.70f, 0.35f);
+    
+    // Docking
+    colors[ImGuiCol_DockingPreview] = ImVec4(0.28f, 0.48f, 0.70f, 0.70f);
+    colors[ImGuiCol_DockingEmptyBg] = ImVec4(0.10f, 0.11f, 0.13f, 1.00f);
+    
+    // Plot colors
+    colors[ImGuiCol_PlotLines] = ImVec4(0.61f, 0.61f, 0.61f, 1.00f);
+    colors[ImGuiCol_PlotLinesHovered] = ImVec4(1.00f, 0.43f, 0.35f, 1.00f);
+    colors[ImGuiCol_PlotHistogram] = ImVec4(0.28f, 0.48f, 0.70f, 1.00f);
+    colors[ImGuiCol_PlotHistogramHovered] = ImVec4(0.35f, 0.58f, 0.85f, 1.00f);
+    
+    // Tables
+    colors[ImGuiCol_TableHeaderBg] = ImVec4(0.15f, 0.16f, 0.19f, 1.00f);
+    colors[ImGuiCol_TableBorderStrong] = ImVec4(0.25f, 0.28f, 0.35f, 1.00f);
+    colors[ImGuiCol_TableBorderLight] = ImVec4(0.20f, 0.22f, 0.27f, 1.00f);
+    colors[ImGuiCol_TableRowBg] = ImVec4(0.00f, 0.00f, 0.00f, 0.00f);
+    colors[ImGuiCol_TableRowBgAlt] = ImVec4(1.00f, 1.00f, 1.00f, 0.06f);
+    
+    // Drag and drop
+    colors[ImGuiCol_DragDropTarget] = ImVec4(0.28f, 0.48f, 0.70f, 0.90f);
+    
+    // Navigation
+    colors[ImGuiCol_NavHighlight] = ImVec4(0.28f, 0.48f, 0.70f, 1.00f);
+    colors[ImGuiCol_NavWindowingHighlight] = ImVec4(1.00f, 1.00f, 1.00f, 0.70f);
+    colors[ImGuiCol_NavWindowingDimBg] = ImVec4(0.80f, 0.80f, 0.80f, 0.20f);
+    
+    // Modal window dimming
+    colors[ImGuiCol_ModalWindowDimBg] = ImVec4(0.05f, 0.05f, 0.05f, 0.75f);
+
+    // Initialize Win32 platform backend
+    bool platformInitialized = ImGui_ImplWin32_Init(window->getHandle());
+    if (!platformInitialized) {
+        LOG_ERROR_C("Failed to initialize ImGui Win32 backend", "ImGuiContext");
+        ::ImGui::DestroyContext();
+        return false;
+    }
+
+    // Initialize DirectX graphics backend
+    GraphicsAPI api = renderContext->getAPI();
+    bool backendInitialized = false;
+
+    switch (api) {
+    #ifdef FRESH_DIRECTX_SUPPORT
+    case GraphicsAPI::DirectX11: {
+        DirectX11RenderContext* dx11Context =
+            dynamic_cast<DirectX11RenderContext*>(renderContext);
+        if (dx11Context) {
+            m_backendRenderContext = dx11Context;
+            ID3D11Device* device = dx11Context->getD3D11Device();
+            ID3D11DeviceContext* deviceContext = dx11Context->getD3D11DeviceContext();
+
+            if (device && deviceContext) {
+                backendInitialized = ImGui_ImplDX11_Init(device, deviceContext);
+                if (backendInitialized) {
+                    LOG_INFO_C("ImGui DirectX 11 backend initialized", "ImGuiContext");
+                }
+            }
+        }
+        break;
+    }
+
+    case GraphicsAPI::DirectX12: {
+        DirectX12RenderContext* dx12Context =
+            dynamic_cast<DirectX12RenderContext*>(renderContext);
+        if (dx12Context) {
+            m_backendRenderContext = dx12Context;
+            ID3D12Device* device = dx12Context->getD3D12Device();
+            ID3D12DescriptorHeap* srvHeap = dx12Context->getSRVDescriptorHeap();
+
+            if (device && srvHeap) {
+                backendInitialized = ImGui_ImplDX12_Init(
+                    device, DirectX12RenderContext::FRAME_COUNT, dx12Context->getRTVFormat(),
+                    srvHeap, srvHeap->GetCPUDescriptorHandleForHeapStart(),
+                    srvHeap->GetGPUDescriptorHandleForHeapStart());
+
+                if (backendInitialized) {
+                    LOG_INFO_C("ImGui DirectX 12 backend initialized", "ImGuiContext");
+                }
+            }
+        }
+        break;
+    }
+    #endif
+
+    default:
+        LOG_ERROR_C("Unsupported graphics API for ImGui with Win32", "ImGuiContext");
+        backendInitialized = false;
+        break;
+    }
+
+    if (!backendInitialized) {
+        LOG_ERROR_C("Failed to initialize ImGui graphics backend", "ImGuiContext");
+        ImGui_ImplWin32_Shutdown();
+        ::ImGui::DestroyContext();
+        return false;
+    }
+
+    m_initialized = true;
+    LOG_INFO_C("ImGui Win32 context initialized successfully", "ImGuiContext");
+    return true;
+#endif // FRESH_IMGUI_AVAILABLE
+}
+#endif // _WIN32
+
 void ImGuiContext::newFrame()
 {
 #ifdef FRESH_IMGUI_AVAILABLE
@@ -355,7 +603,16 @@ void ImGuiContext::newFrame()
         break;
     }
 
+#ifdef _WIN32
+    if (m_usingWin32) {
+        ImGui_ImplWin32_NewFrame();
+    } else {
+        ImGui_ImplGlfw_NewFrame();
+    }
+#else
     ImGui_ImplGlfw_NewFrame();
+#endif
+    
     ::ImGui::NewFrame();
 #endif // FRESH_IMGUI_AVAILABLE
 }
@@ -428,13 +685,25 @@ void ImGuiContext::shutdown()
     if (!m_renderContext) {
         LOG_WARNING_C("Render context is null during shutdown, skipping backend cleanup",
                       "ImGuiContext");
-        // Still need to cleanup ImGui and GLFW
+        // Still need to cleanup ImGui and platform backend
+#ifdef _WIN32
+        if (m_usingWin32) {
+            ImGui_ImplWin32_Shutdown();
+        } else {
+            ImGui_ImplGlfw_Shutdown();
+        }
+#else
         ImGui_ImplGlfw_Shutdown();
+#endif
         ::ImGui::DestroyContext();
         m_initialized = false;
         m_backendRenderContext = nullptr;
-        m_renderContext = nullptr; // Ensure it's null
-        m_window = nullptr;        // Clear the window pointer as well
+        m_renderContext = nullptr;
+        m_window = nullptr;
+#ifdef _WIN32
+        m_win32Window = nullptr;
+        m_usingWin32 = false;
+#endif
         return;
     }
 
@@ -461,16 +730,28 @@ void ImGuiContext::shutdown()
         break;
     }
 
-    // Shutdown GLFW backend
+    // Shutdown platform backend
+#ifdef _WIN32
+    if (m_usingWin32) {
+        ImGui_ImplWin32_Shutdown();
+    } else {
+        ImGui_ImplGlfw_Shutdown();
+    }
+#else
     ImGui_ImplGlfw_Shutdown();
+#endif
 
     // Destroy ImGui context
     ::ImGui::DestroyContext();
 
     m_initialized = false;
     m_backendRenderContext = nullptr;
-    m_renderContext = nullptr; // Clear the render context pointer to avoid dangling pointer
-    m_window = nullptr;        // Clear the window pointer as well
+    m_renderContext = nullptr;
+    m_window = nullptr;
+#ifdef _WIN32
+    m_win32Window = nullptr;
+    m_usingWin32 = false;
+#endif
     LOG_INFO_C("ImGui context shutdown", "ImGuiContext");
 #endif // FRESH_IMGUI_AVAILABLE
 }

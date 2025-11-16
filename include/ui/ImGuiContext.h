@@ -2,13 +2,23 @@
 
 #include <memory>
 
+// Forward declarations for platform-specific types
 struct GLFWwindow;
+
+#ifdef _WIN32
+struct HWND__;
+typedef HWND__* HWND;
+#endif
 
 namespace fresh
 {
 
 class Window;
 class IRenderContext;
+
+#ifdef _WIN32
+class Win32Window;
+#endif
 
 /**
  * @brief Manages ImGui context and integration
@@ -28,11 +38,21 @@ public:
 
     /**
      * @brief Initialize ImGui with the given window and render context
-     * @param window Window to attach ImGui to
+     * @param window Window to attach ImGui to (GLFW-based)
      * @param renderContext Render context for backend-specific setup
      * @return true if initialization was successful
      */
     bool initialize(Window* window, IRenderContext* renderContext);
+
+#ifdef _WIN32
+    /**
+     * @brief Initialize ImGui with Win32 window and render context
+     * @param window Win32Window to attach ImGui to
+     * @param renderContext Render context for backend-specific setup
+     * @return true if initialization was successful
+     */
+    bool initializeWin32(Win32Window* window, IRenderContext* renderContext);
+#endif
 
     /**
      * @brief Begin a new ImGui frame
@@ -79,6 +99,11 @@ private:
 
     // Cached pointers to avoid repeated dynamic_cast
     void* m_backendRenderContext; // Points to DirectX11/12RenderContext or nullptr for OpenGL
+    
+#ifdef _WIN32
+    Win32Window* m_win32Window; // Win32 window if using native Windows
+    bool m_usingWin32; // Flag to indicate if we're using Win32 or GLFW
+#endif
 };
 
 } // namespace fresh
