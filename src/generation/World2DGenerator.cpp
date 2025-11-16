@@ -11,9 +11,9 @@ World2DGenerator::World2DGenerator(const Settings& settings)
     : settings_(settings) {
     
     // Initialize noise generators
-    surfaceNoise_ = std::make_unique<NoiseGenerator>(settings_.seed);
-    caveNoise_ = std::make_unique<NoiseGenerator>(settings_.seed + 1);
-    oreNoise_ = std::make_unique<NoiseGenerator>(settings_.seed + 2);
+    surfaceNoise_ = std::make_unique<NoiseGenerator>(static_cast<int>(settings_.seed));
+    caveNoise_ = std::make_unique<NoiseGenerator>(static_cast<int>(settings_.seed + 1));
+    oreNoise_ = std::make_unique<NoiseGenerator>(static_cast<int>(settings_.seed + 2));
     
     Logger::getInstance().info("Initialized 2D generator with style: " + 
                  std::to_string(static_cast<int>(settings_.style)), "World2DGenerator");
@@ -27,13 +27,14 @@ void World2DGenerator::setDimensions(int width, int height, int depth) {
 
 void World2DGenerator::setSeed(uint64_t seed) {
     settings_.seed = seed;
-    surfaceNoise_ = std::make_unique<NoiseGenerator>(seed);
-    caveNoise_ = std::make_unique<NoiseGenerator>(seed + 1);
-    oreNoise_ = std::make_unique<NoiseGenerator>(seed + 2);
+    surfaceNoise_ = std::make_unique<NoiseGenerator>(static_cast<int>(seed));
+    caveNoise_ = std::make_unique<NoiseGenerator>(static_cast<int>(seed + 1));
+    oreNoise_ = std::make_unique<NoiseGenerator>(static_cast<int>(seed + 2));
 }
 
 void World2DGenerator::generateChunk(Chunk& chunk, int chunkX, int chunkZ) {
     // For pure 2D generation, chunkZ should typically be 0
+    (void)chunkZ; // Unused parameter - 2D generation doesn't use Z coordinate
     
     switch (settings_.style) {
         case Style::PLATFORMER:
@@ -97,6 +98,8 @@ void World2DGenerator::generatePlatformerSurface(Chunk& chunk, int chunkX) {
 void World2DGenerator::generateUnderground(Chunk& chunk, int chunkX, int surfaceHeight) {
     // Underground is already filled by generatePlatformerSurface
     // This method can add special underground layers or features
+    (void)chunkX;       // Unused parameter - reserved for future chunk-specific logic
+    (void)surfaceHeight; // Unused parameter - reserved for future surface-relative logic
     
     for (int localX = 0; localX < 16; localX++) {
         for (int z = 0; z < settings_.worldDepth; z++) {
@@ -233,6 +236,8 @@ void World2DGenerator::generateSurfaceFeatures(Chunk& chunk, int chunkX) {
 void World2DGenerator::generateBackgroundWalls(Chunk& chunk, int chunkX) {
     // Background walls fill in behind the playable area
     // This is useful for visual depth in 2D games
+    (void)chunk;  // Unused parameter - reserved for future implementation
+    (void)chunkX; // Unused parameter - reserved for future implementation
     
     // For now, this is a placeholder
     // Full implementation would create wall tiles behind solid blocks
@@ -264,8 +269,8 @@ int World2DGenerator::countSolidNeighbors(const Chunk& chunk, int x, int y, int 
                 continue;
             }
             
-            VoxelType type = chunk.getVoxel(nx, ny, z);
-            if (type != VoxelType::Air) {
+            const Voxel& voxel = chunk.getVoxel(nx, ny, z);
+            if (voxel.type != VoxelType::Air) {
                 count++;
             }
         }
