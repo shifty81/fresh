@@ -31,6 +31,7 @@ class ConsolePanel;
 class VoxelToolPalette;
 class MainMenuPanel;
 class SettingsPanel;
+class EngineConfigPanel;
 class HotbarPanel;
 class SelectionManager;
 class SelectionRenderer;
@@ -180,6 +181,15 @@ public:
     }
 
     /**
+     * @brief Get the engine configuration panel
+     * @return Engine configuration panel pointer
+     */
+    EngineConfigPanel* getEngineConfigPanel() const
+    {
+        return m_engineConfigPanel.get();
+    }
+
+    /**
      * @brief Get the toolbar
      * @return Toolbar pointer
      */
@@ -255,6 +265,7 @@ private:
     std::unique_ptr<VoxelToolPalette> m_voxelTools;
     std::unique_ptr<MainMenuPanel> m_mainMenuPanel;
     std::unique_ptr<SettingsPanel> m_settingsPanel;
+    std::unique_ptr<EngineConfigPanel> m_engineConfigPanel;
     std::unique_ptr<HotbarPanel> m_hotbar;
     std::unique_ptr<SelectionManager> m_selectionManager;
     std::unique_ptr<SelectionRenderer> m_selectionRenderer;

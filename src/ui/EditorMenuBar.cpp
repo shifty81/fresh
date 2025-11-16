@@ -289,6 +289,12 @@ void EditorMenuBar::renderSettingsMenu()
             }
         }
 
+        if (ImGui::MenuItem("Engine Configuration...", "Ctrl+E")) {
+            if (m_engineConfigCallback) {
+                m_engineConfigCallback();
+            }
+        }
+
         ImGui::Separator();
 
         if (ImGui::BeginMenu("Graphics API")) {

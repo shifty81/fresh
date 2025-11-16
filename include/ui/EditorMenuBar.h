@@ -87,6 +87,10 @@ public:
     {
         m_settingsCallback = callback;
     }
+    void setEngineConfigCallback(MenuCallback callback)
+    {
+        m_engineConfigCallback = callback;
+    }
     void setImportAssetsCallback(MenuCallback callback)
     {
         m_importAssetsCallback = callback;
@@ -131,6 +135,7 @@ private:
     MenuCallback m_pasteCallback;
     MenuCallback m_deleteCallback;
     MenuCallback m_settingsCallback;
+    MenuCallback m_engineConfigCallback;
     MenuCallback m_importAssetsCallback;
     MenuCallback m_selectAllCallback;
     MenuCallback m_deselectAllCallback;
