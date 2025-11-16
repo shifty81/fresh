@@ -2,7 +2,6 @@
 
 #include <algorithm>
 
-#include "input/InputManager.h"
 #include "voxel/VoxelTypes.h"
 #include "voxel/VoxelWorld.h"
 
