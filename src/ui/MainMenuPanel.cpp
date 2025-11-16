@@ -23,6 +23,7 @@ MainMenuPanel::MainMenuPanel()
       m_exitRequested(false),
       m_showNewWorldDialog(false),
       m_showLoadWorldDialog(false),
+      m_isWorld3D(true), // Default to 3D world
       m_worldSeed(0),
       m_selectedWorldIndex(0)
 {
@@ -150,7 +151,7 @@ void MainMenuPanel::renderNewWorldDialog()
     ImGuiIO& io = ImGui::GetIO();
     ImGui::SetNextWindowPos(ImVec2(io.DisplaySize.x * 0.5f, io.DisplaySize.y * 0.5f),
                             ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
-    ImGui::SetNextWindowSize(ImVec2(500, 250), ImGuiCond_Appearing);
+    ImGui::SetNextWindowSize(ImVec2(550, 350), ImGuiCond_Appearing); // Increased height for world type option
 
     ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize;
 
@@ -177,6 +178,23 @@ void MainMenuPanel::renderNewWorldDialog()
 
         ImGui::Spacing();
         ImGui::TextDisabled("Leave seed empty for random generation");
+
+        ImGui::Spacing();
+        
+        // World Type selection (2D or 3D)
+        ImGui::Text("World Type:");
+        int worldType = m_isWorld3D ? 1 : 0;
+        ImGui::RadioButton("3D World (Full Voxel)", &worldType, 1);
+        ImGui::SameLine();
+        ImGui::RadioButton("2D World (Platformer/Terraria-style)", &worldType, 0);
+        m_isWorld3D = (worldType == 1);
+        
+        ImGui::Spacing();
+        if (m_isWorld3D) {
+            ImGui::TextDisabled("Full 3D voxel world with height and depth");
+        } else {
+            ImGui::TextDisabled("2D side-scrolling world, single layer depth");
+        }
 
         ImGui::Spacing();
         ImGui::Separator();

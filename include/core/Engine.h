@@ -118,6 +118,9 @@ private:
     // Track if user explicitly toggled cursor mode with F key
     // Prevents automatic cursor management from overriding user's explicit choice
     bool m_userToggledCursor = false;
+    
+    // Unreal-style mouse control: track if right mouse button is held for free look
+    bool m_rightMouseHeldForCamera = false;
 
 #if defined(FRESH_OPENGL_SUPPORT) && defined(FRESH_GLEW_AVAILABLE)
     // OpenGL rendering state
@@ -131,7 +134,7 @@ private:
     std::unordered_map<ChunkPos, size_t> m_chunkIndexCounts;
 #endif
 
-    void createNewWorld(const std::string& name, int seed);
+    void createNewWorld(const std::string& name, int seed, bool is3D = true);
     void loadWorld(const std::string& name);
     void setupInputCallbacks();
     void initializeGameSystems(); // Helper for common initialization
