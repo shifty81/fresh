@@ -314,6 +314,9 @@ set(ENGINE_SOURCES
     src/assets/AssetManager.cpp
     src/assets/AssetManagerExports.cpp
     src/ecs/EntityManager.cpp
+    src/ecs/TransformComponent.cpp
+    src/ecs/RendererComponent.cpp
+    src/ecs/MaterialComponent.cpp
     src/voxelship/VoxelBlock.cpp
     src/voxelship/VoxelStructureComponent.cpp
     src/galaxy/GalaxySector.cpp
