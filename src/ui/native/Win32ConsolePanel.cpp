@@ -63,7 +63,7 @@ void Win32ConsolePanel::createControls()
     int controlWidth = m_width - 2 * MARGIN;
 
     // Create toolbar with buttons and checkboxes
-    m_clearButton = CreateWindowEx(
+    m_clearButton = CreateWindowExW(
         0, L"BUTTON", L"Clear",
         WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,
         x, y, BUTTON_WIDTH, TOOLBAR_HEIGHT - 2 * MARGIN,
@@ -71,7 +71,7 @@ void Win32ConsolePanel::createControls()
     );
     x += BUTTON_WIDTH + MARGIN;
 
-    m_autoScrollCheck = CreateWindowEx(
+    m_autoScrollCheck = CreateWindowExW(
         0, L"BUTTON", L"Auto-scroll",
         WS_CHILD | WS_VISIBLE | BS_AUTOCHECKBOX,
         x, y, CHECKBOX_WIDTH, TOOLBAR_HEIGHT - 2 * MARGIN,
@@ -81,7 +81,7 @@ void Win32ConsolePanel::createControls()
     x += CHECKBOX_WIDTH + MARGIN;
 
     // Filter checkboxes
-    m_filterInfoCheck = CreateWindowEx(
+    m_filterInfoCheck = CreateWindowExW(
         0, L"BUTTON", L"Info",
         WS_CHILD | WS_VISIBLE | BS_AUTOCHECKBOX,
         x, y, CHECKBOX_WIDTH, TOOLBAR_HEIGHT - 2 * MARGIN,
@@ -90,7 +90,7 @@ void Win32ConsolePanel::createControls()
     SendMessage(m_filterInfoCheck, BM_SETCHECK, BST_CHECKED, 0);
     x += CHECKBOX_WIDTH + MARGIN;
 
-    m_filterWarningCheck = CreateWindowEx(
+    m_filterWarningCheck = CreateWindowExW(
         0, L"BUTTON", L"Warning",
         WS_CHILD | WS_VISIBLE | BS_AUTOCHECKBOX,
         x, y, CHECKBOX_WIDTH, TOOLBAR_HEIGHT - 2 * MARGIN,
@@ -99,7 +99,7 @@ void Win32ConsolePanel::createControls()
     SendMessage(m_filterWarningCheck, BM_SETCHECK, BST_CHECKED, 0);
     x += CHECKBOX_WIDTH + MARGIN;
 
-    m_filterErrorCheck = CreateWindowEx(
+    m_filterErrorCheck = CreateWindowExW(
         0, L"BUTTON", L"Error",
         WS_CHILD | WS_VISIBLE | BS_AUTOCHECKBOX,
         x, y, CHECKBOX_WIDTH, TOOLBAR_HEIGHT - 2 * MARGIN,
@@ -110,8 +110,8 @@ void Win32ConsolePanel::createControls()
     y += TOOLBAR_HEIGHT;
 
     // Create RichEdit control for log display
-    m_richEdit = CreateWindowEx(
-        WS_EX_CLIENTEDGE, RICHEDIT_CLASS, L"",
+    m_richEdit = CreateWindowExW(
+        WS_EX_CLIENTEDGE, RICHEDIT_CLASSW, L"",
         WS_CHILD | WS_VISIBLE | WS_VSCROLL | ES_MULTILINE | ES_READONLY | ES_AUTOVSCROLL,
         MARGIN, y, controlWidth, m_height - y - COMMAND_HEIGHT - 2 * MARGIN,
         m_hwnd, (HMENU)2001, nullptr, nullptr
@@ -122,18 +122,18 @@ void Win32ConsolePanel::createControls()
         SendMessage(m_richEdit, EM_SETBKGNDCOLOR, 0, UnrealStyleTheme::DARK_BACKGROUND);
         
         // Set font
-        CHARFORMAT2 cf = {0};
-        cf.cbSize = sizeof(CHARFORMAT2);
+        CHARFORMAT2W cf = {0};
+        cf.cbSize = sizeof(CHARFORMAT2W);
         cf.dwMask = CFM_FACE | CFM_SIZE | CFM_COLOR;
         cf.yHeight = 180; // 9pt
-        wcscpy_s(cf.szFaceName, L"Consolas");
+        wcscpy_s(cf.szFaceName, LF_FACESIZE, L"Consolas");
         cf.crTextColor = UnrealStyleTheme::PRIMARY_TEXT;
         SendMessage(m_richEdit, EM_SETCHARFORMAT, SCF_ALL, (LPARAM)&cf);
     }
 
     // Create command input field
     y = m_height - COMMAND_HEIGHT - MARGIN;
-    m_commandEdit = CreateWindowEx(
+    m_commandEdit = CreateWindowExW(
         WS_EX_CLIENTEDGE, L"EDIT", L"",
         WS_CHILD | WS_VISIBLE | ES_AUTOHSCROLL,
         MARGIN, y, controlWidth, COMMAND_HEIGHT,
@@ -294,7 +294,7 @@ void Win32ConsolePanel::clear()
 {
     m_messages.clear();
     if (m_richEdit) {
-        SetWindowText(m_richEdit, L"");
+        SetWindowTextW(m_richEdit, L"");
     }
 }
 
@@ -303,7 +303,7 @@ void Win32ConsolePanel::updateDisplay()
     if (!m_richEdit) return;
 
     // Clear display
-    SetWindowText(m_richEdit, L"");
+    SetWindowTextW(m_richEdit, L"");
 
     // Re-add filtered messages
     for (const auto& msg : m_messages) {
@@ -338,11 +338,11 @@ void Win32ConsolePanel::executeCommand()
     if (!m_commandEdit) return;
 
     // Get command text
-    int length = GetWindowTextLength(m_commandEdit);
+    int length = GetWindowTextLengthW(m_commandEdit);
     if (length == 0) return;
 
     std::wstring wideText(length + 1, L'\0');
-    GetWindowText(m_commandEdit, &wideText[0], length + 1);
+    GetWindowTextW(m_commandEdit, &wideText[0], length + 1);
 
     // Convert to narrow string
     int narrowLength = WideCharToMultiByte(CP_UTF8, 0, wideText.c_str(), -1, nullptr, 0, nullptr, nullptr);
@@ -351,7 +351,7 @@ void Win32ConsolePanel::executeCommand()
     command.pop_back(); // Remove null terminator
 
     // Clear command edit
-    SetWindowText(m_commandEdit, L"");
+    SetWindowTextW(m_commandEdit, L"");
 
     // Echo command to console
     addMessage(MessageType::Info, "> " + command);

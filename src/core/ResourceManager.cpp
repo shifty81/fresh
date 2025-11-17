@@ -449,7 +449,7 @@ void ResourceManager::asyncLoadingWorker()
 
             if (!loadingQueue.empty()) {
                 request = std::move(loadingQueue.front());
-                loadingQueue.pop();
+                loadingQueue.pop_front();
             } else {
                 continue;
             }
@@ -506,12 +506,10 @@ bool ResourceManager::isLoading(const std::string& path) const
     std::lock_guard<std::mutex> lock(queueMutex);
     
     // Check if path is in loading queue
-    std::queue<LoadingRequest> tempQueue = loadingQueue;
-    while (!tempQueue.empty()) {
-        if (tempQueue.front().path == path) {
+    for (const auto& request : loadingQueue) {
+        if (request.path == path) {
             return true;
         }
-        tempQueue.pop();
     }
     return false;
 }
