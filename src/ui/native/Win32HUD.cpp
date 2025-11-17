@@ -345,7 +345,6 @@ void Win32HUD::renderMinimap(HDC hdc, const RECT& clientRect)
 
 void Win32HUD::renderDebugInfo(HDC hdc, const RECT& clientRect)
 {
-    const int padding = 15;
     int x = clientRect.right - 220;
     int y = clientRect.bottom - 60;
     
