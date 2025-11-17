@@ -1,7 +1,12 @@
 # Fresh Voxel Engine - Development Roadmap
 
-> **Last Updated:** 2025-11-15  
-> **Note:** This roadmap shows the historical development plan. For accurate current implementation status, see [ACTUAL_STATUS.md](ACTUAL_STATUS.md) which provides code-verified status of all systems.
+> **Last Updated:** 2025-11-17  
+> **Note:** This roadmap shows the historical development plan including platform evolution. For accurate current implementation status, see [PROJECT_STATUS.md](PROJECT_STATUS.md).
+> 
+> **Platform Evolution:**
+> - **Initial Development**: OpenGL/Vulkan with GLFW (cross-platform)
+> - **Current State**: DirectX 12/11 with Win32 native windowing (Windows-exclusive)
+> - **Editor**: ImGui-based panels with native Win32 window management
 
 ## Recent Updates (2025-11-15)
 

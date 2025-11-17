@@ -214,7 +214,44 @@ Load Request → Check Cache → Load from Disk →
 Parse/Decode → Store in Memory → Return Handle
 ```
 
-### 7. Scripting System
+### 7. Windowing & UI System
+
+**Components (Windows):**
+- `Win32Window`: Native Win32 window management
+- `Win32InputManager`: Native Windows input handling
+- `ImGuiContext`: ImGui integration for editor panels
+- `Win32MenuBar`, `Win32Toolbar`: Native UI components
+
+**Components (Linux - CI Testing Only):**
+- `Window`: GLFW-based window (for CI compatibility)
+- `InputManager`: GLFW input handling
+
+**Responsibilities:**
+- Create and manage application window
+- Handle OS-level window events
+- Process keyboard and mouse input
+- Render ImGui editor interface
+- Integrate with Windows-native features
+
+**Architecture:**
+```cpp
+#ifdef _WIN32
+using WindowType = Win32Window;           // Native Win32 on Windows
+using InputManagerType = Win32InputManager;
+#else
+using WindowType = Window;                 // GLFW for Linux CI
+using InputManagerType = InputManager;
+#endif
+```
+
+**Windows Features:**
+- Per-monitor DPI awareness
+- Native menu bar integration
+- Windows 10/11 theme support
+- Jump lists and taskbar integration
+- Toast notifications
+
+### 8. Scripting System
 
 **Components:**
 - `ScriptingEngine`: Script execution backend

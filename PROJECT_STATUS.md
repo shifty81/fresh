@@ -1,6 +1,6 @@
 # Fresh Voxel Engine - Project Status Dashboard
 
-> Last Updated: 2025-11-08
+> Last Updated: 2025-11-17
 
 ## 📊 Overall Progress
 
@@ -21,12 +21,14 @@
 | System | Status | Progress | Priority | Version |
 |--------|--------|----------|----------|---------|
 | **Rendering Engine** | ✅ Complete | ██████████ 100% | High | v0.2.5 |
+| **Windowing System** | ✅ Complete | ██████████ 100% | Critical | v0.2.5 |
 | **Voxel World** | ✅ Stable | █████████░ 90% | High | v0.2.0 |
 | **Terrain Generation** | ✅ Stable | ████████░░ 80% | Medium | v0.2.0 |
 | **Physics System** | ✅ Stable | █████████░ 90% | High | v0.2.0 |
 | **Player Controller** | ✅ Stable | █████████░ 95% | Critical | v0.2.0 |
 | **Chunk Streaming** | ✅ Stable | █████████░ 90% | Critical | v0.2.0 |
-| **Input System** | ✅ Complete | ██████████ 100% | Critical | v0.2.0 |
+| **Input System** | ✅ Complete | ██████████ 100% | Critical | v0.2.5 |
+| **Editor UI** | ✅ Complete | ██████████ 100% | High | v0.2.5 |
 | **Resource Manager** | ✅ Complete | ██████████ 100% | High | v0.2.0 |
 | **Memory Manager** | ✅ Complete | ██████████ 100% | High | v0.2.0 |
 | **Audio Engine** | ✅ Complete | ██████████ 95% | High | v0.2.5 |

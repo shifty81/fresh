@@ -18,8 +18,9 @@ A professional **Windows-exclusive** voxel game development platform built with 
 ## ✨ Features
 
 ### Professional Game Development Platform
-- **Unreal Engine-Like Editor** - Professional native Windows UI editor with comprehensive game development tools
-- **Windows-Native GUI** - Native Win32 windowing, input, menu bar, toolbar, and HUD on Windows (uses Win32 APIs directly, not ImGui)
+- **Unreal Engine-Like Editor** - Professional Windows editor with comprehensive game development tools
+- **Windows-Native Windowing** - Native Win32 window management and input handling (replaces GLFW on Windows)
+- **ImGui Editor UI** - Modern ImGui-based editor panels with DirectX 11/12 rendering
 - **Windows-Native Integration** - Full Windows 10/11 themes, native dialogs, jump lists, toast notifications, and taskbar features
 - **High DPI Support** - Per-monitor DPI awareness for crisp rendering on 4K/5K displays
 - **AVX2 Optimized** - SIMD instructions for 15-30% performance improvement on modern CPUs
@@ -44,8 +45,8 @@ A professional **Windows-exclusive** voxel game development platform built with 
 - **Greedy Meshing** - Optimized rendering with face culling
 
 ### Editor & Tools (Unreal Engine-Like Experience)
-- **Professional Game Editor** - Comprehensive native Windows UI editor for complete game development
-- **Windows Native GUI** - Native Win32 menu bar, toolbar, and HUD (not ImGui-based)
+- **Professional Game Editor** - Comprehensive ImGui-based editor for complete game development
+- **Windows Native Windowing** - Native Win32 window management with native menu bar and toolbar support
 - **Windows Native Integration** - Native Windows 10/11 themes, dialogs, and taskbar features
 - **Terraforming Tools** - Brush, sphere, cube, flatten, smooth, paint for world building
 - **NPC Creation System** - Easy-to-use interface for adding NPCs (villagers, traders, enemies)
@@ -95,10 +96,6 @@ A professional **Windows-exclusive** voxel game development platform built with 
 - **Windows 10 SDK** (included with Visual Studio) - For DirectX support
 
 ### Build and Run
-- **Git**
-- Development libraries: `glfw glm openal-soft` (via Homebrew)
-
-### Build and Run
 
 #### Automated Build (Recommended)
 
@@ -137,21 +134,6 @@ cmake --build . --config Release
 
 # 5. Run
 Release\FreshVoxelEngine.exe
-```
-
-**For complete step-by-step instructions, see [BUILD.md](BUILD.md).**
-
----
-git clone https://github.com/shifty81/fresh.git
-cd fresh
-
-# 3. Build
-mkdir build && cd build
-cmake ..
-cmake --build . --config Release -j$(sysctl -n hw.ncpu)
-
-# 4. Run
-./FreshVoxelEngine
 ```
 
 **For complete step-by-step instructions, see [BUILD.md](BUILD.md).**
@@ -262,7 +244,7 @@ fresh/
 │   ├── generation/        # Procedural terrain generation
 │   ├── physics/           # Physics and collision
 │   ├── editor/            # World editor and terraforming
-│   ├── ui/                # ImGui editor UI
+│   ├── ui/                # ImGui editor UI (with native Win32 components)
 │   ├── gameplay/          # Player and camera
 │   ├── audio/             # Audio engine
 │   ├── character/         # Voxel character system
@@ -372,7 +354,7 @@ dotnet build -c Release
 - **OpenGL** - Available ✅ Optional compatibility backend
 
 ### Editor & NPC Features
-- **Unreal-like Editor** - ✅ Professional ImGui-based game development interface
+- **Unreal-like Editor** - ✅ Professional ImGui-based editor with Win32 native window management
 - **NPC System** - ✅ Integrated with character, AI, and behavior tree systems
 - **NPC Editor Integration** - 🚧 In development - Easy dropdown-based behavior configuration
 - **Visual NPC Placement** - 🚧 In development - Click-to-place NPCs in world editor

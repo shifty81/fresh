@@ -22,11 +22,13 @@ This project adheres to a Code of Conduct that all contributors are expected to 
 
 Before you begin, ensure you have the following installed:
 
-- CMake 3.20 or higher
-- C++20 compatible compiler (GCC 10+, Clang 10+, MSVC 2019 16.11+)
-- OpenGL 4.5+ drivers (or DirectX 11+ on Windows)
-- GLFW 3.3 or higher
-- Git
+- **Windows 10/11** (x64) - Primary development platform
+- **Visual Studio 2022** with "Desktop development with C++" workload
+- **CMake 3.20 or higher**
+- **Git for Windows**
+- **vcpkg** (for dependency management)
+
+**Note**: The engine is Windows-exclusive. On Windows, native Win32 APIs are used for windowing (GLFW is only used for Linux CI testing).
 
 ### Setting Up Development Environment
 
