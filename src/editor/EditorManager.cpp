@@ -599,15 +599,17 @@ void EditorManager::render()
     // Setup dockspace
     setupDockspace();
 
-    // Render menu bar (always visible)
+#ifndef FRESH_WIN32_UI
+    // Render ImGui menu bar and toolbar (only when not using native Win32 UI)
+    // On Windows with FRESH_WIN32_UI, the native Win32MenuBar and Win32Toolbar are used instead
     if (m_menuBar) {
         m_menuBar->render();
     }
 
-    // Render toolbar (always visible when editor is visible)
     if (m_toolbar) {
         m_toolbar->render();
     }
+#endif // !FRESH_WIN32_UI
 
     // Render panels based on visibility flags
     if (m_showSceneHierarchy && m_sceneHierarchy) {
@@ -651,10 +653,13 @@ void EditorManager::render()
         m_engineConfigPanel->render();
     }
 
-    // Render hotbar (shown in play mode)
+#ifndef FRESH_WIN32_UI
+    // Render ImGui hotbar (shown in play mode)
+    // On Windows with FRESH_WIN32_UI, use native Win32HUD instead
     if (m_hotbar) {
         m_hotbar->render();
     }
+#endif // !FRESH_WIN32_UI
 
     // Render selection visualization (3D rendering, not UI)
     if (m_selectionRenderer && m_selectionManager) {
