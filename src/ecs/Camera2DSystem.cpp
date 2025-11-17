@@ -19,12 +19,12 @@ void Camera2DSystem::initialize()
     // Find primary camera
     primaryCamera_ = Entity();
     
-    for (const auto& [id, entity] : entityManager->getAllEntities())
+    for (const auto& entity : entityManager->getAllEntities())
     {
-        auto* camera = entity->getComponent<Camera2DComponent>();
+        auto* camera = entityManager->getComponent<Camera2DComponent>(entity);
         if (camera && camera->isPrimary)
         {
-            primaryCamera_ = Entity(id);
+            primaryCamera_ = entity;
             break;
         }
     }
@@ -36,10 +36,10 @@ void Camera2DSystem::update(float deltaTime)
         return;
 
     // Update all cameras
-    for (auto& [id, entity] : entityManager->getAllEntities())
+    for (const auto& entity : entityManager->getAllEntities())
     {
-        auto* camera = entity->getComponent<Camera2DComponent>();
-        auto* transform = entity->getComponent<Transform2DComponent>();
+        auto* camera = entityManager->getComponent<Camera2DComponent>(entity);
+        auto* transform = entityManager->getComponent<Transform2DComponent>(entity);
         
         if (!camera || !transform)
             continue;
@@ -68,9 +68,9 @@ Entity Camera2DSystem::getPrimaryCamera() const
 
 void Camera2DSystem::setScreenAspectRatio(float aspectRatio)
 {
-    for (auto& [id, entity] : entityManager->getAllEntities())
+    for (const auto& entity : entityManager->getAllEntities())
     {
-        auto* camera = entity->getComponent<Camera2DComponent>();
+        auto* camera = entityManager->getComponent<Camera2DComponent>(entity);
         if (camera)
         {
             camera->aspectRatio = aspectRatio;
@@ -82,17 +82,10 @@ void Camera2DSystem::updateFollow(Camera2DComponent* camera,
                                   Transform2DComponent* cameraTransform,
                                   float deltaTime)
 {
-    auto* targetEntity = entityManager->getEntity(camera->followTarget);
-    if (!targetEntity)
-    {
-        camera->followTarget = Entity(); // Invalid target
-        return;
-    }
-    
-    auto* targetTransform = targetEntity->getComponent<Transform2DComponent>();
+    auto* targetTransform = entityManager->getComponent<Transform2DComponent>(camera->followTarget);
     if (!targetTransform)
     {
-        camera->followTarget = Entity(); // Target has no transform
+        camera->followTarget = Entity(); // Invalid target or target has no transform
         return;
     }
     

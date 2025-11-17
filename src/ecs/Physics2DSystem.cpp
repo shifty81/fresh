@@ -54,10 +54,10 @@ void Physics2DSystem::setFixedTimeStep(float timeStep)
 void Physics2DSystem::integrateVelocities(float deltaTime)
 {
     // Get all entities with Transform2D and RigidBody2D
-    for (auto& [id, entity] : entityManager->getAllEntities())
+    for (const auto& entity : entityManager->getAllEntities())
     {
-        auto* transform = entity->getComponent<Transform2DComponent>();
-        auto* rigidbody = entity->getComponent<RigidBody2DComponent>();
+        auto* transform = entityManager->getComponent<Transform2DComponent>(entity);
+        auto* rigidbody = entityManager->getComponent<RigidBody2DComponent>(entity);
         
         if (!transform || !rigidbody)
             continue;
@@ -100,10 +100,10 @@ void Physics2DSystem::integrateVelocities(float deltaTime)
 void Physics2DSystem::integratePositions(float deltaTime)
 {
     // Update positions based on velocities
-    for (auto& [id, entity] : entityManager->getAllEntities())
+    for (const auto& entity : entityManager->getAllEntities())
     {
-        auto* transform = entity->getComponent<Transform2DComponent>();
-        auto* rigidbody = entity->getComponent<RigidBody2DComponent>();
+        auto* transform = entityManager->getComponent<Transform2DComponent>(entity);
+        auto* rigidbody = entityManager->getComponent<RigidBody2DComponent>(entity);
         
         if (!transform || !rigidbody)
             continue;
@@ -125,9 +125,9 @@ void Physics2DSystem::integratePositions(float deltaTime)
 void Physics2DSystem::applyDrag(float deltaTime)
 {
     // Apply drag to slow down objects
-    for (auto& [id, entity] : entityManager->getAllEntities())
+    for (const auto& entity : entityManager->getAllEntities())
     {
-        auto* rigidbody = entity->getComponent<RigidBody2DComponent>();
+        auto* rigidbody = entityManager->getComponent<RigidBody2DComponent>(entity);
         
         if (!rigidbody)
             continue;

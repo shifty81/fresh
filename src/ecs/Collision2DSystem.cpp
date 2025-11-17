@@ -79,14 +79,14 @@ std::vector<std::pair<Entity, Entity>> Collision2DSystem::broadPhase()
     
     // Get all entities with colliders
     std::vector<Entity> colliderEntities;
-    for (const auto& [id, entity] : entityManager->getAllEntities())
+    for (const auto& entity : entityManager->getAllEntities())
     {
-        auto* transform = entity->getComponent<Transform2DComponent>();
-        auto* collider = entity->getComponent<Collider2DComponent>();
+        auto* transform = entityManager->getComponent<Transform2DComponent>(entity);
+        auto* collider = entityManager->getComponent<Collider2DComponent>(entity);
         
         if (transform && collider && collider->enabled)
         {
-            colliderEntities.push_back(Entity(id));
+            colliderEntities.push_back(entity);
         }
     }
     
@@ -98,16 +98,13 @@ std::vector<std::pair<Entity, Entity>> Collision2DSystem::broadPhase()
             Entity entityA = colliderEntities[i];
             Entity entityB = colliderEntities[j];
             
-            auto* entityObjA = entityManager->getEntity(entityA);
-            auto* entityObjB = entityManager->getEntity(entityB);
+            auto* transformA = entityManager->getComponent<Transform2DComponent>(entityA);
+            auto* transformB = entityManager->getComponent<Transform2DComponent>(entityB);
+            auto* colliderA = entityManager->getComponent<Collider2DComponent>(entityA);
+            auto* colliderB = entityManager->getComponent<Collider2DComponent>(entityB);
             
-            if (!entityObjA || !entityObjB)
+            if (!transformA || !transformB || !colliderA || !colliderB)
                 continue;
-            
-            auto* transformA = entityObjA->getComponent<Transform2DComponent>();
-            auto* transformB = entityObjB->getComponent<Transform2DComponent>();
-            auto* colliderA = entityObjA->getComponent<Collider2DComponent>();
-            auto* colliderB = entityObjB->getComponent<Collider2DComponent>();
             
             // Check collision layer mask
             if ((colliderA->layer & colliderB->mask) == 0 &&
@@ -117,8 +114,12 @@ std::vector<std::pair<Entity, Entity>> Collision2DSystem::broadPhase()
             }
             
             // AABB overlap test
-            auto [minA, maxA] = colliderA->getAABB(transformA->position, transformA->rotation);
-            auto [minB, maxB] = colliderB->getAABB(transformB->position, transformB->rotation);
+            auto aabbA = colliderA->getAABB(transformA->position, transformA->rotation);
+            auto aabbB = colliderB->getAABB(transformB->position, transformB->rotation);
+            glm::vec2 minA = aabbA.first;
+            glm::vec2 maxA = aabbA.second;
+            glm::vec2 minB = aabbB.first;
+            glm::vec2 maxB = aabbB.second;
             
             if (maxA.x >= minB.x && minA.x <= maxB.x &&
                 maxA.y >= minB.y && minA.y <= maxB.y)
@@ -133,16 +134,10 @@ std::vector<std::pair<Entity, Entity>> Collision2DSystem::broadPhase()
 
 bool Collision2DSystem::narrowPhase(Entity entityA, Entity entityB, Collision2D& collision)
 {
-    auto* entityObjA = entityManager->getEntity(entityA);
-    auto* entityObjB = entityManager->getEntity(entityB);
-    
-    if (!entityObjA || !entityObjB)
-        return false;
-    
-    auto* transformA = entityObjA->getComponent<Transform2DComponent>();
-    auto* transformB = entityObjB->getComponent<Transform2DComponent>();
-    auto* colliderA = entityObjA->getComponent<Collider2DComponent>();
-    auto* colliderB = entityObjB->getComponent<Collider2DComponent>();
+    auto* transformA = entityManager->getComponent<Transform2DComponent>(entityA);
+    auto* transformB = entityManager->getComponent<Transform2DComponent>(entityB);
+    auto* colliderA = entityManager->getComponent<Collider2DComponent>(entityA);
+    auto* colliderB = entityManager->getComponent<Collider2DComponent>(entityB);
     
     if (!transformA || !transformB || !colliderA || !colliderB)
         return false;
@@ -176,16 +171,10 @@ bool Collision2DSystem::narrowPhase(Entity entityA, Entity entityB, Collision2D&
 
 void Collision2DSystem::resolveCollision(const Collision2D& collision)
 {
-    auto* entityObjA = entityManager->getEntity(collision.entityA);
-    auto* entityObjB = entityManager->getEntity(collision.entityB);
-    
-    if (!entityObjA || !entityObjB)
-        return;
-    
-    auto* transformA = entityObjA->getComponent<Transform2DComponent>();
-    auto* transformB = entityObjB->getComponent<Transform2DComponent>();
-    auto* rigidbodyA = entityObjA->getComponent<RigidBody2DComponent>();
-    auto* rigidbodyB = entityObjB->getComponent<RigidBody2DComponent>();
+    auto* transformA = entityManager->getComponent<Transform2DComponent>(collision.entityA);
+    auto* transformB = entityManager->getComponent<Transform2DComponent>(collision.entityB);
+    auto* rigidbodyA = entityManager->getComponent<RigidBody2DComponent>(collision.entityA);
+    auto* rigidbodyB = entityManager->getComponent<RigidBody2DComponent>(collision.entityB);
     
     if (!transformA || !transformB)
         return;
