@@ -129,7 +129,7 @@ void Win32ListView::setItemText(int itemIndex, int columnIndex, const std::strin
     LVITEMW item = {};
     item.iSubItem = columnIndex;
     item.pszText = const_cast<LPWSTR>(wideText.c_str());
-    SendMessageW(m_hwnd, LVM_SETITEMTEXTW, (WPARAM)itemIndex, (LPARAM)&item);
+    SendMessageW(m_hwnd, LVM_SETITEMTEXTW, static_cast<WPARAM>(static_cast<unsigned int>(itemIndex)), (LPARAM)&item);
 }
 
 void Win32ListView::removeItem(int index)
@@ -219,7 +219,7 @@ std::string Win32ListView::getItemText(int index, int column) const
     item.iSubItem = column;
     item.pszText = buffer;
     item.cchTextMax = 256;
-    SendMessageW(m_hwnd, LVM_GETITEMTEXTW, (WPARAM)index, (LPARAM)&item);
+    SendMessageW(m_hwnd, LVM_GETITEMTEXTW, static_cast<WPARAM>(static_cast<unsigned int>(index)), (LPARAM)&item);
     return toUtf8String(buffer);
 }
 
