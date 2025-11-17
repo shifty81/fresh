@@ -1077,7 +1077,7 @@ void EditorManager::saveWorldAs()
         };
         
         auto selectedFile = m_windowsDialogManager->showSaveFileDialog(
-            "Save World As", filters, "world");
+            "Save World As", "world", filters);
         
         if (!selectedFile.empty()) {
             LOG_INFO_C("User selected save path: " + selectedFile, "EditorManager");
