@@ -105,6 +105,13 @@ struct LoadingRequest {
     std::string path;
     ResourceType type;
     std::promise<std::shared_ptr<Resource>> promise;
+    
+    // Make it move-only since std::promise is non-copyable
+    LoadingRequest() = default;
+    LoadingRequest(const LoadingRequest&) = delete;
+    LoadingRequest& operator=(const LoadingRequest&) = delete;
+    LoadingRequest(LoadingRequest&&) = default;
+    LoadingRequest& operator=(LoadingRequest&&) = default;
 };
 
 /**
@@ -238,7 +245,7 @@ private:
     std::map<ResourceType, std::function<std::shared_ptr<Resource>(const std::string&)>> loaders;
 
     // Async loading
-    std::queue<LoadingRequest> loadingQueue;
+    std::deque<LoadingRequest> loadingQueue;
     std::thread asyncLoaderThread;
     std::condition_variable loaderCondition;
     std::atomic<bool> asyncLoaderRunning{false};

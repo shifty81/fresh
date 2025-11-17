@@ -68,6 +68,13 @@ struct UnrealStyleTheme
     static constexpr COLORREF StatusError = RGB(232, 17, 35);               // #E81123 - Red
     static constexpr COLORREF StatusInfo = RGB(0, 122, 204);                // #007ACC - Blue
     
+    // Console-specific color aliases
+    static constexpr COLORREF INFO_COLOR = StatusInfo;
+    static constexpr COLORREF WARNING_COLOR = StatusWarning;
+    static constexpr COLORREF ERROR_COLOR = StatusError;
+    static constexpr COLORREF PRIMARY_TEXT = TextPrimary;
+    static constexpr COLORREF DARK_BACKGROUND = DarkBackground;
+    
     // Special UI elements
     static constexpr COLORREF ScrollbarBackground = RGB(37, 37, 38);        // #252526
     static constexpr COLORREF ScrollbarThumb = RGB(104, 104, 104);          // #686868

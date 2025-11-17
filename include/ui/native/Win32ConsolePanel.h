@@ -52,7 +52,7 @@ public:
      * @param height Panel height
      * @return true if successful
      */
-    bool create(HWND parent, int x, int y, int width, int height) override;
+    bool create(HWND parent, int x, int y, int width, int height);
 
     /**
      * @brief Add a message to the console
