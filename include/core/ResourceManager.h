@@ -5,6 +5,10 @@
 #include <mutex>
 #include <string>
 #include <vector>
+#include <future>
+#include <queue>
+#include <thread>
+#include <condition_variable>
 
 namespace fresh
 {
@@ -95,10 +99,19 @@ private:
 };
 
 /**
+ * @brief Loading request for async loading
+ */
+struct LoadingRequest {
+    std::string path;
+    ResourceType type;
+    std::promise<std::shared_ptr<Resource>> promise;
+};
+
+/**
  * @brief Central resource management system
  *
  * Handles loading, unloading, streaming, and optimization of all game assets.
- * Implements reference counting, hot-reloading, and memory management.
+ * Implements reference counting, hot-reloading, memory management, and async loading.
  */
 class ResourceManager
 {
@@ -117,13 +130,21 @@ public:
     void shutdown();
 
     /**
-     * @brief Load a resource by path
+     * @brief Load a resource by path (synchronous)
      * @param path Path to resource file
      * @param type Type of resource
      * @return Resource handle
      */
     template <typename T>
     ResourceHandle<T> load(const std::string& path);
+
+    /**
+     * @brief Load a resource asynchronously
+     * @param path Path to resource file
+     * @return Future to resource handle
+     */
+    template <typename T>
+    std::future<ResourceHandle<T>> loadAsync(const std::string& path);
 
     /**
      * @brief Unload a specific resource
@@ -177,24 +198,55 @@ public:
     bool exists(const std::string& path) const;
 
     /**
+     * @brief Check if resource is currently loading
+     */
+    bool isLoading(const std::string& path) const;
+
+    /**
+     * @brief Get loading progress (0.0 to 1.0)
+     */
+    float getLoadingProgress() const;
+
+    /**
      * @brief Print resource statistics
      */
     void printStats() const;
 
+    /**
+     * @brief Create placeholder resource for missing files
+     */
+    template <typename T>
+    ResourceHandle<T> createPlaceholder(const std::string& name);
+
 private:
-    ResourceManager() = default;
-    ~ResourceManager() = default;
+    ResourceManager();
+    ~ResourceManager();
     ResourceManager(const ResourceManager&) = delete;
     ResourceManager& operator=(const ResourceManager&) = delete;
 
     std::shared_ptr<Resource> loadResource(const std::string& path, ResourceType type);
     ResourceType detectResourceType(const std::string& path) const;
+    
+    // Async loading worker thread
+    void asyncLoadingWorker();
+    void startAsyncLoader();
+    void stopAsyncLoader();
 
     std::string assetDirectory;
     std::map<std::string, std::shared_ptr<Resource>> resources;
+    std::map<std::string, std::shared_ptr<Resource>> placeholders;
     std::map<ResourceType, std::function<std::shared_ptr<Resource>(const std::string&)>> loaders;
 
+    // Async loading
+    std::queue<LoadingRequest> loadingQueue;
+    std::thread asyncLoaderThread;
+    std::condition_variable loaderCondition;
+    std::atomic<bool> asyncLoaderRunning{false};
+    std::atomic<size_t> totalLoadRequests{0};
+    std::atomic<size_t> completedLoadRequests{0};
+
     mutable std::mutex mutex;
+    mutable std::mutex queueMutex;
 };
 
 /**

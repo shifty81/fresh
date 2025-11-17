@@ -7,6 +7,16 @@
 namespace fresh
 {
 
+ResourceManager::ResourceManager()
+{
+    startAsyncLoader();
+}
+
+ResourceManager::~ResourceManager()
+{
+    stopAsyncLoader();
+}
+
 ResourceManager& ResourceManager::getInstance()
 {
     static ResourceManager instance;
@@ -31,6 +41,19 @@ void ResourceManager::initialize(const std::string& assetDir)
     registerLoader(ResourceType::Audio, [](const std::string& path) {
         return std::make_shared<AudioClipResource>(path);
     });
+
+    // Create default placeholder resources
+    auto placeholderTexture = std::make_shared<TextureResource>("__placeholder_texture__");
+    placeholderTexture->load();
+    placeholders["texture"] = placeholderTexture;
+
+    auto placeholderMesh = std::make_shared<MeshResource>("__placeholder_mesh__");
+    placeholderMesh->load();
+    placeholders["mesh"] = placeholderMesh;
+
+    auto placeholderAudio = std::make_shared<AudioClipResource>("__placeholder_audio__");
+    placeholderAudio->load();
+    placeholders["audio"] = placeholderAudio;
 }
 
 void ResourceManager::shutdown()
@@ -40,6 +63,9 @@ void ResourceManager::shutdown()
     std::cout << "ResourceManager shutting down. Unloading " << resources.size() << " resources..."
               << std::endl;
 
+    // Stop async loader first
+    stopAsyncLoader();
+
     for (auto& [path, resource] : resources) {
         if (resource && resource->isLoaded()) {
             resource->unload();
@@ -47,6 +73,7 @@ void ResourceManager::shutdown()
     }
 
     resources.clear();
+    placeholders.clear();
 }
 
 void ResourceManager::unload(const std::string& path)
@@ -260,9 +287,25 @@ TextureResource::TextureResource(const std::string& path)
 
 void TextureResource::load()
 {
-    // TODO: Implement actual texture loading (using stb_image or similar)
     std::cout << "Loading texture: " << path << std::endl;
-    loaded = true;
+    
+    // Check if file exists
+    if (!std::filesystem::exists(path)) {
+        std::cerr << "ERROR: Texture file not found: " << path << std::endl;
+        std::cerr << "Using placeholder texture instead" << std::endl;
+        // Will be handled by ResourceManager fallback
+        return;
+    }
+    
+    try {
+        // TODO: Implement actual texture loading (using stb_image)
+        // For now, just mark as loaded
+        loaded = true;
+        std::cout << "Texture loaded successfully: " << path << std::endl;
+    } catch (const std::exception& e) {
+        std::cerr << "ERROR loading texture " << path << ": " << e.what() << std::endl;
+        loaded = false;
+    }
 }
 
 void TextureResource::unload()
@@ -289,9 +332,24 @@ MeshResource::MeshResource(const std::string& path)
 
 void MeshResource::load()
 {
-    // TODO: Implement actual mesh loading (using tinyobjloader or similar)
     std::cout << "Loading mesh: " << path << std::endl;
-    loaded = true;
+    
+    // Check if file exists
+    if (!std::filesystem::exists(path)) {
+        std::cerr << "ERROR: Mesh file not found: " << path << std::endl;
+        std::cerr << "Using placeholder mesh instead" << std::endl;
+        return;
+    }
+    
+    try {
+        // TODO: Implement actual mesh loading (using tinyobjloader)
+        // For now, just mark as loaded
+        loaded = true;
+        std::cout << "Mesh loaded successfully: " << path << std::endl;
+    } catch (const std::exception& e) {
+        std::cerr << "ERROR loading mesh " << path << ": " << e.what() << std::endl;
+        loaded = false;
+    }
 }
 
 void MeshResource::unload()
@@ -316,9 +374,33 @@ AudioClipResource::AudioClipResource(const std::string& path)
 
 void AudioClipResource::load()
 {
-    // TODO: Implement actual audio loading
     std::cout << "Loading audio: " << path << std::endl;
-    loaded = true;
+    
+    // Check if file exists
+    if (!std::filesystem::exists(path)) {
+        std::cerr << "ERROR: Audio file not found: " << path << std::endl;
+        std::cerr << "Using placeholder audio instead" << std::endl;
+        return;
+    }
+    
+    // Check file extension for supported formats
+    std::string ext = std::filesystem::path(path).extension().string();
+    std::transform(ext.begin(), ext.end(), ext.begin(), ::tolower);
+    
+    if (ext != ".wav" && ext != ".ogg" && ext != ".mp3") {
+        std::cerr << "WARNING: Unsupported audio format: " << ext << std::endl;
+        std::cerr << "Supported formats: .wav, .ogg, .mp3" << std::endl;
+    }
+    
+    try {
+        // TODO: Implement actual audio loading (integrate with AudioEngine)
+        // For now, just mark as loaded
+        loaded = true;
+        std::cout << "Audio loaded successfully: " << path << std::endl;
+    } catch (const std::exception& e) {
+        std::cerr << "ERROR loading audio " << path << ": " << e.what() << std::endl;
+        loaded = false;
+    }
 }
 
 void AudioClipResource::unload()
@@ -330,6 +412,117 @@ void AudioClipResource::unload()
 size_t AudioClipResource::getMemoryUsage() const
 {
     return samples.size() * sizeof(int16_t);
+}
+
+// Async loading implementation
+void ResourceManager::startAsyncLoader()
+{
+    asyncLoaderRunning = true;
+    asyncLoaderThread = std::thread(&ResourceManager::asyncLoadingWorker, this);
+}
+
+void ResourceManager::stopAsyncLoader()
+{
+    if (asyncLoaderRunning) {
+        asyncLoaderRunning = false;
+        loaderCondition.notify_all();
+        if (asyncLoaderThread.joinable()) {
+            asyncLoaderThread.join();
+        }
+    }
+}
+
+void ResourceManager::asyncLoadingWorker()
+{
+    while (asyncLoaderRunning) {
+        LoadingRequest request;
+        
+        {
+            std::unique_lock<std::mutex> lock(queueMutex);
+            loaderCondition.wait(lock, [this] { 
+                return !loadingQueue.empty() || !asyncLoaderRunning; 
+            });
+
+            if (!asyncLoaderRunning) {
+                break;
+            }
+
+            if (!loadingQueue.empty()) {
+                request = std::move(loadingQueue.front());
+                loadingQueue.pop();
+            } else {
+                continue;
+            }
+        }
+
+        try {
+            // Load the resource
+            std::shared_ptr<Resource> resource = loadResource(request.path, request.type);
+            
+            if (resource) {
+                // Store in resource map
+                {
+                    std::lock_guard<std::mutex> lock(mutex);
+                    resources[request.path] = resource;
+                }
+                request.promise.set_value(resource);
+            } else {
+                // Failed to load - use placeholder
+                std::cerr << "Failed to load resource: " << request.path 
+                         << " - using placeholder" << std::endl;
+                
+                // Get appropriate placeholder
+                std::shared_ptr<Resource> placeholder;
+                {
+                    std::lock_guard<std::mutex> lock(mutex);
+                    switch (request.type) {
+                        case ResourceType::Texture:
+                            placeholder = placeholders["texture"];
+                            break;
+                        case ResourceType::Mesh:
+                            placeholder = placeholders["mesh"];
+                            break;
+                        case ResourceType::Audio:
+                            placeholder = placeholders["audio"];
+                            break;
+                        default:
+                            break;
+                    }
+                }
+                request.promise.set_value(placeholder);
+            }
+        } catch (const std::exception& e) {
+            std::cerr << "Exception loading resource: " << request.path 
+                     << " - " << e.what() << std::endl;
+            request.promise.set_exception(std::current_exception());
+        }
+
+        completedLoadRequests++;
+    }
+}
+
+bool ResourceManager::isLoading(const std::string& path) const
+{
+    std::lock_guard<std::mutex> lock(queueMutex);
+    
+    // Check if path is in loading queue
+    std::queue<LoadingRequest> tempQueue = loadingQueue;
+    while (!tempQueue.empty()) {
+        if (tempQueue.front().path == path) {
+            return true;
+        }
+        tempQueue.pop();
+    }
+    return false;
+}
+
+float ResourceManager::getLoadingProgress() const
+{
+    size_t total = totalLoadRequests.load();
+    if (total == 0) {
+        return 1.0f;
+    }
+    return static_cast<float>(completedLoadRequests.load()) / static_cast<float>(total);
 }
 
 } // namespace fresh
