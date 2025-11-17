@@ -24,10 +24,10 @@ void Animation2DSystem::update(float deltaTime)
         return;
 
     // Update all entities with animation and sprite components
-    for (auto& [id, entity] : entityManager->getAllEntities())
+    for (const auto& entity : entityManager->getAllEntities())
     {
-        auto* animation = entity->getComponent<Animation2DComponent>();
-        auto* sprite = entity->getComponent<Sprite2DComponent>();
+        auto* animation = entityManager->getComponent<Animation2DComponent>(entity);
+        auto* sprite = entityManager->getComponent<Sprite2DComponent>(entity);
         
         if (animation && sprite)
         {

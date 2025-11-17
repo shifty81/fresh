@@ -214,6 +214,7 @@ void Win32HUD::renderSlot(HDC hdc, int x, int y, int size,
 
 void Win32HUD::renderHealthBar(HDC hdc, const RECT& clientRect)
 {
+    (void)clientRect; // Not used in current implementation
     const int barWidth = 250;
     const int barHeight = 18;
     const int padding = 15;
@@ -239,6 +240,7 @@ void Win32HUD::renderHealthBar(HDC hdc, const RECT& clientRect)
 
 void Win32HUD::renderStaminaBar(HDC hdc, const RECT& clientRect)
 {
+    (void)clientRect; // Not used in current implementation
     const int barWidth = 250;
     const int barHeight = 18;
     const int padding = 15;
