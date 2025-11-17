@@ -71,7 +71,7 @@ cd fresh
 
 ### Step 2: Set Up vcpkg for Dependencies
 
-Fresh Engine uses vcpkg to manage C++ dependencies (GLFW, GLM, ImGui). We recommend installing vcpkg in the project root directory for simplicity.
+Fresh Engine uses vcpkg to manage C++ dependencies (GLM, ImGui, OpenAL). Windows builds use native Win32 APIs for windowing and input (GLFW is only used for Linux CI testing). We recommend installing vcpkg in the project root directory for simplicity.
 
 **Option A: Install vcpkg in Project Directory (Recommended)**
 
@@ -145,7 +145,7 @@ cmake -G "Visual Studio 17 2022" -A x64 -DCMAKE_TOOLCHAIN_FILE=..\..\vcpkg\scrip
 
 **What happens during this step:**
 - CMake configures the project for Visual Studio 2022
-- vcpkg automatically downloads and builds dependencies (GLFW, GLM, ImGui, GLEW)
+- vcpkg automatically downloads and builds dependencies (GLM, ImGui, GLEW, OpenAL, etc.)
 - This may take 5-15 minutes on first run (dependencies are cached for future use)
 - A Visual Studio solution file is created: `build\FreshVoxelEngine.sln`
 
@@ -306,12 +306,13 @@ No configuration required - the engine automatically selects DirectX 12 on Windo
 - Verify the bootstrap script has been run: `..\vcpkg\vcpkg.exe` should exist
 - Check the CMake command uses the correct path: `..\..\vcpkg\scripts\buildsystems\vcpkg.cmake`
 
-### Build fails with "GLFW not found" or similar dependency errors
+### Build fails with dependency errors
 **Solution:**
 - This means vcpkg didn't run properly during CMake generation
 - Delete the `build` directory
 - Re-run Step 3 with the correct vcpkg toolchain path
 - vcpkg will automatically download and build all dependencies
+- Note: On Windows, native Win32 APIs are used for windowing (GLFW is not required)
 
 ### "Cannot open include file: 'd3d11.h'" or DirectX errors
 **Solution:**
