@@ -114,7 +114,7 @@ bool Win32Toolbar::addButton(int id, const std::string& text, HICON icon, Button
     btnInfo.cbSize = sizeof(TBBUTTONINFOW);
     btnInfo.dwMask = TBIF_TEXT;
     btnInfo.pszText = const_cast<LPWSTR>(wtext.c_str());
-    SendMessage(m_hwnd, TB_SETBUTTONINFOW, id, (LPARAM)&btnInfo);
+    SendMessage(m_hwnd, TB_SETBUTTONINFOW, static_cast<WPARAM>(static_cast<unsigned int>(id)), (LPARAM)&btnInfo);
 
     // Store button info
     ButtonInfo info;
@@ -150,14 +150,14 @@ void Win32Toolbar::addSeparator()
 void Win32Toolbar::setButtonEnabled(int id, bool enabled)
 {
     if (m_hwnd) {
-        SendMessage(m_hwnd, TB_ENABLEBUTTON, id, MAKELONG(enabled, 0));
+        SendMessage(m_hwnd, TB_ENABLEBUTTON, static_cast<WPARAM>(static_cast<unsigned int>(id)), MAKELONG(enabled, 0));
     }
 }
 
 void Win32Toolbar::setButtonChecked(int id, bool checked)
 {
     if (m_hwnd) {
-        SendMessage(m_hwnd, TB_CHECKBUTTON, id, MAKELONG(checked, 0));
+        SendMessage(m_hwnd, TB_CHECKBUTTON, static_cast<WPARAM>(static_cast<unsigned int>(id)), MAKELONG(checked, 0));
     }
 }
 
