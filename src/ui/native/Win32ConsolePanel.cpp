@@ -284,7 +284,7 @@ void Win32ConsolePanel::addMessage(MessageType type, const std::string& message)
         // Auto-scroll if enabled
         if (m_autoScroll) {
             // Scroll to end
-            SendMessage(m_richEdit, EM_SETSEL, -1, -1);
+            SendMessage(m_richEdit, EM_SETSEL, (WPARAM)-1, (LPARAM)-1);
             SendMessage(m_richEdit, EM_SCROLLCARET, 0, 0);
         }
     }
@@ -328,7 +328,7 @@ void Win32ConsolePanel::updateDisplay()
 
     // Scroll to end if auto-scroll is enabled
     if (m_autoScroll) {
-        SendMessage(m_richEdit, EM_SETSEL, -1, -1);
+        SendMessage(m_richEdit, EM_SETSEL, (WPARAM)-1, (LPARAM)-1);
         SendMessage(m_richEdit, EM_SCROLLCARET, 0, 0);
     }
 }
