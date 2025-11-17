@@ -261,6 +261,108 @@ public:
     }
 #endif
 
+    // ========== Editor Operations (for native menu integration) ==========
+    
+    /**
+     * @brief Perform undo operation
+     */
+    void undo();
+    
+    /**
+     * @brief Perform redo operation
+     */
+    void redo();
+    
+    /**
+     * @brief Cut selection to clipboard
+     */
+    void cut();
+    
+    /**
+     * @brief Copy selection to clipboard
+     */
+    void copy();
+    
+    /**
+     * @brief Paste from clipboard
+     */
+    void paste();
+    
+    /**
+     * @brief Delete selected items
+     */
+    void deleteSelection();
+    
+    /**
+     * @brief Select all items
+     */
+    void selectAll();
+    
+    /**
+     * @brief Deselect all items
+     */
+    void deselectAll();
+    
+    /**
+     * @brief Save current world
+     */
+    void saveWorld();
+    
+    /**
+     * @brief Show save world dialog
+     */
+    void saveWorldAs();
+    
+    /**
+     * @brief Show load world dialog
+     */
+    void loadWorld();
+    
+    /**
+     * @brief Show new world dialog
+     */
+    void newWorld();
+    
+    /**
+     * @brief Toggle scene hierarchy panel visibility
+     */
+    void toggleSceneHierarchy();
+    
+    /**
+     * @brief Toggle inspector panel visibility
+     */
+    void toggleInspector();
+    
+    /**
+     * @brief Toggle content browser panel visibility
+     */
+    void toggleContentBrowser();
+    
+    /**
+     * @brief Toggle console panel visibility
+     */
+    void toggleConsole();
+    
+    /**
+     * @brief Toggle tool palette panel visibility
+     */
+    void toggleToolPalette();
+    
+    /**
+     * @brief Show settings panel
+     */
+    void showSettings();
+    
+    /**
+     * @brief Show engine configuration panel
+     */
+    void showEngineConfig();
+    
+    /**
+     * @brief Show import assets dialog
+     */
+    void showImportAssets();
+
 private:
     void setupDockspace();
 

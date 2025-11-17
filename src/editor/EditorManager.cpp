@@ -946,4 +946,324 @@ bool EditorManager::wantCaptureKeyboard() const
     return false;
 }
 
+// ========== Editor Operations Implementation ==========
+
+void EditorManager::undo()
+{
+    if (m_worldEditor && m_worldEditor->getTerraformingSystem()) {
+        if (m_worldEditor->getTerraformingSystem()->undo()) {
+            LOG_INFO_C("Undo performed", "EditorManager");
+        } else {
+            LOG_INFO_C("Nothing to undo", "EditorManager");
+        }
+    }
+}
+
+void EditorManager::redo()
+{
+    if (m_worldEditor && m_worldEditor->getTerraformingSystem()) {
+        if (m_worldEditor->getTerraformingSystem()->redo()) {
+            LOG_INFO_C("Redo performed", "EditorManager");
+        } else {
+            LOG_INFO_C("Nothing to redo", "EditorManager");
+        }
+    }
+}
+
+void EditorManager::cut()
+{
+    if (m_selectionManager && m_selectionManager->hasSelection()) {
+        m_selectionManager->cutToClipboard(m_world);
+        LOG_INFO_C("Cut selection to clipboard", "EditorManager");
+    } else {
+        LOG_INFO_C("No selection to cut", "EditorManager");
+    }
+}
+
+void EditorManager::copy()
+{
+    if (m_selectionManager && m_selectionManager->hasSelection()) {
+        m_selectionManager->copyToClipboard(m_world);
+        LOG_INFO_C("Copied selection to clipboard", "EditorManager");
+    } else {
+        LOG_INFO_C("No selection to copy", "EditorManager");
+    }
+}
+
+void EditorManager::paste()
+{
+    if (m_selectionManager && m_selectionManager->hasClipboardData()) {
+        // TODO: Get paste position from camera/cursor
+        // For now, paste at origin as placeholder
+        m_selectionManager->pasteFromClipboard(glm::ivec3(0, 64, 0), m_world);
+        LOG_INFO_C("Pasted clipboard content", "EditorManager");
+    } else {
+        LOG_INFO_C("Clipboard is empty", "EditorManager");
+    }
+}
+
+void EditorManager::deleteSelection()
+{
+    if (m_selectionManager && m_selectionManager->hasSelection()) {
+        m_selectionManager->deleteSelected(m_world);
+        LOG_INFO_C("Deleted selection", "EditorManager");
+    } else {
+        LOG_INFO_C("No selection to delete", "EditorManager");
+    }
+}
+
+void EditorManager::selectAll()
+{
+    if (m_sceneHierarchy) {
+        m_sceneHierarchy->selectAll();
+        LOG_INFO_C("Selected all", "EditorManager");
+    }
+}
+
+void EditorManager::deselectAll()
+{
+    if (m_sceneHierarchy) {
+        m_sceneHierarchy->deselectAll();
+        LOG_INFO_C("Deselected all", "EditorManager");
+    }
+}
+
+void EditorManager::saveWorld()
+{
+#ifdef _WIN32
+    if (m_worldSerializer && m_world) {
+        if (!m_currentWorldPath.empty()) {
+            // Save to current path
+            if (m_worldSerializer->saveWorld(m_world, m_currentWorldPath)) {
+                LOG_INFO_C("World saved successfully to: " + m_currentWorldPath, "EditorManager");
+                if (m_windowsDialogManager) {
+                    m_windowsDialogManager->showMessageBox(
+                        "Save World",
+                        "World saved successfully!",
+                        MessageBoxButtons::OK,
+                        MessageBoxIcon::Information
+                    );
+                }
+            } else {
+                LOG_ERROR_C("Failed to save world to: " + m_currentWorldPath, "EditorManager");
+                if (m_windowsDialogManager) {
+                    m_windowsDialogManager->showMessageBox(
+                        "Save World",
+                        "Failed to save world!",
+                        MessageBoxButtons::OK,
+                        MessageBoxIcon::Error
+                    );
+                }
+            }
+        } else {
+            // No current path, show save as dialog
+            saveWorldAs();
+        }
+    }
+#else
+    LOG_INFO_C("Save World not implemented on this platform", "EditorManager");
+#endif
+}
+
+void EditorManager::saveWorldAs()
+{
+#ifdef _WIN32
+    if (m_windowsDialogManager && m_windowsDialogManager->isInitialized() && m_worldSerializer && m_world) {
+        LOG_INFO_C("Opening Save World As dialog", "EditorManager");
+        
+        std::vector<FileFilter> filters = {
+            {"Fresh World Files", "*.world"},
+            {"All Files", "*.*"}
+        };
+        
+        auto selectedFile = m_windowsDialogManager->showSaveFileDialog(
+            "Save World As", filters, "world");
+        
+        if (!selectedFile.empty()) {
+            LOG_INFO_C("User selected save path: " + selectedFile, "EditorManager");
+            
+            if (m_worldSerializer->saveWorld(m_world, selectedFile)) {
+                m_currentWorldPath = selectedFile;
+                LOG_INFO_C("World saved successfully to: " + selectedFile, "EditorManager");
+                
+                m_windowsDialogManager->showMessageBox(
+                    "Save World",
+                    "World saved successfully!",
+                    MessageBoxButtons::OK,
+                    MessageBoxIcon::Information
+                );
+            } else {
+                LOG_ERROR_C("Failed to save world to: " + selectedFile, "EditorManager");
+                
+                m_windowsDialogManager->showMessageBox(
+                    "Save World",
+                    "Failed to save world!",
+                    MessageBoxButtons::OK,
+                    MessageBoxIcon::Error
+                );
+            }
+        } else {
+            LOG_INFO_C("Save cancelled by user", "EditorManager");
+        }
+    }
+#else
+    LOG_INFO_C("Save World As not implemented on this platform", "EditorManager");
+#endif
+}
+
+void EditorManager::loadWorld()
+{
+#ifdef _WIN32
+    if (m_windowsDialogManager && m_windowsDialogManager->isInitialized() && m_worldSerializer && m_world) {
+        LOG_INFO_C("Opening Load World dialog", "EditorManager");
+        
+        std::vector<FileFilter> filters = {
+            {"Fresh World Files", "*.world"},
+            {"All Files", "*.*"}
+        };
+        
+        auto selectedFiles = m_windowsDialogManager->showOpenFileDialog(
+            "Open World", filters, false);
+        
+        if (!selectedFiles.empty()) {
+            const std::string& worldPath = selectedFiles[0];
+            LOG_INFO_C("User selected world file: " + worldPath, "EditorManager");
+            
+            // Clear existing world by unloading all chunks
+            auto& chunks = m_world->getChunks();
+            std::vector<ChunkPos> chunksToUnload;
+            for (const auto& [pos, chunk] : chunks) {
+                chunksToUnload.push_back(pos);
+            }
+            for (const auto& pos : chunksToUnload) {
+                m_world->unloadChunk(pos);
+            }
+            
+            // Load the world
+            if (m_worldSerializer->loadWorld(m_world, worldPath)) {
+                m_currentWorldPath = worldPath;
+                LOG_INFO_C("World loaded successfully from: " + worldPath, "EditorManager");
+                
+                m_windowsDialogManager->showMessageBox(
+                    "Load World",
+                    "World loaded successfully!",
+                    MessageBoxButtons::OK,
+                    MessageBoxIcon::Information
+                );
+            } else {
+                LOG_ERROR_C("Failed to load world from: " + worldPath, "EditorManager");
+                
+                m_windowsDialogManager->showMessageBox(
+                    "Load World",
+                    "Failed to load world!",
+                    MessageBoxButtons::OK,
+                    MessageBoxIcon::Error
+                );
+            }
+        } else {
+            LOG_INFO_C("Load cancelled by user", "EditorManager");
+        }
+    }
+#else
+    LOG_INFO_C("Load World not implemented on this platform", "EditorManager");
+#endif
+}
+
+void EditorManager::newWorld()
+{
+#ifdef _WIN32
+    if (m_windowsDialogManager) {
+        // Show confirmation dialog if there's unsaved work
+        auto result = m_windowsDialogManager->showMessageBox(
+            "New World",
+            "Create a new world? Any unsaved changes will be lost.",
+            MessageBoxButtons::YesNo,
+            MessageBoxIcon::Question
+        );
+        
+        if (result == MessageBoxResult::Yes) {
+            if (m_world) {
+                // Clear existing world by unloading all chunks
+                auto& chunks = m_world->getChunks();
+                std::vector<ChunkPos> chunksToUnload;
+                for (const auto& [pos, chunk] : chunks) {
+                    chunksToUnload.push_back(pos);
+                }
+                for (const auto& pos : chunksToUnload) {
+                    m_world->unloadChunk(pos);
+                }
+                
+                m_currentWorldPath.clear();
+                LOG_INFO_C("New world created", "EditorManager");
+                
+                m_windowsDialogManager->showMessageBox(
+                    "New World",
+                    "New world created successfully!",
+                    MessageBoxButtons::OK,
+                    MessageBoxIcon::Information
+                );
+            }
+        } else {
+            LOG_INFO_C("New world cancelled by user", "EditorManager");
+        }
+    }
+#else
+    LOG_INFO_C("New World not implemented on this platform", "EditorManager");
+#endif
+}
+
+void EditorManager::toggleSceneHierarchy()
+{
+    m_showSceneHierarchy = !m_showSceneHierarchy;
+    LOG_INFO_C("Scene Hierarchy toggled: " + std::string(m_showSceneHierarchy ? "shown" : "hidden"), "EditorManager");
+}
+
+void EditorManager::toggleInspector()
+{
+    m_showInspector = !m_showInspector;
+    LOG_INFO_C("Inspector toggled: " + std::string(m_showInspector ? "shown" : "hidden"), "EditorManager");
+}
+
+void EditorManager::toggleContentBrowser()
+{
+    m_showContentBrowser = !m_showContentBrowser;
+    LOG_INFO_C("Content Browser toggled: " + std::string(m_showContentBrowser ? "shown" : "hidden"), "EditorManager");
+}
+
+void EditorManager::toggleConsole()
+{
+    m_showConsole = !m_showConsole;
+    LOG_INFO_C("Console toggled: " + std::string(m_showConsole ? "shown" : "hidden"), "EditorManager");
+}
+
+void EditorManager::toggleToolPalette()
+{
+    m_showToolPalette = !m_showToolPalette;
+    LOG_INFO_C("Tool Palette toggled: " + std::string(m_showToolPalette ? "shown" : "hidden"), "EditorManager");
+}
+
+void EditorManager::showSettings()
+{
+    if (m_settingsPanel) {
+        m_settingsPanel->setVisible(true);
+        LOG_INFO_C("Settings panel shown", "EditorManager");
+    }
+}
+
+void EditorManager::showEngineConfig()
+{
+    if (m_engineConfigPanel) {
+        m_engineConfigPanel->setVisible(true);
+        LOG_INFO_C("Engine configuration panel shown", "EditorManager");
+    }
+}
+
+void EditorManager::showImportAssets()
+{
+    if (m_contentBrowser) {
+        m_contentBrowser->showImportDialog();
+        LOG_INFO_C("Import assets dialog shown", "EditorManager");
+    }
+}
+
 } // namespace fresh

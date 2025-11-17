@@ -1554,38 +1554,53 @@ void Engine::setupNativeMenuBar()
     int fileMenu = menuBar->addMenu("File");
     menuBar->addMenuItem(fileMenu, "New World...\tCtrl+N", [this]() {
         LOG_INFO_C("New World menu item clicked", "Engine");
-        // TODO: Show new world dialog
+        if (m_editorManager) {
+            m_editorManager->newWorld();
+        }
     });
     menuBar->addMenuItem(fileMenu, "Open World...\tCtrl+O", [this]() {
         LOG_INFO_C("Open World menu item clicked", "Engine");
-        // TODO: Show open world dialog
+        if (m_editorManager) {
+            m_editorManager->loadWorld();
+        }
     });
     menuBar->addSeparator(fileMenu);
     menuBar->addMenuItem(fileMenu, "Save\tCtrl+S", [this]() {
         LOG_INFO_C("Save menu item clicked", "Engine");
-        // TODO: Save current world
+        if (m_editorManager) {
+            m_editorManager->saveWorld();
+        }
     });
     menuBar->addMenuItem(fileMenu, "Save As...\tCtrl+Shift+S", [this]() {
         LOG_INFO_C("Save As menu item clicked", "Engine");
-        // TODO: Show save as dialog
+        if (m_editorManager) {
+            m_editorManager->saveWorldAs();
+        }
     });
     menuBar->addMenuItem(fileMenu, "Save All\tCtrl+Shift+A", [this]() {
         LOG_INFO_C("Save All menu item clicked", "Engine");
-        // TODO: Save all open assets
+        // TODO: Implement save all assets (not just world)
+        if (m_editorManager) {
+            m_editorManager->saveWorld();  // For now, just save world
+        }
     });
     menuBar->addSeparator(fileMenu);
     menuBar->addMenuItem(fileMenu, "Import...\tCtrl+I", [this]() {
         LOG_INFO_C("Import menu item clicked", "Engine");
-        // TODO: Import assets
+        if (m_editorManager) {
+            m_editorManager->showImportAssets();
+        }
     });
     menuBar->addMenuItem(fileMenu, "Export...\tCtrl+E", [this]() {
         LOG_INFO_C("Export menu item clicked", "Engine");
-        // TODO: Export world/assets
+        // TODO: Implement export functionality
     });
     menuBar->addSeparator(fileMenu);
     menuBar->addMenuItem(fileMenu, "Project Settings...", [this]() {
         LOG_INFO_C("Project Settings menu item clicked", "Engine");
-        // TODO: Show project settings
+        if (m_editorManager) {
+            m_editorManager->showEngineConfig();
+        }
     });
     menuBar->addSeparator(fileMenu);
     menuBar->addMenuItem(fileMenu, "Exit\tAlt+F4", [this]() {
@@ -1597,47 +1612,65 @@ void Engine::setupNativeMenuBar()
     int editMenu = menuBar->addMenu("Edit");
     menuBar->addMenuItem(editMenu, "Undo\tCtrl+Z", [this]() {
         LOG_INFO_C("Undo menu item clicked", "Engine");
-        // TODO: Implement undo
+        if (m_editorManager) {
+            m_editorManager->undo();
+        }
     });
     menuBar->addMenuItem(editMenu, "Redo\tCtrl+Y", [this]() {
         LOG_INFO_C("Redo menu item clicked", "Engine");
-        // TODO: Implement redo
+        if (m_editorManager) {
+            m_editorManager->redo();
+        }
     });
     menuBar->addSeparator(editMenu);
     menuBar->addMenuItem(editMenu, "Cut\tCtrl+X", [this]() {
         LOG_INFO_C("Cut menu item clicked", "Engine");
-        // TODO: Cut selection
+        if (m_editorManager) {
+            m_editorManager->cut();
+        }
     });
     menuBar->addMenuItem(editMenu, "Copy\tCtrl+C", [this]() {
         LOG_INFO_C("Copy menu item clicked", "Engine");
-        // TODO: Copy selection
+        if (m_editorManager) {
+            m_editorManager->copy();
+        }
     });
     menuBar->addMenuItem(editMenu, "Paste\tCtrl+V", [this]() {
         LOG_INFO_C("Paste menu item clicked", "Engine");
-        // TODO: Paste
+        if (m_editorManager) {
+            m_editorManager->paste();
+        }
     });
     menuBar->addMenuItem(editMenu, "Delete\tDel", [this]() {
         LOG_INFO_C("Delete menu item clicked", "Engine");
-        // TODO: Delete selection
+        if (m_editorManager) {
+            m_editorManager->deleteSelection();
+        }
     });
     menuBar->addSeparator(editMenu);
     menuBar->addMenuItem(editMenu, "Select All\tCtrl+A", [this]() {
         LOG_INFO_C("Select All menu item clicked", "Engine");
-        // TODO: Select all
+        if (m_editorManager) {
+            m_editorManager->selectAll();
+        }
     });
     menuBar->addMenuItem(editMenu, "Deselect All\tCtrl+D", [this]() {
         LOG_INFO_C("Deselect All menu item clicked", "Engine");
-        // TODO: Deselect all
+        if (m_editorManager) {
+            m_editorManager->deselectAll();
+        }
     });
     menuBar->addSeparator(editMenu);
     menuBar->addMenuItem(editMenu, "Find...\tCtrl+F", [this]() {
         LOG_INFO_C("Find menu item clicked", "Engine");
-        // TODO: Show find dialog
+        // TODO: Implement find functionality
     });
     menuBar->addSeparator(editMenu);
     menuBar->addMenuItem(editMenu, "Editor Preferences...", [this]() {
         LOG_INFO_C("Editor Preferences menu item clicked", "Engine");
-        // TODO: Show editor preferences
+        if (m_editorManager) {
+            m_editorManager->showSettings();
+        }
     });
 
     // ========== VIEW MENU (Unreal-style) ==========
@@ -1665,19 +1698,27 @@ void Engine::setupNativeMenuBar()
     menuBar->addSeparator(viewMenu);
     menuBar->addMenuItem(viewMenu, "Content Browser\tCtrl+B", [this]() {
         LOG_INFO_C("Content Browser toggled", "Engine");
-        // TODO: Toggle content browser panel
+        if (m_editorManager) {
+            m_editorManager->toggleContentBrowser();
+        }
     });
     menuBar->addMenuItem(viewMenu, "Scene Hierarchy\tCtrl+H", [this]() {
         LOG_INFO_C("Scene Hierarchy toggled", "Engine");
-        // TODO: Toggle scene hierarchy panel
+        if (m_editorManager) {
+            m_editorManager->toggleSceneHierarchy();
+        }
     });
     menuBar->addMenuItem(viewMenu, "Inspector\tCtrl+I", [this]() {
         LOG_INFO_C("Inspector toggled", "Engine");
-        // TODO: Toggle inspector panel
+        if (m_editorManager) {
+            m_editorManager->toggleInspector();
+        }
     });
     menuBar->addMenuItem(viewMenu, "Console\t~", [this]() {
         LOG_INFO_C("Console toggled", "Engine");
-        // TODO: Toggle console panel
+        if (m_editorManager) {
+            m_editorManager->toggleConsole();
+        }
     });
     menuBar->addSeparator(viewMenu);
     menuBar->addMenuItem(viewMenu, "Toggle Fullscreen\tF11", [this]() {
@@ -1775,29 +1816,39 @@ void Engine::setupNativeMenuBar()
     int windowMenu = menuBar->addMenu("Window");
     menuBar->addMenuItem(windowMenu, "Content Browser\tCtrl+B", [this]() {
         LOG_INFO_C("Content Browser toggled", "Engine");
-        // TODO: Toggle content browser
+        if (m_editorManager) {
+            m_editorManager->toggleContentBrowser();
+        }
     });
     menuBar->addMenuItem(windowMenu, "Scene Hierarchy\tCtrl+H", [this]() {
         LOG_INFO_C("Scene Hierarchy toggled", "Engine");
-        // TODO: Toggle scene hierarchy
+        if (m_editorManager) {
+            m_editorManager->toggleSceneHierarchy();
+        }
     });
     menuBar->addMenuItem(windowMenu, "Inspector\tCtrl+I", [this]() {
         LOG_INFO_C("Inspector toggled", "Engine");
-        // TODO: Toggle inspector
+        if (m_editorManager) {
+            m_editorManager->toggleInspector();
+        }
     });
     menuBar->addMenuItem(windowMenu, "Console\t~", [this]() {
         LOG_INFO_C("Console toggled", "Engine");
-        // TODO: Toggle console
+        if (m_editorManager) {
+            m_editorManager->toggleConsole();
+        }
     });
     menuBar->addSeparator(windowMenu);
     menuBar->addMenuItem(windowMenu, "Reset Layout", [this]() {
         LOG_INFO_C("Layout reset", "Engine");
-        // TODO: Reset window layout
+        // TODO: Implement layout reset
     });
     menuBar->addSeparator(windowMenu);
     menuBar->addMenuItem(windowMenu, "Preferences...", [this]() {
         LOG_INFO_C("Preferences opened", "Engine");
-        // TODO: Show preferences dialog
+        if (m_editorManager) {
+            m_editorManager->showSettings();
+        }
     });
 
     // ========== HELP MENU (Unreal-style) ==========
@@ -1857,17 +1908,23 @@ void Engine::setupNativeToolbar()
     // ========== FILE OPERATIONS GROUP ==========
     toolbar->addButton(5001, "New", nullptr, [this]() {
         LOG_INFO_C("New button clicked", "Engine");
-        // TODO: New world dialog
+        if (m_editorManager) {
+            m_editorManager->newWorld();
+        }
     });
     
     toolbar->addButton(5002, "Open", nullptr, [this]() {
         LOG_INFO_C("Open button clicked", "Engine");
-        // TODO: Open world dialog
+        if (m_editorManager) {
+            m_editorManager->loadWorld();
+        }
     });
     
     toolbar->addButton(5003, "Save", nullptr, [this]() {
         LOG_INFO_C("Save button clicked", "Engine");
-        // TODO: Save current world
+        if (m_editorManager) {
+            m_editorManager->saveWorld();
+        }
     });
     
     toolbar->addSeparator();
@@ -1875,12 +1932,16 @@ void Engine::setupNativeToolbar()
     // ========== EDIT OPERATIONS GROUP ==========
     toolbar->addButton(5004, "Undo", nullptr, [this]() {
         LOG_INFO_C("Undo button clicked", "Engine");
-        // TODO: Implement undo
+        if (m_editorManager) {
+            m_editorManager->undo();
+        }
     });
     
     toolbar->addButton(5005, "Redo", nullptr, [this]() {
         LOG_INFO_C("Redo button clicked", "Engine");
-        // TODO: Implement redo
+        if (m_editorManager) {
+            m_editorManager->redo();
+        }
     });
     
     toolbar->addSeparator();
