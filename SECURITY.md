@@ -68,7 +68,7 @@ Security researchers who responsibly disclose vulnerabilities will be:
 ### For Users
 
 - ✅ Always use the latest stable version
-- ✅ Keep Vulkan drivers updated
+- ✅ Keep graphics drivers updated (DirectX 12/11 on Windows)
 - ✅ Validate downloaded asset packs
 - ✅ Be cautious with community scripts
 - ✅ Run with minimal necessary privileges
@@ -105,8 +105,8 @@ Security researchers who responsibly disclose vulnerabilities will be:
 ### Shader Compilation
 
 - **Risk**: Malicious shaders could cause GPU crashes
-- **Mitigation**: Validate shader code, use trusted compilers
-- **Status**: ✅ Using Vulkan validation layers
+- **Mitigation**: Validate shader code, use trusted compilers, DirectX shader validation
+- **Status**: ✅ Using DirectX shader validation on Windows
 
 ## CVE Assignment
 
@@ -139,7 +139,7 @@ We follow the principle of **coordinated disclosure**. We will work with you to 
 
 - [OWASP Secure Coding Practices](https://owasp.org/www-project-secure-coding-practices-quick-reference-guide/)
 - [CWE Top 25](https://cwe.mitre.org/top25/)
-- [Vulkan Security Best Practices](https://www.vulkan.org/)
+- [Microsoft DirectX Security Best Practices](https://docs.microsoft.com/en-us/windows/win32/direct3d12/)
 
 ---
 
