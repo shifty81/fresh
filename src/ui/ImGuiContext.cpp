@@ -89,6 +89,10 @@ bool ImGuiContext::initialize(Window* window, IRenderContext* renderContext)
     // Only available when ImGui is built with docking branch
     #ifdef IMGUI_HAS_DOCK
     io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+    
+    // Enable multi-viewport / platform windows for more native feel
+    // This allows ImGui windows to move outside the main window
+    io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
     #endif
 
     // Setup Dear ImGui style - Unreal Engine Dark Theme
@@ -117,6 +121,14 @@ bool ImGuiContext::initialize(Window* window, IRenderContext* renderContext)
     style.FramePadding = ImVec2(4.0f, 3.0f);
     style.ItemSpacing = ImVec2(8.0f, 4.0f);
     style.ItemInnerSpacing = ImVec2(4.0f, 4.0f);
+    
+    // When viewports are enabled, tweak WindowRounding/WindowBg for platform windows
+    #ifdef IMGUI_HAS_DOCK
+    if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
+        style.WindowRounding = 0.0f;  // Keep sharp corners for native look
+        style.Colors[ImGuiCol_WindowBg].w = 1.0f;  // No transparency for platform windows
+    }
+    #endif
     
     // Unreal Engine 5 Dark Theme Color Scheme
     ImVec4* colors = style.Colors;
@@ -675,12 +687,10 @@ void ImGuiContext::render()
     // Handle multi-viewport if enabled
     // Only available when ImGui is built with docking branch and multi-viewport support
     ImGuiIO& io = ::ImGui::GetIO();
-    #ifdef IMGUI_HAS_VIEWPORT
+    #ifdef IMGUI_HAS_DOCK
     if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
-        GLFWwindow* backup_current_context = glfwGetCurrentContext();
         ::ImGui::UpdatePlatformWindows();
         ::ImGui::RenderPlatformWindowsDefault();
-        glfwMakeContextCurrent(backup_current_context);
     }
     #endif
 #endif // FRESH_IMGUI_AVAILABLE
