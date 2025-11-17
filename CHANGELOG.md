@@ -8,6 +8,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **Windows-Native Windowing System** - Complete migration to native Win32 window management
+  - Replaced GLFW with native Win32Window on Windows for optimal platform integration
+  - Native Win32 input handling with Win32InputManager
+  - Native Win32 menu bar and toolbar support
+  - ImGui editor panels integrated with Win32 windowing
+  - GLFW retained only for Linux CI testing purposes
+  - Per-monitor DPI awareness for crisp rendering on 4K/5K displays
+  - Full Windows 10/11 theme integration
+  - Jump lists and taskbar integration
+  - Toast notifications support
+  
 - **Complete Cross-Platform Build System** - Production-ready builds on all platforms
   - Full CMake configuration for Windows, Linux, and macOS
   - Platform-specific dependency detection and linking
