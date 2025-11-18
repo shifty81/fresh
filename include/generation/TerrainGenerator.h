@@ -16,6 +16,21 @@ class World2DGenerator;
  *
  * Uses noise functions to create natural-looking terrain with
  * different biomes, caves, and structures.
+ * 
+ * Current Implementation:
+ * - Perlin noise-based heightmap generation
+ * - Multi-octave fractal noise for detail
+ * - Basic height-based biome selection
+ * - 3D cave generation using noise
+ * - Tree and foliage placement
+ * 
+ * Future Advanced Features (see ADVANCED_WORLD_GENERATION.md):
+ * - Climate simulation (temperature, rainfall)
+ * - Geological layering (rock types, ore distribution)
+ * - Hydrological systems (rivers, lakes)
+ * - Structure generation (ruins, dungeons)
+ * - JSON-based modding support
+ * - LOD rendering for distant terrain
  */
 class TerrainGenerator
 {
@@ -51,6 +66,17 @@ public:
 
     /**
      * @brief Get height at world position
+     * 
+     * Current Implementation:
+     * Uses multi-octave fractal Brownian motion (fBm) to generate
+     * natural-looking terrain height variations.
+     * 
+     * Future Enhancement (see ADVANCED_WORLD_GENERATION.md):
+     * Could be enhanced with climate-based modifications:
+     * - Temperature affects terrain roughness
+     * - Rainfall influences erosion patterns
+     * - Altitude affects temperature (lapse rate)
+     * 
      * @param x World X coordinate
      * @param z World Z coordinate
      * @return Height value

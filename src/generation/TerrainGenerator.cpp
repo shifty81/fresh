@@ -58,6 +58,13 @@ int TerrainGenerator::getHeight(int x, int z) const
     // Octaves (4): Number of noise layers combined - more = finer detail
     // Persistence (0.5f): Amplitude decay per octave - lower = smoother terrain
     // Lacunarity (2.0f): Frequency multiplier per octave - higher = more detail variation
+    
+    // FUTURE ENHANCEMENT (see ADVANCED_WORLD_GENERATION.md):
+    // This could be enhanced with climate-based modifications:
+    // - Apply temperature maps to modify terrain roughness
+    // - Use rainfall to create erosion patterns
+    // - Implement altitude-based temperature lapse rate
+    
     float noiseValue = m_noiseGenerator.fractalNoise2D(x * 0.01f, z * 0.01f,
                                                        4,    // octaves
                                                        0.5f, // persistence
@@ -75,6 +82,13 @@ VoxelType TerrainGenerator::getBlockType(int x, int y, int z, int surfaceHeight)
 {
     // Determine block type based on height and position
     // Creates natural terrain layers: grass/dirt on top, stone below, bedrock at bottom
+    
+    // FUTURE ENHANCEMENT (see ADVANCED_WORLD_GENERATION.md):
+    // This could be enhanced with geological layering:
+    // - Different rock types (sedimentary, metamorphic, igneous)
+    // - Realistic ore distribution based on rock type
+    // - Geological provinces with regional variations
+    
     if (y > surfaceHeight) {
         return VoxelType::Air;
     } else if (y == surfaceHeight) {
