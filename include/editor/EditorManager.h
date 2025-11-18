@@ -121,6 +121,15 @@ public:
     bool updateWorld(VoxelWorld* world, WorldEditor* worldEditor);
 
     /**
+     * @brief Set player reference for camera-based operations
+     * @param player Player instance
+     */
+    void setPlayer(class Player* player)
+    {
+        m_player = player;
+    }
+
+    /**
      * @brief Check if editor is initialized
      * @return true if initialized
      */
@@ -435,6 +444,7 @@ private:
     VoxelWorld* m_world;
     WorldEditor* m_worldEditor;
     ecs::EntityManager* m_entityManager;
+    class Player* m_player;
 
     // Panel visibility flags
     bool m_showSceneHierarchy;
