@@ -325,7 +325,7 @@ void Win32ContentBrowserPanel::onViewModeChanged()
     // TODO: Implement view mode switching
 }
 
-LRESULT Win32ContentBrowserPanel::handleMessage(UINT msg, WPARAM wParam, LPARAM lParam)
+bool Win32ContentBrowserPanel::handleMessage(UINT msg, WPARAM wParam, LPARAM lParam, LRESULT& result)
 {
     switch (msg) {
         case WM_NOTIFY: {
@@ -339,14 +339,16 @@ LRESULT Win32ContentBrowserPanel::handleMessage(UINT msg, WPARAM wParam, LPARAM 
                 NMITEMACTIVATE* nmia = (NMITEMACTIVATE*)lParam;
                 onItemActivated(nmia->iItem);
             }
-            break;
+            result = 0;
+            return true;
         }
         
         case WM_CONTEXTMENU: {
             int xPos = GET_X_LPARAM(lParam);
             int yPos = GET_Y_LPARAM(lParam);
             showContextMenu(xPos, yPos);
-            return 0;
+            result = 0;
+            return true;
         }
         
         case WM_COMMAND: {
@@ -384,11 +386,12 @@ LRESULT Win32ContentBrowserPanel::handleMessage(UINT msg, WPARAM wParam, LPARAM 
                     onViewModeChanged();
                     break;
             }
-            break;
+            result = 0;
+            return true;
         }
     }
     
-    return Win32Panel::handleMessage(msg, wParam, lParam);
+    return false; // Let base class handle it
 }
 
 } // namespace fresh

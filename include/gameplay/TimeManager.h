@@ -2,6 +2,7 @@
 
 #include <glm/glm.hpp>
 #include <functional>
+#include <string>
 
 namespace fresh
 {

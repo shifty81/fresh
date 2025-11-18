@@ -32,9 +32,10 @@ public:
      * @param y Y position
      * @param width Panel width
      * @param height Panel height
+     * @param title Optional window title
      * @return true if successful
      */
-    bool create(HWND parent, int x, int y, int width, int height);
+    bool create(HWND parent, int x, int y, int width, int height, const wchar_t* title = L"Panel");
 
     /**
      * @brief Destroy the panel window

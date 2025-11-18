@@ -51,7 +51,7 @@ bool Win32Panel::registerWindowClass()
     return true;
 }
 
-bool Win32Panel::create(HWND parent, int x, int y, int width, int height)
+bool Win32Panel::create(HWND parent, int x, int y, int width, int height, const wchar_t* title)
 {
     if (m_hwnd) {
         LOG_WARNING_C("Panel already created", "Win32Panel");
@@ -69,7 +69,7 @@ bool Win32Panel::create(HWND parent, int x, int y, int width, int height)
     m_hwnd = CreateWindowExW(
         0,
         WINDOW_CLASS_NAME,
-        L"Panel",
+        title,
         WS_CHILD | WS_VISIBLE | WS_CLIPCHILDREN,
         x, y, width, height,
         parent,

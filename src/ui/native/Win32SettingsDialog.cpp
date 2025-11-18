@@ -7,6 +7,9 @@
 #include <sstream>
 #include <iomanip>
 
+// Dialog resource ID (would normally be defined in a resource file)
+#define IDD_SETTINGS 101
+
 namespace fresh
 {
 

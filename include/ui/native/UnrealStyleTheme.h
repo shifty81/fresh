@@ -125,6 +125,40 @@ struct UnrealStyleTheme
     static constexpr int IconSmall = 16;
     static constexpr int IconMedium = 24;
     static constexpr int IconLarge = 32;
+    
+    // Helper functions for applying theme
+    /**
+     * @brief Apply theme colors to a window
+     * @param hwnd Window handle to apply theme to
+     */
+    static void ApplyToWindow(HWND hwnd) {
+        // Set background color using window subclassing or custom painting
+        // This is a placeholder implementation
+        (void)hwnd;
+    }
+    
+    /**
+     * @brief Get default font for UI elements
+     * @return Handle to default font
+     */
+    static HFONT GetFont() {
+        static HFONT hFont = nullptr;
+        if (!hFont) {
+            hFont = CreateFontW(
+                FontSizeNormal,
+                0, 0, 0,
+                FW_NORMAL,
+                FALSE, FALSE, FALSE,
+                DEFAULT_CHARSET,
+                OUT_DEFAULT_PRECIS,
+                CLIP_DEFAULT_PRECIS,
+                CLEARTYPE_QUALITY,
+                DEFAULT_PITCH | FF_DONTCARE,
+                L"Segoe UI"
+            );
+        }
+        return hFont;
+    }
 };
 
 } // namespace fresh
