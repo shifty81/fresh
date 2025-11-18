@@ -1,16 +1,17 @@
 #pragma once
 
-#include <Windows.h>
+#include <functional>
 #include <string>
 #include <vector>
-#include <functional>
+
+#include <Windows.h>
 
 namespace fresh
 {
 
 /**
  * @brief Native Windows Main Menu using Win32 API
- * 
+ *
  * This is a proof-of-concept replacement for MainMenuPanel that uses
  * pure Win32 API instead of ImGui. Features:
  * - Native Windows dialog
@@ -41,55 +42,74 @@ public:
     /**
      * @brief Check if user wants to create a new world
      */
-    bool shouldCreateNewWorld() const { return m_createNewWorld; }
+    bool shouldCreateNewWorld() const
+    {
+        return m_createNewWorld;
+    }
 
     /**
      * @brief Check if user wants to load existing world
      */
-    bool shouldLoadWorld() const { return m_loadWorld; }
+    bool shouldLoadWorld() const
+    {
+        return m_loadWorld;
+    }
 
     /**
      * @brief Get the new world name
      */
-    const std::wstring& getNewWorldName() const { return m_newWorldName; }
+    const std::wstring& getNewWorldName() const
+    {
+        return m_newWorldName;
+    }
 
     /**
      * @brief Get the world seed
      */
-    int getWorldSeed() const { return m_worldSeed; }
+    int getWorldSeed() const
+    {
+        return m_worldSeed;
+    }
 
     /**
      * @brief Check if world should be 3D
      */
-    bool isWorld3D() const { return m_isWorld3D; }
+    bool isWorld3D() const
+    {
+        return m_isWorld3D;
+    }
 
     /**
      * @brief Get the world to load
      */
-    const std::wstring& getLoadWorldName() const { return m_loadWorldName; }
+    const std::wstring& getLoadWorldName() const
+    {
+        return m_loadWorldName;
+    }
 
 private:
     // Dialog procedure for main menu
     static INT_PTR CALLBACK mainMenuDialogProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
-    
+
     // Dialog procedure for world creation
-    static INT_PTR CALLBACK createWorldDialogProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
-    
+    static INT_PTR CALLBACK createWorldDialogProc(HWND hwnd, UINT msg, WPARAM wParam,
+                                                  LPARAM lParam);
+
     // Dialog procedure for world loading
     static INT_PTR CALLBACK loadWorldDialogProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
     // Create the main menu dialog
     void createMainMenuDialog(HWND hwnd);
-    
+
     // Create the world creation dialog
     void createWorldCreationDialog(HWND hwnd);
-    
+
     // Create the world loading dialog
     void createWorldLoadingDialog(HWND hwnd);
 
     // Apply dark theme to window
     void applyDarkTheme(HWND hwnd);
-    
+
     // Apply dark theme to control
     void applyDarkThemeToControl(HWND control);
 
@@ -99,18 +119,18 @@ private:
 private:
     HWND m_parentWindow;
     HWND m_mainDialog;
-    
+
     // State
     bool m_createNewWorld;
     bool m_loadWorld;
     bool m_isWorld3D;
-    
+
     // World data
     std::wstring m_newWorldName;
     int m_worldSeed;
     std::wstring m_loadWorldName;
     std::vector<std::wstring> m_worldSaves;
-    
+
     // Control IDs
     enum ControlIDs {
         ID_BTN_CREATE_WORLD = 1001,
@@ -126,7 +146,7 @@ private:
         ID_BTN_LOAD = 1011,
         ID_STATIC_TITLE = 1012,
     };
-    
+
     // Unreal Engine dark theme colors
     struct UnrealColors {
         static constexpr COLORREF WindowBg = RGB(32, 32, 32);        // #202020
