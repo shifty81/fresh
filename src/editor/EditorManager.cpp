@@ -14,6 +14,7 @@
 #include "editor/WorldEditor.h"
 #include "editor/SelectionManager.h"
 #include "editor/SelectionRenderer.h"
+#include "editor/TransformGizmo.h"
 #include "serialization/WorldSerializer.h"
 #include "devtools/DebugRenderer.h"
 #include "renderer/RenderContext.h"
@@ -290,6 +291,11 @@ bool EditorManager::initialize(WindowType* window, IRenderContext* renderContext
             return false;
         }
         LOG_INFO_C("Selection Renderer initialized", "EditorManager");
+        
+        // Initialize transform gizmo
+        m_transformGizmo = std::make_unique<TransformGizmo>();
+        m_transformGizmo->setDebugRenderer(m_debugRenderer.get());
+        LOG_INFO_C("Transform Gizmo initialized", "EditorManager");
         
         // Initialize world serializer
         m_worldSerializer = std::make_unique<WorldSerializer>();

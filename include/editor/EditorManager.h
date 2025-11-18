@@ -36,6 +36,7 @@ class HotbarPanel;
 class SelectionManager;
 class SelectionRenderer;
 class WorldSerializer;
+class TransformGizmo;
 
 namespace ecs
 {
@@ -256,6 +257,15 @@ public:
         return m_selectionRenderer.get();
     }
 
+    /**
+     * @brief Get the transform gizmo
+     * @return Transform gizmo pointer
+     */
+    TransformGizmo* getTransformGizmo() const
+    {
+        return m_transformGizmo.get();
+    }
+
 #ifdef _WIN32
     /**
      * @brief Get the Windows customization panel
@@ -399,6 +409,7 @@ private:
     std::unique_ptr<HotbarPanel> m_hotbar;
     std::unique_ptr<SelectionManager> m_selectionManager;
     std::unique_ptr<SelectionRenderer> m_selectionRenderer;
+    std::unique_ptr<TransformGizmo> m_transformGizmo;
     std::unique_ptr<devtools::DebugRenderer> m_debugRenderer;
     std::unique_ptr<WorldSerializer> m_worldSerializer;
 

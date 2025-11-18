@@ -7,6 +7,10 @@ namespace fresh {
 
 class Camera;
 
+namespace devtools {
+    class DebugRenderer;
+}
+
 /**
  * @brief 3D Transform Gizmo for visual object manipulation
  * 
@@ -130,6 +134,12 @@ public:
     glm::vec3 getDeltaScale() const { return deltaScale_; }
 
     /**
+     * @brief Set the debug renderer for visualization
+     * @param debugRenderer Pointer to debug renderer
+     */
+    void setDebugRenderer(devtools::DebugRenderer* debugRenderer) { debugRenderer_ = debugRenderer; }
+
+    /**
      * @brief Render gizmo
      * @param camera Current camera for view/projection
      * @note This should be called from the rendering system
@@ -142,6 +152,8 @@ private:
     bool snapEnabled_ = false;
     float snapValue_ = 1.0f;
     float size_ = 1.0f;
+    
+    devtools::DebugRenderer* debugRenderer_ = nullptr;
 
     glm::mat4 transform_ = glm::mat4(1.0f);
     glm::vec3 position_ = glm::vec3(0.0f);

@@ -1,6 +1,7 @@
 #include "editor/TransformGizmo.h"
 #include "gameplay/Camera.h"
 #include "core/Logger.h"
+#include "devtools/DebugRenderer.h"
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtx/matrix_decompose.hpp>
 #include <glm/gtx/quaternion.hpp>
@@ -308,23 +309,70 @@ void TransformGizmo::renderScaleGizmo(const Camera& camera) {
             highlightZ ? COLOR_HIGHLIGHT : COLOR_Z_AXIS, highlightZ);
 }
 
-// Placeholder rendering functions - these should be implemented using the actual rendering system
+// Rendering functions using DebugRenderer
 void TransformGizmo::drawArrow(const glm::vec3& position, const glm::vec3& direction, 
                                const glm::vec3& color, bool highlighted) {
-    // TODO: Implement using DebugRenderer or similar
-    // This is a placeholder that should draw a 3D arrow
+    if (!debugRenderer_) {
+        return; // No renderer available
+    }
+    
+    // Scale arrow based on gizmo size
+    glm::vec3 end = position + direction * ARROW_LENGTH * size_;
+    
+    // Convert color to vec4
+    glm::vec4 color4 = glm::vec4(color, 1.0f);
+    if (highlighted) {
+        color4 = glm::vec4(COLOR_HIGHLIGHT, 1.0f);
+    }
+    
+    // Draw the arrow using DebugRenderer
+    debugRenderer_->drawArrow(position, end, color4, 0.0f);
 }
 
 void TransformGizmo::drawCircle(const glm::vec3& position, const glm::vec3& normal, 
                                 float radius, const glm::vec3& color, bool highlighted) {
-    // TODO: Implement using DebugRenderer or similar
-    // This is a placeholder that should draw a 3D circle
+    if (!debugRenderer_) {
+        return; // No renderer available
+    }
+    
+    // Convert color to vec4
+    glm::vec4 color4 = glm::vec4(color, 1.0f);
+    if (highlighted) {
+        color4 = glm::vec4(COLOR_HIGHLIGHT, 1.0f);
+    }
+    
+    // Create perpendicular vectors to the normal
+    glm::vec3 up = glm::abs(normal.y) < 0.999f ? glm::vec3(0, 1, 0) : glm::vec3(1, 0, 0);
+    glm::vec3 tangent = glm::normalize(glm::cross(normal, up));
+    glm::vec3 bitangent = glm::cross(normal, tangent);
+    
+    // Draw circle as line segments
+    glm::vec3 prevPoint = position + tangent * radius;
+    for (int i = 1; i <= CIRCLE_SEGMENTS; ++i) {
+        float angle = (static_cast<float>(i) / CIRCLE_SEGMENTS) * 2.0f * glm::pi<float>();
+        float c = std::cos(angle);
+        float s = std::sin(angle);
+        glm::vec3 point = position + (tangent * c + bitangent * s) * radius;
+        
+        debugRenderer_->drawLine(prevPoint, point, color4, 0.0f);
+        prevPoint = point;
+    }
 }
 
 void TransformGizmo::drawBox(const glm::vec3& position, const glm::vec3& size, 
                              const glm::vec3& color, bool highlighted) {
-    // TODO: Implement using DebugRenderer or similar
-    // This is a placeholder that should draw a 3D box
+    if (!debugRenderer_) {
+        return; // No renderer available
+    }
+    
+    // Convert color to vec4
+    glm::vec4 color4 = glm::vec4(color, 1.0f);
+    if (highlighted) {
+        color4 = glm::vec4(COLOR_HIGHLIGHT, 1.0f);
+    }
+    
+    // Draw box using DebugRenderer
+    debugRenderer_->drawBox(position, size, color4, 0.0f);
 }
 
 glm::vec2 TransformGizmo::projectToScreen(const glm::vec3& worldPos, const Camera& camera) const {
