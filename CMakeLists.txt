@@ -188,6 +188,13 @@ if(NOT nlohmann_json_FOUND)
     message(WARNING "  vcpkg install nlohmann-json:x64-windows")
 endif()
 
+# Native File Dialog Extended for file dialogs
+find_package(nfd QUIET CONFIG)
+if(NOT nfd_FOUND)
+    message(WARNING "Native File Dialog Extended (nfd) not found. File dialogs will not be available.")
+    message(WARNING "  vcpkg install nativefiledialog-extended:x64-windows")
+endif()
+
 # ==============================================================================
 # Dependency Check Summary
 # ==============================================================================
@@ -320,6 +327,7 @@ set(ENGINE_SOURCES
     src/editor/SelectionManager.cpp
     src/editor/SelectionRenderer.cpp
     src/editor/TransformGizmo.cpp
+    src/editor/FileDialogManager.cpp
     src/serialization/WorldSerializer.cpp
     src/ui/MainMenu.cpp
     src/input/InputManager.cpp
@@ -677,6 +685,13 @@ if(nlohmann_json_FOUND)
     message(STATUS "nlohmann-json enabled for asset manifest parsing")
 endif()
 
+# Link Native File Dialog Extended (file dialogs)
+if(nfd_FOUND)
+    target_link_libraries(${PROJECT_NAME} PRIVATE nfd::nfd)
+    add_definitions(-DFRESH_NFD_AVAILABLE)
+    message(STATUS "Native File Dialog Extended enabled for file operations")
+endif()
+
 # Link DirectX (Windows only)
 if(WIN32 AND ENABLE_DIRECTX)
     target_link_libraries(${PROJECT_NAME} PRIVATE 
@@ -854,6 +869,7 @@ if(BUILD_TESTS)
         src/editor/SelectionManager.cpp
         src/editor/SelectionRenderer.cpp
         src/editor/TransformGizmo.cpp
+        src/editor/FileDialogManager.cpp
         src/devtools/DebugRenderer.cpp
         src/ecs/Transform2DComponent.cpp
         src/ecs/Sprite2DComponent.cpp
