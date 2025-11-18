@@ -1,5 +1,6 @@
 #include "editor/EditorManager.h"
 
+#include <cmath>
 #include "core/Logger.h"
 #include "ecs/EntityManager.h"
 #include "gameplay/Player.h"
