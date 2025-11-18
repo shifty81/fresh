@@ -257,6 +257,29 @@ bool EditorManager::initialize(WindowType* window, IRenderContext* renderContext
             LOG_ERROR_C("Failed to initialize Toolbar", "EditorManager");
             return false;
         }
+        
+        // Set up toolbar callbacks for transform gizmo mode switching
+        m_toolbar->setToolCallback([this](EditorToolbar::Tool tool) {
+            if (!m_transformGizmo) return;
+            
+            switch (tool) {
+                case EditorToolbar::Tool::Move:
+                    m_transformGizmo->setMode(TransformGizmo::Mode::Translate);
+                    LOG_INFO_C("Toolbar: Transform Gizmo set to Translate mode", "EditorManager");
+                    break;
+                case EditorToolbar::Tool::Rotate:
+                    m_transformGizmo->setMode(TransformGizmo::Mode::Rotate);
+                    LOG_INFO_C("Toolbar: Transform Gizmo set to Rotate mode", "EditorManager");
+                    break;
+                case EditorToolbar::Tool::Scale:
+                    m_transformGizmo->setMode(TransformGizmo::Mode::Scale);
+                    LOG_INFO_C("Toolbar: Transform Gizmo set to Scale mode", "EditorManager");
+                    break;
+                default:
+                    // Other tools don't affect the transform gizmo
+                    break;
+            }
+        });
 
         m_contentBrowser = std::make_unique<ContentBrowserPanel>();
         if (!m_contentBrowser->initialize("assets")) {
