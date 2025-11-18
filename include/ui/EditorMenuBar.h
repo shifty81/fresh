@@ -95,6 +95,10 @@ public:
     {
         m_importAssetsCallback = callback;
     }
+    void setDialogueEditorCallback(MenuCallback callback)
+    {
+        m_dialogueEditorCallback = callback;
+    }
     void setSelectAllCallback(MenuCallback callback)
     {
         m_selectAllCallback = callback;
@@ -114,6 +118,7 @@ private:
     void renderFileMenu();
     void renderEditMenu();
     void renderWindowMenu();
+    void renderToolsMenu();
     void renderBuildMenu();
     void renderSettingsMenu();
     void renderHelpMenu();
@@ -137,6 +142,7 @@ private:
     MenuCallback m_settingsCallback;
     MenuCallback m_engineConfigCallback;
     MenuCallback m_importAssetsCallback;
+    MenuCallback m_dialogueEditorCallback;
     MenuCallback m_selectAllCallback;
     MenuCallback m_deselectAllCallback;
 #ifdef _WIN32

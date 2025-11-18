@@ -37,6 +37,7 @@ void EditorMenuBar::render()
         renderFileMenu();
         renderEditMenu();
         renderWindowMenu();
+        renderToolsMenu();
         renderBuildMenu();
         renderSettingsMenu();
         renderHelpMenu();
@@ -239,6 +240,31 @@ void EditorMenuBar::renderWindowMenu()
 
         if (ImGui::MenuItem("Reset Layout")) {
             LOG_INFO_C("Resetting to default layout", "EditorMenuBar");
+        }
+
+        ImGui::EndMenu();
+    }
+}
+
+void EditorMenuBar::renderToolsMenu()
+{
+    if (ImGui::BeginMenu("Tools")) {
+        if (ImGui::MenuItem("Dialogue Editor", "Ctrl+D")) {
+            if (m_dialogueEditorCallback) {
+                m_dialogueEditorCallback();
+            } else {
+                LOG_INFO_C("Dialogue Editor (callback not set)", "EditorMenuBar");
+            }
+        }
+
+        ImGui::Separator();
+
+        if (ImGui::MenuItem("Import Assets...", "Ctrl+I")) {
+            if (m_importAssetsCallback) {
+                m_importAssetsCallback();
+            } else {
+                LOG_INFO_C("Import Assets... (callback not set)", "EditorMenuBar");
+            }
         }
 
         ImGui::EndMenu();

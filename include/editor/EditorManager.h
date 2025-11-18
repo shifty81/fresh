@@ -362,6 +362,12 @@ public:
      * @brief Show import assets dialog
      */
     void showImportAssets();
+    
+    /**
+     * @brief Launch dialogue editor
+     * Opens the dialogue editor tool for creating and editing game dialogues
+     */
+    void launchDialogueEditor();
 
 private:
     void setupDockspace();

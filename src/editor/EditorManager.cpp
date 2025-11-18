@@ -5,6 +5,8 @@
 #ifdef _WIN32
     #include "core/Win32Window.h"
     #include "input/Win32InputManager.h"
+    #include <windows.h>
+    #include <filesystem>
 #else
     #include "core/Window.h"
     #include "input/InputManager.h"
@@ -150,6 +152,11 @@ bool EditorManager::initialize(WindowType* window, IRenderContext* renderContext
             if (m_contentBrowser) {
                 m_contentBrowser->showImportDialog();
             }
+        });
+
+        // Set dialogue editor callback
+        m_menuBar->setDialogueEditorCallback([this]() {
+            launchDialogueEditor();
         });
 
         // Set select all/deselect all callbacks for scene hierarchy
@@ -1264,6 +1271,65 @@ void EditorManager::showImportAssets()
         m_contentBrowser->showImportDialog();
         LOG_INFO_C("Import assets dialog shown", "EditorManager");
     }
+}
+
+void EditorManager::launchDialogueEditor()
+{
+#ifdef _WIN32
+    LOG_INFO_C("Launching dialogue editor", "EditorManager");
+    
+    // Path to the dialogue editor executable
+    std::string editorPath = "dotnet/DialogueEditor/bin/Release/net9.0-windows/DialogueEditor.exe";
+    
+    // Check if the editor exists
+    if (!std::filesystem::exists(editorPath)) {
+        // Try debug build
+        editorPath = "dotnet/DialogueEditor/bin/Debug/net9.0-windows/DialogueEditor.exe";
+        
+        if (!std::filesystem::exists(editorPath)) {
+            LOG_ERROR_C("Dialogue editor executable not found. Please build the DialogueEditor project.", "EditorManager");
+            
+            #ifdef FRESH_IMGUI_AVAILABLE
+            // Show error dialog in ImGui if available
+            // (This would be implemented in a future update)
+            #endif
+            
+            return;
+        }
+    }
+    
+    // Launch the dialogue editor as a separate process
+    STARTUPINFOA si = {};
+    PROCESS_INFORMATION pi = {};
+    si.cb = sizeof(si);
+    
+    // Create the process
+    if (CreateProcessA(
+        editorPath.c_str(),     // Application path
+        nullptr,                // Command line
+        nullptr,                // Process handle not inheritable
+        nullptr,                // Thread handle not inheritable
+        FALSE,                  // Set handle inheritance to FALSE
+        0,                      // No creation flags
+        nullptr,                // Use parent's environment block
+        nullptr,                // Use parent's starting directory
+        &si,                    // Pointer to STARTUPINFO structure
+        &pi))                   // Pointer to PROCESS_INFORMATION structure
+    {
+        LOG_INFO_C("Dialogue editor launched successfully", "EditorManager");
+        
+        // Close process and thread handles as we don't need them
+        CloseHandle(pi.hProcess);
+        CloseHandle(pi.hThread);
+    }
+    else
+    {
+        DWORD error = GetLastError();
+        LOG_ERROR_C("Failed to launch dialogue editor. Error code: " + std::to_string(error), "EditorManager");
+    }
+#else
+    LOG_WARNING_C("Dialogue editor is only available on Windows", "EditorManager");
+#endif
 }
 
 } // namespace fresh
