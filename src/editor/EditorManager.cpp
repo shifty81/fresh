@@ -1122,10 +1122,28 @@ void EditorManager::copy()
 void EditorManager::paste()
 {
     if (m_selectionManager && m_selectionManager->hasClipboardData()) {
-        // TODO: Get paste position from camera/cursor
-        // For now, paste at origin as placeholder
-        m_selectionManager->pasteFromClipboard(glm::ivec3(0, 64, 0), m_world);
-        LOG_INFO_C("Pasted clipboard content", "EditorManager");
+        // Get paste position from camera/player if available
+        glm::ivec3 pastePos(0, 64, 0);  // Default position
+        
+        if (m_player) {
+            // Use player's camera position as the paste location
+            const auto& camera = m_player->getCamera();
+            glm::vec3 cameraPos = camera.getPosition();
+            // Offset slightly forward from camera
+            glm::vec3 forward = camera.getFront();
+            glm::vec3 targetPos = cameraPos + forward * 5.0f;
+            pastePos = glm::ivec3(
+                static_cast<int>(std::floor(targetPos.x)),
+                static_cast<int>(std::floor(targetPos.y)),
+                static_cast<int>(std::floor(targetPos.z))
+            );
+        }
+        
+        m_selectionManager->pasteFromClipboard(pastePos, m_world);
+        LOG_INFO_C("Pasted clipboard content at " + 
+                  std::to_string(pastePos.x) + ", " + 
+                  std::to_string(pastePos.y) + ", " + 
+                  std::to_string(pastePos.z), "EditorManager");
     } else {
         LOG_INFO_C("Clipboard is empty", "EditorManager");
     }
