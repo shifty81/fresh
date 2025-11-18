@@ -242,7 +242,7 @@ bool EditorManager::initialize(WindowType* window, IRenderContext* renderContext
                     const auto& camera = m_player->getCamera();
                     glm::vec3 cameraPos = camera.getPosition();
                     // Offset slightly forward from camera
-                    glm::vec3 forward = camera.getForward();
+                    glm::vec3 forward = camera.getFront();
                     glm::vec3 targetPos = cameraPos + forward * 5.0f;
                     pastePos = glm::ivec3(
                         static_cast<int>(std::floor(targetPos.x)),
