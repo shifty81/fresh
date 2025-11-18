@@ -38,6 +38,12 @@
     #include "ui/WindowsDialogManager.h"
     #include "ui/WindowsTaskbarManager.h"
     #include "ui/WindowsCustomizationPanel.h"
+    #include "ui/native/Win32InspectorPanel.h"
+    #include "ui/native/Win32SceneHierarchyPanel.h"
+    #include "ui/native/Win32ContentBrowserPanel.h"
+    #include "ui/native/Win32ConsolePanel.h"
+    #include "ui/native/Win32HUD.h"
+    #include "ui/native/Win32SettingsDialog.h"
 #endif
 
 #ifdef FRESH_IMGUI_AVAILABLE
@@ -564,7 +570,64 @@ bool EditorManager::initialize(WindowType* window, IRenderContext* renderContext
         
         LOG_INFO_C("File dialog callbacks configured successfully", "EditorManager");
     }
-#endif
+    
+#ifdef FRESH_WIN32_UI
+    // Initialize native Win32 UI panels (replaces ImGui panels)
+    LOG_INFO_C("Initializing native Win32 UI panels", "EditorManager");
+    
+    // Get Win32 window handle
+    Win32Window* win32Window = dynamic_cast<Win32Window*>(window);
+    if (win32Window) {
+        HWND hwnd = win32Window->getHandle();
+        
+        // Create native Inspector panel
+        m_nativeInspector = std::make_unique<Win32InspectorPanel>();
+        if (m_nativeInspector->create(hwnd, 10, 80, 350, 500, m_entityManager)) {
+            LOG_INFO_C("Native Win32 Inspector Panel created", "EditorManager");
+        }
+        
+        // Create native Scene Hierarchy panel
+        m_nativeSceneHierarchy = std::make_unique<Win32SceneHierarchyPanel>();
+        if (m_nativeSceneHierarchy->create(hwnd, 370, 80, 300, 500, world)) {
+            // Set selection callback to update inspector
+            m_nativeSceneHierarchy->setSelectionCallback([this](HierarchyNode* node) {
+                if (m_nativeInspector) {
+                    m_nativeInspector->setInspectedNode(node);
+                }
+            });
+            LOG_INFO_C("Native Win32 Scene Hierarchy Panel created", "EditorManager");
+        }
+        
+        // Create native Content Browser panel
+        m_nativeContentBrowser = std::make_unique<Win32ContentBrowserPanel>();
+        if (m_nativeContentBrowser->create(hwnd, 10, 600, 660, 350, "assets")) {
+            LOG_INFO_C("Native Win32 Content Browser Panel created", "EditorManager");
+        }
+        
+        // Create native Console panel
+        m_nativeConsole = std::make_unique<Win32ConsolePanel>();
+        if (m_nativeConsole->create(hwnd, 680, 600, 600, 350)) {
+            LOG_INFO_C("Native Win32 Console Panel created", "EditorManager");
+        }
+        
+        // Create native HUD (for play mode)
+        m_nativeHUD = std::make_unique<Win32HUD>();
+        if (m_nativeHUD->initialize(hwnd)) {
+            m_nativeHUD->setVisible(false); // Hidden by default
+            LOG_INFO_C("Native Win32 HUD created", "EditorManager");
+        }
+        
+        // Create native Settings Dialog
+        m_nativeSettingsDialog = std::make_unique<Win32SettingsDialog>();
+        LOG_INFO_C("Native Win32 Settings Dialog created", "EditorManager");
+        
+        LOG_INFO_C("All native Win32 UI panels initialized successfully", "EditorManager");
+    } else {
+        LOG_WARNING_C("Win32Window not available, native panels not created", "EditorManager");
+    }
+#endif // FRESH_WIN32_UI
+    
+#endif // _WIN32
 
     // Connect scene hierarchy to inspector
     // When a node is selected in the hierarchy, show it in the inspector
@@ -619,6 +682,8 @@ void EditorManager::render()
 #endif // !FRESH_WIN32_UI
 
     // Render panels based on visibility flags
+#ifndef FRESH_WIN32_UI
+    // Use ImGui panels when native Win32 UI is not available
     if (m_showSceneHierarchy && m_sceneHierarchy) {
         m_sceneHierarchy->render();
 
@@ -640,6 +705,12 @@ void EditorManager::render()
     if (m_showConsole && m_console) {
         m_console->render();
     }
+#else
+    // When using native Win32 UI, native panels are always visible and managed by Win32
+    // No need to render them here - they are native windows
+    // The native panels were created during initialization and handle their own rendering
+    LOG_DEBUG_C("Using native Win32 UI panels", "EditorManager");
+#endif // !FRESH_WIN32_UI
 
     if (m_showToolPalette && m_voxelTools) {
         m_voxelTools->render();
