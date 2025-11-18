@@ -287,37 +287,37 @@
 
 ---
 
-#### Week 13: Day/Night Cycle
+#### Week 13: Day/Night Cycle ✅ COMPLETE
 **Goal:** Dynamic time of day
 
 **Tasks:**
-1. [ ] Create `TimeManager` class
-   - Current time (0-24000 ticks)
+1. [x] Create `TimeManager` class
+   - Time tracking (0-24000 ticks)
    - Time progression rate
    - Pause/resume time
 
-2. [ ] Implement sun/moon movement
+2. [x] Implement sun/moon movement
    - Calculate sun position from time
    - Calculate moon position
    - Smooth transitions
 
-3. [ ] Update lighting
+3. [x] Update lighting
    - Ambient light intensity
    - Sun light direction
    - Sky color gradient
 
-4. [ ] Add sky rendering
+4. [x] Add sky rendering
    - Day sky (blue gradient)
    - Sunset/sunrise colors
    - Night sky (dark blue/black)
    - Stars at night (optional)
 
-5. [ ] Time controls
+5. [x] Time controls
    - Set time command
    - Skip to dawn/dusk/noon/midnight
    - Time display on HUD
 
-**Deliverable:** Full day/night cycle
+**Deliverable:** Full day/night cycle ✅
 
 ---
 
@@ -364,11 +364,11 @@
   - [ ] Initial recipes
   - [ ] Crafting stations
 
-- [ ] **Day/Night Cycle**
-  - [ ] Time manager
-  - [ ] Sun/moon movement
-  - [ ] Dynamic lighting
-  - [ ] Sky rendering
+- [x] **Day/Night Cycle**
+  - [x] Time manager
+  - [x] Sun/moon movement
+  - [x] Dynamic lighting
+  - [x] Sky rendering
 
 ### Nice to Have (Polish)
 
