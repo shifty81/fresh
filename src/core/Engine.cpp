@@ -40,6 +40,7 @@
 #include "ecs/MaterialComponent.h"
 #include "editor/EditorGUI.h"
 #include "editor/EditorManager.h"
+#include "editor/TransformGizmo.h"
 #include "editor/WorldEditor.h"
 #include "gameplay/Player.h"
 #include "generation/TerrainGenerator.h"
@@ -84,7 +85,10 @@ namespace fresh
     constexpr int KEY_7 = '7';
     constexpr int KEY_8 = '8';
     constexpr int KEY_9 = '9';
+    constexpr int KEY_E = 'E';
     constexpr int KEY_F = 'F';
+    constexpr int KEY_R = 'R';
+    constexpr int KEY_W = 'W';
     constexpr int KEY_Y = 'Y';
     constexpr int KEY_Z = 'Z';
     constexpr int KEY_LEFT_CONTROL = VK_LCONTROL;
@@ -105,7 +109,10 @@ namespace fresh
     constexpr int KEY_7 = GLFW_KEY_7;
     constexpr int KEY_8 = GLFW_KEY_8;
     constexpr int KEY_9 = GLFW_KEY_9;
+    constexpr int KEY_E = GLFW_KEY_E;
     constexpr int KEY_F = GLFW_KEY_F;
+    constexpr int KEY_R = GLFW_KEY_R;
+    constexpr int KEY_W = GLFW_KEY_W;
     constexpr int KEY_Y = GLFW_KEY_Y;
     constexpr int KEY_Z = GLFW_KEY_Z;
     constexpr int KEY_LEFT_CONTROL = GLFW_KEY_LEFT_CONTROL;
@@ -868,6 +875,44 @@ void Engine::processInput()
                         LOG_INFO_C("Redo performed (Ctrl+Y)", "Engine");
                     } else {
                         LOG_INFO_C("Nothing to redo", "Engine");
+                    }
+                }
+            }
+            
+            // Transform Gizmo mode shortcuts (W/E/R) - only when editor is active
+            if (m_editorManager && m_editorManager->getTransformGizmo()) {
+                auto* gizmo = m_editorManager->getTransformGizmo();
+                
+                // W key - Translate mode
+                if (m_inputManager->isKeyJustPressed(KEY_W)) {
+                    gizmo->setMode(TransformGizmo::Mode::Translate);
+                    LOG_INFO_C("Transform Gizmo: Translate mode (W)", "Engine");
+                    
+                    // Update toolbar to reflect the change
+                    if (m_editorManager->getToolbar()) {
+                        m_editorManager->getToolbar()->setActiveTool(EditorToolbar::Tool::Move);
+                    }
+                }
+                
+                // E key - Rotate mode
+                if (m_inputManager->isKeyJustPressed(KEY_E)) {
+                    gizmo->setMode(TransformGizmo::Mode::Rotate);
+                    LOG_INFO_C("Transform Gizmo: Rotate mode (E)", "Engine");
+                    
+                    // Update toolbar to reflect the change
+                    if (m_editorManager->getToolbar()) {
+                        m_editorManager->getToolbar()->setActiveTool(EditorToolbar::Tool::Rotate);
+                    }
+                }
+                
+                // R key - Scale mode
+                if (m_inputManager->isKeyJustPressed(KEY_R)) {
+                    gizmo->setMode(TransformGizmo::Mode::Scale);
+                    LOG_INFO_C("Transform Gizmo: Scale mode (R)", "Engine");
+                    
+                    // Update toolbar to reflect the change
+                    if (m_editorManager->getToolbar()) {
+                        m_editorManager->getToolbar()->setActiveTool(EditorToolbar::Tool::Scale);
                     }
                 }
             }
