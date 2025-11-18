@@ -529,6 +529,14 @@ void Engine::initializeGameSystems()
     m_player->setPosition(glm::vec3(0.0f, 80.0f, 0.0f));
     std::cout << "Player initialized" << std::endl;
     
+#ifdef FRESH_IMGUI_AVAILABLE
+    // Set player reference in editor manager for camera-based operations like paste
+    if (m_editorManager) {
+        m_editorManager->setPlayer(m_player.get());
+        LOG_INFO_C("Editor manager updated with player reference", "Engine");
+    }
+#endif
+    
     // Set up camera mode based on world type
     if (!m_isWorld3D) {
         Camera& camera = m_player->getCamera();
