@@ -245,10 +245,10 @@ void Win32InspectorPanel::renderTransformSection()
     // Transform header
     addSectionHeader(L"Transform", yPos);
     
-    // Get transform data from node
-    glm::vec3 position = m_inspectedNode->position;
-    glm::vec3 rotation(0.0f); // Would come from transform component
-    glm::vec3 scale(1.0f); // Would come from transform component
+    // Get transform data from entity's transform component
+    glm::vec3 position(0.0f);
+    glm::vec3 rotation(0.0f);
+    glm::vec3 scale(1.0f);
     
     // Try to get transform component if available
     if (m_entityManager && m_inspectedNode->userData) {
@@ -308,7 +308,7 @@ void Win32InspectorPanel::renderComponentSection()
     // Placeholder for component list
 }
 
-LRESULT Win32InspectorPanel::handleMessage(UINT msg, WPARAM wParam, LPARAM lParam)
+bool Win32InspectorPanel::handleMessage(UINT msg, WPARAM wParam, LPARAM lParam, LRESULT& result)
 {
     switch (msg) {
         case WM_COMMAND: {
@@ -323,18 +323,20 @@ LRESULT Win32InspectorPanel::handleMessage(UINT msg, WPARAM wParam, LPARAM lPara
                     LOG_INFO_C("Object visibility changed", "Win32InspectorPanel");
                 }
             }
-            break;
+            result = 0;
+            return true;
         }
         
         case WM_CTLCOLORSTATIC: {
             HDC hdcStatic = (HDC)wParam;
-            SetTextColor(hdcStatic, UnrealStyleTheme::COLOR_TEXT);
-            SetBkColor(hdcStatic, UnrealStyleTheme::COLOR_DARK_BG);
-            return (LRESULT)UnrealStyleTheme::GetBackgroundBrush();
+            SetTextColor(hdcStatic, UnrealStyleTheme::TextPrimary);
+            SetBkColor(hdcStatic, UnrealStyleTheme::DarkBackground);
+            result = (LRESULT)GetStockObject(DC_BRUSH);
+            return true;
         }
     }
     
-    return Win32Panel::handleMessage(msg, wParam, lParam);
+    return false; // Let base class handle it
 }
 
 } // namespace fresh

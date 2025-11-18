@@ -81,7 +81,7 @@ public:
 
 protected:
     // Override base class method
-    LRESULT handleMessage(UINT msg, WPARAM wParam, LPARAM lParam) override;
+    bool handleMessage(UINT msg, WPARAM wParam, LPARAM lParam, LRESULT& result) override;
 
 private:
     void populateListView();

@@ -376,7 +376,10 @@ void TransformGizmo::drawBox(const glm::vec3& position, const glm::vec3& size,
 }
 
 glm::vec2 TransformGizmo::projectToScreen(const glm::vec3& worldPos, const Camera& camera) const {
-    glm::mat4 viewProj = camera.getProjectionMatrix() * camera.getViewMatrix();
+    // Use a standard aspect ratio for projection calculations
+    // In a real implementation, this should be passed from the viewport
+    constexpr float aspectRatio = 16.0f / 9.0f;
+    glm::mat4 viewProj = camera.getProjectionMatrix(aspectRatio) * camera.getViewMatrix();
     glm::vec4 clipSpace = viewProj * glm::vec4(worldPos, 1.0f);
     
     if (clipSpace.w == 0.0f) {
@@ -393,7 +396,10 @@ void TransformGizmo::unprojectRay(const glm::vec2& screenPos, const Camera& came
     glm::vec2 ndc = screenPos * 2.0f - 1.0f;
     ndc.y = -ndc.y; // Flip Y
     
-    glm::mat4 viewProj = camera.getProjectionMatrix() * camera.getViewMatrix();
+    // Use a standard aspect ratio for projection calculations
+    // In a real implementation, this should be passed from the viewport
+    constexpr float aspectRatio = 16.0f / 9.0f;
+    glm::mat4 viewProj = camera.getProjectionMatrix(aspectRatio) * camera.getViewMatrix();
     glm::mat4 invViewProj = glm::inverse(viewProj);
     
     // Unproject near and far points
