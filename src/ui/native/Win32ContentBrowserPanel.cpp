@@ -1,0 +1,396 @@
+#ifdef _WIN32
+
+#include "ui/native/Win32ContentBrowserPanel.h"
+#include "ui/native/UnrealStyleTheme.h"
+#include "core/Logger.h"
+#include <windowsx.h>
+#include <filesystem>
+#include <shlobj.h>
+
+namespace fresh
+{
+
+// Context menu command IDs
+constexpr int CMD_IMPORT = 3001;
+constexpr int CMD_COPY = 3002;
+constexpr int CMD_PASTE = 3003;
+constexpr int CMD_DELETE_FILE = 3004;
+constexpr int CMD_RENAME_FILE = 3005;
+constexpr int CMD_OPEN_LOCATION = 3006;
+
+// Toolbar button IDs
+constexpr int BTN_BACK = 3100;
+constexpr int BTN_UP = 3101;
+constexpr int BTN_REFRESH = 3102;
+constexpr int BTN_VIEW_MODE = 3103;
+
+Win32ContentBrowserPanel::Win32ContentBrowserPanel()
+    : Win32Panel(),
+      m_listView(nullptr),
+      m_rootPath(""),
+      m_currentPath(""),
+      m_toolbar(nullptr),
+      m_pathEdit(nullptr),
+      m_searchEdit(nullptr),
+      m_contextMenu(nullptr),
+      m_itemSelectedCallback(nullptr),
+      m_itemActivatedCallback(nullptr)
+{
+}
+
+Win32ContentBrowserPanel::~Win32ContentBrowserPanel()
+{
+    if (m_contextMenu) {
+        DestroyMenu(m_contextMenu);
+    }
+}
+
+bool Win32ContentBrowserPanel::create(HWND parent, int x, int y, int width, int height, const std::string& rootPath)
+{
+    m_rootPath = rootPath;
+    m_currentPath = rootPath;
+    
+    if (!Win32Panel::create(parent, x, y, width, height, L"Content Browser")) {
+        return false;
+    }
+    
+    // Create toolbar
+    createToolbar();
+    
+    // Create path bar
+    m_pathEdit = CreateWindowExW(
+        WS_EX_CLIENTEDGE, L"EDIT", L"",
+        WS_CHILD | WS_VISIBLE | ES_LEFT | ES_AUTOHSCROLL | ES_READONLY,
+        10, TOOLBAR_HEIGHT + 5, width - 20, PATH_BAR_HEIGHT - 10,
+        m_hwnd, nullptr, GetModuleHandle(nullptr), nullptr
+    );
+    UnrealStyleTheme::ApplyToWindow(m_pathEdit);
+    SendMessageW(m_pathEdit, WM_SETFONT, (WPARAM)UnrealStyleTheme::GetFont(), TRUE);
+    
+    // Create list view control
+    m_listView = std::make_unique<Win32ListView>();
+    int listY = TOOLBAR_HEIGHT + PATH_BAR_HEIGHT;
+    int listHeight = height - listY;
+    
+    if (!m_listView->create(m_hwnd, 0, listY, width, listHeight)) {
+        LOG_ERROR_C("Failed to create ListView control", "Win32ContentBrowserPanel");
+        return false;
+    }
+    
+    // Add columns to list view
+    m_listView->addColumn("Name", 200);
+    m_listView->addColumn("Type", 100);
+    m_listView->addColumn("Size", 100);
+    m_listView->addColumn("Modified", 150);
+    
+    // Create context menu
+    m_contextMenu = CreatePopupMenu();
+    AppendMenuW(m_contextMenu, MF_STRING, CMD_IMPORT, L"Import Assets...");
+    AppendMenuW(m_contextMenu, MF_SEPARATOR, 0, nullptr);
+    AppendMenuW(m_contextMenu, MF_STRING, CMD_COPY, L"Copy");
+    AppendMenuW(m_contextMenu, MF_STRING, CMD_PASTE, L"Paste");
+    AppendMenuW(m_contextMenu, MF_STRING, CMD_DELETE_FILE, L"Delete");
+    AppendMenuW(m_contextMenu, MF_STRING, CMD_RENAME_FILE, L"Rename");
+    AppendMenuW(m_contextMenu, MF_SEPARATOR, 0, nullptr);
+    AppendMenuW(m_contextMenu, MF_STRING, CMD_OPEN_LOCATION, L"Show in Explorer");
+    
+    // Populate initial content
+    refresh();
+    
+    LOG_INFO_C("Win32ContentBrowserPanel created", "Win32ContentBrowserPanel");
+    return true;
+}
+
+void Win32ContentBrowserPanel::createToolbar()
+{
+    RECT clientRect;
+    GetClientRect(m_hwnd, &clientRect);
+    
+    m_toolbar = CreateWindowExW(
+        0, TOOLBARCLASSNAMEW, nullptr,
+        WS_CHILD | WS_VISIBLE | TBSTYLE_FLAT | CCS_NODIVIDER,
+        0, 0, clientRect.right, TOOLBAR_HEIGHT,
+        m_hwnd, nullptr, GetModuleHandle(nullptr), nullptr
+    );
+    
+    SendMessageW(m_toolbar, TB_BUTTONSTRUCTSIZE, sizeof(TBBUTTON), 0);
+    
+    // Add toolbar buttons
+    TBBUTTON buttons[4] = {};
+    
+    // Back button
+    buttons[0].iBitmap = 0;
+    buttons[0].idCommand = BTN_BACK;
+    buttons[0].fsState = TBSTATE_ENABLED;
+    buttons[0].fsStyle = BTNS_BUTTON;
+    buttons[0].iString = (INT_PTR)L"Back";
+    
+    // Up button
+    buttons[1].iBitmap = 1;
+    buttons[1].idCommand = BTN_UP;
+    buttons[1].fsState = TBSTATE_ENABLED;
+    buttons[1].fsStyle = BTNS_BUTTON;
+    buttons[1].iString = (INT_PTR)L"Up";
+    
+    // Refresh button
+    buttons[2].iBitmap = 2;
+    buttons[2].idCommand = BTN_REFRESH;
+    buttons[2].fsState = TBSTATE_ENABLED;
+    buttons[2].fsStyle = BTNS_BUTTON;
+    buttons[2].iString = (INT_PTR)L"Refresh";
+    
+    // View mode button
+    buttons[3].iBitmap = 3;
+    buttons[3].idCommand = BTN_VIEW_MODE;
+    buttons[3].fsState = TBSTATE_ENABLED;
+    buttons[3].fsStyle = BTNS_BUTTON;
+    buttons[3].iString = (INT_PTR)L"View";
+    
+    SendMessageW(m_toolbar, TB_ADDBUTTONSW, 4, (LPARAM)buttons);
+    
+    UnrealStyleTheme::ApplyToWindow(m_toolbar);
+}
+
+void Win32ContentBrowserPanel::refresh()
+{
+    if (!m_listView) {
+        return;
+    }
+    
+    // Clear existing items
+    m_listView->clear();
+    m_items.clear();
+    
+    // Update path edit
+    std::wstring wpath(m_currentPath.begin(), m_currentPath.end());
+    SetWindowTextW(m_pathEdit, wpath.c_str());
+    
+    // Populate from current directory
+    populateListView();
+}
+
+void Win32ContentBrowserPanel::populateListView()
+{
+    namespace fs = std::filesystem;
+    
+    try {
+        if (!fs::exists(m_currentPath) || !fs::is_directory(m_currentPath)) {
+            LOG_WARNING_C("Directory does not exist: " + m_currentPath, "Win32ContentBrowserPanel");
+            return;
+        }
+        
+        // Iterate through directory
+        for (const auto& entry : fs::directory_iterator(m_currentPath)) {
+            std::string filename = entry.path().filename().string();
+            std::string fullPath = entry.path().string();
+            bool isDirectory = entry.is_directory();
+            
+            addFileItem(filename, fullPath, isDirectory);
+        }
+        
+        LOG_INFO_C("Populated content browser with items from: " + m_currentPath, "Win32ContentBrowserPanel");
+        
+    } catch (const fs::filesystem_error& e) {
+        LOG_ERROR_C("Filesystem error: " + std::string(e.what()), "Win32ContentBrowserPanel");
+    }
+}
+
+void Win32ContentBrowserPanel::addFileItem(const std::string& filename, const std::string& fullPath, bool isDirectory)
+{
+    if (!m_listView) {
+        return;
+    }
+    
+    // Store item data
+    ItemData item;
+    item.name = filename;
+    item.fullPath = fullPath;
+    item.isDirectory = isDirectory;
+    m_items.push_back(item);
+    
+    // Add to list view
+    int index = m_listView->addItem(filename);
+    
+    // Type column
+    std::string type = isDirectory ? "Folder" : "File";
+    m_listView->setItemText(index, 1, type);
+    
+    // Size column (for files)
+    if (!isDirectory) {
+        try {
+            namespace fs = std::filesystem;
+            auto size = fs::file_size(fullPath);
+            std::string sizeStr = std::to_string(size) + " bytes";
+            m_listView->setItemText(index, 2, sizeStr);
+        } catch (...) {
+            m_listView->setItemText(index, 2, "Unknown");
+        }
+    }
+    
+    // Modified column
+    m_listView->setItemText(index, 3, "Recently");
+}
+
+void Win32ContentBrowserPanel::navigateTo(const std::string& path)
+{
+    m_currentPath = path;
+    refresh();
+}
+
+void Win32ContentBrowserPanel::onItemSelected(int index)
+{
+    if (index < 0 || index >= (int)m_items.size()) {
+        return;
+    }
+    
+    const ItemData& item = m_items[index];
+    
+    LOG_INFO_C("Item selected: " + item.name, "Win32ContentBrowserPanel");
+    
+    if (m_itemSelectedCallback) {
+        m_itemSelectedCallback(item.fullPath);
+    }
+}
+
+void Win32ContentBrowserPanel::onItemActivated(int index)
+{
+    if (index < 0 || index >= (int)m_items.size()) {
+        return;
+    }
+    
+    const ItemData& item = m_items[index];
+    
+    if (item.isDirectory) {
+        // Navigate into directory
+        navigateTo(item.fullPath);
+    } else {
+        // Open file (invoke callback)
+        LOG_INFO_C("Item activated: " + item.name, "Win32ContentBrowserPanel");
+        
+        if (m_itemActivatedCallback) {
+            m_itemActivatedCallback(item.fullPath);
+        }
+    }
+}
+
+void Win32ContentBrowserPanel::showContextMenu(int x, int y)
+{
+    if (!m_contextMenu) {
+        return;
+    }
+    
+    POINT pt = { x, y };
+    ClientToScreen(m_hwnd, &pt);
+    TrackPopupMenu(m_contextMenu, TPM_RIGHTBUTTON, pt.x, pt.y, 0, m_hwnd, nullptr);
+}
+
+void Win32ContentBrowserPanel::showImportDialog()
+{
+    LOG_INFO_C("Import dialog requested", "Win32ContentBrowserPanel");
+    
+    // TODO: Implement file open dialog for importing assets
+}
+
+void Win32ContentBrowserPanel::onBackClicked()
+{
+    // Navigate back in history (TODO: implement history)
+    LOG_INFO_C("Back clicked", "Win32ContentBrowserPanel");
+}
+
+void Win32ContentBrowserPanel::onUpClicked()
+{
+    // Navigate to parent directory
+    namespace fs = std::filesystem;
+    
+    try {
+        fs::path current(m_currentPath);
+        if (current.has_parent_path()) {
+            fs::path parent = current.parent_path();
+            navigateTo(parent.string());
+        }
+    } catch (const fs::filesystem_error& e) {
+        LOG_ERROR_C("Error navigating up: " + std::string(e.what()), "Win32ContentBrowserPanel");
+    }
+}
+
+void Win32ContentBrowserPanel::onRefreshClicked()
+{
+    refresh();
+}
+
+void Win32ContentBrowserPanel::onViewModeChanged()
+{
+    // Toggle between view modes (icons, list, details)
+    LOG_INFO_C("View mode changed", "Win32ContentBrowserPanel");
+    // TODO: Implement view mode switching
+}
+
+LRESULT Win32ContentBrowserPanel::handleMessage(UINT msg, WPARAM wParam, LPARAM lParam)
+{
+    switch (msg) {
+        case WM_NOTIFY: {
+            NMHDR* nmhdr = (NMHDR*)lParam;
+            if (nmhdr->code == LVN_ITEMCHANGED) {
+                NMLISTVIEW* nmlv = (NMLISTVIEW*)lParam;
+                if (nmlv->uNewState & LVIS_SELECTED) {
+                    onItemSelected(nmlv->iItem);
+                }
+            } else if (nmhdr->code == NM_DBLCLK) {
+                NMITEMACTIVATE* nmia = (NMITEMACTIVATE*)lParam;
+                onItemActivated(nmia->iItem);
+            }
+            break;
+        }
+        
+        case WM_CONTEXTMENU: {
+            int xPos = GET_X_LPARAM(lParam);
+            int yPos = GET_Y_LPARAM(lParam);
+            showContextMenu(xPos, yPos);
+            return 0;
+        }
+        
+        case WM_COMMAND: {
+            int cmdId = LOWORD(wParam);
+            
+            switch (cmdId) {
+                case CMD_IMPORT:
+                    showImportDialog();
+                    break;
+                case CMD_COPY:
+                    LOG_INFO_C("Copy requested", "Win32ContentBrowserPanel");
+                    break;
+                case CMD_PASTE:
+                    LOG_INFO_C("Paste requested", "Win32ContentBrowserPanel");
+                    break;
+                case CMD_DELETE_FILE:
+                    LOG_INFO_C("Delete requested", "Win32ContentBrowserPanel");
+                    break;
+                case CMD_RENAME_FILE:
+                    LOG_INFO_C("Rename requested", "Win32ContentBrowserPanel");
+                    break;
+                case CMD_OPEN_LOCATION:
+                    LOG_INFO_C("Open location requested", "Win32ContentBrowserPanel");
+                    break;
+                case BTN_BACK:
+                    onBackClicked();
+                    break;
+                case BTN_UP:
+                    onUpClicked();
+                    break;
+                case BTN_REFRESH:
+                    onRefreshClicked();
+                    break;
+                case BTN_VIEW_MODE:
+                    onViewModeChanged();
+                    break;
+            }
+            break;
+        }
+    }
+    
+    return Win32Panel::handleMessage(msg, wParam, lParam);
+}
+
+} // namespace fresh
+
+#endif // _WIN32

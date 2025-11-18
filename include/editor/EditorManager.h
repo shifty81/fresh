@@ -52,6 +52,12 @@ class WindowsThemeManager;
 class WindowsDialogManager;
 class WindowsTaskbarManager;
 class WindowsCustomizationPanel;
+class Win32InspectorPanel;
+class Win32SceneHierarchyPanel;
+class Win32ContentBrowserPanel;
+class Win32ConsolePanel;
+class Win32HUD;
+class Win32SettingsDialog;
 #endif
 
 /**
@@ -402,6 +408,14 @@ private:
     std::unique_ptr<WindowsDialogManager> m_windowsDialogManager;
     std::unique_ptr<WindowsTaskbarManager> m_windowsTaskbarManager;
     std::unique_ptr<WindowsCustomizationPanel> m_windowsCustomizationPanel;
+    
+    // Native Win32 UI panels (used when FRESH_WIN32_UI is defined)
+    std::unique_ptr<Win32InspectorPanel> m_nativeInspector;
+    std::unique_ptr<Win32SceneHierarchyPanel> m_nativeSceneHierarchy;
+    std::unique_ptr<Win32ContentBrowserPanel> m_nativeContentBrowser;
+    std::unique_ptr<Win32ConsolePanel> m_nativeConsole;
+    std::unique_ptr<Win32HUD> m_nativeHUD;
+    std::unique_ptr<Win32SettingsDialog> m_nativeSettingsDialog;
 #endif
 
     // References
