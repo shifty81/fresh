@@ -73,14 +73,18 @@ void MainMenuPanel::render()
     }
     ImGui::End();
 
-    // Render dialogs if needed
+    // Open modal dialogs when requested
     if (m_showNewWorldDialog) {
-        renderNewWorldDialog();
+        ImGui::OpenPopup("Create New World");
+    }
+    
+    if (m_showLoadWorldDialog) {
+        ImGui::OpenPopup("Load World");
     }
 
-    if (m_showLoadWorldDialog) {
-        renderLoadWorldDialog();
-    }
+    // Render modal dialogs
+    renderNewWorldDialog();
+    renderLoadWorldDialog();
 #endif
 }
 
@@ -149,14 +153,13 @@ void MainMenuPanel::renderWorldSelection()
 void MainMenuPanel::renderNewWorldDialog()
 {
 #ifdef FRESH_IMGUI_AVAILABLE
-    ImGuiIO& io = ImGui::GetIO();
-    ImGui::SetNextWindowPos(ImVec2(io.DisplaySize.x * 0.5f, io.DisplaySize.y * 0.5f),
+    ImGui::SetNextWindowPos(ImVec2(ImGui::GetIO().DisplaySize.x * 0.5f, ImGui::GetIO().DisplaySize.y * 0.5f),
                             ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
-    ImGui::SetNextWindowSize(ImVec2(550, 450), ImGuiCond_Appearing); // Increased height for 2D game style option
+    ImGui::SetNextWindowSize(ImVec2(550, 450), ImGuiCond_Appearing);
 
-    ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize;
-
-    if (ImGui::Begin("Create New World", &m_showNewWorldDialog, window_flags)) {
+    // Use modal popup for proper background dimming and click blocking
+    if (ImGui::BeginPopupModal("Create New World", &m_showNewWorldDialog, 
+                               ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove)) {
         ImGui::Spacing();
 
         // World name input
@@ -238,14 +241,18 @@ void MainMenuPanel::renderNewWorldDialog()
                                       (m_2dGameStyle == 0 ? "2D Platformer" : "2D Top-down");
             LOG_INFO_C("Creating new " + worldTypeStr + " world: " + m_newWorldName + 
                        " with seed: " + std::to_string(m_worldSeed), "MainMenuPanel");
+            
+            ImGui::CloseCurrentPopup();
         }
 
         ImGui::SameLine();
         if (ImGui::Button("Cancel", ImVec2(buttonWidth, 40))) {
             m_showNewWorldDialog = false;
+            ImGui::CloseCurrentPopup();
         }
+        
+        ImGui::EndPopup();
     }
-    ImGui::End();
 #endif
 }
 

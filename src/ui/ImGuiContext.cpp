@@ -136,7 +136,7 @@ bool ImGuiContext::initialize(Window* window, IRenderContext* renderContext)
     // Background colors - Unreal charcoal gray (#202020, #252526)
     colors[ImGuiCol_WindowBg] = ImVec4(0.125f, 0.125f, 0.125f, 1.00f);           // #202020
     colors[ImGuiCol_ChildBg] = ImVec4(0.145f, 0.145f, 0.149f, 1.00f);            // #252526
-    colors[ImGuiCol_PopupBg] = ImVec4(0.125f, 0.125f, 0.125f, 0.98f);            // #202020
+    colors[ImGuiCol_PopupBg] = ImVec4(0.125f, 0.125f, 0.125f, 1.00f);            // #202020 - Fully opaque for readability
     colors[ImGuiCol_MenuBarBg] = ImVec4(0.176f, 0.176f, 0.188f, 1.00f);          // #2D2D30
     
     // Border colors - Subtle gray
@@ -223,8 +223,8 @@ bool ImGuiContext::initialize(Window* window, IRenderContext* renderContext)
     colors[ImGuiCol_NavWindowingHighlight] = ImVec4(1.00f, 1.00f, 1.00f, 0.70f);
     colors[ImGuiCol_NavWindowingDimBg] = ImVec4(0.80f, 0.80f, 0.80f, 0.20f);
     
-    // Modal window dimming
-    colors[ImGuiCol_ModalWindowDimBg] = ImVec4(0.05f, 0.05f, 0.05f, 0.75f);
+    // Modal window dimming - Increased opacity for better visibility of modal dialogs
+    colors[ImGuiCol_ModalWindowDimBg] = ImVec4(0.05f, 0.05f, 0.05f, 0.90f);
 
     // Initialize appropriate graphics API backend first to determine GLFW init mode
     GraphicsAPI api = renderContext->getAPI();
@@ -419,7 +419,7 @@ bool ImGuiContext::initializeWin32(Win32Window* window, IRenderContext* renderCo
     // Background colors - Very dark with slight blue tint
     colors[ImGuiCol_WindowBg] = ImVec4(0.10f, 0.11f, 0.13f, 1.00f);
     colors[ImGuiCol_ChildBg] = ImVec4(0.12f, 0.13f, 0.15f, 1.00f);
-    colors[ImGuiCol_PopupBg] = ImVec4(0.10f, 0.11f, 0.13f, 0.98f);
+    colors[ImGuiCol_PopupBg] = ImVec4(0.10f, 0.11f, 0.13f, 1.00f);              // Fully opaque for readability
     colors[ImGuiCol_MenuBarBg] = ImVec4(0.08f, 0.09f, 0.11f, 1.00f);
     
     // Border colors
@@ -506,8 +506,8 @@ bool ImGuiContext::initializeWin32(Win32Window* window, IRenderContext* renderCo
     colors[ImGuiCol_NavWindowingHighlight] = ImVec4(1.00f, 1.00f, 1.00f, 0.70f);
     colors[ImGuiCol_NavWindowingDimBg] = ImVec4(0.80f, 0.80f, 0.80f, 0.20f);
     
-    // Modal window dimming
-    colors[ImGuiCol_ModalWindowDimBg] = ImVec4(0.05f, 0.05f, 0.05f, 0.75f);
+    // Modal window dimming - Increased opacity for better visibility of modal dialogs
+    colors[ImGuiCol_ModalWindowDimBg] = ImVec4(0.05f, 0.05f, 0.05f, 0.90f);
 
     // Initialize Win32 platform backend
     bool platformInitialized = ImGui_ImplWin32_Init(window->getHandle());
