@@ -35,6 +35,11 @@ If you're new to Fresh Voxel Engine, follow this path:
 - **[VOXEL_SELECTION_SYSTEM.md](VOXEL_SELECTION_SYSTEM.md)** - 🆕 Voxel selection, Cut/Copy/Paste
 - **[textures/USAGE.md](textures/USAGE.md)** - Texture system and assets
 
+### World Generation
+- **[WORLD_GENERATION_GUIDE.md](WORLD_GENERATION_GUIDE.md)** - Complete world generation guide (3D, 2D, hybrid)
+- **[ADVANCED_WORLD_GENERATION.md](ADVANCED_WORLD_GENERATION.md)** - 🆕 Advanced features design (climate, geology, rivers)
+- **[WORLD_TYPE_SELECTION.md](WORLD_TYPE_SELECTION.md)** - World type selection UI and implementation
+
 ### System Documentation
 - **[docs/INPUT_SYSTEM.md](docs/INPUT_SYSTEM.md)** - Input handling and modes
 - **[docs/AUDIO_SYSTEM.md](docs/AUDIO_SYSTEM.md)** - Audio engine guide

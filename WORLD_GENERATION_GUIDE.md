@@ -1,9 +1,11 @@
 # Fresh Voxel Engine - World Generation Guide
 ## Complete Guide to Procedural World Generation Types
 
-> **Document Version:** 1.0.0  
-> **Last Updated:** 2025-11-15  
+> **Document Version:** 1.1.0  
+> **Last Updated:** 2025-11-18  
 > **Purpose:** Comprehensive guide to all world generation types, including 3D, 2D, and hybrid approaches
+
+> 📘 **See Also:** [ADVANCED_WORLD_GENERATION.md](ADVANCED_WORLD_GENERATION.md) - Design document for advanced features inspired by Vintage Story
 
 ---
 
@@ -17,10 +19,19 @@ Fresh Voxel Engine supports multiple world generation paradigms:
 
 ### Current Implementation Status
 - **3D Basic Generation:** ✅ 85% Complete
-- **3D Advanced Generation:** 🟨 30% Complete
+- **3D Advanced Generation:** 🟨 30% Complete (see [ADVANCED_WORLD_GENERATION.md](ADVANCED_WORLD_GENERATION.md))
 - **2D Generation:** ❌ 0% Complete (NEW FEATURE)
 - **Structure Generation:** ❌ 0% Complete
 - **Custom Generators:** ✅ 100% Complete (API exists)
+
+### Future Advanced Features (Design Phase)
+See [ADVANCED_WORLD_GENERATION.md](ADVANCED_WORLD_GENERATION.md) for detailed design documentation on:
+- **Climate Simulation Systems** - Temperature and rainfall-based biomes
+- **Geological Layering** - Realistic rock strata and ore distribution
+- **Hydrological Systems** - Rivers, lakes, and water flow simulation
+- **Structure & Lore Generation** - Procedural ruins and storytelling
+- **LOD Rendering** - Distant terrain rendering for larger view distances
+- **JSON Moddability** - Data-driven world generation configuration
 
 ---
 
@@ -1165,6 +1176,7 @@ void main() {
 - **Starbound:** 2D with parallax
 - **No Man's Sky:** Procedural planets
 - **Dwarf Fortress:** Complex simulation
+- **Vintage Story:** Advanced systems-based generation (see [ADVANCED_WORLD_GENERATION.md](ADVANCED_WORLD_GENERATION.md))
 
 ---
 
@@ -1179,9 +1191,20 @@ Fresh Voxel Engine now has a **comprehensive world generation framework** suppor
 
 The implementation roadmap provides a clear path from current basic generation to advanced multi-paradigm world creation. With these features, Fresh can support a wide variety of game types and play styles!
 
+**For advanced features and future enhancements**, see [ADVANCED_WORLD_GENERATION.md](ADVANCED_WORLD_GENERATION.md) which details:
+- Systems-based climate simulation
+- Geological layering and ore distribution
+- River and lake generation
+- Structure placement with lore
+- LOD rendering for distant terrain
+- Moddability through JSON configuration
+
 ---
 
 **Document Status:** ✅ Complete  
 **Next Review:** 2025-12-15  
 **Owner:** Development Team  
-**Related Docs:** ROADMAP.md, COMPREHENSIVE_ROADMAP.md
+**Related Docs:** 
+- [ADVANCED_WORLD_GENERATION.md](ADVANCED_WORLD_GENERATION.md) - Advanced features design
+- [ROADMAP.md](ROADMAP.md) - Overall project roadmap
+- [COMPREHENSIVE_ROADMAP.md](COMPREHENSIVE_ROADMAP.md) - Detailed feature planning
