@@ -15,6 +15,7 @@
 #include "editor/SelectionManager.h"
 #include "editor/SelectionRenderer.h"
 #include "editor/TransformGizmo.h"
+#include "editor/FileDialogManager.h"
 #include "serialization/WorldSerializer.h"
 #include "devtools/DebugRenderer.h"
 #include "renderer/RenderContext.h"
@@ -1191,7 +1192,32 @@ void EditorManager::saveWorldAs()
         }
     }
 #else
-    LOG_INFO_C("Save World As not implemented on this platform", "EditorManager");
+    // Use cross-platform file dialog manager
+    if (FileDialogManager::isAvailable() && m_worldSerializer && m_world) {
+        LOG_INFO_C("Opening Save World As dialog", "EditorManager");
+        
+        std::vector<FileDialogManager::Filter> filters = {
+            {"Fresh World Files", "world"},
+            {"All Files", "*"}
+        };
+        
+        auto selectedFile = FileDialogManager::saveFile(filters, "", "NewWorld.world");
+        
+        if (!selectedFile.empty()) {
+            LOG_INFO_C("User selected save path: " + selectedFile, "EditorManager");
+            
+            if (m_worldSerializer->saveWorld(m_world, selectedFile)) {
+                m_currentWorldPath = selectedFile;
+                LOG_INFO_C("World saved successfully to: " + selectedFile, "EditorManager");
+            } else {
+                LOG_ERROR_C("Failed to save world to: " + selectedFile, "EditorManager");
+            }
+        } else {
+            LOG_INFO_C("Save cancelled by user", "EditorManager");
+        }
+    } else {
+        LOG_INFO_C("Save World As not available (file dialogs not available)", "EditorManager");
+    }
 #endif
 }
 
@@ -1249,7 +1275,43 @@ void EditorManager::loadWorld()
         }
     }
 #else
-    LOG_INFO_C("Load World not implemented on this platform", "EditorManager");
+    // Use cross-platform file dialog manager
+    if (FileDialogManager::isAvailable() && m_worldSerializer && m_world) {
+        LOG_INFO_C("Opening Load World dialog", "EditorManager");
+        
+        std::vector<FileDialogManager::Filter> filters = {
+            {"Fresh World Files", "world"},
+            {"All Files", "*"}
+        };
+        
+        auto selectedFile = FileDialogManager::openFile(filters);
+        
+        if (!selectedFile.empty()) {
+            LOG_INFO_C("User selected world file: " + selectedFile, "EditorManager");
+            
+            // Clear existing world by unloading all chunks
+            auto& chunks = m_world->getChunks();
+            std::vector<ChunkPos> chunksToUnload;
+            for (const auto& [pos, chunk] : chunks) {
+                chunksToUnload.push_back(pos);
+            }
+            for (const auto& pos : chunksToUnload) {
+                m_world->unloadChunk(pos);
+            }
+            
+            // Load the world
+            if (m_worldSerializer->loadWorld(m_world, selectedFile)) {
+                m_currentWorldPath = selectedFile;
+                LOG_INFO_C("World loaded successfully from: " + selectedFile, "EditorManager");
+            } else {
+                LOG_ERROR_C("Failed to load world from: " + selectedFile, "EditorManager");
+            }
+        } else {
+            LOG_INFO_C("Load cancelled by user", "EditorManager");
+        }
+    } else {
+        LOG_INFO_C("Load World not available (file dialogs not available)", "EditorManager");
+    }
 #endif
 }
 
