@@ -324,6 +324,7 @@ set(ENGINE_SOURCES
     src/input/InputManager.cpp
     src/gameplay/Camera.cpp
     src/gameplay/Player.cpp
+    src/gameplay/TimeManager.cpp
     src/assets/ModularAssetSystem.cpp
     src/assets/VoxelMaterialPack.cpp
     src/assets/AssetManager.cpp
@@ -481,6 +482,7 @@ set(ENGINE_HEADERS
     include/input/InputManager.h
     include/gameplay/Camera.h
     include/gameplay/Player.h
+    include/gameplay/TimeManager.h
     include/assets/ModularAssetSystem.h
     include/ecs/Entity.h
     include/ecs/IComponent.h
@@ -803,6 +805,7 @@ if(BUILD_TESTS)
         tests/test_main.cpp                 # Custom main with better error handling
         tests/voxel/ChunkTests.cpp
         tests/voxel/VoxelWorldTests.cpp
+        tests/gameplay/TimeManagerTests.cpp       # Tests for day/night cycle system
         tests/integration/WorldCreationIntegrationTest.cpp
         tests/generation/NoiseTests.cpp
         tests/generation/TerrainGeneratorTests.cpp
@@ -835,6 +838,7 @@ if(BUILD_TESTS)
         src/core/Reflection.cpp
         src/scripting/EventSystem.cpp
         src/input/InputManager.cpp
+        src/gameplay/TimeManager.cpp
         src/rpg/Inventory.cpp
         src/rpg/CraftingSystem.cpp
         src/assets/ModularAssetSystem.cpp
