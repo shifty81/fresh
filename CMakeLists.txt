@@ -319,6 +319,7 @@ set(ENGINE_SOURCES
     src/editor/BlockBuilder.cpp
     src/editor/SelectionManager.cpp
     src/editor/SelectionRenderer.cpp
+    src/editor/TransformGizmo.cpp
     src/serialization/WorldSerializer.cpp
     src/ui/MainMenu.cpp
     src/input/InputManager.cpp
@@ -848,6 +849,7 @@ if(BUILD_TESTS)
         src/character/AnimationController.cpp
         src/editor/SelectionManager.cpp
         src/editor/SelectionRenderer.cpp
+        src/editor/TransformGizmo.cpp
         src/devtools/DebugRenderer.cpp
         src/ecs/Transform2DComponent.cpp
         src/ecs/Sprite2DComponent.cpp
