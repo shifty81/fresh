@@ -1390,26 +1390,12 @@ void EditorManager::newWorld()
         );
         
         if (result == MessageBoxResult::Yes) {
-            if (m_world) {
-                // Clear existing world by unloading all chunks
-                auto& chunks = m_world->getChunks();
-                std::vector<ChunkPos> chunksToUnload;
-                for (const auto& [pos, chunk] : chunks) {
-                    chunksToUnload.push_back(pos);
-                }
-                for (const auto& pos : chunksToUnload) {
-                    m_world->unloadChunk(pos);
-                }
-                
-                m_currentWorldPath.clear();
-                LOG_INFO_C("New world created", "EditorManager");
-                
-                m_windowsDialogManager->showMessageBox(
-                    "New World",
-                    "New world created successfully!",
-                    MessageBoxButtons::OK,
-                    MessageBoxIcon::Information
-                );
+            // Show the main menu panel to allow user to configure new world
+            if (m_mainMenuPanel) {
+                m_mainMenuPanel->setMenuActive(true);
+                // Clear any existing flags
+                m_mainMenuPanel->clearFlags();
+                LOG_INFO_C("Main menu activated for new world creation", "EditorManager");
             }
         } else {
             LOG_INFO_C("New world cancelled by user", "EditorManager");
@@ -1424,24 +1410,52 @@ void EditorManager::toggleSceneHierarchy()
 {
     m_showSceneHierarchy = !m_showSceneHierarchy;
     LOG_INFO_C("Scene Hierarchy toggled: " + std::string(m_showSceneHierarchy ? "shown" : "hidden"), "EditorManager");
+    
+#ifdef FRESH_WIN32_UI
+    // Toggle native Win32 panel visibility
+    if (m_nativeSceneHierarchy) {
+        m_nativeSceneHierarchy->setVisible(m_showSceneHierarchy);
+    }
+#endif
 }
 
 void EditorManager::toggleInspector()
 {
     m_showInspector = !m_showInspector;
     LOG_INFO_C("Inspector toggled: " + std::string(m_showInspector ? "shown" : "hidden"), "EditorManager");
+    
+#ifdef FRESH_WIN32_UI
+    // Toggle native Win32 panel visibility
+    if (m_nativeInspector) {
+        m_nativeInspector->setVisible(m_showInspector);
+    }
+#endif
 }
 
 void EditorManager::toggleContentBrowser()
 {
     m_showContentBrowser = !m_showContentBrowser;
     LOG_INFO_C("Content Browser toggled: " + std::string(m_showContentBrowser ? "shown" : "hidden"), "EditorManager");
+    
+#ifdef FRESH_WIN32_UI
+    // Toggle native Win32 panel visibility
+    if (m_nativeContentBrowser) {
+        m_nativeContentBrowser->setVisible(m_showContentBrowser);
+    }
+#endif
 }
 
 void EditorManager::toggleConsole()
 {
     m_showConsole = !m_showConsole;
     LOG_INFO_C("Console toggled: " + std::string(m_showConsole ? "shown" : "hidden"), "EditorManager");
+    
+#ifdef FRESH_WIN32_UI
+    // Toggle native Win32 panel visibility
+    if (m_nativeConsole) {
+        m_nativeConsole->setVisible(m_showConsole);
+    }
+#endif
 }
 
 void EditorManager::toggleToolPalette()
