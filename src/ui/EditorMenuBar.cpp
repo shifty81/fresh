@@ -5,6 +5,12 @@
 #include "voxel/VoxelWorld.h"
 
 #include <imgui.h>
+#include <filesystem>
+
+#ifdef _WIN32
+#include <windows.h>
+#include <shellapi.h>
+#endif
 
 namespace fresh
 {
@@ -376,18 +382,18 @@ void EditorMenuBar::renderSettingsMenu()
 #endif
 
         if (ImGui::MenuItem("Input Settings...")) {
-            LOG_INFO_C("TODO: Open input settings dialog - would show key bindings, mouse sensitivity, etc.", "EditorMenuBar");
+            ImGui::OpenPopup("Input Settings");
         }
 
         if (ImGui::MenuItem("Audio Settings...")) {
-            LOG_INFO_C("TODO: Open audio settings dialog - would show volume controls, audio device selection, etc.", "EditorMenuBar");
+            ImGui::OpenPopup("Audio Settings");
         }
 
         if (ImGui::MenuItem("Editor Settings...")) {
             if (m_editorSettingsCallback) {
                 m_editorSettingsCallback();
             } else {
-                LOG_INFO_C("TODO: Open editor settings dialog - would show autosave settings, UI preferences, etc.", "EditorMenuBar");
+                ImGui::OpenPopup("Editor Settings");
             }
         }
 
@@ -399,25 +405,61 @@ void EditorMenuBar::renderHelpMenu()
 {
     if (ImGui::BeginMenu("Help")) {
         if (ImGui::MenuItem("Documentation", "F1")) {
-            LOG_INFO_C("TODO: Open documentation - would open README.md or launch browser to docs", "EditorMenuBar");
+#ifdef _WIN32
+            // Open README.md or DOCUMENTATION.md with default application
+            ShellExecuteA(nullptr, "open", "README.md", nullptr, nullptr, SW_SHOW);
+            LOG_INFO_C("Opening documentation (README.md)", "EditorMenuBar");
+#else
+            LOG_INFO_C("Documentation: See README.md in the project root", "EditorMenuBar");
+#endif
         }
 
         if (ImGui::MenuItem("API Reference")) {
-            LOG_INFO_C("TODO: Open API reference - would open Doxygen-generated API docs", "EditorMenuBar");
+#ifdef _WIN32
+            // Try to open Doxygen HTML documentation if it exists
+            if (std::filesystem::exists("docs/html/index.html")) {
+                ShellExecuteA(nullptr, "open", "docs/html/index.html", nullptr, nullptr, SW_SHOW);
+                LOG_INFO_C("Opening API reference (docs/html/index.html)", "EditorMenuBar");
+            } else {
+                LOG_INFO_C("API Reference not found. Run 'doxygen' to generate API docs.", "EditorMenuBar");
+            }
+#else
+            LOG_INFO_C("API Reference: See docs/html/index.html (run doxygen to generate)", "EditorMenuBar");
+#endif
         }
 
         if (ImGui::MenuItem("Tutorials")) {
-            LOG_INFO_C("TODO: Open tutorials - would show getting started guides", "EditorMenuBar");
+#ifdef _WIN32
+            // Open getting started guide
+            if (std::filesystem::exists("docs/getting-started/GETTING_STARTED.md")) {
+                ShellExecuteA(nullptr, "open", "docs/getting-started/GETTING_STARTED.md", nullptr, nullptr, SW_SHOW);
+                LOG_INFO_C("Opening tutorials", "EditorMenuBar");
+            } else {
+                LOG_INFO_C("Tutorials: See docs/getting-started/ folder", "EditorMenuBar");
+            }
+#else
+            LOG_INFO_C("Tutorials: See docs/getting-started/GETTING_STARTED.md", "EditorMenuBar");
+#endif
         }
 
         ImGui::Separator();
 
         if (ImGui::MenuItem("Report Bug...")) {
-            LOG_INFO_C("TODO: Open bug report form - would launch browser to GitHub issues page", "EditorMenuBar");
+#ifdef _WIN32
+            ShellExecuteA(nullptr, "open", "https://github.com/shifty81/fresh/issues/new", nullptr, nullptr, SW_SHOW);
+            LOG_INFO_C("Opening GitHub issues page in browser", "EditorMenuBar");
+#else
+            LOG_INFO_C("Report bugs at: https://github.com/shifty81/fresh/issues/new", "EditorMenuBar");
+#endif
         }
 
         if (ImGui::MenuItem("Feature Request...")) {
-            LOG_INFO_C("TODO: Open feature request form - would launch browser to GitHub discussions", "EditorMenuBar");
+#ifdef _WIN32
+            ShellExecuteA(nullptr, "open", "https://github.com/shifty81/fresh/discussions", nullptr, nullptr, SW_SHOW);
+            LOG_INFO_C("Opening GitHub discussions page in browser", "EditorMenuBar");
+#else
+            LOG_INFO_C("Feature requests at: https://github.com/shifty81/fresh/discussions", "EditorMenuBar");
+#endif
         }
 
         ImGui::Separator();
