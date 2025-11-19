@@ -254,10 +254,10 @@ void Win32InspectorPanel::renderTransformSection()
     if (m_entityManager && m_inspectedNode->userData) {
         ecs::Entity* entity = static_cast<ecs::Entity*>(m_inspectedNode->userData);
         if (entity && entity->isValid() && m_entityManager->hasComponent<ecs::TransformComponent>(*entity)) {
-            auto& transform = m_entityManager->getComponent<ecs::TransformComponent>(*entity);
-            position = transform.position;
-            rotation = transform.rotation;
-            scale = transform.scale;
+            auto* transform = m_entityManager->getComponent<ecs::TransformComponent>(*entity);
+            position = transform->position;
+            rotation = transform->rotation;
+            scale = transform->scale;
         }
     }
     

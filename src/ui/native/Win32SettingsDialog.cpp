@@ -51,6 +51,7 @@ bool Win32SettingsDialog::show(HWND parentHwnd, const Settings& currentSettings)
         DialogProc,
         (LPARAM)this
     );
+    (void)result; // Unused - dialog resource not yet implemented
     
     // Since we don't have dialog resources, we'll create a simple window-based dialog
     // For now, log that settings dialog was requested
