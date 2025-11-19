@@ -384,7 +384,11 @@ void EditorMenuBar::renderSettingsMenu()
         }
 
         if (ImGui::MenuItem("Editor Settings...")) {
-            LOG_INFO_C("TODO: Open editor settings dialog - would show autosave settings, UI preferences, etc.", "EditorMenuBar");
+            if (m_editorSettingsCallback) {
+                m_editorSettingsCallback();
+            } else {
+                LOG_INFO_C("TODO: Open editor settings dialog - would show autosave settings, UI preferences, etc.", "EditorMenuBar");
+            }
         }
 
         ImGui::EndMenu();

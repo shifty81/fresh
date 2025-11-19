@@ -329,6 +329,7 @@ set(ENGINE_SOURCES
     src/editor/TransformGizmo.cpp
     src/editor/FileDialogManager.cpp
     src/editor/LayoutManager.cpp
+    src/editor/EditorSettingsDialog.cpp
     src/serialization/WorldSerializer.cpp
     src/ui/MainMenu.cpp
     src/input/InputManager.cpp
