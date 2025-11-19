@@ -310,6 +310,7 @@ void Win32InspectorPanel::renderComponentSection()
 
 bool Win32InspectorPanel::handleMessage(UINT msg, WPARAM wParam, LPARAM lParam, LRESULT& result)
 {
+    (void)lParam;  // Unused parameter
     switch (msg) {
         case WM_COMMAND: {
             int controlId = LOWORD(wParam);
