@@ -39,6 +39,7 @@ class WorldSerializer;
 class TransformGizmo;
 class LayoutManager;
 class EditorSettingsDialog;
+class CameraController;
 
 namespace ecs
 {
@@ -126,10 +127,7 @@ public:
      * @brief Set player reference for camera-based operations
      * @param player Player instance
      */
-    void setPlayer(class Player* player)
-    {
-        m_player = player;
-    }
+    void setPlayer(class Player* player);
 
     /**
      * @brief Check if editor is initialized
@@ -435,6 +433,33 @@ public:
     {
         return m_editorSettingsDialog.get();
     }
+    
+    /**
+     * @brief Get the camera controller
+     * @return Camera controller pointer
+     */
+    CameraController* getCameraController() const
+    {
+        return m_cameraController.get();
+    }
+    
+    // ========== Camera Control Operations ==========
+    
+    /**
+     * @brief Set camera view mode
+     * @param mode View mode name ("Perspective", "Top", "Front", "Side", etc.)
+     */
+    void setCameraViewMode(const std::string& mode);
+    
+    /**
+     * @brief Focus camera on selection (F key)
+     */
+    void focusOnSelection();
+    
+    /**
+     * @brief Frame selection in view
+     */
+    void frameSelection();
 
 private:
     void setupDockspace();
@@ -465,6 +490,7 @@ private:
     std::unique_ptr<WorldSerializer> m_worldSerializer;
     std::unique_ptr<LayoutManager> m_layoutManager;
     std::unique_ptr<EditorSettingsDialog> m_editorSettingsDialog;
+    std::unique_ptr<CameraController> m_cameraController;
 
 #ifdef _WIN32
     // Windows-native integration managers
