@@ -129,17 +129,20 @@ void Win32SettingsDialog::onInitDialog(HWND hwnd)
 
 void Win32SettingsDialog::createControls(HWND hwnd)
 {
+    (void)hwnd; // Unused parameter
     // This would create all the controls defined in the header
     // For this simplified version, we'll skip the full implementation
 }
 
 void Win32SettingsDialog::loadSettings(HWND hwnd)
 {
+    (void)hwnd; // Unused parameter
     // Load settings into controls
 }
 
 void Win32SettingsDialog::saveSettings(HWND hwnd)
 {
+    (void)hwnd; // Unused parameter
     // Read values from controls and update m_settings
 }
 
@@ -162,6 +165,9 @@ void Win32SettingsDialog::onCommand(HWND hwnd, WPARAM wParam)
 
 void Win32SettingsDialog::onHScroll(HWND hwnd, WPARAM wParam, LPARAM lParam)
 {
+    (void)hwnd;   // Unused parameter
+    (void)wParam; // Unused parameter
+    (void)lParam; // Unused parameter
     // Handle slider changes
 }
 

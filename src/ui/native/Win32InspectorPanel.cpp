@@ -256,7 +256,7 @@ void Win32InspectorPanel::renderTransformSection()
         if (entity && entity->isValid() && m_entityManager->hasComponent<ecs::TransformComponent>(*entity)) {
             auto* transform = m_entityManager->getComponent<ecs::TransformComponent>(*entity);
             position = transform->position;
-            rotation = transform->rotation;
+            rotation = transform->getEulerAngles();
             scale = transform->scale;
         }
     }
