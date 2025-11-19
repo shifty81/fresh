@@ -761,7 +761,6 @@ void EditorManager::render()
     // When using native Win32 UI, native panels are always visible and managed by Win32
     // No need to render them here - they are native windows
     // The native panels were created during initialization and handle their own rendering
-    LOG_INFO_C("Using native Win32 UI panels", "EditorManager");
 #endif // !FRESH_WIN32_UI
 
     if (m_showToolPalette && m_voxelTools) {
