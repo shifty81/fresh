@@ -1,40 +1,40 @@
 # Fresh Voxel Engine - GUI System Guide
 
-**Comprehensive guide to the Fresh Editor GUI implementation**
+**Comprehensive guide to the Fresh Editor Windows Native GUI implementation**
 
 ## Table of Contents
 
 1. [Overview](#overview)
 2. [Architecture](#architecture)
 3. [Windows Native GUI](#windows-native-gui)
-4. [ImGui Integration](#imgui-integration)
-5. [Editor Panels](#editor-panels)
-6. [Dark Theme System](#dark-theme-system)
-7. [Transform Gizmo](#transform-gizmo)
-8. [Toolbar and Menu Bar](#toolbar-and-menu-bar)
-9. [Quick Start](#quick-start)
-10. [Current Status](#current-status)
-11. [Keyboard Shortcuts](#keyboard-shortcuts)
+4. [Editor Panels](#editor-panels)
+5. [Dark Theme System](#dark-theme-system)
+6. [Transform Gizmo](#transform-gizmo)
+7. [Toolbar and Menu Bar](#toolbar-and-menu-bar)
+8. [Quick Start](#quick-start)
+9. [Current Status](#current-status)
+10. [Keyboard Shortcuts](#keyboard-shortcuts)
 
 ---
 
 ## Overview
 
-The Fresh Voxel Engine features a professional Unreal Engine-like editor with a hybrid GUI system:
-- **Windows Native UI**: Native Win32 window management, menu bars, and toolbars
-- **ImGui Editor Panels**: Modern, immediate-mode GUI for editor tools
+The Fresh Voxel Engine features a professional Unreal Engine-like editor with **Windows Native GUI**:
+- **Windows Native UI**: All UI uses native Win32 controls
+- **Native Window Management**: Win32 window management, menu bars, and toolbars
+- **Native Editor Panels**: Tree views, list views, property grids using Win32 controls
 - **DirectX Rendering**: Full integration with DirectX 11/12 graphics pipeline
-- **Dark Theme**: Professional dark theme with customizable colors
+- **Dark Theme**: Professional Unreal-style dark theme
 
 ### Key Features
 
-- ✅ Native Windows window management (replaces GLFW on Windows)
+- ✅ Native Windows window management
 - ✅ Native menu bar with File, Edit, View, Tools, Help menus
 - ✅ Native toolbar with icon buttons
-- ✅ ImGui panels: Scene Hierarchy, Inspector, Content Browser, Console
+- ✅ Native Win32 panels: Scene Hierarchy, Inspector, Content Browser, Console
 - ✅ Transform Gizmo for object manipulation (Move/Rotate/Scale)
 - ✅ Selection system for voxel and entity selection
-- ✅ Dark theme with customizable colors
+- ✅ Unreal-style dark theme
 - ✅ High DPI support
 - ✅ Keyboard shortcuts (W/E/R for gizmo modes)
 
@@ -42,35 +42,36 @@ The Fresh Voxel Engine features a professional Unreal Engine-like editor with a 
 
 ## Architecture
 
-### Dual GUI System
+### Windows Native UI System
 
-The Fresh Editor uses a **hybrid approach** combining the best of both worlds:
+The Fresh Editor uses **native Windows controls exclusively**:
 
 ```
 ┌─────────────────────────────────────────┐
 │     Native Windows Window (Win32)       │
 │  ┌────────────┐  ┌──────────────────┐  │
 │  │Menu Bar    │  │ Toolbar          │  │
-│  │(Native)    │  │ (Native)         │  │
+│  │(HMENU)     │  │ (Native)         │  │
 │  └────────────┘  └──────────────────┘  │
 │  ┌─────────────────────────────────┐   │
 │  │  Main Viewport (DirectX)        │   │
 │  │  ┌─────────┐  ┌──────────────┐  │   │
 │  │  │Hierarchy│  │ Inspector    │  │   │
-│  │  │(ImGui)  │  │ (ImGui)      │  │   │
+│  │  │TreeView │  │ PropGrid     │  │   │
 │  │  └─────────┘  └──────────────┘  │   │
 │  │  ┌──────────────────────────┐   │   │
-│  │  │ Content Browser (ImGui)  │   │   │
+│  │  │ Content Browser ListView │   │   │
 │  │  └──────────────────────────┘   │   │
 │  └─────────────────────────────────┘   │
 └─────────────────────────────────────────┘
 ```
 
-### Why Hybrid?
+### Why Native Win32 Only?
 
-1. **Native Windows Controls**: Better OS integration, familiar UX, native performance
-2. **ImGui Panels**: Flexible, easy to customize, perfect for editor tools
-3. **DirectX Integration**: Both systems render seamlessly with DirectX 11/12
+1. **Native Windows Controls**: Best OS integration, familiar UX, native performance
+2. **Professional Appearance**: Unreal-style theme applied to native controls
+3. **DirectX Integration**: Seamless rendering with DirectX 11/12
+4. **Smaller Binary**: No third-party UI library dependency
 
 ---
 
@@ -78,7 +79,7 @@ The Fresh Editor uses a **hybrid approach** combining the best of both worlds:
 
 ### Win32Window Class
 
-The `Win32Window` class replaces GLFW on Windows for better native integration:
+The `Win32Window` class provides native window management:
 
 **Features:**
 - Native window creation and management
@@ -109,7 +110,6 @@ Native Windows input handling:
 - Mouse input (WM_MOUSEMOVE, WM_LBUTTONDOWN, etc.)
 - Mouse wheel (WM_MOUSEWHEEL)
 - Raw input support for high-precision mouse
-- Integration with ImGui input system
 
 **Key Methods:**
 ```cpp
@@ -121,142 +121,102 @@ class Win32InputManager {
 };
 ```
 
-### Enabling Win32 Native Mode
+### Build Configuration
 
-#### CMake Configuration (Recommended)
+Native Win32 UI is enabled by default on Windows:
 
-```bash
-cmake -DUSE_WIN32_NATIVE=ON \
-      -DCMAKE_TOOLCHAIN_FILE=vcpkg/scripts/buildsystems/vcpkg.cmake \
-      -S . -B build
+```cmake
+if(WIN32)
+    list(APPEND ENGINE_SOURCES
+        src/ui/native/Win32Panel.cpp
+        src/ui/native/Win32MenuBar.cpp
+        src/ui/native/Win32Toolbar.cpp
+        src/ui/native/Win32ConsolePanel.cpp
+        src/ui/native/Win32InspectorPanel.cpp
+        src/ui/native/Win32SceneHierarchyPanel.cpp
+        src/ui/native/Win32ContentBrowserPanel.cpp
+    )
+    add_definitions(-DFRESH_WIN32_UI)
+endif()
 ```
-
-#### Code Configuration
-
-```cpp
-#ifdef USE_WIN32_NATIVE
-    #include "core/Win32Window.h"
-    #include "input/Win32InputManager.h"
-    auto window = std::make_unique<Win32Window>(1920, 1080, "Fresh");
-#else
-    #include "core/Window.h"
-    auto window = std::make_unique<Window>(1920, 1080, "Fresh");
-#endif
-```
-
----
-
-## ImGui Integration
-
-### ImGuiManager Class
-
-The `ImGuiManager` class handles ImGui initialization and rendering:
-
-**Features:**
-- DirectX 11/12 backend integration
-- Win32 backend for input
-- Custom dark theme
-- Docking and viewports support
-- Font loading and management
-
-**Initialization:**
-```cpp
-class ImGuiManager {
-    bool initialize(HWND hwnd, ID3D11Device* device, 
-                   ID3D11DeviceContext* context);
-    void newFrame();
-    void render();
-    void shutdown();
-};
-```
-
-### ImGui Panels
-
-All editor panels use ImGui for flexibility:
-
-1. **Scene Hierarchy** - Tree view of entities
-2. **Inspector** - Property editor for selected objects
-3. **Content Browser** - Asset browser with thumbnails
-4. **Console** - Log viewer with filtering
-5. **Voxel Tool Palette** - Block selection and tools
 
 ---
 
 ## Editor Panels
 
-### Scene Hierarchy Panel
+### Win32SceneHierarchyPanel
 
-**File**: `include/ui/SceneHierarchyPanel.h`
+**File**: `include/ui/native/Win32SceneHierarchyPanel.h`
 
-Displays world entities in a tree structure:
+Displays world entities in a native tree control:
 
 ```cpp
-class SceneHierarchyPanel {
-    void render();
-    void setWorld(World* world);
-    Entity* getSelectedEntity() const;
+class Win32SceneHierarchyPanel {
+    bool create(HWND parent, VoxelWorld* world);
+    void refresh();
     void selectEntity(Entity* entity);
+    Entity* getSelectedEntity() const;
 };
 ```
 
 **Features:**
-- Tree view of entities
+- Native tree view control (SysTreeView32)
 - Drag-and-drop support
 - Right-click context menu
 - Search/filter
 - Multi-selection
 
-### Inspector Panel
+### Win32InspectorPanel
 
-**File**: `include/ui/InspectorPanel.h`
+**File**: `include/ui/native/Win32InspectorPanel.h`
 
 Property editor for selected entities:
 
 ```cpp
-class InspectorPanel {
-    void render();
+class Win32InspectorPanel {
+    bool create(HWND parent);
     void setEntity(Entity* entity);
     void setVoxel(Voxel* voxel);
 };
 ```
 
 **Features:**
+- Native property grid
 - Transform properties (Position, Rotation, Scale)
 - Component properties
 - Material properties
 - Real-time editing
-- Undo/redo integration
 
-### Content Browser Panel
+### Win32ContentBrowserPanel
 
-**File**: `include/ui/ContentBrowserPanel.h`
+**File**: `include/ui/native/Win32ContentBrowserPanel.h`
 
-Asset browser with preview:
+Asset browser with native list view:
 
 ```cpp
-class ContentBrowserPanel {
-    void render();
-    void setAssetPath(const std::string& path);
+class Win32ContentBrowserPanel {
+    bool create(HWND parent, const std::string& assetPath);
+    void refresh();
     Asset* getSelectedAsset() const;
 };
 ```
 
 **Features:**
+- Native list view control (icon/list/details views)
 - Folder navigation
 - Asset thumbnails
 - Asset import
 - Drag-and-drop to scene
-- Asset search
 
-### Console Panel
+### Win32ConsolePanel
 
-**File**: `include/ui/ConsolePanel.h`
+**File**: `include/ui/native/Win32ConsolePanel.h`
 
-Log viewer with filtering:
+Log viewer with native list control:
 
 ```cpp
-class ConsolePanel {
-    void render();
+class Win32ConsolePanel {
+    bool create(HWND parent);
     void addMessage(const std::string& message, LogLevel level);
     void clear();
 };
@@ -273,55 +233,41 @@ class ConsolePanel {
 
 ## Dark Theme System
 
-### Theme Colors
+### Unreal-Style Theme
 
-The editor uses a professional dark theme inspired by Unreal Engine and Visual Studio:
+The editor uses a professional dark theme inspired by Unreal Engine:
+
+**File**: `include/ui/native/UnrealStyleTheme.h`
 
 **Primary Colors:**
 ```cpp
 // Background colors
-WindowBg:          rgb(37, 37, 38)    // Main background
-ChildBg:           rgb(45, 45, 48)    // Panel background
-PopupBg:           rgb(45, 45, 48)    // Popup background
-
+WindowBackground:  RGB(37, 37, 38)    // Main background
+PanelBackground:   RGB(45, 45, 48)    // Panel background
+ 
 // Text colors
-Text:              rgb(241, 241, 241) // Primary text
-TextDisabled:      rgb(128, 128, 128) // Disabled text
+Text:              RGB(241, 241, 241) // Primary text
+TextDisabled:      RGB(128, 128, 128) // Disabled text
 
 // Accent colors
-Header:            rgb(51, 153, 255)  // Blue accent
-HeaderHovered:     rgb(75, 175, 255)  // Lighter blue
-HeaderActive:      rgb(25, 128, 230)  // Darker blue
-
-// Interactive colors
-Button:            rgb(51, 153, 255)
-ButtonHovered:     rgb(75, 175, 255)
-ButtonActive:      rgb(25, 128, 230)
+AccentBlue:        RGB(51, 153, 255)  // Blue accent
+AccentHover:       RGB(75, 175, 255)  // Lighter blue
+AccentActive:      RGB(25, 128, 230)  // Darker blue
 ```
 
 ### Applying the Theme
 
 ```cpp
-void ImGuiManager::applyDarkTheme() {
-    ImGuiStyle& style = ImGui::GetStyle();
-    ImVec4* colors = style.Colors;
-    
-    // Apply all theme colors
-    colors[ImGuiCol_WindowBg] = ImVec4(0.145f, 0.145f, 0.149f, 1.0f);
-    colors[ImGuiCol_Text] = ImVec4(0.945f, 0.945f, 0.945f, 1.0f);
-    // ... more colors ...
-}
-```
+#include "ui/native/UnrealStyleTheme.h"
 
-### Customization
+// Apply theme to window
+WindowsThemeManager themeManager;
+themeManager.initialize();
+themeManager.applyToWindow(hwnd);
 
-Users can customize the theme in `Config/EditorSettings.ini`:
-
-```ini
-[Theme]
-WindowBg=37,37,38
-AccentColor=51,153,255
-TextColor=241,241,241
+// Apply theme colors
+HBRUSH bgBrush = CreateSolidBrush(UnrealStyleTheme::WindowBackground);
+SetClassLongPtr(hwnd, GCLP_HBRBACKGROUND, (LONG_PTR)bgBrush);
 ```
 
 ---
@@ -368,52 +314,13 @@ class TransformGizmo {
 - Snap to grid (hold Ctrl)
 - Local/World space toggle
 
-### Keyboard Shortcuts
-
-```cpp
-// In Engine.cpp processInput()
-if (m_inputManager->isKeyJustPressed(KEY_W)) {
-    gizmo->setMode(TransformGizmo::Mode::Translate);
-    m_editorManager->getToolbar()->setActiveTool(EditorToolbar::Tool::Move);
-}
-if (m_inputManager->isKeyJustPressed(KEY_E)) {
-    gizmo->setMode(TransformGizmo::Mode::Rotate);
-    m_editorManager->getToolbar()->setActiveTool(EditorToolbar::Tool::Rotate);
-}
-if (m_inputManager->isKeyJustPressed(KEY_R)) {
-    gizmo->setMode(TransformGizmo::Mode::Scale);
-    m_editorManager->getToolbar()->setActiveTool(EditorToolbar::Tool::Scale);
-}
-```
-
-### Toolbar Integration
-
-The toolbar buttons are synchronized with the gizmo:
-
-```cpp
-m_toolbar->setToolCallback([this](EditorToolbar::Tool tool) {
-    if (!m_transformGizmo) return;
-    switch (tool) {
-        case EditorToolbar::Tool::Move:
-            m_transformGizmo->setMode(TransformGizmo::Mode::Translate);
-            break;
-        case EditorToolbar::Tool::Rotate:
-            m_transformGizmo->setMode(TransformGizmo::Mode::Rotate);
-            break;
-        case EditorToolbar::Tool::Scale:
-            m_transformGizmo->setMode(TransformGizmo::Mode::Scale);
-            break;
-    }
-});
-```
-
 ---
 
 ## Toolbar and Menu Bar
 
 ### Native Menu Bar
 
-**File**: `include/ui/NativeMenuBar.h`
+**File**: `include/ui/native/Win32MenuBar.h`
 
 Native Windows menu bar with standard menus:
 
@@ -472,7 +379,7 @@ Help
 
 ### Native Toolbar
 
-**File**: `include/ui/NativeToolbar.h`
+**File**: `include/ui/native/Win32Toolbar.h`
 
 Native Windows toolbar with icon buttons:
 
@@ -485,10 +392,9 @@ Native Windows toolbar with icon buttons:
 
 **Implementation:**
 ```cpp
-class NativeToolbar {
-    void create(HWND parent);
-    void addButton(int id, const std::string& icon, 
-                   const std::string& tooltip);
+class Win32Toolbar {
+    bool create(HWND parent);
+    void addButton(int id, const wchar_t* icon, const wchar_t* tooltip);
     void setButtonState(int id, bool enabled);
     void setToolCallback(std::function<void(Tool)> callback);
 };
@@ -498,7 +404,7 @@ class NativeToolbar {
 
 ## Quick Start
 
-### 1. Enable Windows Native GUI
+### 1. Build the Engine
 
 ```bash
 cmake -DUSE_WIN32_NATIVE=ON \
@@ -547,49 +453,35 @@ cd build/Release
 
 ### ✅ Completed Features
 
-1. **Transform Gizmo** ✅
+1. **Windows Native UI** ✅
+   - Native Win32 window management
+   - Native menu bar (HMENU)
+   - Native toolbar
+   - DirectX integration
+   - High DPI support
+
+2. **Native Editor Panels** ✅
+   - Win32SceneHierarchyPanel (TreeView)
+   - Win32InspectorPanel (Property grid)
+   - Win32ContentBrowserPanel (ListView)
+   - Win32ConsolePanel (ListBox)
+
+3. **Transform Gizmo** ✅
    - Rendering with DebugRenderer
    - Keyboard shortcuts (W/E/R)
    - Toolbar integration
    - Bidirectional sync
 
-2. **File Dialogs** ✅
-   - NFD (Native File Dialog Extended) integration
-   - Open/Save World dialogs
-   - Import Assets dialog (multi-file)
-   - Folder picker
-
-3. **Windows Native GUI** ✅
-   - Win32 window management
-   - Native menu bar
-   - Native toolbar
-   - DirectX integration
-   - High DPI support
-
-4. **ImGui Panels** ✅
-   - Scene Hierarchy
-   - Inspector
-   - Content Browser
-   - Console
-   - Voxel Tool Palette
-
-5. **Dark Theme** ✅
-   - Professional color scheme
+4. **Dark Theme** ✅
+   - Unreal-style color scheme
+   - Applied to native controls
    - Customizable colors
-   - Persistent settings
 
-6. **Selection System** ✅
+5. **Selection System** ✅
    - SelectionManager
    - SelectionRenderer
    - Box selection
    - Multi-selection
-
-### 🚧 In Progress / Testing Needed
-
-1. **Selection System Testing**
-   - Box selection verification
-   - Copy/Paste with selections
-   - Undo/Redo with selections
 
 ### 🔮 Future Enhancements
 
@@ -616,12 +508,6 @@ cd build/Release
    - 3D model preview with rotation
    - Material preview sphere
    - Audio playback controls
-
-5. **Build Pipeline** (2-3 weeks)
-   - Mesh optimization
-   - Texture compression
-   - Lightmap baking
-   - Occlusion culling
 
 ---
 
@@ -661,11 +547,10 @@ cd build/Release
 
 ## Related Documentation
 
-- [Editor Integration Guide](../EDITOR_INTEGRATION.md)
-- [Input System](../INPUT_SYSTEM.md)
-- [Transform Gizmo Implementation](../../TRANSFORM_GIZMO_IMPLEMENTATION.md)
-- [Windows Native UI Quick Start](../../WINDOWS_NATIVE_UI_QUICK_START.md)
-- [Development Tools](../DEVELOPMENT_TOOLS.md)
+- [UI Architecture](../architecture/UI_ARCHITECTURE.md)
+- [Input System](../guides/INPUT_SYSTEM.md)
+- [Windows Native UI Quick Start](../getting-started/QUICK_START_WIN32_UI.md)
+- [Development Tools](../community/DEVELOPMENT_TOOLS.md)
 
 ---
 
@@ -673,10 +558,10 @@ cd build/Release
 
 ### GUI Not Showing
 
-1. Check ImGui initialization:
+1. Check Win32Window initialization:
    ```cpp
-   if (!m_imguiManager->initialize(hwnd, device, context)) {
-       LOG_ERROR("Failed to initialize ImGui");
+   if (!window->initialize()) {
+       LOG_ERROR("Failed to initialize Win32Window");
    }
    ```
 
@@ -687,7 +572,7 @@ cd build/Release
 
 1. Verify callback is set:
    ```cpp
-   m_toolbar->setToolCallback([this](Tool tool) { ... });
+   toolbar->setToolCallback([this](Tool tool) { ... });
    ```
 
 2. Check button IDs match
@@ -703,11 +588,11 @@ cd build/Release
 ### High DPI Issues
 
 1. Verify DPI awareness is set in manifest
-2. Check ImGui scale factor
-3. Update to latest ImGui version
+2. Check DPI scaling in Win32Window
+3. Update to latest Windows SDK
 
 ---
 
 **Last Updated**: 2025-11-19  
-**Version**: 1.0  
-**Status**: Production Ready (95% complete)
+**Version**: 2.0  
+**Status**: Production Ready - Windows Native UI Only
