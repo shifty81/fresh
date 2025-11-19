@@ -20,6 +20,7 @@
 #include "editor/TransformGizmo.h"
 #include "editor/FileDialogManager.h"
 #include "editor/LayoutManager.h"
+#include "editor/EditorSettingsDialog.h"
 #include "serialization/WorldSerializer.h"
 #include "devtools/DebugRenderer.h"
 #include "renderer/RenderContext.h"
@@ -157,6 +158,13 @@ bool EditorManager::initialize(WindowType* window, IRenderContext* renderContext
         m_menuBar->setEngineConfigCallback([this]() {
             if (m_engineConfigPanel) {
                 m_engineConfigPanel->setVisible(true);
+            }
+        });
+        
+        // Set editor settings callback to open editor settings dialog
+        m_menuBar->setEditorSettingsCallback([this]() {
+            if (m_editorSettingsDialog) {
+                m_editorSettingsDialog->setVisible(true);
             }
         });
 
@@ -364,6 +372,11 @@ bool EditorManager::initialize(WindowType* window, IRenderContext* renderContext
         // Initialize layout manager
         m_layoutManager = std::make_unique<LayoutManager>();
         m_layoutManager->initialize("configs/layouts.ini");
+        
+        // Initialize editor settings dialog
+        m_editorSettingsDialog = std::make_unique<EditorSettingsDialog>();
+        m_editorSettingsDialog->initialize("configs/editor_settings.ini");
+        LOG_INFO_C("Editor Settings Dialog initialized", "EditorManager");
         
         // Load the current or default layout
         LayoutConfig currentLayout;
@@ -809,6 +822,11 @@ void EditorManager::render()
     // Render engine configuration panel if visible
     if (m_engineConfigPanel) {
         m_engineConfigPanel->render();
+    }
+    
+    // Render editor settings dialog if visible
+    if (m_editorSettingsDialog) {
+        m_editorSettingsDialog->render();
     }
 
 #ifndef FRESH_WIN32_UI
@@ -1506,6 +1524,14 @@ void EditorManager::showEngineConfig()
     if (m_engineConfigPanel) {
         m_engineConfigPanel->setVisible(true);
         LOG_INFO_C("Engine configuration panel shown", "EditorManager");
+    }
+}
+
+void EditorManager::showEditorSettings()
+{
+    if (m_editorSettingsDialog) {
+        m_editorSettingsDialog->setVisible(true);
+        LOG_INFO_C("Editor settings dialog shown", "EditorManager");
     }
 }
 

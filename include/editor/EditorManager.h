@@ -38,6 +38,7 @@ class SelectionRenderer;
 class WorldSerializer;
 class TransformGizmo;
 class LayoutManager;
+class EditorSettingsDialog;
 
 namespace ecs
 {
@@ -385,6 +386,11 @@ public:
     void showEngineConfig();
     
     /**
+     * @brief Show editor settings dialog
+     */
+    void showEditorSettings();
+    
+    /**
      * @brief Show import assets dialog
      */
     void showImportAssets();
@@ -420,6 +426,15 @@ public:
     {
         return m_layoutManager.get();
     }
+    
+    /**
+     * @brief Get the editor settings dialog
+     * @return Editor settings dialog pointer
+     */
+    EditorSettingsDialog* getEditorSettingsDialog() const
+    {
+        return m_editorSettingsDialog.get();
+    }
 
 private:
     void setupDockspace();
@@ -449,6 +464,7 @@ private:
     std::unique_ptr<devtools::DebugRenderer> m_debugRenderer;
     std::unique_ptr<WorldSerializer> m_worldSerializer;
     std::unique_ptr<LayoutManager> m_layoutManager;
+    std::unique_ptr<EditorSettingsDialog> m_editorSettingsDialog;
 
 #ifdef _WIN32
     // Windows-native integration managers
