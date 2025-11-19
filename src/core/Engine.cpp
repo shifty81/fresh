@@ -923,6 +923,12 @@ void Engine::processInput()
                         m_editorManager->getToolbar()->setActiveTool(EditorToolbar::Tool::Scale);
                     }
                 }
+                
+                // F key - Focus on selection
+                if (m_inputManager->isKeyJustPressed(KEY_F)) {
+                    m_editorManager->focusOnSelection();
+                    LOG_INFO_C("Camera: Focus on selection (F)", "Engine");
+                }
             }
         }
 #endif
