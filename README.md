@@ -19,8 +19,8 @@ A professional **Windows-exclusive** voxel game development platform built with 
 
 ### Professional Game Development Platform
 - **Unreal Engine-Like Editor** - Professional Windows editor with comprehensive game development tools
-- **Windows-Native Windowing** - Native Win32 window management and input handling (replaces GLFW on Windows)
-- **ImGui Editor UI** - Modern ImGui-based editor panels with DirectX 11/12 rendering
+- **Windows-Native Windowing** - Native Win32 window management and input handling
+- **Windows-Native UI** - Professional native Windows UI with menus, toolbars, and panels
 - **Windows-Native Integration** - Full Windows 10/11 themes, native dialogs, jump lists, toast notifications, and taskbar features
 - **High DPI Support** - Per-monitor DPI awareness for crisp rendering on 4K/5K displays
 - **AVX2 Optimized** - SIMD instructions for 15-30% performance improvement on modern CPUs
@@ -45,8 +45,9 @@ A professional **Windows-exclusive** voxel game development platform built with 
 - **Greedy Meshing** - Optimized rendering with face culling
 
 ### Editor & Tools (Unreal Engine-Like Experience)
-- **Professional Game Editor** - Comprehensive ImGui-based editor for complete game development
+- **Professional Game Editor** - Comprehensive native Windows editor for complete game development
 - **Windows Native Windowing** - Native Win32 window management with native menu bar and toolbar support
+- **Windows Native UI** - All editor panels use native Windows controls (tree views, list views, property grids)
 - **Windows Native Integration** - Native Windows 10/11 themes, dialogs, and taskbar features
 - **Terraforming Tools** - Brush, sphere, cube, flatten, smooth, paint for world building
 - **NPC Creation System** - Easy-to-use interface for adding NPCs (villagers, traders, enemies)
@@ -54,9 +55,9 @@ A professional **Windows-exclusive** voxel game development platform built with 
   - Dropdown behavior selection (Friendly, Trader, Hostile, Patrol, Guard, etc.)
   - Configure AI behaviors without coding
   - Use existing character, AI, and behavior tree systems
-- **Scene Hierarchy** - Visual world structure and entity browser
-- **Content Browser** - Complete asset management system
-- **Entity Inspector** - Edit properties of selected NPCs and objects
+- **Scene Hierarchy** - Visual world structure and entity browser (native tree control)
+- **Content Browser** - Complete asset management system (native list/icon view)
+- **Entity Inspector** - Edit properties of selected NPCs and objects (native property grid)
 - **Undo/Redo** - Up to 100 operations in history
 - **Hot-Reload** - Shader and script changes update in real-time
 - **Play-in-Editor** - Test gameplay instantly without leaving editor
@@ -244,7 +245,7 @@ fresh/
 │   ├── generation/        # Procedural terrain generation
 │   ├── physics/           # Physics and collision
 │   ├── editor/            # World editor and terraforming
-│   ├── ui/                # ImGui editor UI (with native Win32 components)
+│   ├── ui/                # Native Windows UI (Win32 components)
 │   ├── gameplay/          # Player and camera
 │   ├── audio/             # Audio engine
 │   ├── character/         # Voxel character system
@@ -348,7 +349,7 @@ dotnet build -c Release
 - **OpenGL** - Available ✅ Optional compatibility backend
 
 ### Editor & NPC Features
-- **Unreal-like Editor** - ✅ Professional ImGui-based editor with Win32 native window management
+- **Unreal-like Editor** - ✅ Professional native Windows editor with Win32 UI components
 - **NPC System** - ✅ Integrated with character, AI, and behavior tree systems
 - **NPC Editor Integration** - 🚧 In development - Easy dropdown-based behavior configuration
 - **Visual NPC Placement** - 🚧 In development - Click-to-place NPCs in world editor

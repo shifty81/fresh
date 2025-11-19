@@ -95,20 +95,12 @@ if(ENABLE_OPENGL)
     endif()
 endif()
 
-# ImGui for UI
-find_package(imgui QUIET)
-if(NOT imgui_FOUND)
-    # Check if we have imgui in external directory
-    if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/external/imgui/CMakeLists.txt")
-        message(STATUS "Using ImGui from external/imgui")
-        add_subdirectory(external/imgui)
-        set(imgui_FOUND TRUE)
-        add_library(imgui::imgui ALIAS imgui)
-    else()
-        message(WARNING "ImGui not found. Editor UI features will be limited.")
-        message(WARNING "  vcpkg install imgui[glfw-binding,dx11-binding,dx12-binding]:x64-windows")
-    endif()
-endif()
+# ImGui is NO LONGER USED - Windows Native UI only
+# ImGui for UI (DISABLED - using Windows native UI only)
+# find_package(imgui QUIET)
+# if(NOT imgui_FOUND)
+#     message(STATUS "ImGui not used - Windows native UI only")
+# endif()
 
 # OpenAL for audio
 find_package(OpenAL QUIET)
@@ -427,25 +419,23 @@ if(WIN32)
     message(STATUS "Win32 native UI enabled")
 endif()
 
-# Add ImGui-dependent UI sources only if ImGui is available
-if(imgui_FOUND)
-    list(APPEND ENGINE_SOURCES
-        src/editor/EditorManager.cpp
-        src/ui/ImGuiContext.cpp
-        src/ui/SceneHierarchyPanel.cpp
-        src/ui/InspectorPanel.cpp
-        src/ui/EditorMenuBar.cpp
-        src/ui/EditorToolbar.cpp
-        src/ui/ContentBrowserPanel.cpp
-        src/ui/ConsolePanel.cpp
-        src/ui/VoxelToolPalette.cpp
-        src/ui/MainMenuPanel.cpp
-        src/ui/SettingsPanel.cpp
-        src/ui/HotbarPanel.cpp
-        src/ui/EngineConfigPanel.cpp
-    )
-    message(STATUS "ImGui UI enabled")
-endif()
+# ImGui UI is DISABLED - Windows Native UI only
+# if(imgui_FOUND)
+#     list(APPEND ENGINE_SOURCES
+#         ... ImGui-based UI files removed ...
+#     )
+#     message(STATUS "ImGui UI enabled")
+# endif()
+
+# Always include non-ImGui UI components
+list(APPEND ENGINE_SOURCES
+    src/editor/EditorManager.cpp
+    src/ui/MainMenuPanel.cpp
+    src/ui/SettingsPanel.cpp
+    src/ui/HotbarPanel.cpp
+    src/ui/EngineConfigPanel.cpp
+)
+message(STATUS "Windows Native UI enabled")
 
 # Header files
 set(ENGINE_HEADERS
@@ -482,14 +472,6 @@ set(ENGINE_HEADERS
     include/editor/SelectionRenderer.h
     include/serialization/WorldSerializer.h
     include/ui/MainMenu.h
-    include/ui/ImGuiContext.h
-    include/ui/SceneHierarchyPanel.h
-    include/ui/InspectorPanel.h
-    include/ui/EditorMenuBar.h
-    include/ui/EditorToolbar.h
-    include/ui/ContentBrowserPanel.h
-    include/ui/ConsolePanel.h
-    include/ui/VoxelToolPalette.h
     include/ui/MainMenuPanel.h
     include/ui/SettingsPanel.h
     include/ui/HotbarPanel.h
@@ -559,17 +541,14 @@ if(glm_FOUND)
     target_link_libraries(${PROJECT_NAME} PRIVATE glm::glm)
 endif()
 
-# Link ImGui (UI)
-if(imgui_FOUND)
-    target_link_libraries(${PROJECT_NAME} PRIVATE imgui::imgui)
-    add_definitions(-DFRESH_IMGUI_AVAILABLE)
-    
-    # Enable ImGui docking and multi-viewport features
-    # These are experimental features that need to be explicitly enabled
-    add_definitions(-DIMGUI_HAS_DOCK)
-    add_definitions(-DIMGUI_HAS_VIEWPORT)
-    message(STATUS "ImGui enabled with docking and viewport support")
-endif()
+# ImGui linking REMOVED - Windows Native UI only
+# if(imgui_FOUND)
+#     target_link_libraries(${PROJECT_NAME} PRIVATE imgui::imgui)
+#     add_definitions(-DFRESH_IMGUI_AVAILABLE)
+#     message(STATUS "ImGui disabled - Windows Native UI only")
+# endif()
+
+message(STATUS "Using Windows Native UI only - ImGui not required")
 
 # Link OpenAL (Audio)
 if(OpenAL_FOUND)
