@@ -19,6 +19,7 @@
 #include "editor/SelectionRenderer.h"
 #include "editor/TransformGizmo.h"
 #include "editor/FileDialogManager.h"
+#include "editor/LayoutManager.h"
 #include "serialization/WorldSerializer.h"
 #include "devtools/DebugRenderer.h"
 #include "renderer/RenderContext.h"
@@ -183,6 +184,19 @@ bool EditorManager::initialize(WindowType* window, IRenderContext* renderContext
                 m_sceneHierarchy->deselectAll();
             }
         });
+        
+        // Set up layout management callbacks
+        m_menuBar->setLoadLayoutCallback([this](const std::string& name) {
+            loadLayout(name);
+        });
+        
+        m_menuBar->setSaveLayoutCallback([this]() {
+            saveCurrentLayout();
+        });
+        
+        m_menuBar->setResetLayoutCallback([this]() {
+            resetLayout();
+        });
 
 #ifdef _WIN32
         // Set Windows customization callback
@@ -346,6 +360,21 @@ bool EditorManager::initialize(WindowType* window, IRenderContext* renderContext
         // Initialize world serializer
         m_worldSerializer = std::make_unique<WorldSerializer>();
         LOG_INFO_C("World Serializer initialized", "EditorManager");
+        
+        // Initialize layout manager
+        m_layoutManager = std::make_unique<LayoutManager>();
+        m_layoutManager->initialize("configs/layouts.ini");
+        
+        // Load the current or default layout
+        LayoutConfig currentLayout;
+        if (m_layoutManager->loadLayout(m_layoutManager->getCurrentLayoutName(), currentLayout)) {
+            m_showSceneHierarchy = currentLayout.showSceneHierarchy;
+            m_showInspector = currentLayout.showInspector;
+            m_showContentBrowser = currentLayout.showContentBrowser;
+            m_showConsole = currentLayout.showConsole;
+            m_showToolPalette = currentLayout.showToolPalette;
+            LOG_INFO_C("Loaded layout: " + m_layoutManager->getCurrentLayoutName(), "EditorManager");
+        }
     } else {
         LOG_INFO_C("World and WorldEditor not provided, deferring initialization of world-dependent panels", "EditorManager");
     }
@@ -1545,6 +1574,58 @@ void EditorManager::launchDialogueEditor()
 #else
     LOG_WARNING_C("Dialogue editor is only available on Windows", "EditorManager");
 #endif
+}
+
+void EditorManager::loadLayout(const std::string& name)
+{
+    if (!m_layoutManager) {
+        LOG_WARNING_C("Layout manager not initialized", "EditorManager");
+        return;
+    }
+    
+    LayoutConfig config;
+    if (m_layoutManager->loadLayout(name, config)) {
+        // Apply the layout configuration
+        m_showSceneHierarchy = config.showSceneHierarchy;
+        m_showInspector = config.showInspector;
+        m_showContentBrowser = config.showContentBrowser;
+        m_showConsole = config.showConsole;
+        m_showToolPalette = config.showToolPalette;
+        
+        LOG_INFO_C("Layout applied: " + name, "EditorManager");
+    } else {
+        LOG_ERROR_C("Failed to load layout: " + name, "EditorManager");
+    }
+}
+
+void EditorManager::saveCurrentLayout(const std::string& name)
+{
+    if (!m_layoutManager) {
+        LOG_WARNING_C("Layout manager not initialized", "EditorManager");
+        return;
+    }
+    
+    // Get the current panel visibility states
+    LayoutConfig config;
+    config.showSceneHierarchy = m_showSceneHierarchy;
+    config.showInspector = m_showInspector;
+    config.showContentBrowser = m_showContentBrowser;
+    config.showConsole = m_showConsole;
+    config.showToolPalette = m_showToolPalette;
+    
+    // Use provided name or current layout name
+    std::string layoutName = name.empty() ? m_layoutManager->getCurrentLayoutName() : name;
+    
+    if (m_layoutManager->saveLayout(layoutName, config)) {
+        LOG_INFO_C("Layout saved: " + layoutName, "EditorManager");
+    } else {
+        LOG_ERROR_C("Failed to save layout: " + layoutName, "EditorManager");
+    }
+}
+
+void EditorManager::resetLayout()
+{
+    loadLayout("Default");
 }
 
 } // namespace fresh

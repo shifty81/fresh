@@ -221,17 +221,33 @@ void EditorMenuBar::renderWindowMenu()
 
         if (ImGui::BeginMenu("Layout")) {
             if (ImGui::MenuItem("Default")) {
-                LOG_INFO_C("Loading default layout", "EditorMenuBar");
+                if (m_loadLayoutCallback) {
+                    m_loadLayoutCallback("Default");
+                } else {
+                    LOG_INFO_C("Loading default layout", "EditorMenuBar");
+                }
             }
             if (ImGui::MenuItem("Minimal")) {
-                LOG_INFO_C("Loading minimal layout", "EditorMenuBar");
+                if (m_loadLayoutCallback) {
+                    m_loadLayoutCallback("Minimal");
+                } else {
+                    LOG_INFO_C("Loading minimal layout", "EditorMenuBar");
+                }
             }
             if (ImGui::MenuItem("Debugging")) {
-                LOG_INFO_C("Loading debugging layout", "EditorMenuBar");
+                if (m_loadLayoutCallback) {
+                    m_loadLayoutCallback("Debugging");
+                } else {
+                    LOG_INFO_C("Loading debugging layout", "EditorMenuBar");
+                }
             }
             ImGui::Separator();
             if (ImGui::MenuItem("Save Layout")) {
-                LOG_INFO_C("Saving current layout", "EditorMenuBar");
+                if (m_saveLayoutCallback) {
+                    m_saveLayoutCallback();
+                } else {
+                    LOG_INFO_C("Saving current layout", "EditorMenuBar");
+                }
             }
             ImGui::EndMenu();
         }
@@ -239,7 +255,11 @@ void EditorMenuBar::renderWindowMenu()
         ImGui::Separator();
 
         if (ImGui::MenuItem("Reset Layout")) {
-            LOG_INFO_C("Resetting to default layout", "EditorMenuBar");
+            if (m_resetLayoutCallback) {
+                m_resetLayoutCallback();
+            } else {
+                LOG_INFO_C("Resetting to default layout", "EditorMenuBar");
+            }
         }
 
         ImGui::EndMenu();
