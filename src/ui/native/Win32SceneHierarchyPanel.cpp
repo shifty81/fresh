@@ -328,7 +328,6 @@ bool Win32SceneHierarchyPanel::handleMessage(UINT msg, WPARAM wParam, LPARAM lPa
     
     return false; // Let base class handle it
 }
-}
 
 } // namespace fresh
 

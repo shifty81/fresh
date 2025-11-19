@@ -158,6 +158,7 @@ TransformGizmo::Component TransformGizmo::hitTest(const glm::vec2& mousePos, con
 }
 
 bool TransformGizmo::beginManipulation(const glm::vec2& mousePos, const Camera& camera) {
+    (void)camera; // Parameter reserved for future use
     if (mode_ == Mode::None || hoveredComponent_ == Component::None) {
         return false;
     }
@@ -256,6 +257,7 @@ void TransformGizmo::render(const Camera& camera) {
 }
 
 void TransformGizmo::renderTranslateGizmo(const Camera& camera) {
+    (void)camera; // Parameter reserved for future use
     // Draw X axis arrow (red)
     bool highlightX = (hoveredComponent_ == Component::XAxis || selectedComponent_ == Component::XAxis);
     drawArrow(position_, getAxisDirection(Component::XAxis), 
@@ -273,6 +275,7 @@ void TransformGizmo::renderTranslateGizmo(const Camera& camera) {
 }
 
 void TransformGizmo::renderRotateGizmo(const Camera& camera) {
+    (void)camera; // Parameter reserved for future use
     // Draw X rotation circle (red)
     bool highlightX = (hoveredComponent_ == Component::XAxis || selectedComponent_ == Component::XAxis);
     drawCircle(position_, getAxisDirection(Component::XAxis), CIRCLE_RADIUS * size_,
@@ -290,6 +293,7 @@ void TransformGizmo::renderRotateGizmo(const Camera& camera) {
 }
 
 void TransformGizmo::renderScaleGizmo(const Camera& camera) {
+    (void)camera; // Parameter reserved for future use
     // Draw X scale handle (red)
     bool highlightX = (hoveredComponent_ == Component::XAxis || selectedComponent_ == Component::XAxis);
     glm::vec3 xEnd = position_ + getAxisDirection(Component::XAxis) * SCALE_LINE_LENGTH * size_;
@@ -494,6 +498,7 @@ glm::vec3 TransformGizmo::computeTranslation(const glm::vec2& currentMousePos, c
 }
 
 glm::vec3 TransformGizmo::computeRotation(const glm::vec2& currentMousePos, const Camera& camera) {
+    (void)camera; // Parameter reserved for future use
     // Calculate mouse delta in screen space
     glm::vec2 mouseDelta = currentMousePos - initialMousePos_;
     
@@ -523,6 +528,7 @@ glm::vec3 TransformGizmo::computeRotation(const glm::vec2& currentMousePos, cons
 }
 
 glm::vec3 TransformGizmo::computeScale(const glm::vec2& currentMousePos, const Camera& camera) {
+    (void)camera; // Parameter reserved for future use
     // Calculate mouse delta in screen space
     glm::vec2 mouseDelta = currentMousePos - initialMousePos_;
     
