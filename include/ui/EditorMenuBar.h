@@ -107,6 +107,18 @@ public:
     {
         m_deselectAllCallback = callback;
     }
+    void setLoadLayoutCallback(std::function<void(const std::string&)> callback)
+    {
+        m_loadLayoutCallback = callback;
+    }
+    void setSaveLayoutCallback(MenuCallback callback)
+    {
+        m_saveLayoutCallback = callback;
+    }
+    void setResetLayoutCallback(MenuCallback callback)
+    {
+        m_resetLayoutCallback = callback;
+    }
 #ifdef _WIN32
     void setWindowsCustomizationCallback(MenuCallback callback)
     {
@@ -145,6 +157,9 @@ private:
     MenuCallback m_dialogueEditorCallback;
     MenuCallback m_selectAllCallback;
     MenuCallback m_deselectAllCallback;
+    std::function<void(const std::string&)> m_loadLayoutCallback;
+    MenuCallback m_saveLayoutCallback;
+    MenuCallback m_resetLayoutCallback;
 #ifdef _WIN32
     MenuCallback m_windowsCustomizationCallback;
 #endif

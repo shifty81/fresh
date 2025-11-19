@@ -123,18 +123,36 @@ m_toolbar->setToolCallback([this](EditorToolbar::Tool tool) {
 
 **Estimated Time:** 1-2 hours testing
 
+## ✅ Recently Completed
+
+### 6. Layout Management ✅
+**Status:** Fully Implemented
+**Completed:** 2025-11-19
+
+**Implementation Details:**
+- ✅ Implemented LayoutManager class for managing workspace configurations
+- ✅ Added save workspace layout functionality
+- ✅ Added load workspace layout functionality
+- ✅ Implemented predefined layouts (Default, Minimal, Debugging)
+- ✅ Store layouts in config file (configs/layouts.ini)
+- ✅ Added UI for layout selection in Window menu
+- ✅ Wired up menu callbacks for Load/Save/Reset operations
+- ✅ Automatic persistence across sessions
+- ✅ Loads last used layout on startup
+
+**Files Created:**
+- `include/editor/LayoutManager.h` - Layout management header
+- `src/editor/LayoutManager.cpp` - Layout management implementation
+- `docs/editor/LAYOUT_MANAGEMENT.md` - Complete documentation
+
+**Files Modified:**
+- `include/editor/EditorManager.h` - Added LayoutManager integration
+- `src/editor/EditorManager.cpp` - Wired up layout methods
+- `include/ui/EditorMenuBar.h` - Added layout callbacks
+- `src/ui/EditorMenuBar.cpp` - Updated Window menu
+- `CMakeLists.txt` - Added LayoutManager to build
+
 ## 🔴 Not Yet Started - Lower Priority
-
-### 6. Layout Management
-**Status:** Not Started
-**Remaining Work:**
-- [ ] Implement save workspace layout
-- [ ] Implement load workspace layout
-- [ ] Add predefined layouts (Default, Minimal, Debugging)
-- [ ] Store layouts in config file
-- [ ] Add UI for layout selection
-
-**Estimated Time:** 1 week
 
 ### 7. Asset Preview System
 **Status:** Basic preview exists, needs enhancement
@@ -194,11 +212,11 @@ m_toolbar->setToolCallback([this](EditorToolbar::Tool tool) {
 **Total High Priority Remaining:** 1-2 hours testing
 
 ### Medium Priority
-- **Layout Management** - 1 week
+- **Layout Management** - ✅ DONE (2025-11-19)
 - **Camera Controls Enhancement** - 1 week
 - **Editor Settings Dialog** - 1 week
 
-**Total Medium Priority:** 3 weeks
+**Total Medium Priority:** 2 weeks (1 completed)
 
 ### Low Priority
 - **Asset Preview System** - 1-2 weeks
@@ -220,10 +238,11 @@ m_toolbar->setToolCallback([this](EditorToolbar::Tool tool) {
 3. Test gizmo rendering and interaction
 4. Test keyboard shortcuts (W/E/R)
 5. Test toolbar button integration
-6. Fix any bugs found
+6. Test layout management (NEW)
+7. Fix any bugs found
 
-### Phase 3: Medium Priority Features (3 weeks)
-1. Layout management
+### Phase 3: Medium Priority Features (2 weeks)
+1. ✅ Layout management - COMPLETED
 2. Camera controls
 3. Editor settings dialog
 
@@ -244,12 +263,13 @@ m_toolbar->setToolCallback([this](EditorToolbar::Tool tool) {
 - Windows-native integration (on Windows)
 - Selection system (SelectionManager/SelectionRenderer)
 
-### Key Improvements Made Today
+### Key Improvements Made
 1. ✅ **Transform Gizmo** is now fully functional with DebugRenderer
 2. ✅ **File Dialogs** are now cross-platform with NFD
 3. ✅ **Keyboard Shortcuts** W/E/R now control gizmo modes
 4. ✅ **Toolbar Integration** Move/Rotate/Scale buttons now control gizmo
 5. ✅ **Bidirectional Sync** between keyboard, toolbar, and gizmo state
+6. ✅ **Layout Management** workspace layouts with persistence (NEW)
 
 ### Dependencies Resolved
 - ✅ NFD library added via vcpkg
@@ -257,6 +277,7 @@ m_toolbar->setToolCallback([this](EditorToolbar::Tool tool) {
 - ✅ EditorManager properly manages all GUI components
 - ✅ Keyboard input integrated with gizmo control
 - ✅ Toolbar callbacks wired to gizmo modes
+- ✅ LayoutManager integrated with menu system (NEW)
 
 ## 🔗 Related Documentation
 
@@ -265,6 +286,7 @@ m_toolbar->setToolCallback([this](EditorToolbar::Tool tool) {
 - [GUI_IMPLEMENTATION_STATUS.md](GUI_IMPLEMENTATION_STATUS.md) - Original status
 - [TRANSFORM_GIZMO_IMPLEMENTATION.md](TRANSFORM_GIZMO_IMPLEMENTATION.md) - Gizmo details
 - [TRANSFORM_GIZMO_INTEGRATION_GUIDE.md](TRANSFORM_GIZMO_INTEGRATION_GUIDE.md) - Integration guide
+- [LAYOUT_MANAGEMENT.md](../editor/LAYOUT_MANAGEMENT.md) - Layout management guide (NEW)
 
 ## ✅ Conclusion
 
@@ -274,13 +296,23 @@ The major GUI components are now **implemented and fully functional**:
 - ✅ Transform Gizmo toolbar integration
 - ✅ File dialog system
 - ✅ Selection system
+- ✅ Layout Management system (NEW)
 
 What remains is mostly **testing and enhancement features**:
 - Testing (1-2 hours)
+- Camera controls enhancement (1 week)
+- Editor settings dialog (1 week)
 - Enhancement features (optional, lower priority)
 
 **The high-priority GUI implementation tasks are COMPLETE!**
 
 **Estimated time to complete remaining high-priority testing: 1-2 hours**
 
-The GUI implementation is approximately **95% complete** for core functionality!
+**The GUI implementation is approximately 97% complete** for core functionality! (Up from 95%)
+
+### Latest Update (2025-11-19)
+- ✅ Implemented Layout Management system
+- ✅ Three predefined layouts (Default, Minimal, Debugging)
+- ✅ Custom layout save/load functionality
+- ✅ Automatic persistence across sessions
+- ✅ Full menu integration and documentation

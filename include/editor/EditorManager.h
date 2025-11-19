@@ -37,6 +37,7 @@ class SelectionManager;
 class SelectionRenderer;
 class WorldSerializer;
 class TransformGizmo;
+class LayoutManager;
 
 namespace ecs
 {
@@ -393,6 +394,32 @@ public:
      * Opens the dialogue editor tool for creating and editing game dialogues
      */
     void launchDialogueEditor();
+    
+    /**
+     * @brief Load a workspace layout
+     * @param name Layout name ("Default", "Minimal", "Debugging", or custom name)
+     */
+    void loadLayout(const std::string& name);
+    
+    /**
+     * @brief Save the current workspace layout
+     * @param name Layout name (if empty, saves to current layout)
+     */
+    void saveCurrentLayout(const std::string& name = "");
+    
+    /**
+     * @brief Reset to default layout
+     */
+    void resetLayout();
+    
+    /**
+     * @brief Get the layout manager
+     * @return Layout manager pointer
+     */
+    LayoutManager* getLayoutManager() const
+    {
+        return m_layoutManager.get();
+    }
 
 private:
     void setupDockspace();
@@ -421,6 +448,7 @@ private:
     std::unique_ptr<TransformGizmo> m_transformGizmo;
     std::unique_ptr<devtools::DebugRenderer> m_debugRenderer;
     std::unique_ptr<WorldSerializer> m_worldSerializer;
+    std::unique_ptr<LayoutManager> m_layoutManager;
 
 #ifdef _WIN32
     // Windows-native integration managers
