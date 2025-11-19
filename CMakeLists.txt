@@ -782,11 +782,27 @@ if(MSVC)
 endif()
 
 # Copy shaders to build directory
+# Handle both single-config (Makefile, Ninja) and multi-config (Visual Studio, Xcode) generators
 file(GLOB SHADER_FILES "${CMAKE_CURRENT_SOURCE_DIR}/shaders/*.vert" 
                        "${CMAKE_CURRENT_SOURCE_DIR}/shaders/*.frag")
+
+# For multi-config generators, copy shaders to each configuration directory
+# For single-config generators, copy to the binary directory
 foreach(SHADER ${SHADER_FILES})
     get_filename_component(SHADER_NAME ${SHADER} NAME)
-    configure_file(${SHADER} ${CMAKE_CURRENT_BINARY_DIR}/shaders/${SHADER_NAME} COPYONLY)
+    
+    # Add a custom command to copy shaders after building the target
+    # This uses generator expressions to handle multi-config generators correctly
+    add_custom_command(
+        TARGET ${PROJECT_NAME} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E make_directory
+            "$<TARGET_FILE_DIR:${PROJECT_NAME}>/shaders"
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            "${SHADER}"
+            "$<TARGET_FILE_DIR:${PROJECT_NAME}>/shaders/${SHADER_NAME}"
+        COMMENT "Copying shader ${SHADER_NAME} to build directory"
+        VERBATIM
+    )
 endforeach()
 
 # Install target
