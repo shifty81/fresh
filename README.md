@@ -10,7 +10,7 @@
 
 A professional **Windows-exclusive** voxel game development platform built with **C++20**, featuring **DirectX 12/11** rendering, an **Unreal Engine-like editor**, **.NET 9 bindings**, **Lua scripting**, procedural terrain generation, and comprehensive Windows-native integration for game development.
 
-> 📚 **New to Fresh?** See [DOCUMENTATION_INDEX.md](DOCUMENTATION_INDEX.md) for complete documentation guide.
+> 📚 **New to Fresh?** See [DOCUMENTATION.md](DOCUMENTATION.md) for complete documentation guide.
 > 🎮 **Windows Gaming Platform** - Exclusive focus on Windows 10/11 with DirectX and professional game development tools.
 
 ---
@@ -110,7 +110,7 @@ cd fresh
 
 This script handles everything: vcpkg setup, dependency installation, CMake generation, and building (10-20 minutes first run).
 
-**See [AUTOMATED_BUILD.md](AUTOMATED_BUILD.md) for detailed options.**
+**See [docs/getting-started/AUTOMATED_BUILD.md](docs/getting-started/AUTOMATED_BUILD.md) for detailed options.**
 
 #### Manual Build
 
@@ -136,7 +136,7 @@ cmake --build . --config Release
 Release\FreshVoxelEngine.exe
 ```
 
-**For complete step-by-step instructions, see [BUILD.md](BUILD.md).**
+**For complete step-by-step instructions, see [docs/getting-started/BUILD.md](docs/getting-started/BUILD.md).**
 
 ---
 
@@ -166,7 +166,7 @@ Release\FreshVoxelEngine.exe
 - **Physics enabled** - Gravity and collision active
 - **Interact with NPCs** - Talk to villagers, trade with merchants, combat enemies
 
-**See [CONTROLS.md](CONTROLS.md) for complete controls reference.**
+**See [docs/guides/CONTROLS.md](docs/guides/CONTROLS.md) for complete controls reference.**
 
 ### Getting Started with the Editor
 
@@ -204,14 +204,14 @@ Fresh Voxel Engine supports multiple development approaches for Windows:
 - **Rapid iteration**: Hot reload, faster compile times
 - **Rich ecosystem**: NuGet packages, LINQ, async/await
 - **Interop**: P/Invoke to native engine
-- **See**: [DOTNET_INTEGRATION.md](DOTNET_INTEGRATION.md)
+- **See**: [docs/architecture/DOTNET_INTEGRATION.md](docs/architecture/DOTNET_INTEGRATION.md)
 
 ### Optional: Lua Scripting
 - **Gameplay modding**: Custom behaviors and logic
 - **Hot reload**: Change scripts without recompiling
 - **Easy learning**: Simple syntax for non-programmers
 - **Event system**: Hook into engine events
-- **See**: [LUA_INTEGRATION_GUIDE.md](LUA_INTEGRATION_GUIDE.md)
+- **See**: [docs/guides/LUA_INTEGRATION_GUIDE.md](docs/guides/LUA_INTEGRATION_GUIDE.md)
 
 ### Tools: Python 3.8+
 - **Asset pipeline**: Texture atlas generation
@@ -271,43 +271,37 @@ fresh/
 
 ### Getting Started
 - [README.md](README.md) - This file
-- [GETTING_STARTED.md](GETTING_STARTED.md) - Detailed setup guide
-- [BUILD.md](BUILD.md) - Complete build instructions
-- [AUTOMATED_BUILD.md](AUTOMATED_BUILD.md) - Automated setup documentation
+- [docs/getting-started/GETTING_STARTED.md](docs/getting-started/GETTING_STARTED.md) - Detailed setup guide
+- [docs/getting-started/BUILD.md](docs/getting-started/BUILD.md) - Complete build instructions
+- [docs/getting-started/AUTOMATED_BUILD.md](docs/getting-started/AUTOMATED_BUILD.md) - Automated setup documentation
 
 ### Features & Systems
-- [CONTROLS.md](CONTROLS.md) - Complete control reference
-- [docs/EDITOR_INTEGRATION.md](docs/EDITOR_INTEGRATION.md) - Editor usage guide
-- [docs/TERRAFORMING.md](docs/TERRAFORMING.md) - Terraforming tools
-- [docs/INPUT_SYSTEM.md](docs/INPUT_SYSTEM.md) - Input system documentation
-- [docs/AUDIO_SYSTEM.md](docs/AUDIO_SYSTEM.md) - Audio engine guide
-- [docs/LOGGING.md](docs/LOGGING.md) - Logging system
+- [docs/guides/CONTROLS.md](docs/guides/CONTROLS.md) - Complete control reference
+- [docs/editor/EDITOR_INTEGRATION.md](docs/editor/EDITOR_INTEGRATION.md) - Editor usage guide
+- [docs/guides/TERRAFORMING.md](docs/guides/TERRAFORMING.md) - Terraforming tools
+- [docs/guides/INPUT_SYSTEM.md](docs/guides/INPUT_SYSTEM.md) - Input system documentation
+- [docs/guides/AUDIO_SYSTEM.md](docs/guides/AUDIO_SYSTEM.md) - Audio engine guide
+- [docs/guides/LOGGING.md](docs/guides/LOGGING.md) - Logging system
 - [textures/USAGE.md](textures/USAGE.md) - Texture system guide
 
 ### Development
-- [ARCHITECTURE.md](ARCHITECTURE.md) - System architecture
-- [CONTRIBUTING.md](CONTRIBUTING.md) - Contribution guidelines
-- [docs/CPP_GUIDELINES.md](docs/CPP_GUIDELINES.md) - C++ coding standards
-- [docs/DEVELOPMENT_TOOLS.md](docs/DEVELOPMENT_TOOLS.md) - Dev tools guide
+- [docs/architecture/ARCHITECTURE.md](docs/architecture/ARCHITECTURE.md) - System architecture
+- [docs/community/CONTRIBUTING.md](docs/community/CONTRIBUTING.md) - Contribution guidelines
+- [docs/community/CPP_GUIDELINES.md](docs/community/CPP_GUIDELINES.md) - C++ coding standards
+- [docs/community/DEVELOPMENT_TOOLS.md](docs/community/DEVELOPMENT_TOOLS.md) - Dev tools guide
 
 ### Status & Planning
-- [PROJECT_STATUS.md](PROJECT_STATUS.md) - Current status
-- [ROADMAP.md](ROADMAP.md) - Development roadmap
+- [docs/status/PROJECT_STATUS.md](docs/status/PROJECT_STATUS.md) - Current status
+- [docs/status/ROADMAP.md](docs/status/ROADMAP.md) - Development roadmap
 - [CHANGELOG.md](CHANGELOG.md) - Version history
 
 ### Advanced
-- [DOTNET_INTEGRATION.md](DOTNET_INTEGRATION.md) - .NET 9 bindings
-- [LUA_INTEGRATION_GUIDE.md](LUA_INTEGRATION_GUIDE.md) - Lua scripting
-- [WINDOWS_INTEGRATION.md](WINDOWS_INTEGRATION.md) - Windows-native features (Jump Lists, DPI, etc.)
-- [WINDOWS_NATIVE_GUI_HOWTO.md](WINDOWS_NATIVE_GUI_HOWTO.md) - Native Win32 GUI (replaces GLFW)
-- [NATIVE_MENU_BAR_INTEGRATION.md](NATIVE_MENU_BAR_INTEGRATION.md) - Native menu bar integration guide
-- [NATIVE_TOOLBAR_INTEGRATION.md](NATIVE_TOOLBAR_INTEGRATION.md) - Native toolbar integration guide
-- [NATIVE_GUI_CONVERSION_SUMMARY.md](NATIVE_GUI_CONVERSION_SUMMARY.md) - Native GUI conversion progress (initial)
-- [NATIVE_GUI_COMPLETION_SUMMARY.md](NATIVE_GUI_COMPLETION_SUMMARY.md) - **COMPLETE:** Native GUI implementation finished
-- [WINDOWS_NATIVE_GUI_MIGRATION.md](WINDOWS_NATIVE_GUI_MIGRATION.md) - Migration guide from GLFW to Win32
-- [WINDOWS_OPTIMIZATION_SUMMARY.md](WINDOWS_OPTIMIZATION_SUMMARY.md) - Performance optimizations guide
-- [TESTING.md](TESTING.md) - Testing guide
-- [WORKFLOWS.md](WORKFLOWS.md) - CI/CD workflows
+- [docs/architecture/DOTNET_INTEGRATION.md](docs/architecture/DOTNET_INTEGRATION.md) - .NET 9 bindings
+- [docs/guides/LUA_INTEGRATION_GUIDE.md](docs/guides/LUA_INTEGRATION_GUIDE.md) - Lua scripting
+- [docs/architecture/WINDOWS_INTEGRATION.md](docs/architecture/WINDOWS_INTEGRATION.md) - Windows-native features (Jump Lists, DPI, etc.)
+- [docs/editor/GUI_GUIDE.md](docs/editor/GUI_GUIDE.md) - Complete GUI system guide
+- [docs/testing/TESTING.md](docs/testing/TESTING.md) - Testing guide
+- [docs/WORKFLOWS.md](docs/WORKFLOWS.md) - CI/CD workflows
 
 ---
 

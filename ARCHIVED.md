@@ -6,6 +6,24 @@ As of this release, Fresh Voxel Engine has transitioned to a **Windows-exclusive
 
 ## Archived Components
 
+### Documentation Reorganization (November 2025)
+
+On 2025-11-19, the project documentation was comprehensively reorganized:
+
+**Changes Made:**
+- 120+ markdown files moved from root to organized `docs/` structure
+- 69 historical implementation summaries moved to `docs/history/`
+- Created comprehensive guides: `GUI_GUIDE.md`, `GUI_TESTING_GUIDE.md`
+- Created new master index: `DOCUMENTATION.md` (replaces `DOCUMENTATION_INDEX.md`)
+- Updated all cross-references in README.md
+
+**Old Documentation Index:**
+- `DOCUMENTATION_INDEX.md` → archived to `docs/history/DOCUMENTATION_INDEX_OLD.md`
+
+**New Documentation Structure:**
+- See [DOCUMENTATION.md](DOCUMENTATION.md) for current documentation navigation
+- Historical documents preserved in `docs/history/` for reference
+
 ### Cross-Platform Build Scripts
 
 The following build scripts for Linux and macOS have been archived to `archived/cross-platform/`:
@@ -82,5 +100,25 @@ If you have questions about the Windows-only transition:
 
 ---
 
-**Last Updated:** November 2025
-**Archived Version:** All Linux/macOS support prior to Windows-only transition
+## Historical Documents
+
+All implementation summaries, PR summaries, and historical documentation from previous development sessions are preserved in `docs/history/` including:
+
+- GUI implementation summaries (12 files)
+- Windows Native UI migration documents (15 files)
+- Weekly sprint summaries (4 files)
+- Feature implementation notes (20+ files)
+- PR summaries (6 files)
+- Bug fix reports (5+ files)
+
+To browse historical documents:
+```bash
+ls docs/history/
+```
+
+---
+
+**Last Updated:** 2025-11-19
+**Archived Versions:**
+- Linux/macOS support prior to Windows-only transition
+- Documentation structure prior to 2025-11-19 reorganization
