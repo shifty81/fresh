@@ -6,4 +6,10 @@
 
 #ifdef _WIN32
     #include "ui/native/Win32InspectorPanel.h"
+    
+    namespace fresh
+    {
+        // Type alias for backward compatibility
+        using InspectorPanel = Win32InspectorPanel;
+    }
 #endif

@@ -58,11 +58,8 @@ class Win32ConsolePanel;
 class Win32HUD;
 class Win32SettingsDialog;
 class Win32TerraformingPanel;
-// Use Win32 types on Windows (stub headers create aliases)
-using InspectorPanel = Win32InspectorPanel;
-using SceneHierarchyPanel = Win32SceneHierarchyPanel;
-using ContentBrowserPanel = Win32ContentBrowserPanel;
-using ConsolePanel = Win32ConsolePanel;
+// Note: InspectorPanel, SceneHierarchyPanel, ContentBrowserPanel, and ConsolePanel
+// are defined as type aliases in their respective stub headers (ui/InspectorPanel.h, etc.)
 #else
 // Forward declarations for non-Windows platforms
 class InspectorPanel;
