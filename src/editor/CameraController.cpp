@@ -1,3 +1,10 @@
+// Prevent Windows.h from defining min/max macros (must be first)
+#ifdef _WIN32
+    #ifndef NOMINMAX
+    #define NOMINMAX
+    #endif
+#endif
+
 #include "editor/CameraController.h"
 #include "gameplay/Camera.h"
 #include "gameplay/Player.h"
@@ -6,14 +13,6 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtx/quaternion.hpp>
 #include <algorithm>
-
-// Prevent Windows.h from defining min/max macros
-#ifdef _WIN32
-    #ifndef NOMINMAX
-    #define NOMINMAX
-    #endif
-#endif
-
 #include <fstream>
 #include <sstream>
 
