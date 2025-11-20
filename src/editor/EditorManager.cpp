@@ -1,14 +1,18 @@
 #include "editor/EditorManager.h"
 
+// Prevent Windows.h from defining min/max macros (must be before any Windows includes)
+#ifdef _WIN32
+    #ifndef NOMINMAX
+    #define NOMINMAX
+    #endif
+#endif
+
 #include <cmath>
 #include "core/Logger.h"
 #include "ecs/EntityManager.h"
 #include "gameplay/Player.h"
 #include "gameplay/Camera.h"
 #ifdef _WIN32
-    #ifndef NOMINMAX
-    #define NOMINMAX
-    #endif
     #include "core/Win32Window.h"
     #include "input/Win32InputManager.h"
     #include <windows.h>
@@ -91,6 +95,7 @@ bool EditorManager::initialize(WindowType* window, IRenderContext* renderContext
                                WorldEditor* worldEditor, InputManagerType* inputManager,
                                ecs::EntityManager* entityManager)
 {
+    (void)inputManager;  // Unused parameter
     if (m_initialized) {
         LOG_WARNING_C("EditorManager already initialized", "EditorManager");
         return true;

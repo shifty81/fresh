@@ -131,7 +131,7 @@ void Win32TerraformingPanel::onCreate()
 void Win32TerraformingPanel::createControls()
 {
     // Create tool buttons
-    int yPos = MARGIN;
+    // Removed unused variable: int yPos = MARGIN;
     
     // Tool selection section
     createToolButtons();
@@ -433,12 +433,15 @@ void Win32TerraformingPanel::onPaint(HDC hdc)
 
 void Win32TerraformingPanel::onResize(int width, int height)
 {
+    (void)width;   // Unused parameter
+    (void)height;  // Unused parameter
     // Reposition controls on resize if needed
     // For simplicity, we'll keep controls at their original positions
 }
 
 bool Win32TerraformingPanel::handleMessage(UINT msg, WPARAM wParam, LPARAM lParam, LRESULT& result)
 {
+    (void)lParam;  // Unused parameter
     if (msg == WM_COMMAND) {
         int cmdId = LOWORD(wParam);
 
