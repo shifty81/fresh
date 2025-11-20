@@ -852,12 +852,14 @@ if(BUILD_TESTS)
         src/voxel/MeshGenerator.cpp
         src/generation/NoiseGenerator.cpp
         src/generation/TerrainGenerator.cpp
+        src/generation/World2DGenerator.cpp
         src/core/MemoryManager.cpp
         src/core/Logger.cpp
         src/core/Reflection.cpp
         src/scripting/EventSystem.cpp
         src/input/InputManager.cpp
         src/gameplay/TimeManager.cpp
+        src/gameplay/Camera.cpp
         src/rpg/Inventory.cpp
         src/rpg/CraftingSystem.cpp
         src/assets/ModularAssetSystem.cpp
@@ -868,6 +870,7 @@ if(BUILD_TESTS)
         src/editor/SelectionManager.cpp
         src/editor/SelectionRenderer.cpp
         src/editor/TransformGizmo.cpp
+        src/editor/TerraformingSystem.cpp
         src/editor/FileDialogManager.cpp
         src/devtools/DebugRenderer.cpp
         src/ecs/Transform2DComponent.cpp
