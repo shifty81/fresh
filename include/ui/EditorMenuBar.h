@@ -6,4 +6,10 @@
 
 #ifdef _WIN32
     #include "ui/native/Win32MenuBar.h"
+    
+    namespace fresh
+    {
+        // Type alias for backward compatibility
+        using EditorMenuBar = Win32MenuBar;
+    }
 #endif
