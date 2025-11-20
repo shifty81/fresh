@@ -6,4 +6,10 @@
 
 #ifdef _WIN32
     #include "ui/native/Win32ContentBrowserPanel.h"
+    
+    namespace fresh
+    {
+        // Type alias for backward compatibility
+        using ContentBrowserPanel = Win32ContentBrowserPanel;
+    }
 #endif

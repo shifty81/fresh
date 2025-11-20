@@ -6,4 +6,10 @@
 
 #ifdef _WIN32
     #include "ui/native/Win32ConsolePanel.h"
+    
+    namespace fresh
+    {
+        // Type alias for backward compatibility
+        using ConsolePanel = Win32ConsolePanel;
+    }
 #endif

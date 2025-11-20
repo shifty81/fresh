@@ -6,4 +6,10 @@
 
 #ifdef _WIN32
     #include "ui/native/Win32SceneHierarchyPanel.h"
+    
+    namespace fresh
+    {
+        // Type alias for backward compatibility
+        using SceneHierarchyPanel = Win32SceneHierarchyPanel;
+    }
 #endif
