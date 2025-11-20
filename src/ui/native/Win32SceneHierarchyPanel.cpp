@@ -200,12 +200,127 @@ bool Win32SceneHierarchyPanel::renameSelectedNode()
         return false;
     }
     
-    // Show input dialog for new name
-    // For now, just log
-    LOG_INFO_C("Rename requested for: " + m_selectedNode->name, "Win32SceneHierarchyPanel");
+    // Create a simple input dialog for rename
+    wchar_t buffer[256] = {0};
+    std::wstring currentName(m_selectedNode->name.begin(), m_selectedNode->name.end());
+    wcsncpy_s(buffer, 256, currentName.c_str(), _TRUNCATE);
     
-    // TODO: Implement input dialog and update tree view
-    return true;
+    // Create a simple dialog
+    HWND hDialog = CreateWindowExW(
+        WS_EX_DLGMODALFRAME | WS_EX_TOPMOST,
+        L"STATIC",
+        L"Rename Node",
+        WS_POPUP | WS_CAPTION | WS_SYSMENU | WS_VISIBLE,
+        CW_USEDEFAULT, CW_USEDEFAULT, 350, 150,
+        m_hwnd, nullptr, GetModuleHandle(nullptr), nullptr
+    );
+    
+    if (!hDialog) {
+        LOG_ERROR_C("Failed to create rename dialog", "Win32SceneHierarchyPanel");
+        return false;
+    }
+    
+    // Apply theme
+    UnrealStyleTheme::ApplyToWindow(hDialog);
+    
+    // Create label
+    HWND hLabel = CreateWindowExW(
+        0, L"STATIC", L"New name:",
+        WS_CHILD | WS_VISIBLE | SS_LEFT,
+        20, 20, 300, 20,
+        hDialog, nullptr, GetModuleHandle(nullptr), nullptr
+    );
+    
+    // Create edit control
+    HWND hEdit = CreateWindowExW(
+        WS_EX_CLIENTEDGE, L"EDIT", buffer,
+        WS_CHILD | WS_VISIBLE | WS_BORDER | ES_AUTOHSCROLL,
+        20, 45, 300, 25,
+        hDialog, (HMENU)1001, GetModuleHandle(nullptr), nullptr
+    );
+    
+    // Create OK button
+    HWND hOK = CreateWindowExW(
+        0, L"BUTTON", L"OK",
+        WS_CHILD | WS_VISIBLE | BS_DEFPUSHBUTTON,
+        140, 85, 80, 30,
+        hDialog, (HMENU)IDOK, GetModuleHandle(nullptr), nullptr
+    );
+    
+    // Create Cancel button
+    HWND hCancel = CreateWindowExW(
+        0, L"BUTTON", L"Cancel",
+        WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,
+        230, 85, 80, 30,
+        hDialog, (HMENU)IDCANCEL, GetModuleHandle(nullptr), nullptr
+    );
+    
+    // Set font for controls
+    HFONT hFont = (HFONT)GetStockObject(DEFAULT_GUI_FONT);
+    SendMessageW(hLabel, WM_SETFONT, (WPARAM)hFont, TRUE);
+    SendMessageW(hEdit, WM_SETFONT, (WPARAM)hFont, TRUE);
+    SendMessageW(hOK, WM_SETFONT, (WPARAM)hFont, TRUE);
+    SendMessageW(hCancel, WM_SETFONT, (WPARAM)hFont, TRUE);
+    
+    // Focus the edit control and select all text
+    SetFocus(hEdit);
+    SendMessageW(hEdit, EM_SETSEL, 0, -1);
+    
+    // Center dialog relative to parent
+    RECT parentRect, dialogRect;
+    GetWindowRect(m_hwnd, &parentRect);
+    GetWindowRect(hDialog, &dialogRect);
+    int x = parentRect.left + ((parentRect.right - parentRect.left) - (dialogRect.right - dialogRect.left)) / 2;
+    int y = parentRect.top + ((parentRect.bottom - parentRect.top) - (dialogRect.bottom - dialogRect.top)) / 2;
+    SetWindowPos(hDialog, nullptr, x, y, 0, 0, SWP_NOSIZE | SWP_NOZORDER);
+    
+    // Simple message loop for modal dialog
+    MSG msg;
+    bool dialogResult = false;
+    bool dialogActive = true;
+    
+    while (dialogActive && GetMessageW(&msg, nullptr, 0, 0)) {
+        if (msg.hwnd == hDialog || IsChild(hDialog, msg.hwnd)) {
+            if (msg.message == WM_COMMAND) {
+                int cmdId = LOWORD(msg.wParam);
+                if (cmdId == IDOK) {
+                    // Get new name from edit control
+                    wchar_t newName[256] = {0};
+                    GetWindowTextW(hEdit, newName, 256);
+                    
+                    if (wcslen(newName) > 0) {
+                        // Convert to narrow string
+                        char narrowName[256];
+                        WideCharToMultiByte(CP_UTF8, 0, newName, -1, narrowName, 256, nullptr, nullptr);
+                        
+                        // Update node name
+                        m_selectedNode->name = narrowName;
+                        
+                        // Update tree view item
+                        auto it = m_nodeToItem.find(m_selectedNode);
+                        if (it != m_nodeToItem.end()) {
+                            m_treeView->setItemText(it->second, narrowName);
+                        }
+                        
+                        dialogResult = true;
+                        LOG_INFO_C("Node renamed to: " + m_selectedNode->name, "Win32SceneHierarchyPanel");
+                    }
+                    
+                    dialogActive = false;
+                } else if (cmdId == IDCANCEL) {
+                    dialogActive = false;
+                }
+            } else if (msg.message == WM_CLOSE) {
+                dialogActive = false;
+            }
+        }
+        
+        TranslateMessage(&msg);
+        DispatchMessageW(&msg);
+    }
+    
+    DestroyWindow(hDialog);
+    return dialogResult;
 }
 
 bool Win32SceneHierarchyPanel::duplicateSelectedNode()
@@ -214,10 +329,54 @@ bool Win32SceneHierarchyPanel::duplicateSelectedNode()
         return false;
     }
     
-    LOG_INFO_C("Duplicate requested for: " + m_selectedNode->name, "Win32SceneHierarchyPanel");
+    // Create a copy of the selected node
+    auto newNode = std::make_shared<HierarchyNode>(m_selectedNode->name + " (Copy)");
+    newNode->type = m_selectedNode->type;
+    newNode->data = m_selectedNode->data;
     
-    // TODO: Implement duplication logic
-    return true;
+    // Find the parent of the selected node
+    HierarchyNode* parent = nullptr;
+    if (m_rootNode) {
+        // Search for parent in the tree
+        std::function<HierarchyNode*(HierarchyNode*, HierarchyNode*)> findParent;
+        findParent = [&](HierarchyNode* current, HierarchyNode* target) -> HierarchyNode* {
+            for (const auto& child : current->children) {
+                if (child.get() == target) {
+                    return current;
+                }
+                HierarchyNode* found = findParent(child.get(), target);
+                if (found) {
+                    return found;
+                }
+            }
+            return nullptr;
+        };
+        
+        parent = findParent(m_rootNode.get(), m_selectedNode);
+    }
+    
+    // Add the new node to the parent (or root if no parent found)
+    if (!parent) {
+        parent = m_rootNode.get();
+    }
+    
+    if (parent) {
+        parent->children.push_back(newNode);
+        
+        // Add to tree view
+        HTREEITEM parentItem = m_nodeToItem[parent];
+        addNodeToTree(newNode.get(), parentItem);
+        
+        // Expand parent to show the new node
+        if (m_treeView) {
+            m_treeView->expandItem(parentItem);
+        }
+        
+        LOG_INFO_C("Node duplicated: " + m_selectedNode->name + " -> " + newNode->name, "Win32SceneHierarchyPanel");
+        return true;
+    }
+    
+    return false;
 }
 
 bool Win32SceneHierarchyPanel::deleteSelectedNode()
@@ -226,10 +385,69 @@ bool Win32SceneHierarchyPanel::deleteSelectedNode()
         return false;
     }
     
-    LOG_INFO_C("Delete requested for: " + m_selectedNode->name, "Win32SceneHierarchyPanel");
+    // Don't allow deleting the root node
+    if (m_selectedNode == m_rootNode.get()) {
+        LOG_WARNING_C("Cannot delete root node", "Win32SceneHierarchyPanel");
+        return false;
+    }
     
-    // TODO: Implement deletion logic and refresh tree
-    return true;
+    // Confirm deletion with user
+    int result = MessageBoxW(
+        m_hwnd,
+        (L"Are you sure you want to delete '" + 
+         std::wstring(m_selectedNode->name.begin(), m_selectedNode->name.end()) + 
+         L"'?").c_str(),
+        L"Confirm Delete",
+        MB_YESNO | MB_ICONQUESTION
+    );
+    
+    if (result != IDYES) {
+        return false;
+    }
+    
+    // Find the parent and remove the node
+    bool deleted = false;
+    if (m_rootNode) {
+        std::function<bool(HierarchyNode*)> removeNode;
+        removeNode = [&](HierarchyNode* current) -> bool {
+            auto& children = current->children;
+            for (auto it = children.begin(); it != children.end(); ++it) {
+                if (it->get() == m_selectedNode) {
+                    // Remove from tree view first
+                    auto itemIt = m_nodeToItem.find(m_selectedNode);
+                    if (itemIt != m_nodeToItem.end()) {
+                        if (m_treeView) {
+                            m_treeView->removeItem(itemIt->second);
+                        }
+                        m_itemToNode.erase(itemIt->second);
+                        m_nodeToItem.erase(itemIt);
+                    }
+                    
+                    // Remove from hierarchy
+                    children.erase(it);
+                    deleted = true;
+                    return true;
+                }
+                
+                // Recursively search in children
+                if (removeNode(it->get())) {
+                    return true;
+                }
+            }
+            return false;
+        };
+        
+        deleted = removeNode(m_rootNode.get());
+    }
+    
+    if (deleted) {
+        m_selectedNode = nullptr;
+        LOG_INFO_C("Node deleted successfully", "Win32SceneHierarchyPanel");
+    } else {
+        LOG_WARNING_C("Failed to delete node", "Win32SceneHierarchyPanel");
+    }
+    
+    return deleted;
 }
 
 void Win32SceneHierarchyPanel::selectAll()
