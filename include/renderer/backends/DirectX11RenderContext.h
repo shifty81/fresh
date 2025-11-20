@@ -6,7 +6,9 @@
 #include "voxel/VoxelTypes.h"
 
 #ifdef _WIN32
+    #ifndef NOMINMAX
     #define NOMINMAX
+    #endif
     #include <wrl/client.h>
 
     #include <d3d11.h>
