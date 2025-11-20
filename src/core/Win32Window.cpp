@@ -7,14 +7,6 @@
 
 #include <windowsx.h>
 
-// Forward declare ImGui Win32 handler if ImGui is available
-#ifdef FRESH_IMGUI_AVAILABLE
-    #ifndef IMGUI_IMPL_API
-        #define IMGUI_IMPL_API
-    #endif
-    extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
-#endif
-
 namespace fresh
 {
 
@@ -248,13 +240,6 @@ Win32Toolbar* Win32Window::getToolbar()
 
 LRESULT CALLBACK Win32Window::WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
-    // Let ImGui handle the message first if it's available
-#ifdef FRESH_IMGUI_AVAILABLE
-    if (ImGui_ImplWin32_WndProcHandler(hwnd, uMsg, wParam, lParam)) {
-        return true;
-    }
-#endif
-
     Win32Window* window = nullptr;
 
     if (uMsg == WM_CREATE) {
