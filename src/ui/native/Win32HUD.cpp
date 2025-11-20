@@ -176,7 +176,29 @@ void Win32HUD::renderSlot(HDC hdc, int x, int y, int size,
     if (!slot.isEmpty) {
         // Draw icon if available
         if (slot.icon) {
-            // TODO: Draw bitmap icon
+            // Create a compatible DC for the bitmap
+            HDC hdcMem = CreateCompatibleDC(hdc);
+            if (hdcMem) {
+                HBITMAP oldBitmap = (HBITMAP)SelectObject(hdcMem, slot.icon);
+                
+                // Get bitmap dimensions
+                BITMAP bm;
+                GetObject(slot.icon, sizeof(BITMAP), &bm);
+                
+                // Calculate icon position (centered in slot)
+                int iconSize = size - 16;  // Leave margin for slot number and count
+                int iconX = x + (size - iconSize) / 2;
+                int iconY = y + (size - iconSize) / 2 + 8;  // Offset for slot number
+                
+                // Draw the bitmap with stretching/shrinking to fit
+                SetStretchBltMode(hdc, HALFTONE);
+                SetBrushOrgEx(hdc, 0, 0, nullptr);
+                StretchBlt(hdc, iconX, iconY, iconSize, iconSize,
+                          hdcMem, 0, 0, bm.bmWidth, bm.bmHeight, SRCCOPY);
+                
+                SelectObject(hdcMem, oldBitmap);
+                DeleteDC(hdcMem);
+            }
         }
         
         // Draw item name with Unreal text color

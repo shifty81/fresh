@@ -6,6 +6,7 @@
 #include <windowsx.h>
 #include <filesystem>
 #include <shlobj.h>
+#include <commdlg.h>
 
 namespace fresh
 {
@@ -34,7 +35,9 @@ Win32ContentBrowserPanel::Win32ContentBrowserPanel()
       m_searchEdit(nullptr),
       m_contextMenu(nullptr),
       m_itemSelectedCallback(nullptr),
-      m_itemActivatedCallback(nullptr)
+      m_itemActivatedCallback(nullptr),
+      m_historyIndex(-1),
+      m_viewMode(0)  // Start with details view
 {
 }
 
@@ -233,6 +236,21 @@ void Win32ContentBrowserPanel::addFileItem(const std::string& filename, const st
 
 void Win32ContentBrowserPanel::navigateTo(const std::string& path)
 {
+    // Add to history if navigating to a new path
+    if (path != m_currentPath) {
+        // Remove any forward history if we're not at the end
+        if (m_historyIndex < (int)m_navigationHistory.size() - 1) {
+            m_navigationHistory.erase(
+                m_navigationHistory.begin() + m_historyIndex + 1,
+                m_navigationHistory.end()
+            );
+        }
+        
+        // Add new path to history
+        m_navigationHistory.push_back(path);
+        m_historyIndex = (int)m_navigationHistory.size() - 1;
+    }
+    
     m_currentPath = path;
     refresh();
 }
@@ -288,13 +306,110 @@ void Win32ContentBrowserPanel::showImportDialog()
 {
     LOG_INFO_C("Import dialog requested", "Win32ContentBrowserPanel");
     
-    // TODO: Implement file open dialog for importing assets
+    // Use native Windows file dialog to select files to import
+    OPENFILENAMEW ofn = {};
+    wchar_t fileNameBuffer[32768] = {0};  // Large buffer for multiple files
+    
+    ofn.lStructSize = sizeof(OPENFILENAMEW);
+    ofn.hwndOwner = m_hwnd;
+    ofn.lpstrFile = fileNameBuffer;
+    ofn.nMaxFile = 32768;
+    ofn.lpstrTitle = L"Import Assets";
+    ofn.Flags = OFN_EXPLORER | OFN_FILEMUSTEXIST | OFN_PATHMUSTEXIST | OFN_ALLOWMULTISELECT;
+    
+    // Set up file filters for common asset types
+    const wchar_t* filters = 
+        L"All Asset Files\0*.png;*.jpg;*.jpeg;*.bmp;*.tga;*.obj;*.fbx;*.dae;*.wav;*.ogg;*.mp3;*.lua;*.txt\0"
+        L"Image Files\0*.png;*.jpg;*.jpeg;*.bmp;*.tga\0"
+        L"3D Model Files\0*.obj;*.fbx;*.dae\0"
+        L"Audio Files\0*.wav;*.ogg;*.mp3\0"
+        L"Script Files\0*.lua;*.txt\0"
+        L"All Files\0*.*\0\0";
+    ofn.lpstrFilter = filters;
+    ofn.nFilterIndex = 1;
+    
+    if (GetOpenFileNameW(&ofn)) {
+        // Parse selected files
+        std::vector<std::wstring> selectedFiles;
+        const wchar_t* p = fileNameBuffer;
+        std::wstring directory(p);
+        p += directory.length() + 1;
+        
+        if (*p == 0) {
+            // Single file selected
+            selectedFiles.push_back(directory);
+        } else {
+            // Multiple files selected
+            while (*p) {
+                std::wstring filename(p);
+                std::wstring fullPath = directory + L"\\" + filename;
+                selectedFiles.push_back(fullPath);
+                p += filename.length() + 1;
+            }
+        }
+        
+        // Copy files to current directory
+        namespace fs = std::filesystem;
+        int successCount = 0;
+        int failCount = 0;
+        
+        for (const auto& sourceFile : selectedFiles) {
+            try {
+                fs::path source(sourceFile);
+                fs::path dest = fs::path(m_currentPath) / source.filename();
+                
+                // Check if file already exists
+                if (fs::exists(dest)) {
+                    int result = MessageBoxW(
+                        m_hwnd,
+                        (L"File '" + source.filename().wstring() + L"' already exists. Overwrite?").c_str(),
+                        L"File Exists",
+                        MB_YESNO | MB_ICONQUESTION
+                    );
+                    
+                    if (result != IDYES) {
+                        continue;
+                    }
+                }
+                
+                // Copy the file
+                fs::copy(source, dest, fs::copy_options::overwrite_existing);
+                successCount++;
+                
+            } catch (const fs::filesystem_error& e) {
+                LOG_ERROR_C("Failed to import file: " + std::string(e.what()), "Win32ContentBrowserPanel");
+                failCount++;
+            }
+        }
+        
+        // Refresh the view to show imported files
+        refresh();
+        
+        // Show result message
+        std::wstring message = L"Imported " + std::to_wstring(successCount) + L" file(s)";
+        if (failCount > 0) {
+            message += L"\nFailed to import " + std::to_wstring(failCount) + L" file(s)";
+        }
+        
+        MessageBoxW(m_hwnd, message.c_str(), L"Import Complete", 
+                   failCount > 0 ? MB_ICONWARNING : MB_ICONINFORMATION);
+        
+        LOG_INFO_C("Import completed: " + std::to_string(successCount) + " success, " + 
+                   std::to_string(failCount) + " failed", "Win32ContentBrowserPanel");
+    }
 }
 
 void Win32ContentBrowserPanel::onBackClicked()
 {
-    // Navigate back in history (TODO: implement history)
-    LOG_INFO_C("Back clicked", "Win32ContentBrowserPanel");
+    // Navigate back in history
+    if (m_historyIndex > 0) {
+        m_historyIndex--;
+        m_currentPath = m_navigationHistory[m_historyIndex];
+        refresh();
+        LOG_INFO_C("Navigated back to: " + m_currentPath, "Win32ContentBrowserPanel");
+    } else {
+        LOG_INFO_C("No previous location in history", "Win32ContentBrowserPanel");
+    }
 }
 
 void Win32ContentBrowserPanel::onUpClicked()
@@ -320,9 +435,41 @@ void Win32ContentBrowserPanel::onRefreshClicked()
 
 void Win32ContentBrowserPanel::onViewModeChanged()
 {
-    // Toggle between view modes (icons, list, details)
-    LOG_INFO_C("View mode changed", "Win32ContentBrowserPanel");
-    // TODO: Implement view mode switching
+    if (!m_listView) {
+        return;
+    }
+    
+    // Cycle through view modes: Details -> List -> Icon -> SmallIcon -> Details
+    m_viewMode = (m_viewMode + 1) % 4;
+    
+    Win32ListView::ViewMode mode;
+    std::string modeName;
+    
+    switch (m_viewMode) {
+        case 0:
+            mode = Win32ListView::ViewMode::Details;
+            modeName = "Details";
+            break;
+        case 1:
+            mode = Win32ListView::ViewMode::List;
+            modeName = "List";
+            break;
+        case 2:
+            mode = Win32ListView::ViewMode::Icon;
+            modeName = "Large Icons";
+            break;
+        case 3:
+            mode = Win32ListView::ViewMode::SmallIcon;
+            modeName = "Small Icons";
+            break;
+        default:
+            mode = Win32ListView::ViewMode::Details;
+            modeName = "Details";
+            break;
+    }
+    
+    m_listView->setViewMode(mode);
+    LOG_INFO_C("View mode changed to: " + modeName, "Win32ContentBrowserPanel");
 }
 
 bool Win32ContentBrowserPanel::handleMessage(UINT msg, WPARAM wParam, LPARAM lParam, LRESULT& result)

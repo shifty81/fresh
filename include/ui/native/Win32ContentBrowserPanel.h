@@ -121,6 +121,13 @@ private:
     ItemSelectedCallback m_itemSelectedCallback;
     ItemActivatedCallback m_itemActivatedCallback;
     
+    // Navigation history
+    std::vector<std::string> m_navigationHistory;
+    int m_historyIndex;
+    
+    // View mode (0=details, 1=list, 2=icons)
+    int m_viewMode;
+    
     // Layout constants
     static constexpr int TOOLBAR_HEIGHT = 40;
     static constexpr int PATH_BAR_HEIGHT = 30;
