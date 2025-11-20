@@ -26,11 +26,12 @@ struct HierarchyNode
     void* data = nullptr;                                 // Custom data pointer
     std::vector<std::shared_ptr<HierarchyNode>> children; // Child nodes
     bool visible = true;                                  // Visibility flag
+    bool selected = false;                                // Selection state
     void* userData = nullptr;                             // User-defined data pointer
     
     // Constructor
     explicit HierarchyNode(const std::string& nodeName = "") 
-        : name(nodeName), type(0), data(nullptr), visible(true), userData(nullptr) {}
+        : name(nodeName), type(0), data(nullptr), visible(true), selected(false), userData(nullptr) {}
 };
 
 /**
