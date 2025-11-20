@@ -6,6 +6,7 @@
 #include "voxel/VoxelWorld.h"
 #include "core/Logger.h"
 #include <windowsx.h>
+#include <functional>
 
 namespace fresh
 {

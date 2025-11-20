@@ -6,6 +6,7 @@
 #include <windowsx.h>
 #include <filesystem>
 #include <shlobj.h>
+#include <commdlg.h>
 
 namespace fresh
 {
