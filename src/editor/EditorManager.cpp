@@ -6,6 +6,9 @@
 #include "gameplay/Player.h"
 #include "gameplay/Camera.h"
 #ifdef _WIN32
+    #ifndef NOMINMAX
+    #define NOMINMAX
+    #endif
     #include "core/Win32Window.h"
     #include "input/Win32InputManager.h"
     #include <windows.h>
@@ -1238,6 +1241,12 @@ void EditorManager::selectAll()
         m_sceneHierarchy->selectAll();
         LOG_INFO_C("Selected all", "EditorManager");
     }
+#ifdef _WIN32
+    else if (m_nativeSceneHierarchy) {
+        m_nativeSceneHierarchy->selectAll();
+        LOG_INFO_C("Selected all (native)", "EditorManager");
+    }
+#endif
 }
 
 void EditorManager::deselectAll()
@@ -1246,6 +1255,12 @@ void EditorManager::deselectAll()
         m_sceneHierarchy->deselectAll();
         LOG_INFO_C("Deselected all", "EditorManager");
     }
+#ifdef _WIN32
+    else if (m_nativeSceneHierarchy) {
+        m_nativeSceneHierarchy->deselectAll();
+        LOG_INFO_C("Deselected all (native)", "EditorManager");
+    }
+#endif
 }
 
 void EditorManager::saveWorld()
@@ -1567,6 +1582,12 @@ void EditorManager::showImportAssets()
         m_contentBrowser->showImportDialog();
         LOG_INFO_C("Import assets dialog shown", "EditorManager");
     }
+#ifdef _WIN32
+    else if (m_nativeContentBrowser) {
+        m_nativeContentBrowser->showImportDialog();
+        LOG_INFO_C("Import assets dialog shown (native)", "EditorManager");
+    }
+#endif
 }
 
 void EditorManager::launchDialogueEditor()
@@ -1744,7 +1765,7 @@ void EditorManager::focusOnSelection()
     }
     
     // Get selection center
-    const auto& selectedBlocks = m_selectionManager->getSelectedBlocks();
+    const auto& selectedBlocks = m_selectionManager->getSelectedVoxels();
     if (selectedBlocks.empty()) {
         LOG_INFO_C("Selection is empty", "EditorManager");
         return;
@@ -1784,23 +1805,23 @@ void EditorManager::frameSelection()
     }
     
     // Get selection bounds
-    const auto& selectedBlocks = m_selectionManager->getSelectedBlocks();
+    const auto& selectedBlocks = m_selectionManager->getSelectedVoxels();
     if (selectedBlocks.empty()) {
         LOG_INFO_C("Selection is empty", "EditorManager");
         return;
     }
     
     // Calculate bounding box of selected blocks
-    glm::vec3 min(std::numeric_limits<float>::max());
-    glm::vec3 max(std::numeric_limits<float>::lowest());
+    glm::vec3 boundsMin(std::numeric_limits<float>::max());
+    glm::vec3 boundsMax(std::numeric_limits<float>::lowest());
     
     for (const auto& block : selectedBlocks) {
         glm::vec3 pos(block.x, block.y, block.z);
-        min = glm::min(min, pos);
-        max = glm::max(max, pos);
+        boundsMin = glm::min(boundsMin, pos);
+        boundsMax = glm::max(boundsMax, pos);
     }
     
-    m_cameraController->frameBox(min, max);
+    m_cameraController->frameBox(boundsMin, boundsMax);
     LOG_INFO_C("Framed selection in view", "EditorManager");
 }
 
