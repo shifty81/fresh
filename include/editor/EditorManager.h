@@ -22,10 +22,8 @@ class IRenderContext;
 class VoxelWorld;
 class WorldEditor;
 class ImGuiContext;
-class InspectorPanel;
 class EditorMenuBar;
 class EditorToolbar;
-class ConsolePanel;
 class VoxelToolPalette;
 class MainMenuPanel;
 class SettingsPanel;
@@ -62,12 +60,16 @@ class Win32HUD;
 class Win32SettingsDialog;
 class Win32TerraformingPanel;
 // Use Win32 types on Windows (stub headers create aliases)
+using InspectorPanel = Win32InspectorPanel;
 using SceneHierarchyPanel = Win32SceneHierarchyPanel;
 using ContentBrowserPanel = Win32ContentBrowserPanel;
+using ConsolePanel = Win32ConsolePanel;
 #else
 // Forward declarations for non-Windows platforms
+class InspectorPanel;
 class SceneHierarchyPanel;
 class ContentBrowserPanel;
+class ConsolePanel;
 #endif
 
 /**
