@@ -26,7 +26,7 @@ bool EditorGUI::initialize(WorldEditor* worldEditor)
     m_worldEditor = worldEditor;
 
     LOG_INFO_C("EditorGUI initialized", "EditorGUI");
-    std::cout << "Editor GUI initialized" << std::endl;
+    LOG_INFO_C("Note: EditorGUI is now a legacy wrapper. Native Win32 UI panels are used via EditorManager.", "EditorGUI");
     return true;
 }
 
@@ -36,11 +36,17 @@ void EditorGUI::render()
         return;
     }
 
-    // Console-based UI for now (would use ImGui in full implementation)
-    std::cout << "\n===== EDITOR GUI =====\n";
-
+    // Legacy EditorGUI is now a lightweight wrapper
+    // The actual GUI is handled by native Win32 panels in EditorManager
+    // This method is kept for backward compatibility but does minimal work
+    
+    // If EditorManager's Win32TerraformingPanel is available, it handles all UI
+    // Otherwise, provide basic console feedback for debugging
+    #ifndef FRESH_WIN32_UI
+    // Only show console output if native Win32 UI is not available
     renderTerraformingPanel();
     renderWorldInfoPanel();
+    #endif
 }
 
 void EditorGUI::renderTerraformingPanel()
@@ -54,7 +60,9 @@ void EditorGUI::renderTerraformingPanel()
         return;
     }
 
-    std::cout << "\n--- Terraforming Tools ---\n";
+    // Console-based UI fallback (only used when Win32 UI is not available)
+    std::cout << "\n--- Terraforming Tools (Console Mode) ---\n";
+    std::cout << "Note: For full GUI, use native Win32 panels via EditorManager\n";
     std::cout << "Current Tool: ";
 
     switch (terraform->getTool()) {
@@ -135,23 +143,27 @@ void EditorGUI::renderWorldInfoPanel()
         return;
     }
 
-    std::cout << "\n--- World Info ---\n";
+    // Console-based UI fallback
+    std::cout << "\n--- World Info (Console Mode) ---\n";
     std::cout << "Press 'E' to toggle editor\n";
     std::cout << "Press 'T' to change tool\n";
     std::cout << "Press 'M' to change material\n";
     std::cout << "Press 'U' to undo\n";
     std::cout << "Press 'R' to redo\n";
     std::cout << "Press '+/-' to change tool size\n";
+    std::cout << "Note: Use Win32TerraformingPanel for full GUI experience\n";
 }
 
 void EditorGUI::renderToolSelector()
 {
     // Tool selection UI would go here
+    // Now handled by Win32TerraformingPanel
 }
 
 void EditorGUI::renderMaterialSelector()
 {
     // Material selection UI would go here
+    // Now handled by Win32TerraformingPanel
 }
 
 } // namespace fresh

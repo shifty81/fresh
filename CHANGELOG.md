@@ -8,6 +8,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **Win32TerraformingPanel** - Native Windows GUI for terraforming tools (v0.2.6)
+  - Full tool selection UI with buttons for all 10 terraforming tools
+  - Mode selection buttons (Place, Remove, Replace)
+  - Material picker with 5+ common voxel types
+  - Size control with +/- buttons and live display
+  - Undo/Redo buttons with automatic enable/disable
+  - Unreal-style dark theme integration
+  - Auto-synchronization with TerraformingSystem
+  - Replaces console-based EditorGUI with proper native GUI
+
 - **Windows-Native Windowing System** - Complete migration to native Win32 window management
   - Replaced GLFW with native Win32Window on Windows for optimal platform integration
   - Native Win32 input handling with Win32InputManager

@@ -229,6 +229,49 @@ class Win32ConsolePanel {
 - Timestamps
 - Copy to clipboard
 
+### Win32TerraformingPanel
+
+**File**: `include/ui/native/Win32TerraformingPanel.h`
+
+**NEW in v0.2.6** - Native terraforming tool panel with full UI controls:
+
+```cpp
+class Win32TerraformingPanel {
+    bool initialize(HWND parent, WorldEditor* worldEditor);
+    void update();  // Call after terraforming state changes
+};
+```
+
+**Features:**
+- Tool selection buttons (10 tools):
+  - Single Block, Brush, Sphere, Filled Sphere
+  - Cube, Filled Cube, Line
+  - Flatten, Smooth, Paint
+- Mode selection (Place, Remove, Replace)
+- Material picker with 5+ common voxel types
+- Size control with +/- buttons and live display
+- Undo/Redo buttons with automatic enable/disable
+- Unreal-style dark theme integration
+- Native Win32 controls for best performance
+- Auto-synchronizes with TerraformingSystem
+
+**Usage:**
+```cpp
+// Initialize with world editor
+Win32TerraformingPanel* panel = editorManager->getTerraformingPanel();
+if (panel) {
+    // Panel is automatically created and positioned
+    // Updates happen automatically when terraforming changes
+    panel->update();  // Optional: force refresh
+}
+```
+
+**Integration:**
+- Replaces console-based EditorGUI output
+- Seamlessly integrates with EditorManager
+- Coordinates with other Win32 panels
+- Full keyboard shortcut support via WorldEditor
+
 ---
 
 ## Dark Theme System
@@ -465,6 +508,11 @@ cd build/Release
    - Win32InspectorPanel (Property grid)
    - Win32ContentBrowserPanel (ListView)
    - Win32ConsolePanel (ListBox)
+   - Win32TerraformingPanel (NEW in v0.2.6) ✨
+     - Full tool selection UI
+     - Mode and material pickers
+     - Size controls
+     - Undo/Redo integration
 
 3. **Transform Gizmo** ✅
    - Rendering with DebugRenderer
