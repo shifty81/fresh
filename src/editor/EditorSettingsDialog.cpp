@@ -37,7 +37,7 @@ bool EditorSettingsDialog::initialize(const std::string& configPath)
     
     // Load settings from file or use defaults
     if (!loadSettings()) {
-        LOG_WARN_C("Could not load editor settings, using defaults", "EditorSettingsDialog");
+        LOG_WARNING_C("Could not load editor settings, using defaults", "EditorSettingsDialog");
         m_settings = EditorSettings(); // Use default settings
     }
     
@@ -55,7 +55,7 @@ void EditorSettingsDialog::render()
     }
     
     // TODO: Implement with Windows native UI (ImGui has been removed from this project)
-    LOG_WARN_C("EditorSettingsDialog::render() - ImGui UI not available, use Win32SettingsDialog instead", "EditorSettingsDialog");
+    LOG_WARNING_C("EditorSettingsDialog::render() - ImGui UI not available, use Win32SettingsDialog instead", "EditorSettingsDialog");
 }
 
 void EditorSettingsDialog::renderAutoSaveSettings()
@@ -171,7 +171,7 @@ bool EditorSettingsDialog::loadSettings()
 {
     std::ifstream file(m_configPath);
     if (!file.is_open()) {
-        LOG_WARN_C("Settings file not found: " + m_configPath, "EditorSettingsDialog");
+        LOG_WARNING_C("Settings file not found: " + m_configPath, "EditorSettingsDialog");
         return false;
     }
     
