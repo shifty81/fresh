@@ -62,6 +62,7 @@ class Win32ContentBrowserPanel;
 class Win32ConsolePanel;
 class Win32HUD;
 class Win32SettingsDialog;
+class Win32TerraformingPanel;
 #endif
 
 /**
@@ -283,6 +284,15 @@ public:
     WindowsCustomizationPanel* getWindowsCustomizationPanel() const
     {
         return m_windowsCustomizationPanel.get();
+    }
+    
+    /**
+     * @brief Get the native Win32 terraforming panel
+     * @return Terraforming panel pointer (nullptr if not on Windows or panel not created)
+     */
+    Win32TerraformingPanel* getTerraformingPanel() const
+    {
+        return m_nativeTerraformingPanel.get();
     }
 #endif
 
@@ -506,6 +516,7 @@ private:
     std::unique_ptr<Win32ConsolePanel> m_nativeConsole;
     std::unique_ptr<Win32HUD> m_nativeHUD;
     std::unique_ptr<Win32SettingsDialog> m_nativeSettingsDialog;
+    std::unique_ptr<Win32TerraformingPanel> m_nativeTerraformingPanel;
 #endif
 
     // References

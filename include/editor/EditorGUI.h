@@ -9,10 +9,13 @@ class WorldEditor;
 class TerraformingSystem;
 
 /**
- * @brief ImGui-based editor interface
+ * @brief Legacy editor GUI interface
  *
- * Provides the graphical user interface for the world editor,
- * including terraforming tools, world settings, and debug info.
+ * This class is kept for backward compatibility but is now a lightweight wrapper.
+ * The actual GUI functionality is implemented via native Win32 panels in EditorManager.
+ * When FRESH_WIN32_UI is defined (default on Windows), Win32TerraformingPanel and other
+ * native panels handle all UI rendering. This class provides console-based fallback
+ * for debugging purposes when native UI is not available.
  */
 class EditorGUI
 {

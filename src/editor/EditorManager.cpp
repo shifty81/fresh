@@ -52,6 +52,7 @@
     #include "ui/native/Win32ConsolePanel.h"
     #include "ui/native/Win32HUD.h"
     #include "ui/native/Win32SettingsDialog.h"
+    #include "ui/native/Win32TerraformingPanel.h"
 #endif
 
 #ifdef FRESH_IMGUI_AVAILABLE
@@ -720,6 +721,14 @@ bool EditorManager::initialize(WindowType* window, IRenderContext* renderContext
         // Create native Settings Dialog
         m_nativeSettingsDialog = std::make_unique<Win32SettingsDialog>();
         LOG_INFO_C("Native Win32 Settings Dialog created", "EditorManager");
+        
+        // Create native Terraforming Panel
+        if (worldEditor) {
+            m_nativeTerraformingPanel = std::make_unique<Win32TerraformingPanel>();
+            if (m_nativeTerraformingPanel->initialize(hwnd, worldEditor)) {
+                LOG_INFO_C("Native Win32 Terraforming Panel created", "EditorManager");
+            }
+        }
         
         LOG_INFO_C("All native Win32 UI panels initialized successfully", "EditorManager");
     } else {
