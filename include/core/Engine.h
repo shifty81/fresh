@@ -114,9 +114,7 @@ private:
     std::unique_ptr<AISystem> m_aiSystem;
     std::unique_ptr<ecs::EntityManager> m_entityManager;
     std::unique_ptr<EditorGUI> m_editor;
-#ifdef FRESH_IMGUI_AVAILABLE
     std::unique_ptr<EditorManager> m_editorManager;
-#endif
     std::unique_ptr<MainMenu> m_mainMenu;
     std::unique_ptr<WorldEditor> m_worldEditor;
     std::unique_ptr<Player> m_player;

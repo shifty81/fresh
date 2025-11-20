@@ -6,6 +6,7 @@
 #include <string>
 #include <memory>
 #include <map>
+#include <vector>
 #include <functional>
 #include "ui/native/Win32Panel.h"
 #include "ui/native/Win32TreeView.h"
@@ -14,7 +15,23 @@ namespace fresh
 {
 
 class VoxelWorld;
-struct HierarchyNode;
+
+/**
+ * @brief Hierarchy node structure for scene graph representation
+ */
+struct HierarchyNode
+{
+    std::string name;                                     // Node name
+    int type = 0;                                         // Node type identifier
+    void* data = nullptr;                                 // Custom data pointer
+    std::vector<std::shared_ptr<HierarchyNode>> children; // Child nodes
+    bool visible = true;                                  // Visibility flag
+    void* userData = nullptr;                             // User-defined data pointer
+    
+    // Constructor
+    explicit HierarchyNode(const std::string& nodeName = "") 
+        : name(nodeName), type(0), data(nullptr), visible(true), userData(nullptr) {}
+};
 
 /**
  * @brief Native Win32 Scene Hierarchy Panel using TreeView

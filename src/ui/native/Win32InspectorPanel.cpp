@@ -1,6 +1,7 @@
 #ifdef _WIN32
 
 #include "ui/native/Win32InspectorPanel.h"
+#include "ui/native/Win32SceneHierarchyPanel.h"
 #include "ui/native/UnrealStyleTheme.h"
 #include "ui/SceneHierarchyPanel.h"
 #include "ecs/EntityManager.h"
