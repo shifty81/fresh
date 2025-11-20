@@ -326,6 +326,7 @@ set(ENGINE_SOURCES
     src/editor/CameraController.cpp
     src/serialization/WorldSerializer.cpp
     src/ui/MainMenu.cpp
+    src/ui/EditorToolbar.cpp
     src/input/InputManager.cpp
     src/gameplay/Camera.cpp
     src/gameplay/Player.cpp
