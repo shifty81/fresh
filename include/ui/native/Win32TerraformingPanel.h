@@ -2,6 +2,11 @@
 
 #ifdef _WIN32
 
+// Prevent Windows.h from defining min/max macros
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
+
 #include "ui/native/Win32Panel.h"
 #include "editor/TerraformingSystem.h"
 #include "ui/native/UnrealStyleTheme.h"
