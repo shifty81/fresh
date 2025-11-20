@@ -46,6 +46,9 @@
 #include "ui/VoxelToolPalette.h"
 #include "voxel/VoxelWorld.h"
 
+#include "ui/VoxelToolPalette.h"
+#include "voxel/VoxelWorld.h"
+
 #include <glm/glm.hpp>
 
 #ifdef _WIN32
@@ -60,10 +63,6 @@
     #include "ui/native/Win32HUD.h"
     #include "ui/native/Win32SettingsDialog.h"
     #include "ui/native/Win32TerraformingPanel.h"
-#endif
-
-#ifdef FRESH_IMGUI_AVAILABLE
-    #include <imgui.h>
 #endif
 
 namespace fresh
@@ -111,23 +110,6 @@ bool EditorManager::initialize(WindowType* window, IRenderContext* renderContext
     m_world = world;
     m_worldEditor = worldEditor;
     m_entityManager = entityManager;
-
-#ifdef FRESH_IMGUI_AVAILABLE
-    // Initialize ImGui context
-    m_imguiContext = std::make_unique<ImGuiContext>();
-#ifdef _WIN32
-    if (!m_imguiContext->initializeWin32(window, renderContext)) {
-        LOG_ERROR_C("Failed to initialize ImGui context with Win32 backend", "EditorManager");
-        return false;
-    }
-    LOG_INFO_C("ImGui context initialized with Win32 backend", "EditorManager");
-#else
-    if (!m_imguiContext->initialize(window, renderContext)) {
-        LOG_ERROR_C("Failed to initialize ImGui context", "EditorManager");
-        return false;
-    }
-    LOG_INFO_C("ImGui context initialized", "EditorManager");
-#endif
 
     // Initialize UI panels that require world/worldEditor
     // Only initialize these if world and worldEditor are available
@@ -766,14 +748,6 @@ void EditorManager::beginFrame()
     if (!m_initialized) {
         return;
     }
-
-#ifdef FRESH_IMGUI_AVAILABLE
-    // Always call newFrame() when initialized, regardless of visibility
-    // This is required by ImGui - NewFrame() and Render() must always be paired
-    if (m_imguiContext) {
-        m_imguiContext->newFrame();
-    }
-#endif
 }
 
 void EditorManager::render()
@@ -782,25 +756,9 @@ void EditorManager::render()
         return;
     }
 
-#ifdef FRESH_IMGUI_AVAILABLE
-    // Setup dockspace
-    setupDockspace();
-
-#ifndef FRESH_WIN32_UI
-    // Render ImGui menu bar and toolbar (only when not using native Win32 UI)
-    // On Windows with FRESH_WIN32_UI, the native Win32MenuBar and Win32Toolbar are used instead
-    if (m_menuBar) {
-        m_menuBar->render();
-    }
-
-    if (m_toolbar) {
-        m_toolbar->render();
-    }
-#endif // !FRESH_WIN32_UI
-
     // Render panels based on visibility flags
 #ifndef FRESH_WIN32_UI
-    // Use ImGui panels when native Win32 UI is not available
+    // Use panels when native Win32 UI is not available
     if (m_showSceneHierarchy && m_sceneHierarchy) {
         m_sceneHierarchy->render();
 
@@ -853,7 +811,7 @@ void EditorManager::render()
     }
 
 #ifndef FRESH_WIN32_UI
-    // Render ImGui hotbar (shown in play mode)
+    // Render hotbar (shown in play mode)
     // On Windows with FRESH_WIN32_UI, use native Win32HUD instead
     if (m_hotbar) {
         m_hotbar->render();
@@ -876,10 +834,6 @@ void EditorManager::render()
         m_windowsCustomizationPanel->render();
     }
 #endif
-#else
-    // Console mode fallback
-    LOG_INFO_C("Editor running in console mode (ImGui not available)", "EditorManager");
-#endif
 }
 
 void EditorManager::endFrame()
@@ -887,14 +841,6 @@ void EditorManager::endFrame()
     if (!m_initialized) {
         return;
     }
-
-#ifdef FRESH_IMGUI_AVAILABLE
-    // Always call render() when initialized, regardless of visibility
-    // This is required by ImGui - NewFrame() and Render() must always be paired
-    if (m_imguiContext) {
-        m_imguiContext->render();
-    }
-#endif
 }
 
 void EditorManager::shutdown()
@@ -903,7 +849,6 @@ void EditorManager::shutdown()
         return;
     }
 
-#ifdef FRESH_IMGUI_AVAILABLE
     // Shutdown in reverse order
     m_hotbar.reset();
     m_settingsPanel.reset();
@@ -933,12 +878,6 @@ void EditorManager::shutdown()
         m_windowsThemeManager->shutdown();
         m_windowsThemeManager.reset();
     }
-#endif
-
-    if (m_imguiContext) {
-        m_imguiContext->shutdown();
-    }
-    m_imguiContext.reset();
 #endif
 
     // Clear all pointer references to avoid dangling pointers
@@ -1090,69 +1029,19 @@ bool EditorManager::updateWorld(VoxelWorld* world, WorldEditor* worldEditor)
 
     LOG_INFO_C("EditorManager updated with new world successfully", "EditorManager");
     return true;
-#else
-    LOG_WARNING_C("ImGui not available, updateWorld has no effect", "EditorManager");
-    return true;
-#endif
-}
-
-void EditorManager::setupDockspace()
-{
-#ifdef FRESH_IMGUI_AVAILABLE
-    // Create a fullscreen dockspace (requires ImGui docking branch)
-    ImGuiViewport* viewport = ImGui::GetMainViewport();
-    ImGui::SetNextWindowPos(viewport->WorkPos);
-    ImGui::SetNextWindowSize(viewport->WorkSize);
-
-    #ifdef IMGUI_HAS_VIEWPORT
-    ImGui::SetNextWindowViewport(viewport->ID);
-    #endif
-
-    ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse |
-                                    ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove |
-                                    ImGuiWindowFlags_NoBringToFrontOnFocus |
-                                    ImGuiWindowFlags_NoNavFocus | ImGuiWindowFlags_NoBackground;
-
-    #ifdef IMGUI_HAS_DOCK
-    window_flags |= ImGuiWindowFlags_NoDocking;
-    #endif
-
-    ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
-    ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
-    ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
-
-    ImGui::Begin("DockSpaceWindow", nullptr, window_flags);
-    ImGui::PopStyleVar(3);
-
-    #ifdef IMGUI_HAS_DOCK
-    // DockSpace (only available in docking branch)
-    ImGuiID dockspace_id = ImGui::GetID("MyDockSpace");
-    ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f), ImGuiDockNodeFlags_PassthruCentralNode);
-    #endif
-
-    ImGui::End();
-#endif
 }
 
 bool EditorManager::wantCaptureMouse() const
 {
-#ifdef FRESH_IMGUI_AVAILABLE
-    // Only capture input when editor is visible
-    if (m_visible && m_imguiContext) {
-        return m_imguiContext->wantCaptureMouse();
-    }
-#endif
+    // For Windows native UI, check if any UI element is capturing mouse
+    // For now, return false to allow normal game interaction
     return false;
 }
 
 bool EditorManager::wantCaptureKeyboard() const
 {
-#ifdef FRESH_IMGUI_AVAILABLE
-    // Only capture input when editor is visible
-    if (m_visible && m_imguiContext) {
-        return m_imguiContext->wantCaptureKeyboard();
-    }
-#endif
+    // For Windows native UI, check if any UI element is capturing keyboard
+    // For now, return false to allow normal game interaction
     return false;
 }
 

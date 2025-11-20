@@ -21,7 +21,6 @@ using InputManagerType = InputManager;
 class IRenderContext;
 class VoxelWorld;
 class WorldEditor;
-class ImGuiContext;
 class EditorMenuBar;
 class EditorToolbar;
 class VoxelToolPalette;
@@ -173,25 +172,16 @@ public:
     }
 
     /**
-     * @brief Check if ImGui wants to capture mouse
-     * @return true if ImGui is using the mouse
+     * @brief Check if editor wants to capture mouse
+     * @return true if editor is using the mouse
      */
     bool wantCaptureMouse() const;
 
     /**
-     * @brief Check if ImGui wants to capture keyboard
-     * @return true if ImGui is using the keyboard
+     * @brief Check if editor wants to capture keyboard
+     * @return true if editor is using the keyboard
      */
     bool wantCaptureKeyboard() const;
-
-    /**
-     * @brief Get the ImGui context
-     * @return ImGui context pointer
-     */
-    ImGuiContext* getImGuiContext() const
-    {
-        return m_imguiContext.get();
-    }
 
     /**
      * @brief Get the main menu panel
@@ -479,14 +469,8 @@ public:
     void frameSelection();
 
 private:
-    void setupDockspace();
-
-private:
     bool m_initialized;
     bool m_visible;
-
-    // ImGui context
-    std::unique_ptr<ImGuiContext> m_imguiContext;
 
     // UI Panels
     std::unique_ptr<SceneHierarchyPanel> m_sceneHierarchy;

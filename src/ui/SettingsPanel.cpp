@@ -12,10 +12,6 @@
     #include "input/InputManager.h"
 #endif
 
-#ifdef FRESH_IMGUI_AVAILABLE
-    #include <imgui.h>
-#endif
-
 namespace fresh
 {
 

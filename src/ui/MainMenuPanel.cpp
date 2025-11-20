@@ -7,10 +7,6 @@
 
 #include "core/Logger.h"
 
-#ifdef FRESH_IMGUI_AVAILABLE
-    #include <imgui.h>
-#endif
-
 namespace fs = std::filesystem;
 
 namespace fresh

@@ -96,13 +96,6 @@ if(ENABLE_OPENGL)
     endif()
 endif()
 
-# ImGui is NO LONGER USED - Windows Native UI only
-# ImGui for UI (DISABLED - using Windows native UI only)
-# find_package(imgui QUIET)
-# if(NOT imgui_FOUND)
-#     message(STATUS "ImGui not used - Windows native UI only")
-# endif()
-
 # OpenAL for audio
 find_package(OpenAL QUIET)
 if(NOT OpenAL_FOUND)
@@ -211,11 +204,6 @@ if(NOT glm_FOUND)
     list(APPEND MISSING_DEPS "GLM")
 endif()
 
-# ImGui is optional but recommended
-if(NOT imgui_FOUND)
-    list(APPEND MISSING_DEPS "ImGui (optional)")
-endif()
-
 # OpenGL dependencies (optional for Windows compatibility)
 if(ENABLE_OPENGL)
     if(NOT OpenGL_FOUND)
@@ -262,9 +250,6 @@ elseif(NOT USING_VCPKG AND DEPENDENCIES_OK)
     message("")
     message("========================================================================")
     message(STATUS "All required dependencies found!")
-    if(NOT imgui_FOUND)
-        message(STATUS "Note: ImGui not found - editor UI will be limited")
-    endif()
     message("========================================================================")
     message("")
 endif()
@@ -423,14 +408,6 @@ if(WIN32)
     message(STATUS "Win32 native UI enabled")
 endif()
 
-# ImGui UI is DISABLED - Windows Native UI only
-# if(imgui_FOUND)
-#     list(APPEND ENGINE_SOURCES
-#         ... ImGui-based UI files removed ...
-#     )
-#     message(STATUS "ImGui UI enabled")
-# endif()
-
 # Always include non-ImGui UI components
 list(APPEND ENGINE_SOURCES
     src/editor/EditorManager.cpp
@@ -544,15 +521,6 @@ endif()
 if(glm_FOUND)
     target_link_libraries(${PROJECT_NAME} PRIVATE glm::glm)
 endif()
-
-# ImGui linking REMOVED - Windows Native UI only
-# if(imgui_FOUND)
-#     target_link_libraries(${PROJECT_NAME} PRIVATE imgui::imgui)
-#     add_definitions(-DFRESH_IMGUI_AVAILABLE)
-#     message(STATUS "ImGui disabled - Windows Native UI only")
-# endif()
-
-message(STATUS "Using Windows Native UI only - ImGui not required")
 
 # Link OpenAL (Audio)
 if(OpenAL_FOUND)
