@@ -106,15 +106,15 @@ bool Win32TerraformingPanel::initialize(HWND parent, WorldEditor* worldEditor)
     // Create GDI resources
     m_bgBrush = CreateSolidBrush(UnrealStyleTheme::PanelBackground);
     m_selectedBrush = CreateSolidBrush(UnrealStyleTheme::AccentBlue);
-    m_buttonBrush = CreateSolidBrush(UnrealStyleTheme::ButtonBackground);
-    m_borderPen = CreatePen(PS_SOLID, 1, UnrealStyleTheme::Border);
+    m_buttonBrush = CreateSolidBrush(UnrealStyleTheme::ButtonNormal);
+    m_borderPen = CreatePen(PS_SOLID, 1, UnrealStyleTheme::BorderLight);
 
     // Create fonts
-    m_titleFont = CreateFont(16, 0, 0, 0, FW_BOLD, FALSE, FALSE, FALSE,
+    m_titleFont = CreateFontW(16, 0, 0, 0, FW_BOLD, FALSE, FALSE, FALSE,
                             DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS,
                             CLEARTYPE_QUALITY, DEFAULT_PITCH | FF_DONTCARE, L"Segoe UI");
 
-    m_textFont = CreateFont(14, 0, 0, 0, FW_NORMAL, FALSE, FALSE, FALSE,
+    m_textFont = CreateFontW(14, 0, 0, 0, FW_NORMAL, FALSE, FALSE, FALSE,
                            DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS,
                            CLEARTYPE_QUALITY, DEFAULT_PITCH | FF_DONTCARE, L"Segoe UI");
 
@@ -410,7 +410,7 @@ void Win32TerraformingPanel::onPaint(HDC hdc)
 
     // Set text properties
     SetBkMode(hdc, TRANSPARENT);
-    SetTextColor(hdc, UnrealStyleTheme::TextNormal);
+    SetTextColor(hdc, UnrealStyleTheme::TextPrimary);
     SelectObject(hdc, m_titleFont);
 
     // Draw section headers
@@ -418,17 +418,17 @@ void Win32TerraformingPanel::onPaint(HDC hdc)
 
     // Tools header
     RECT headerRect = { MARGIN, yPos, m_width - MARGIN, yPos + 25 };
-    DrawText(hdc, L"Tools", -1, &headerRect, DT_LEFT | DT_VCENTER);
+    DrawTextW(hdc, L"Tools", -1, &headerRect, DT_LEFT | DT_VCENTER);
     yPos += 30 + (BUTTON_HEIGHT + BUTTON_SPACING) * 10 + SECTION_SPACING;
 
     // Mode header
     headerRect = { MARGIN, yPos, m_width - MARGIN, yPos + 25 };
-    DrawText(hdc, L"Mode", -1, &headerRect, DT_LEFT | DT_VCENTER);
+    DrawTextW(hdc, L"Mode", -1, &headerRect, DT_LEFT | DT_VCENTER);
     yPos += 30 + BUTTON_HEIGHT + SECTION_SPACING;
 
     // Material header
     headerRect = { MARGIN, yPos, m_width - MARGIN, yPos + 25 };
-    DrawText(hdc, L"Material", -1, &headerRect, DT_LEFT | DT_VCENTER);
+    DrawTextW(hdc, L"Material", -1, &headerRect, DT_LEFT | DT_VCENTER);
 }
 
 void Win32TerraformingPanel::onResize(int width, int height)

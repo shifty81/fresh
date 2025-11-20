@@ -217,7 +217,7 @@ void CameraController::applySpeedToPlayer() {
     m_player->setWalkSpeed(m_normalSpeed);
     m_player->setSprintSpeed(m_fastSpeed);
     
-    LOG_DEBUG_C("Applied camera speeds to player", "CameraController");
+    LOG_INFO_C("Applied camera speeds to player", "CameraController");
 }
 
 bool CameraController::saveBookmark(const std::string& name) {

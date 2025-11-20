@@ -953,6 +953,8 @@ void EngineConfigPanel::renderMaterialProperties(Material* material)
         ImGui::Text("Emissive Map:");
         renderTextureSelector(material->emissiveMap, "Emissive");
     }
+#else
+    (void)material;  // Suppress unreferenced parameter warning
 #endif
 }
 
@@ -974,6 +976,9 @@ void EngineConfigPanel::renderTextureSelector(std::shared_ptr<class Texture>& te
     }
     ImGui::PopID();
     ImGui::Spacing();
+#else
+    (void)texture;  // Suppress unreferenced parameter warning
+    (void)label;    // Suppress unreferenced parameter warning
 #endif
 }
 

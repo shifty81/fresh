@@ -192,7 +192,7 @@ void NativeMainMenu::createMainMenuDialog(HWND hwnd)
                                 WS_CHILD | WS_VISIBLE | SS_CENTER, 150, 30, 300, 40, hwnd,
                                 (HMENU)ID_STATIC_TITLE, GetModuleHandle(nullptr), nullptr);
 
-    HFONT titleFont = CreateFont(28, 0, 0, 0, FW_BOLD, FALSE, FALSE, FALSE, DEFAULT_CHARSET,
+    HFONT titleFont = CreateFontW(28, 0, 0, 0, FW_BOLD, FALSE, FALSE, FALSE, DEFAULT_CHARSET,
                                  OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, CLEARTYPE_QUALITY,
                                  DEFAULT_PITCH | FF_DONTCARE, L"Segoe UI");
     SendMessage(title, WM_SETFONT, (WPARAM)titleFont, TRUE);

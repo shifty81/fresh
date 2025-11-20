@@ -30,6 +30,7 @@ enum class VoxelType : uint8_t {
     Iron,
     Gold,
     Diamond,
+    Obsidian,
     // Add more types as needed
     Count
 };
