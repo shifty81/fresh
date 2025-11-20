@@ -21,7 +21,6 @@ using InputManagerType = InputManager;
 class IRenderContext;
 class VoxelWorld;
 class WorldEditor;
-class EditorMenuBar;
 class EditorToolbar;
 class VoxelToolPalette;
 class MainMenuPanel;
@@ -68,6 +67,7 @@ class Win32MenuBar;
 #include "ui/EditorMenuBar.h"
 #else
 // Forward declarations for non-Windows platforms
+class EditorMenuBar;
 class InspectorPanel;
 class SceneHierarchyPanel;
 class ContentBrowserPanel;
