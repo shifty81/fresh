@@ -2,6 +2,11 @@
 
 #ifdef _WIN32
 
+// Prevent Windows.h from defining min/max macros
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
+
 #include <windows.h>
 #include <memory>
 #include <string>
