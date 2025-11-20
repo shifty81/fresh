@@ -21,6 +21,7 @@
 #include "editor/FileDialogManager.h"
 #include "editor/LayoutManager.h"
 #include "editor/EditorSettingsDialog.h"
+#include "editor/CameraController.h"
 #include "serialization/WorldSerializer.h"
 #include "devtools/DebugRenderer.h"
 #include "renderer/RenderContext.h"
@@ -377,6 +378,11 @@ bool EditorManager::initialize(WindowType* window, IRenderContext* renderContext
         m_editorSettingsDialog = std::make_unique<EditorSettingsDialog>();
         m_editorSettingsDialog->initialize("configs/editor_settings.ini");
         LOG_INFO_C("Editor Settings Dialog initialized", "EditorManager");
+        
+        // Initialize camera controller
+        m_cameraController = std::make_unique<CameraController>();
+        // Camera controller will be fully initialized when player is set via setPlayer()
+        LOG_INFO_C("Camera Controller created (waiting for player)", "EditorManager");
         
         // Load the current or default layout
         LayoutConfig currentLayout;
@@ -927,6 +933,17 @@ void EditorManager::shutdown()
     m_initialized = false;
     m_visible = false; // Reset visibility flag on shutdown
     LOG_INFO_C("EditorManager shutdown complete", "EditorManager");
+}
+
+void EditorManager::setPlayer(Player* player)
+{
+    m_player = player;
+    
+    // Initialize camera controller when player is set
+    if (m_cameraController && player) {
+        m_cameraController->initialize(player);
+        LOG_INFO_C("Camera controller initialized with player", "EditorManager");
+    }
 }
 
 bool EditorManager::updateWorld(VoxelWorld* world, WorldEditor* worldEditor)
@@ -1652,6 +1669,130 @@ void EditorManager::saveCurrentLayout(const std::string& name)
 void EditorManager::resetLayout()
 {
     loadLayout("Default");
+}
+
+void EditorManager::setCameraViewMode(const std::string& mode)
+{
+    if (!m_cameraController) {
+        LOG_WARNING_C("Camera controller not initialized", "EditorManager");
+        return;
+    }
+    
+    if (!m_player) {
+        LOG_WARNING_C("Player not set, cannot initialize camera controller", "EditorManager");
+        return;
+    }
+    
+    // Initialize camera controller with player if not already done
+    if (!m_player) {
+        m_cameraController->initialize(m_player);
+    }
+    
+    // Map string to view mode
+    CameraController::ViewMode viewMode;
+    if (mode == "Perspective") {
+        viewMode = CameraController::ViewMode::Perspective;
+    } else if (mode == "Top") {
+        viewMode = CameraController::ViewMode::Top;
+    } else if (mode == "Front") {
+        viewMode = CameraController::ViewMode::Front;
+    } else if (mode == "Side" || mode == "Right") {
+        viewMode = CameraController::ViewMode::Side;
+    } else if (mode == "Bottom") {
+        viewMode = CameraController::ViewMode::Bottom;
+    } else if (mode == "Back") {
+        viewMode = CameraController::ViewMode::Back;
+    } else if (mode == "Left") {
+        viewMode = CameraController::ViewMode::Left;
+    } else {
+        LOG_WARNING_C("Unknown camera view mode: " + mode, "EditorManager");
+        return;
+    }
+    
+    m_cameraController->setViewMode(viewMode);
+}
+
+void EditorManager::focusOnSelection()
+{
+    if (!m_cameraController) {
+        LOG_WARNING_C("Camera controller not initialized", "EditorManager");
+        return;
+    }
+    
+    if (!m_player) {
+        LOG_WARNING_C("Player not set", "EditorManager");
+        return;
+    }
+    
+    // Initialize camera controller with player if not already done
+    if (!m_player) {
+        m_cameraController->initialize(m_player);
+    }
+    
+    if (!m_selectionManager || !m_selectionManager->hasSelection()) {
+        LOG_INFO_C("No selection to focus on", "EditorManager");
+        return;
+    }
+    
+    // Get selection center
+    const auto& selectedBlocks = m_selectionManager->getSelectedBlocks();
+    if (selectedBlocks.empty()) {
+        LOG_INFO_C("Selection is empty", "EditorManager");
+        return;
+    }
+    
+    // Calculate center of selected blocks
+    glm::vec3 center(0.0f);
+    for (const auto& block : selectedBlocks) {
+        center += glm::vec3(block.x, block.y, block.z);
+    }
+    center /= static_cast<float>(selectedBlocks.size());
+    
+    m_cameraController->focusOn(center);
+    LOG_INFO_C("Focused camera on selection center", "EditorManager");
+}
+
+void EditorManager::frameSelection()
+{
+    if (!m_cameraController) {
+        LOG_WARNING_C("Camera controller not initialized", "EditorManager");
+        return;
+    }
+    
+    if (!m_player) {
+        LOG_WARNING_C("Player not set", "EditorManager");
+        return;
+    }
+    
+    // Initialize camera controller with player if not already done
+    if (!m_player) {
+        m_cameraController->initialize(m_player);
+    }
+    
+    if (!m_selectionManager || !m_selectionManager->hasSelection()) {
+        LOG_INFO_C("No selection to frame", "EditorManager");
+        return;
+    }
+    
+    // Get selection bounds
+    const auto& selectedBlocks = m_selectionManager->getSelectedBlocks();
+    if (selectedBlocks.empty()) {
+        LOG_INFO_C("Selection is empty", "EditorManager");
+        return;
+    }
+    
+    // Calculate bounding box of selected blocks
+    glm::vec3 min(std::numeric_limits<float>::max());
+    glm::vec3 max(std::numeric_limits<float>::lowest());
+    
+    for (const auto& block : selectedBlocks) {
+        glm::vec3 pos(block.x, block.y, block.z);
+        min = glm::min(min, pos);
+        max = glm::max(max, pos);
+    }
+    
+    m_cameraController->frameBox(min, max);
+    LOG_INFO_C("Framed selection in view", "EditorManager");
 }
 
 } // namespace fresh

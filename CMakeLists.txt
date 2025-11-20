@@ -322,6 +322,7 @@ set(ENGINE_SOURCES
     src/editor/FileDialogManager.cpp
     src/editor/LayoutManager.cpp
     src/editor/EditorSettingsDialog.cpp
+    src/editor/CameraController.cpp
     src/serialization/WorldSerializer.cpp
     src/ui/MainMenu.cpp
     src/input/InputManager.cpp
