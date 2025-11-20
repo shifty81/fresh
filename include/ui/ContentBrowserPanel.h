@@ -6,7 +6,11 @@
 
 #ifdef _WIN32
     #include "ui/native/Win32ContentBrowserPanel.h"
+    
+    #ifndef FRESH_CONTENT_BROWSER_PANEL_ALIAS_DEFINED
+    #define FRESH_CONTENT_BROWSER_PANEL_ALIAS_DEFINED
     namespace fresh {
         using ContentBrowserPanel = Win32ContentBrowserPanel;
     }
+    #endif
 #endif

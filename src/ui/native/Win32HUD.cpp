@@ -3,6 +3,7 @@
 #include "ui/native/Win32HUD.h"
 #include "ui/native/UnrealStyleTheme.h"
 #include "core/Logger.h"
+#include <algorithm>
 #include <sstream>
 #include <iomanip>
 
@@ -435,7 +436,7 @@ void Win32HUD::drawProgressBar(HDC hdc, int x, int y, int width, int height,
     
     // Draw fill (progress) with slight inset
     float percentage = (maxValue > 0) ? (value / maxValue) : 0.0f;
-    percentage = max(0.0f, min(1.0f, percentage));
+    percentage = std::max(0.0f, std::min(1.0f, percentage));
     int fillWidth = (int)((width - 4) * percentage);
     
     if (fillWidth > 0) {
