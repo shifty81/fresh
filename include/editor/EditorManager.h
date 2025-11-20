@@ -58,8 +58,14 @@ class Win32ConsolePanel;
 class Win32HUD;
 class Win32SettingsDialog;
 class Win32TerraformingPanel;
-// Note: InspectorPanel, SceneHierarchyPanel, ContentBrowserPanel, and ConsolePanel
-// are defined as type aliases in their respective stub headers (ui/InspectorPanel.h, etc.)
+class Win32MenuBar;
+// Include stub headers to define type aliases for Windows builds
+// These define: SceneHierarchyPanel, InspectorPanel, ContentBrowserPanel, ConsolePanel, EditorMenuBar
+#include "ui/SceneHierarchyPanel.h"
+#include "ui/InspectorPanel.h"
+#include "ui/ContentBrowserPanel.h"
+#include "ui/ConsolePanel.h"
+#include "ui/EditorMenuBar.h"
 #else
 // Forward declarations for non-Windows platforms
 class InspectorPanel;
