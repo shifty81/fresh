@@ -625,6 +625,15 @@ void Engine::initializeGameSystems()
         m_editorManager->setVisible(true);
     }
     
+    // TODO: VIEWPORT INTEGRATION - After viewport panel is created, update DirectX renderer
+    // to use the viewport child window for rendering instead of main window.
+    // See VIEWPORT_INTEGRATION_TODO.md for complete implementation details.
+    // Key steps:
+    // 1. Get viewport HWND: m_editorManager->getViewportPanel()->getHandle()
+    // 2. Call m_renderer->setViewportWindow(viewportHwnd)
+    // 3. Recreate DirectX swap chain with viewport dimensions
+    // This allows 3D world to render only within the viewport panel, not full screen.
+    
     // Create demo entities for Inspector demonstration
     createDemoEntities();
 #endif
@@ -991,6 +1000,16 @@ void Engine::update(float deltaTime)
         return;
     }
 
+    // TODO: VIEWPORT INTEGRATION - Check if viewport was resized
+    // If viewport panel exists and was resized, recreate DirectX swap chain
+    // See VIEWPORT_INTEGRATION_TODO.md section 3 for implementation.
+    // Example:
+    // if (m_editorManager && m_editorManager->getViewportPanel() && 
+    //     m_editorManager->getViewportPanel()->wasResized()) {
+    //     // Recreate swap chain with new viewport dimensions
+    //     // Update camera aspect ratio
+    // }
+
     // Check if GUI wants input before processing player updates
 #ifdef FRESH_IMGUI_AVAILABLE
     bool guiCapturesMouse = m_editorManager && m_editorManager->wantCaptureMouse();
@@ -1008,6 +1027,18 @@ void Engine::update(float deltaTime)
     // - RMB released = Cursor visible, can interact with UI/menus
     // - This prevents the cursor from "snapping" to camera control automatically
     // ========================================================================
+    
+    // TODO: VIEWPORT INTEGRATION - Only allow camera control when mouse is within viewport
+    // Check if mouse is in viewport bounds before processing RMB camera control
+    // See VIEWPORT_INTEGRATION_TODO.md section 4 for implementation.
+    // Example:
+    // bool mouseInViewport = false;
+    // if (m_editorManager && m_editorManager->getViewportPanel()) {
+    //     POINT cursorPos;
+    //     GetCursorPos(&cursorPos);
+    //     mouseInViewport = m_editorManager->getViewportPanel()->isMouseInViewport(cursorPos.x, cursorPos.y);
+    // }
+    // Then use mouseInViewport in the RMB check below
     
     if (m_inputManager) {
         InputMode currentMode = m_inputManager->getInputMode();
@@ -1147,6 +1178,10 @@ void Engine::render()
     if (!m_renderer) {
         return;
     }
+
+    // TODO: VIEWPORT INTEGRATION - Set viewport to match viewport panel dimensions
+    // Currently renders to full window. Should render only to viewport child window.
+    // See VIEWPORT_INTEGRATION_TODO.md section 5 for implementation.
 
     // Set clear color (sky blue) before beginning frame
     m_renderer->clearColor(0.53f, 0.81f, 0.92f, 1.0f);
