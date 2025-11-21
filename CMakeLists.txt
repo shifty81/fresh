@@ -181,6 +181,17 @@ if(NOT nfd_FOUND)
     message(WARNING "  vcpkg install nativefiledialog-extended:x64-windows")
 endif()
 
+# ImGui for UI (optional, will migrate to native Win32 UI fully)
+find_package(imgui QUIET CONFIG)
+if(imgui_FOUND)
+    message(STATUS "ImGui found - UI panels will be available")
+    set(IMGUI_AVAILABLE TRUE)
+else()
+    message(WARNING "ImGui not found. Some UI panels will not be available.")
+    message(WARNING "  vcpkg install imgui:x64-windows")
+    set(IMGUI_AVAILABLE FALSE)
+endif()
+
 # ==============================================================================
 # Dependency Check Summary
 # ==============================================================================
@@ -644,6 +655,13 @@ if(nfd_FOUND)
     target_link_libraries(${PROJECT_NAME} PRIVATE nfd::nfd)
     add_definitions(-DFRESH_NFD_AVAILABLE)
     message(STATUS "Native File Dialog Extended enabled for file operations")
+endif()
+
+# Link ImGui (UI library)
+if(IMGUI_AVAILABLE)
+    target_link_libraries(${PROJECT_NAME} PRIVATE imgui::imgui)
+    target_compile_definitions(${PROJECT_NAME} PRIVATE FRESH_IMGUI_AVAILABLE)
+    message(STATUS "ImGui enabled for UI panels")
 endif()
 
 # Link DirectX (Windows only)

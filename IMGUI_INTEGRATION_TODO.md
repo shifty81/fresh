@@ -1,0 +1,204 @@
+# ImGui Integration TODO
+
+## Overview
+ImGui has been added back as a dependency to support UI panels (MainMenuPanel, SettingsPanel, etc.) that haven't been migrated to native Win32 UI yet. However, ImGui requires backend initialization to actually render.
+
+## Current State
+
+### What's Done
+- ✅ ImGui added to vcpkg.json dependencies
+- ✅ ImGui find_package and linking added to CMakeLists.txt
+- ✅ FRESH_IMGUI_AVAILABLE compile definition set when ImGui is available
+- ✅ EditorManager handles case when ImGui is unavailable (shows informative message)
+
+### What's Missing
+- ❌ ImGui context initialization (ImGui::CreateContext)
+- ❌ ImGui backend initialization for Win32 (ImGui_ImplWin32_Init)
+- ❌ ImGui backend initialization for DirectX 11 (ImGui_ImplDX11_Init)
+- ❌ ImGui backend initialization for DirectX 12 (ImGui_ImplDX12_Init)
+- ❌ ImGui frame lifecycle (NewFrame, Render, RenderDrawData)
+- ❌ ImGui Win32 message handling (WndProc integration)
+
+## Required Changes
+
+### 1. Add ImGui Backend Dependencies
+
+Note: ImGui backends may be included automatically with vcpkg imgui package.
+If not, you may need to download the backend files manually from the ImGui repository.
+
+**vcpkg.json** (ImGui should already be present from this PR):
+```json
+"dependencies": [
+  "imgui"
+]
+```
+
+The win32-binding and dx11/dx12-binding backends are typically included in the main imgui package.
+Check the vcpkg port to confirm what's included.
+
+### 2. Initialize ImGui in Engine
+
+**In Engine::initialize()** after renderer creation:
+
+```cpp
+#ifdef FRESH_IMGUI_AVAILABLE
+    // Setup Dear ImGui context
+    IMGUI_CHECKVERSION();
+    ImGui::CreateContext();
+    ImGuiIO& io = ImGui::GetIO();
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+    
+    // Setup Platform/Renderer backends
+    #ifdef _WIN32
+        ImGui_ImplWin32_Init(m_window->getHandle());
+        
+        #ifdef FRESH_DIRECTX_SUPPORT
+            if (m_renderer->getAPI() == GraphicsAPI::DirectX11) {
+                auto* dx11Context = static_cast<DirectX11RenderContext*>(m_renderer.get());
+                ImGui_ImplDX11_Init(dx11Context->getDevice(), dx11Context->getDeviceContext());
+            } else if (m_renderer->getAPI() == GraphicsAPI::DirectX12) {
+                auto* dx12Context = static_cast<DirectX12RenderContext*>(m_renderer.get());
+                ImGui_ImplDX12_Init(dx12Context->getDevice(), 
+                                   NUM_FRAMES_IN_FLIGHT,
+                                   DXGI_FORMAT_R8G8B8A8_UNORM,
+                                   dx12Context->getSrvDescriptorHeap(),
+                                   dx12Context->getSrvDescriptorHeap()->GetCPUDescriptorHandleForHeapStart(),
+                                   dx12Context->getSrvDescriptorHeap()->GetGPUDescriptorHandleForHeapStart());
+            }
+        #endif
+    #endif
+    
+    // Setup style
+    ImGui::StyleColorsDark();
+    
+    LOG_INFO_C("ImGui initialized successfully", "Engine");
+#endif
+```
+
+### 3. Frame Lifecycle
+
+**At the start of each frame in Engine::update():**
+
+```cpp
+#ifdef FRESH_IMGUI_AVAILABLE
+    // Start ImGui frame
+    #ifdef _WIN32
+        ImGui_ImplWin32_NewFrame();
+        #ifdef FRESH_DIRECTX_SUPPORT
+            if (m_renderer->getAPI() == GraphicsAPI::DirectX11) {
+                ImGui_ImplDX11_NewFrame();
+            } else if (m_renderer->getAPI() == GraphicsAPI::DirectX12) {
+                ImGui_ImplDX12_NewFrame();
+            }
+        #endif
+    #endif
+    ImGui::NewFrame();
+#endif
+```
+
+**After rendering game world, before presenting:**
+
+```cpp
+#ifdef FRESH_IMGUI_AVAILABLE
+    // Render ImGui
+    ImGui::Render();
+    
+    #ifdef _WIN32
+        #ifdef FRESH_DIRECTX_SUPPORT
+            if (m_renderer->getAPI() == GraphicsAPI::DirectX11) {
+                ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
+            } else if (m_renderer->getAPI() == GraphicsAPI::DirectX12) {
+                ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), 
+                                             dx12Context->getCommandList());
+            }
+        #endif
+    #endif
+#endif
+```
+
+### 4. Win32 Message Handling
+
+**In Win32Window::WindowProc(), before processing messages:**
+
+```cpp
+#ifdef FRESH_IMGUI_AVAILABLE
+    extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, 
+                                                                  WPARAM wParam, LPARAM lParam);
+    if (ImGui_ImplWin32_WndProcHandler(hwnd, uMsg, wParam, lParam))
+        return true;
+#endif
+```
+
+### 5. Cleanup
+
+**In Engine::shutdown():**
+
+```cpp
+#ifdef FRESH_IMGUI_AVAILABLE
+    #ifdef _WIN32
+        #ifdef FRESH_DIRECTX_SUPPORT
+            if (m_renderer->getAPI() == GraphicsAPI::DirectX11) {
+                ImGui_ImplDX11_Shutdown();
+            } else if (m_renderer->getAPI() == GraphicsAPI::DirectX12) {
+                ImGui_ImplDX12_Shutdown();
+            }
+        #endif
+        ImGui_ImplWin32_Shutdown();
+    #endif
+    ImGui::DestroyContext();
+    LOG_INFO_C("ImGui shutdown complete", "Engine");
+#endif
+```
+
+## Alternative: Complete Native Win32 UI Migration
+
+Instead of implementing full ImGui support, consider completing the migration to native Win32 UI:
+
+1. **Create Win32MainMenuPanel** - Native dialog for world creation/loading
+2. **Create Win32SettingsPanel** - Native dialog for engine settings
+3. **Create Win32EngineConfigPanel** - Native property sheet for configuration
+4. **Remove ImGui dependency** - Once all panels are native
+
+This would be more consistent with the Windows-exclusive focus of the project.
+
+## Recommendation
+
+Given the project's focus on Windows-native development with DirectX:
+
+1. **Short term**: Implement ImGui backend initialization (this document) to make existing panels work
+2. **Long term**: Complete native Win32 UI migration for better integration and performance
+
+The native Win32 approach is preferred because:
+- Better integration with Windows 10/11 themes
+- No additional dependency
+- More professional look for a Windows-exclusive engine
+- Better DPI scaling support
+- Native keyboard shortcuts and accessibility
+
+## Testing
+
+Once ImGui is fully initialized:
+
+1. Launch the application
+2. Click "File > New World" in the menu bar
+3. Verify that a world creation dialog appears
+4. Create a world and verify it loads
+5. Click "File > Settings" (if available)
+6. Verify that settings dialog appears and is functional
+
+## Related Files
+
+- `src/core/Engine.cpp` - Main engine, needs ImGui initialization
+- `src/core/Win32Window.cpp` - Window handling, needs WndProc integration
+- `src/ui/MainMenuPanel.cpp` - ImGui-based menu (will work when ImGui is initialized)
+- `src/ui/SettingsPanel.cpp` - ImGui-based settings (will work when ImGui is initialized)
+- `src/editor/EditorManager.cpp` - Already handles ImGui unavailable case
+- `CMakeLists.txt` - Already set up to link ImGui
+- `vcpkg.json` - Already includes ImGui dependency
+
+## Status
+
+As of this writing, ImGui is linked but not initialized. Menu items that try to show ImGui panels will:
+- Show native confirmation dialogs (these work)
+- Try to activate ImGui panels (these won't render until ImGui is initialized)
+- Show informative message when ImGui is not available (fallback behavior)

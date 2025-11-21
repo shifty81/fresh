@@ -1192,6 +1192,7 @@ void EditorManager::newWorld()
         );
         
         if (result == MessageBoxResult::Yes) {
+#ifdef FRESH_IMGUI_AVAILABLE
             // Show the main menu panel to allow user to configure new world
             if (m_mainMenuPanel) {
                 m_mainMenuPanel->setMenuActive(true);
@@ -1199,6 +1200,25 @@ void EditorManager::newWorld()
                 m_mainMenuPanel->clearFlags();
                 LOG_INFO_C("Main menu activated for new world creation", "EditorManager");
             }
+#else
+            // ImGui not available - create world with default settings
+            // In future, this should show a native Win32 dialog for world configuration
+            LOG_INFO_C("ImGui not available - cannot show world creation panel", "EditorManager");
+            
+            // Show informative message to user
+            if (m_windowsDialogManager) {
+                m_windowsDialogManager->showMessageBox(
+                    "World Creation",
+                    "World creation dialog not yet implemented with native Win32 UI.\n\n"
+                    "To create a new world:\n"
+                    "1. Close the application\n"
+                    "2. Restart and use the console menu on startup\n\n"
+                    "This will be improved in a future update.",
+                    MessageBoxButtons::OK,
+                    MessageBoxIcon::Information
+                );
+            }
+#endif
         } else {
             LOG_INFO_C("New world cancelled by user", "EditorManager");
         }
