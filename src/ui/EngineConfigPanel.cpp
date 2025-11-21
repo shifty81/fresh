@@ -1,3 +1,8 @@
+// DEPRECATED: This file contains ImGui code and is no longer used.
+// Fresh Voxel Engine uses Windows Native Win32 UI exclusively.
+// See WINDOWS_NATIVE_ONLY_POLICY.md
+
+#if 0 // ImGui code disabled - not compiled
 #include "ui/EngineConfigPanel.h"
 
 #include "core/Logger.h"
@@ -69,7 +74,6 @@ void EngineConfigPanel::shutdown()
 
 void EngineConfigPanel::render()
 {
-#ifdef FRESH_IMGUI_AVAILABLE
     if (!isVisible) {
         return;
     }
@@ -143,7 +147,6 @@ void EngineConfigPanel::render()
 
 void EngineConfigPanel::renderGraphicsPanel()
 {
-#ifdef FRESH_IMGUI_AVAILABLE
     ImGui::Spacing();
     ImGui::TextColored(ImVec4(1.0f, 1.0f, 0.0f, 1.0f), "Graphics Configuration");
     ImGui::Separator();
@@ -168,7 +171,6 @@ void EngineConfigPanel::renderGraphicsPanel()
 
 void EngineConfigPanel::renderLightingPanel()
 {
-#ifdef FRESH_IMGUI_AVAILABLE
     ImGui::Spacing();
     ImGui::TextColored(ImVec4(1.0f, 1.0f, 0.0f, 1.0f), "Lighting Configuration");
     ImGui::Separator();
@@ -213,7 +215,6 @@ void EngineConfigPanel::renderLightingPanel()
 
 void EngineConfigPanel::renderPostProcessingPanel()
 {
-#ifdef FRESH_IMGUI_AVAILABLE
     ImGui::Spacing();
     ImGui::TextColored(ImVec4(1.0f, 1.0f, 0.0f, 1.0f), "Post-Processing Effects");
     ImGui::Separator();
@@ -263,7 +264,6 @@ void EngineConfigPanel::renderPostProcessingPanel()
 
 void EngineConfigPanel::renderInputPanel()
 {
-#ifdef FRESH_IMGUI_AVAILABLE
     ImGui::Spacing();
     ImGui::TextColored(ImVec4(1.0f, 1.0f, 0.0f, 1.0f), "Input Configuration");
     ImGui::Separator();
@@ -293,7 +293,6 @@ void EngineConfigPanel::renderInputPanel()
 
 void EngineConfigPanel::renderPerformancePanel()
 {
-#ifdef FRESH_IMGUI_AVAILABLE
     ImGui::Spacing();
     ImGui::TextColored(ImVec4(1.0f, 1.0f, 0.0f, 1.0f), "Performance Monitoring");
     ImGui::Separator();
@@ -318,7 +317,6 @@ void EngineConfigPanel::renderPerformancePanel()
 
 void EngineConfigPanel::renderMaterialEditorPanel()
 {
-#ifdef FRESH_IMGUI_AVAILABLE
     ImGui::Spacing();
     ImGui::TextColored(ImVec4(1.0f, 1.0f, 0.0f, 1.0f), "Material Editor");
     ImGui::Separator();
@@ -343,7 +341,6 @@ void EngineConfigPanel::renderMaterialEditorPanel()
 // Graphics sub-panels
 void EngineConfigPanel::renderAPISelector()
 {
-#ifdef FRESH_IMGUI_AVAILABLE
     ImGui::Text("Select Graphics API:");
     ImGui::Spacing();
 
@@ -361,7 +358,6 @@ void EngineConfigPanel::renderAPISelector()
 
 void EngineConfigPanel::renderRenderQualitySettings()
 {
-#ifdef FRESH_IMGUI_AVAILABLE
     ImGui::Text("Quality Presets:");
     ImGui::Spacing();
 
@@ -400,7 +396,6 @@ void EngineConfigPanel::renderRenderQualitySettings()
 
 void EngineConfigPanel::renderDisplaySettings()
 {
-#ifdef FRESH_IMGUI_AVAILABLE
     static bool fullscreen = false;
     ImGui::Checkbox("Fullscreen", &fullscreen);
 
@@ -421,7 +416,6 @@ void EngineConfigPanel::renderDisplaySettings()
 // Lighting sub-panels
 void EngineConfigPanel::renderAmbientLightSettings()
 {
-#ifdef FRESH_IMGUI_AVAILABLE
     static float ambientColor[3] = {0.2f, 0.2f, 0.3f};
     ImGui::ColorEdit3("Ambient Color", ambientColor);
 
@@ -432,7 +426,6 @@ void EngineConfigPanel::renderAmbientLightSettings()
 
 void EngineConfigPanel::renderDirectionalLightSettings()
 {
-#ifdef FRESH_IMGUI_AVAILABLE
     ImGui::Text("Directional lights (e.g., sun, moon)");
     ImGui::Spacing();
 
@@ -452,7 +445,6 @@ void EngineConfigPanel::renderDirectionalLightSettings()
 
 void EngineConfigPanel::renderPointLightSettings()
 {
-#ifdef FRESH_IMGUI_AVAILABLE
     ImGui::Text("Point lights (e.g., torches, lamps)");
     ImGui::Spacing();
 
@@ -474,7 +466,6 @@ void EngineConfigPanel::renderPointLightSettings()
 
 void EngineConfigPanel::renderSpotLightSettings()
 {
-#ifdef FRESH_IMGUI_AVAILABLE
     ImGui::Text("Spot lights (e.g., flashlights, spotlights)");
     ImGui::Spacing();
 
@@ -493,7 +484,6 @@ void EngineConfigPanel::renderSpotLightSettings()
 
 void EngineConfigPanel::renderShadowSettings()
 {
-#ifdef FRESH_IMGUI_AVAILABLE
     static bool enableShadows = true;
     ImGui::Checkbox("Enable Shadows", &enableShadows);
 
@@ -518,7 +508,6 @@ void EngineConfigPanel::renderShadowSettings()
 
 void EngineConfigPanel::renderPBRSettings()
 {
-#ifdef FRESH_IMGUI_AVAILABLE
     static bool enablePBR = true;
     ImGui::Checkbox("Enable PBR Rendering", &enablePBR);
 
@@ -545,7 +534,6 @@ void EngineConfigPanel::renderPBRSettings()
 // Post-processing sub-panels
 void EngineConfigPanel::renderFXAASettings()
 {
-#ifdef FRESH_IMGUI_AVAILABLE
     static bool enableFXAA = true;
     ImGui::Checkbox("Enable FXAA", &enableFXAA);
 
@@ -562,7 +550,6 @@ void EngineConfigPanel::renderFXAASettings()
 
 void EngineConfigPanel::renderBloomSettings()
 {
-#ifdef FRESH_IMGUI_AVAILABLE
     static bool enableBloom = true;
     ImGui::Checkbox("Enable Bloom", &enableBloom);
 
@@ -584,7 +571,6 @@ void EngineConfigPanel::renderBloomSettings()
 
 void EngineConfigPanel::renderToneMappingSettings()
 {
-#ifdef FRESH_IMGUI_AVAILABLE
     static bool enableToneMapping = true;
     ImGui::Checkbox("Enable Tone Mapping", &enableToneMapping);
 
@@ -604,7 +590,6 @@ void EngineConfigPanel::renderToneMappingSettings()
 
 void EngineConfigPanel::renderColorGradingSettings()
 {
-#ifdef FRESH_IMGUI_AVAILABLE
     static bool enableColorGrading = false;
     ImGui::Checkbox("Enable Color Grading", &enableColorGrading);
 
@@ -626,7 +611,6 @@ void EngineConfigPanel::renderColorGradingSettings()
 
 void EngineConfigPanel::renderVignetteSettings()
 {
-#ifdef FRESH_IMGUI_AVAILABLE
     static bool enableVignette = false;
     ImGui::Checkbox("Enable Vignette", &enableVignette);
 
@@ -642,7 +626,6 @@ void EngineConfigPanel::renderVignetteSettings()
 
 void EngineConfigPanel::renderDepthOfFieldSettings()
 {
-#ifdef FRESH_IMGUI_AVAILABLE
     static bool enableDOF = false;
     ImGui::Checkbox("Enable Depth of Field", &enableDOF);
 
@@ -661,7 +644,6 @@ void EngineConfigPanel::renderDepthOfFieldSettings()
 
 void EngineConfigPanel::renderSSAOSettings()
 {
-#ifdef FRESH_IMGUI_AVAILABLE
     static bool enableSSAO = false;
     ImGui::Checkbox("Enable SSAO", &enableSSAO);
 
@@ -684,7 +666,6 @@ void EngineConfigPanel::renderSSAOSettings()
 // Input sub-panels
 void EngineConfigPanel::renderKeyBindingsSettings()
 {
-#ifdef FRESH_IMGUI_AVAILABLE
     ImGui::Text("Key Bindings:");
     ImGui::Spacing();
 
@@ -735,7 +716,6 @@ void EngineConfigPanel::renderKeyBindingsSettings()
 
 void EngineConfigPanel::renderGamepadSettings()
 {
-#ifdef FRESH_IMGUI_AVAILABLE
     ImGui::Text("Gamepad Settings:");
     ImGui::Spacing();
 
@@ -760,7 +740,6 @@ void EngineConfigPanel::renderGamepadSettings()
 
 void EngineConfigPanel::renderMouseSettings()
 {
-#ifdef FRESH_IMGUI_AVAILABLE
     static float mouseSensitivity = 1.0f;
     ImGui::SliderFloat("Mouse Sensitivity", &mouseSensitivity, 0.1f, 5.0f);
 
@@ -778,7 +757,6 @@ void EngineConfigPanel::renderMouseSettings()
 // Performance monitoring
 void EngineConfigPanel::renderFPSCounter()
 {
-#ifdef FRESH_IMGUI_AVAILABLE
     // Update FPS history
     static float lastFrameTime = 0.0f;
     frameTime = ImGui::GetIO().DeltaTime;
@@ -805,7 +783,6 @@ void EngineConfigPanel::renderFPSCounter()
 
 void EngineConfigPanel::renderMemoryUsage()
 {
-#ifdef FRESH_IMGUI_AVAILABLE
     ImGui::Text("Memory Usage:");
     ImGui::Spacing();
 
@@ -823,7 +800,6 @@ void EngineConfigPanel::renderMemoryUsage()
 
 void EngineConfigPanel::renderGPUStats()
 {
-#ifdef FRESH_IMGUI_AVAILABLE
     ImGui::Text("GPU Statistics:");
     ImGui::Spacing();
 
@@ -842,7 +818,6 @@ void EngineConfigPanel::renderGPUStats()
 // Material editor
 void EngineConfigPanel::renderMaterialList()
 {
-#ifdef FRESH_IMGUI_AVAILABLE
     ImGui::Text("Materials:");
     ImGui::Separator();
     ImGui::Spacing();
@@ -871,7 +846,6 @@ void EngineConfigPanel::renderMaterialList()
 
 void EngineConfigPanel::renderMaterialProperties(Material* material)
 {
-#ifdef FRESH_IMGUI_AVAILABLE
     if (!material) {
         return;
     }
@@ -956,7 +930,6 @@ void EngineConfigPanel::renderMaterialProperties(Material* material)
 
 void EngineConfigPanel::renderTextureSelector(std::shared_ptr<class Texture>& texture, const char* label)
 {
-#ifdef FRESH_IMGUI_AVAILABLE
     ImGui::PushID(label);
     if (texture) {
         ImGui::Text("Loaded: %s", "texture.png"); // Would show actual path
@@ -1068,3 +1041,4 @@ bool EngineConfigPanel::loadConfig(const std::string& path)
 }
 
 } // namespace fresh
+#endif // ImGui code disabled

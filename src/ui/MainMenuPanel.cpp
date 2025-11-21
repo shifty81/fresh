@@ -1,3 +1,8 @@
+// DEPRECATED: This file contains ImGui code and is no longer used.
+// Fresh Voxel Engine uses Windows Native Win32 UI exclusively.
+// See WINDOWS_NATIVE_ONLY_POLICY.md
+
+#if 0 // ImGui code disabled - not compiled
 #include "ui/MainMenuPanel.h"
 
 #include <cstring>
@@ -51,7 +56,6 @@ bool MainMenuPanel::initialize()
 
 void MainMenuPanel::render()
 {
-#ifdef FRESH_IMGUI_AVAILABLE
     if (!m_menuActive) {
         return;
     }
@@ -86,7 +90,6 @@ void MainMenuPanel::render()
 
 void MainMenuPanel::renderWorldSelection()
 {
-#ifdef FRESH_IMGUI_AVAILABLE
     ImGui::Spacing();
     ImGui::Separator();
     ImGui::Spacing();
@@ -148,7 +151,6 @@ void MainMenuPanel::renderWorldSelection()
 
 void MainMenuPanel::renderNewWorldDialog()
 {
-#ifdef FRESH_IMGUI_AVAILABLE
     ImGui::SetNextWindowPos(ImVec2(ImGui::GetIO().DisplaySize.x * 0.5f, ImGui::GetIO().DisplaySize.y * 0.5f),
                             ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
     ImGui::SetNextWindowSize(ImVec2(550, 450), ImGuiCond_Appearing);
@@ -254,7 +256,6 @@ void MainMenuPanel::renderNewWorldDialog()
 
 void MainMenuPanel::renderLoadWorldDialog()
 {
-#ifdef FRESH_IMGUI_AVAILABLE
     ImGuiIO& io = ImGui::GetIO();
     ImGui::SetNextWindowPos(ImVec2(io.DisplaySize.x * 0.5f, io.DisplaySize.y * 0.5f),
                             ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
@@ -369,3 +370,4 @@ void MainMenuPanel::scanWorldSaves()
 }
 
 } // namespace fresh
+#endif // ImGui code disabled

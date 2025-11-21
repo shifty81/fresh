@@ -1,3 +1,8 @@
+// DEPRECATED: This file contains ImGui code and is no longer used.
+// Fresh Voxel Engine uses Windows Native Win32 UI exclusively.
+// See WINDOWS_NATIVE_ONLY_POLICY.md
+
+#if 0 // ImGui code disabled - not compiled
 #include "ui/SettingsPanel.h"
 
 #include <fstream>
@@ -69,7 +74,6 @@ bool SettingsPanel::initialize(WindowType* window, InputManagerType* inputManage
 
 void SettingsPanel::render()
 {
-#ifdef FRESH_IMGUI_AVAILABLE
     if (!m_visible) {
         return;
     }
@@ -141,7 +145,6 @@ void SettingsPanel::render()
 
 void SettingsPanel::renderVideoSettings()
 {
-#ifdef FRESH_IMGUI_AVAILABLE
     ImGui::Spacing();
     ImGui::Text("Display Settings");
     ImGui::Separator();
@@ -209,7 +212,6 @@ void SettingsPanel::renderVideoSettings()
 
 void SettingsPanel::renderAudioSettings()
 {
-#ifdef FRESH_IMGUI_AVAILABLE
     ImGui::Spacing();
     ImGui::Text("Volume Settings");
     ImGui::Separator();
@@ -244,7 +246,6 @@ void SettingsPanel::renderAudioSettings()
 
 void SettingsPanel::renderControlsSettings()
 {
-#ifdef FRESH_IMGUI_AVAILABLE
     ImGui::Spacing();
     ImGui::Text("Mouse Settings");
     ImGui::Separator();
@@ -286,7 +287,6 @@ void SettingsPanel::renderControlsSettings()
 
 void SettingsPanel::renderGameplaySettings()
 {
-#ifdef FRESH_IMGUI_AVAILABLE
     ImGui::Spacing();
     ImGui::Text("Performance Settings");
     ImGui::Separator();
@@ -412,3 +412,4 @@ void SettingsPanel::saveSettings()
 }
 
 } // namespace fresh
+#endif // ImGui code disabled

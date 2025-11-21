@@ -125,9 +125,7 @@ namespace fresh
     constexpr int KEY_RIGHT_SHIFT = GLFW_KEY_RIGHT_SHIFT;
     constexpr int MOUSE_BUTTON_LEFT = GLFW_MOUSE_BUTTON_LEFT;
     constexpr int MOUSE_BUTTON_RIGHT = GLFW_MOUSE_BUTTON_RIGHT;
-#endif
-
-// Rendering constants
+#endif // Rendering constants
 namespace
 {
 constexpr float MAX_INTERACTION_DISTANCE = 5.0f;
@@ -234,9 +232,7 @@ bool Engine::initialize()
     setupNativeMenuBar();
     // Set up native Win32 toolbar
     setupNativeToolbar();
-#endif
-
-    // Initialize renderer with the window
+#endif // Initialize renderer with the window
     if (!m_renderer->initialize(m_window.get())) {
         std::cerr << "Failed to initialize renderer" << std::endl;
         LOG_ERROR_C("Failed to initialize renderer", "Engine");
@@ -288,8 +284,7 @@ bool Engine::initialize()
     std::cout << "Entity manager initialized" << std::endl;
     LOG_INFO_C("Entity manager initialized", "Engine");
 
-#ifdef FRESH_IMGUI_AVAILABLE
-    // Create comprehensive editor manager (requires ImGui) - show immediately
+    // Create comprehensive editor manager (uses Windows Native Win32 UI) - show immediately
     m_editorManager = std::make_unique<EditorManager>();
     // Initialize with nullptr for world and worldEditor initially
     if (!m_editorManager->initialize(m_window.get(), m_renderer.get(), nullptr, nullptr,
@@ -301,7 +296,6 @@ bool Engine::initialize()
     m_editorManager->setVisible(true); // Show editor immediately
     std::cout << "Editor manager initialized" << std::endl;
     LOG_INFO_C("Editor manager initialized", "Engine");
-#endif
 
     m_running = true;
     m_inGame = false; // Start in menu mode
@@ -442,7 +436,6 @@ void Engine::initializeGameSystems()
         }
     }
 
-#ifdef FRESH_IMGUI_AVAILABLE
     // Update editor manager with the world instead of shutting down and re-initializing
     if (m_editorManager && m_world && m_worldEditor) {
         // Update the editor manager with world and world editor references
@@ -499,16 +492,12 @@ void Engine::initializeGameSystems()
             }
         }
     }
-#endif
-
-    // Initialize rendering based on API
+#endif // Initialize rendering based on API
 #if defined(FRESH_OPENGL_SUPPORT) && defined(FRESH_GLEW_AVAILABLE)
     if (m_renderer->getAPI() == GraphicsAPI::OpenGL) {
         initializeRendering();
     }
-#endif
-
-    // DirectX 11 rendering confirmation
+#endif // DirectX 11 rendering confirmation
     if (m_renderer->getAPI() == GraphicsAPI::DirectX11) {
         std::cout << "DirectX 11 voxel rendering ready" << std::endl;
     }
@@ -533,15 +522,12 @@ void Engine::initializeGameSystems()
     m_player->setPosition(glm::vec3(0.0f, 80.0f, 0.0f));
     std::cout << "Player initialized" << std::endl;
     
-#ifdef FRESH_IMGUI_AVAILABLE
     // Set player reference in editor manager for camera-based operations like paste
     if (m_editorManager) {
         m_editorManager->setPlayer(m_player.get());
         LOG_INFO_C("Editor manager updated with player reference", "Engine");
     }
-#endif
-    
-    // Set up camera mode based on world type
+#endif // Set up camera mode based on world type
     if (!m_isWorld3D) {
         Camera& camera = m_player->getCamera();
         if (m_world2DStyle == 0) {
@@ -568,7 +554,6 @@ void Engine::initializeGameSystems()
     }
 
     // Initialize hotbar with common block types
-#ifdef FRESH_IMGUI_AVAILABLE
     if (m_editorManager && m_editorManager->getHotbar()) {
         auto* hotbar = m_editorManager->getHotbar();
         
@@ -615,11 +600,7 @@ void Engine::initializeGameSystems()
         LOG_INFO_C("Hotbar initialized with " + std::to_string(commonBlocks.size()) + " block types", 
                   "Engine");
     }
-#endif
-
-    // Keep editor visible and stay in UI mode (editor-first approach)
     m_inputManager->setInputMode(InputMode::UIMode);
-#ifdef FRESH_IMGUI_AVAILABLE
     // Keep the editor manager visible when entering game
     if (m_editorManager) {
         m_editorManager->setVisible(true);
@@ -636,7 +617,6 @@ void Engine::initializeGameSystems()
     
     // Create demo entities for Inspector demonstration
     createDemoEntities();
-#endif
     m_inGame = true;
 }
 
@@ -665,7 +645,6 @@ void Engine::run()
 
         // If not in game yet, show GUI menu and handle world creation
         if (!m_inGame) {
-#ifdef FRESH_IMGUI_AVAILABLE
             // Set clear color and begin frame for menu rendering
             if (m_renderer) {
                 m_renderer->clearColor(0.53f, 0.81f, 0.92f, 1.0f);
@@ -699,7 +678,6 @@ void Engine::run()
                 loadWorld(m_mainMenu->getLoadWorldName());
                 m_mainMenu->clearFlags();
             }
-#endif
             continue;
         }
 
@@ -773,15 +751,12 @@ void Engine::shutdown()
     // Clean up GLFW callback user data
     m_callbackUserData.reset();
 #endif
-
-#ifdef FRESH_IMGUI_AVAILABLE
     // Explicitly shutdown editor manager BEFORE resetting renderer
-    // This ensures ImGuiContext can safely access render context during shutdown
+    // This ensures proper cleanup during shutdown
     if (m_editorManager) {
         m_editorManager->shutdown();
         m_editorManager.reset();
     }
-#endif
 
     m_player.reset();
     m_inputManager.reset();
@@ -811,7 +786,6 @@ void Engine::processInput()
         m_inputManager->update();
 
         // Check if GUI wants input (only process world input if GUI doesn't need it)
-#ifdef FRESH_IMGUI_AVAILABLE
         bool guiCapturesMouse = m_editorManager && m_editorManager->wantCaptureMouse();
         (void)guiCapturesMouse; // May be unused in this scope
         bool guiCapturesKeyboard = m_editorManager && m_editorManager->wantCaptureKeyboard();
@@ -819,10 +793,7 @@ void Engine::processInput()
         bool guiCapturesMouse = false;
         (void)guiCapturesMouse; // Suppress unused warning
         bool guiCapturesKeyboard = false;
-#endif
-
-        // Handle hotbar key presses (1-0) when not in editor mode and GUI doesn't capture keyboard
-#ifdef FRESH_IMGUI_AVAILABLE
+#endif // Handle hotbar key presses (1-0) when not in editor mode and GUI doesn't capture keyboard
         if (!guiCapturesKeyboard && m_editorManager && m_editorManager->getHotbar()) {
             auto* hotbar = m_editorManager->getHotbar();
             if (hotbar->isVisible()) {
@@ -912,9 +883,7 @@ void Engine::processInput()
                 }
             }
         }
-#endif
-
-        // F key to toggle mouse cursor capture (camera freelook vs GUI mode)
+#endif // F key to toggle mouse cursor capture (camera freelook vs GUI mode)
         if (!guiCapturesKeyboard && m_inputManager->isKeyJustPressed(KEY_F)) {
             m_inputManager->toggleCursorCapture();
             m_userToggledCursor = true;  // Track that user explicitly toggled
@@ -937,8 +906,7 @@ void Engine::processInput()
         // Keeping this code commented out for reference
         // if (!guiCapturesKeyboard &&
         //     m_inputManager->isActionJustPressed(InputAction::ToggleEditor)) {
-        // #ifdef FRESH_IMGUI_AVAILABLE
-        //     if (m_editorManager) {
+        //         //     if (m_editorManager) {
         //         m_editorManager->toggle();
         //         // Switch to UI mode when editor is visible, game mode when hidden
         //         if (m_editorManager->isVisible()) {
@@ -950,8 +918,7 @@ void Engine::processInput()
         //     }
         // #else
         //     LOG_INFO_C("Editor not available (ImGui required)", "Engine");
-        // #endif
-        // }
+        // #endif // }
 
         // Allow ESC to close the window (only if GUI doesn't want keyboard)
         if (!guiCapturesKeyboard && m_inputManager->isActionJustPressed(InputAction::OpenMenu)) {
@@ -979,15 +946,12 @@ void Engine::update(float deltaTime)
     // }
 
     // Check if GUI wants input before processing player updates
-#ifdef FRESH_IMGUI_AVAILABLE
     bool guiCapturesMouse = m_editorManager && m_editorManager->wantCaptureMouse();
     bool guiCapturesKeyboard = m_editorManager && m_editorManager->wantCaptureKeyboard();
 #else
     bool guiCapturesMouse = false;
     bool guiCapturesKeyboard = false;
-#endif
-
-    // ========================================================================
+#endif // ========================================================================
     // UNREAL-STYLE MOUSE CONTROL SYSTEM
     // ========================================================================
     // In Unreal Engine:
@@ -1181,9 +1145,7 @@ void Engine::render()
         // Render crosshair overlay
         renderCrosshair();
     }
-#endif
-
-    // DirectX 11 rendering path
+#endif // DirectX 11 rendering path
 #ifdef _WIN32
     if (m_renderer->getAPI() == GraphicsAPI::DirectX11) {
         // Render voxel world using DirectX 11
@@ -1205,10 +1167,7 @@ void Engine::render()
             }
         }
     }
-#endif
-
-#ifdef FRESH_IMGUI_AVAILABLE
-    // Begin editor frame (ImGui) before rendering editor UI
+#endif // Begin editor frame (ImGui) before rendering editor UI
     if (m_editorManager && m_editorManager->isInitialized()) {
         m_editorManager->beginFrame();
     }
@@ -1222,7 +1181,6 @@ void Engine::render()
     if (m_editorManager && m_editorManager->isInitialized()) {
         m_editorManager->endFrame();
     }
-#endif // FRESH_IMGUI_AVAILABLE
 
     m_renderer->endFrame();
 }
@@ -2204,7 +2162,6 @@ void Engine::createDemoEntities()
         return;
     }
 
-#ifdef FRESH_IMGUI_AVAILABLE
     if (!m_editorManager) {
         LOG_WARNING_C("Cannot create demo entities: EditorManager not available", "Engine");
         return;

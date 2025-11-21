@@ -1,3 +1,8 @@
+// DEPRECATED: This file contains ImGui code and is no longer used.
+// Fresh Voxel Engine uses Windows Native Win32 UI exclusively.
+// See WINDOWS_NATIVE_ONLY_POLICY.md
+
+#if 0 // ImGui code disabled - not compiled
 #ifdef _WIN32
 
 #include "ui/WindowsCustomizationPanel.h"
@@ -51,7 +56,6 @@ bool WindowsCustomizationPanel::initialize(WindowsThemeManager* themeManager,
 
 void WindowsCustomizationPanel::render()
 {
-#ifdef FRESH_IMGUI_AVAILABLE
     if (!m_visible) {
         return;
     }
@@ -96,7 +100,6 @@ void WindowsCustomizationPanel::render()
 
 void WindowsCustomizationPanel::renderThemeSection()
 {
-#ifdef FRESH_IMGUI_AVAILABLE
     if (!m_themeManager) {
         ImGui::TextColored(ImVec4(1.0f, 0.5f, 0.0f, 1.0f), 
                           "Theme manager not available");
@@ -176,7 +179,6 @@ void WindowsCustomizationPanel::renderThemeSection()
 
 void WindowsCustomizationPanel::renderDialogSection()
 {
-#ifdef FRESH_IMGUI_AVAILABLE
     if (!m_dialogManager) {
         ImGui::TextColored(ImVec4(1.0f, 0.5f, 0.0f, 1.0f), 
                           "Dialog manager not available");
@@ -299,7 +301,6 @@ void WindowsCustomizationPanel::renderDialogSection()
 
 void WindowsCustomizationPanel::renderTaskbarSection()
 {
-#ifdef FRESH_IMGUI_AVAILABLE
     if (!m_taskbarManager) {
         ImGui::TextColored(ImVec4(1.0f, 0.5f, 0.0f, 1.0f), 
                           "Taskbar manager not available");
@@ -390,7 +391,6 @@ void WindowsCustomizationPanel::renderTaskbarSection()
 
 void WindowsCustomizationPanel::renderCustomThemeEditor()
 {
-#ifdef FRESH_IMGUI_AVAILABLE
     if (!m_themeManager) {
         return;
     }
@@ -492,3 +492,4 @@ void WindowsCustomizationPanel::renderCustomThemeEditor()
 } // namespace fresh
 
 #endif // _WIN32
+#endif // ImGui code disabled

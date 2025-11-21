@@ -37,7 +37,7 @@
 #include "ui/EditorMenuBar.h"
 #include "ui/EditorToolbar.h"
 #include "ui/HotbarPanel.h"
-#include "ui/ImGuiContext.h"
+// Removed: ImGuiContext.h (ImGui has been removed from this project)
 #include "ui/InspectorPanel.h"
 // Removed ImGui-based panels (replaced with Win32 native versions):
 // #include "ui/MainMenuPanel.h"
@@ -704,128 +704,11 @@ bool EditorManager::updateWorld(VoxelWorld* world, WorldEditor* worldEditor)
         return false;
     }
 
-#ifdef FRESH_IMGUI_AVAILABLE
-    // Update world references
-    m_world = world;
-    m_worldEditor = worldEditor;
-
-    // Recreate world-dependent panels with new world reference
-    // Shutdown and reinitialize only the world-dependent panels
-    m_sceneHierarchy.reset();
-    m_inspector.reset();
-    m_menuBar.reset();
-    m_toolbar.reset();
-    m_contentBrowser.reset();
-    m_console.reset();
-    m_voxelTools.reset();
-
-    // Reinitialize world-dependent panels
-    m_sceneHierarchy = std::make_unique<SceneHierarchyPanel>();
-    if (!m_sceneHierarchy->initialize(world)) {
-        LOG_ERROR_C("Failed to initialize Scene Hierarchy panel", "EditorManager");
-        return false;
-    }
-
-    m_inspector = std::make_unique<InspectorPanel>();
-    if (!m_inspector->initialize(m_entityManager)) {
-        LOG_ERROR_C("Failed to initialize Inspector panel", "EditorManager");
-        return false;
-    }
-
-    m_menuBar = std::make_unique<EditorMenuBar>();
-    if (!m_menuBar->initialize(world, worldEditor)) {
-        LOG_ERROR_C("Failed to initialize Menu Bar", "EditorManager");
-        return false;
-    }
-
-    // Link menu bar to panel visibility flags
-    m_menuBar->setSceneHierarchyVisible(&m_showSceneHierarchy);
-    m_menuBar->setInspectorVisible(&m_showInspector);
-    m_menuBar->setContentBrowserVisible(&m_showContentBrowser);
-    m_menuBar->setConsoleVisible(&m_showConsole);
-    m_menuBar->setToolPaletteVisible(&m_showToolPalette);
-
-    // Set settings callback to open settings panel
-    m_menuBar->setSettingsCallback([this]() {
-        if (m_settingsPanel) {
-            m_settingsPanel->setVisible(true);
-        }
-    });
-
-    // Set import assets callback to show import dialog in content browser
-    m_menuBar->setImportAssetsCallback([this]() {
-        if (m_contentBrowser) {
-            m_contentBrowser->showImportDialog();
-        }
-    });
-
-    // Set select all/deselect all callbacks for scene hierarchy
-    m_menuBar->setSelectAllCallback([this]() {
-        if (m_sceneHierarchy) {
-            m_sceneHierarchy->selectAll();
-        }
-    });
-
-    m_menuBar->setDeselectAllCallback([this]() {
-        if (m_sceneHierarchy) {
-            m_sceneHierarchy->deselectAll();
-        }
-    });
-
-    // Set undo/redo callbacks for terraforming
-    m_menuBar->setUndoCallback([this, worldEditor]() {
-        if (worldEditor && worldEditor->getTerraformingSystem()) {
-            if (worldEditor->getTerraformingSystem()->undo()) {
-                LOG_INFO_C("Undo performed", "EditorManager");
-            } else {
-                LOG_INFO_C("Nothing to undo", "EditorManager");
-            }
-        }
-    });
-
-    m_menuBar->setRedoCallback([this, worldEditor]() {
-        if (worldEditor && worldEditor->getTerraformingSystem()) {
-            if (worldEditor->getTerraformingSystem()->redo()) {
-                LOG_INFO_C("Redo performed", "EditorManager");
-            } else {
-                LOG_INFO_C("Nothing to redo", "EditorManager");
-            }
-        }
-    });
-
-    m_toolbar = std::make_unique<EditorToolbar>();
-    if (!m_toolbar->initialize()) {
-        LOG_ERROR_C("Failed to initialize Toolbar", "EditorManager");
-        return false;
-    }
-
-    m_contentBrowser = std::make_unique<ContentBrowserPanel>();
-    if (!m_contentBrowser->initialize("assets")) {
-        LOG_ERROR_C("Failed to initialize Content Browser panel", "EditorManager");
-        return false;
-    }
-
-    m_console = std::make_unique<ConsolePanel>();
-    if (!m_console->initialize()) {
-        LOG_ERROR_C("Failed to initialize Console panel", "EditorManager");
-        return false;
-    }
-
-    m_voxelTools = std::make_unique<VoxelToolPalette>();
-    if (!m_voxelTools->initialize(worldEditor->getTerraformingSystem())) {
-        LOG_ERROR_C("Failed to initialize Voxel Tool Palette", "EditorManager");
-        return false;
-    }
-
-    LOG_INFO_C("EditorManager updated with new world successfully", "EditorManager");
-    return true;
-#else
-    // On Windows with native UI, updating world is simpler
+    // Windows native UI - update world reference
     m_world = world;
     m_worldEditor = worldEditor;
     LOG_INFO_C("EditorManager updated with new world (Windows native UI)", "EditorManager");
     return true;
-#endif // FRESH_IMGUI_AVAILABLE
 }
 
 bool EditorManager::wantCaptureMouse() const
@@ -1169,18 +1052,8 @@ void EditorManager::newWorld()
         );
         
         if (result == MessageBoxResult::Yes) {
-#ifdef FRESH_IMGUI_AVAILABLE
-            // Show the main menu panel to allow user to configure new world
-            if (m_mainMenuPanel) {
-                m_mainMenuPanel->setMenuActive(true);
-                // Clear any existing flags
-                m_mainMenuPanel->clearFlags();
-                LOG_INFO_C("Main menu activated for new world creation", "EditorManager");
-            }
-#else
-            // ImGui not available - create world with default settings
-            // In future, this should show a native Win32 dialog for world configuration
-            LOG_INFO_C("ImGui not available - cannot show world creation panel", "EditorManager");
+            // Native Win32 UI - world creation dialog not yet fully implemented
+            LOG_INFO_C("Native Win32 UI - world creation dialog not yet fully implemented", "EditorManager");
             
             // Show informative message to user
             if (m_windowsDialogManager) {
@@ -1195,7 +1068,6 @@ void EditorManager::newWorld()
                     MessageBoxIcon::Information
                 );
             }
-#endif
         } else {
             LOG_INFO_C("New world cancelled by user", "EditorManager");
         }
@@ -1321,11 +1193,6 @@ void EditorManager::launchDialogueEditor()
         
         if (!std::filesystem::exists(editorPath)) {
             LOG_ERROR_C("Dialogue editor executable not found. Please build the DialogueEditor project.", "EditorManager");
-            
-            #ifdef FRESH_IMGUI_AVAILABLE
-            // Show error dialog in ImGui if available
-            // (This would be implemented in a future update)
-            #endif
             
             return;
         }

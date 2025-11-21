@@ -44,7 +44,7 @@ struct ThemeColors
  * - Dark mode detection and support
  * - Windows accent color integration
  * - Custom theme presets
- * - ImGui style synchronization
+ * - Native Win32 UI styling
  */
 class WindowsThemeManager
 {
@@ -86,12 +86,6 @@ public:
      * @return Accent color as RGBA
      */
     uint32_t getWindowsAccentColor() const;
-
-    /**
-     * @brief Apply theme to ImGui
-     * Synchronizes current theme with ImGui styling
-     */
-    void applyToImGui();
 
     /**
      * @brief Get theme colors for current theme
