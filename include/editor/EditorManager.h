@@ -1,5 +1,6 @@
 #pragma once
 
+#include <functional>
 #include <memory>
 #include <string>
 
@@ -116,6 +117,12 @@ public:
     void beginFrame();
 
     /**
+     * @brief Update editor state
+     * @param deltaTime Time since last frame
+     */
+    void update(float deltaTime);
+
+    /**
      * @brief Render all editor UI
      */
     void render();
@@ -191,6 +198,24 @@ public:
      */
     bool wantCaptureKeyboard() const;
 
+    /**
+     * @brief Set callback for world creation
+     * @param callback Function to call when a new world should be created (worldName, seed, is3D)
+     */
+    void setWorldCreationCallback(std::function<void(const std::string&, int, bool)> callback)
+    {
+        m_worldCreationCallback = callback;
+    }
+
+    /**
+     * @brief Set callback for world loading
+     * @param callback Function to call when a world should be loaded (worldName)
+     */
+    void setWorldLoadCallback(std::function<void(const std::string&)> callback)
+    {
+        m_worldLoadCallback = callback;
+    }
+
     // Removed ImGui-based panel getters (replaced with Win32 native versions):
     // MainMenuPanel* getMainMenuPanel() const
     // SettingsPanel* getSettingsPanel() const  
@@ -223,6 +248,17 @@ public:
     {
         return m_hotbar.get();
     }
+
+#ifdef _WIN32
+    /**
+     * @brief Get the native Win32 HUD
+     * @return Win32 HUD pointer
+     */
+    Win32HUD* getHUD() const
+    {
+        return m_nativeHUD.get();
+    }
+#endif
 
     /**
      * @brief Get the voxel tool palette
@@ -517,6 +553,10 @@ private:
     
     // World file path
     std::string m_currentWorldPath;
+
+    // Callbacks for world operations (set by Engine)
+    std::function<void(const std::string&, int, bool)> m_worldCreationCallback;
+    std::function<void(const std::string&)> m_worldLoadCallback;
 };
 
 } // namespace fresh

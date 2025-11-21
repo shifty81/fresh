@@ -30,6 +30,8 @@ Win32ConsolePanel::Win32ConsolePanel()
 
 Win32ConsolePanel::~Win32ConsolePanel()
 {
+    // Unregister from Logger
+    Logger::getInstance().removeListener(this);
 }
 
 bool Win32ConsolePanel::create(HWND parent, int x, int y, int width, int height)
@@ -46,6 +48,10 @@ bool Win32ConsolePanel::create(HWND parent, int x, int y, int width, int height)
     }
 
     createControls();
+    
+    // Register with Logger to receive log messages
+    Logger::getInstance().addListener(this);
+    
     return true;
 }
 
@@ -428,6 +434,34 @@ COLORREF Win32ConsolePanel::getMessageColor(MessageType type) const
         default:
             return UnrealStyleTheme::PRIMARY_TEXT;
     }
+}
+
+void Win32ConsolePanel::onLogMessage(LogLevel level, const std::string& message, const std::string& component)
+{
+    // Convert LogLevel to MessageType
+    MessageType type;
+    switch (level) {
+        case LogLevel::WARNING:
+            type = MessageType::Warning;
+            break;
+        case LogLevel::ERR:
+        case LogLevel::FATAL:
+            type = MessageType::Error;
+            break;
+        case LogLevel::INFO:
+        default:
+            type = MessageType::Info;
+            break;
+    }
+
+    // Format the message with component if present
+    std::string fullMessage = message;
+    if (!component.empty()) {
+        fullMessage = "[" + component + "] " + message;
+    }
+
+    // Add the message to the console
+    addMessage(type, fullMessage);
 }
 
 } // namespace fresh

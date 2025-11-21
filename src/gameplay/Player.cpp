@@ -19,6 +19,13 @@ void Player::update(float deltaTime)
     if (!world)
         return;
 
+    // Update stamina (regenerates when not sprinting)
+    if (!isSprinting) {
+        restoreStamina(20.0f * deltaTime); // Regenerate 20 stamina per second
+    } else {
+        consumeStamina(10.0f * deltaTime); // Consume 10 stamina per second when sprinting
+    }
+
     // In free flight mode, no gravity or collision
     if (freeFlightMode) {
         // Apply velocity directly in free flight mode
