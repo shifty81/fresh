@@ -70,6 +70,7 @@ void Win32InputManager::processMouseMovement(int xpos, int ypos)
         lastMouseX = xpos;
         lastMouseY = ypos;
         firstMouse = false;
+        return; // Skip this frame to avoid jump
     }
 
     float xoffset = static_cast<float>(xpos - lastMouseX);
@@ -81,6 +82,22 @@ void Win32InputManager::processMouseMovement(int xpos, int ypos)
     if (cursorCaptured) {
         mouseDelta.x += xoffset * sensitivity;
         mouseDelta.y += yoffset * sensitivity;
+        
+        // Re-center cursor to prevent hitting window edges
+        if (window) {
+            HWND hwnd = window->getHandle();
+            RECT rect;
+            GetClientRect(hwnd, &rect);
+            POINT center = {rect.right / 2, rect.bottom / 2};
+            ClientToScreen(hwnd, &center);
+            
+            SetCursorPos(center.x, center.y);
+            
+            // Update lastMouse to the center position to calculate delta correctly next frame
+            POINT clientCenter = {rect.right / 2, rect.bottom / 2};
+            lastMouseX = clientCenter.x;
+            lastMouseY = clientCenter.y;
+        }
     }
 }
 
