@@ -40,6 +40,7 @@
 #include "ecs/MaterialComponent.h"
 #include "editor/EditorGUI.h"
 #include "editor/EditorManager.h"
+#include "editor/TerraformingSystem.h"
 #include "editor/TransformGizmo.h"
 #include "editor/WorldEditor.h"
 #include "gameplay/Player.h"
@@ -1819,7 +1820,9 @@ void Engine::setupNativeMenuBar()
     });
     menuBar->addMenuItem(viewMenu, "Show Stats\tCtrl+Shift+S", [this]() {
         LOG_INFO_C("Show Stats toggled", "Engine");
-        // TODO: Toggle stats overlay
+        if (m_editorManager) {
+            m_editorManager->showEngineConfig();
+        }
     });
 
     // ========== WORLD MENU (Unreal-style) ==========
@@ -1862,45 +1865,63 @@ void Engine::setupNativeMenuBar()
     int toolsMenu = menuBar->addMenu("Tools");
     menuBar->addMenuItem(toolsMenu, "Brush\tB", [this]() {
         LOG_INFO_C("Brush tool selected", "Engine");
-        // TODO: Activate brush tool
+        if (m_worldEditor && m_worldEditor->getTerraformingSystem()) {
+            m_worldEditor->getTerraformingSystem()->setTool(TerraformTool::Brush);
+        }
     });
     menuBar->addMenuItem(toolsMenu, "Paint\tP", [this]() {
         LOG_INFO_C("Paint tool selected", "Engine");
-        // TODO: Activate paint tool
+        if (m_worldEditor && m_worldEditor->getTerraformingSystem()) {
+            m_worldEditor->getTerraformingSystem()->setTool(TerraformTool::Paint);
+        }
     });
     menuBar->addMenuItem(toolsMenu, "Sculpt\tS", [this]() {
-        LOG_INFO_C("Sculpt tool selected", "Engine");
-        // TODO: Activate sculpt tool
+        LOG_INFO_C("Sculpt tool selected (using FilledSphere)", "Engine");
+        if (m_worldEditor && m_worldEditor->getTerraformingSystem()) {
+            m_worldEditor->getTerraformingSystem()->setTool(TerraformTool::FilledSphere);
+        }
     });
     menuBar->addMenuItem(toolsMenu, "Smooth\tM", [this]() {
         LOG_INFO_C("Smooth tool selected", "Engine");
-        // TODO: Activate smooth tool
+        if (m_worldEditor && m_worldEditor->getTerraformingSystem()) {
+            m_worldEditor->getTerraformingSystem()->setTool(TerraformTool::Smooth);
+        }
     });
     menuBar->addSeparator(toolsMenu);
     menuBar->addMenuItem(toolsMenu, "Select\tV", [this]() {
         LOG_INFO_C("Select tool activated", "Engine");
-        // TODO: Activate selection tool
+        if (m_worldEditor && m_worldEditor->getTerraformingSystem()) {
+            m_worldEditor->getTerraformingSystem()->setTool(TerraformTool::SingleBlock);
+        }
     });
     menuBar->addMenuItem(toolsMenu, "Move\tW", [this]() {
         LOG_INFO_C("Move tool activated", "Engine");
-        // TODO: Activate move tool
+        if (m_editorManager && m_editorManager->getTransformGizmo()) {
+            m_editorManager->getTransformGizmo()->setMode(TransformGizmo::Mode::Translate);
+        }
     });
     menuBar->addMenuItem(toolsMenu, "Rotate\tE", [this]() {
         LOG_INFO_C("Rotate tool activated", "Engine");
-        // TODO: Activate rotate tool
+        if (m_editorManager && m_editorManager->getTransformGizmo()) {
+            m_editorManager->getTransformGizmo()->setMode(TransformGizmo::Mode::Rotate);
+        }
     });
     menuBar->addMenuItem(toolsMenu, "Scale\tR", [this]() {
         LOG_INFO_C("Scale tool activated", "Engine");
-        // TODO: Activate scale tool
+        if (m_editorManager && m_editorManager->getTransformGizmo()) {
+            m_editorManager->getTransformGizmo()->setMode(TransformGizmo::Mode::Scale);
+        }
     });
     menuBar->addSeparator(toolsMenu);
     menuBar->addMenuItem(toolsMenu, "Asset Manager...", [this]() {
         LOG_INFO_C("Asset Manager opened", "Engine");
-        // TODO: Show asset manager
+        if (m_editorManager) {
+            m_editorManager->toggleContentBrowser();
+        }
     });
     menuBar->addMenuItem(toolsMenu, "Material Editor...", [this]() {
         LOG_INFO_C("Material Editor opened", "Engine");
-        // TODO: Show material editor
+        // TODO: Show dedicated material editor (not yet implemented)
     });
 
     // ========== WINDOW MENU (Unreal-style) ==========
