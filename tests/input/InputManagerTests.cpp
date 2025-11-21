@@ -362,3 +362,21 @@ TEST_F(InputManagerTest, ToggleCursorCapture_SwitchesModes) {
     // The method should exist and be callable without crashing
     EXPECT_NO_THROW(inputManager->toggleCursorCapture());
 }
+
+/**
+ * Test that mouse movement is properly tracked after first mouse flag is set
+ * This test verifies the fix for the bug where camera doesn't move when right-click is held
+ */
+TEST_F(InputManagerTest, ProcessMouseMovement_AfterFirstMouse_TracksMovementCorrectly) {
+    // Arrange - simulate the scenario where cursor is captured (firstMouse would be set to true)
+    // First movement establishes baseline position
+    inputManager->processMouseMovement(100.0, 100.0);
+    
+    // Act - simulate subsequent movement (this should produce non-zero delta)
+    inputManager->processMouseMovement(110.0, 120.0);
+    
+    // Assert - delta should reflect the movement
+    glm::vec2 delta = inputManager->getMouseDelta();
+    EXPECT_FLOAT_EQ(delta.x, 10.0f);
+    EXPECT_FLOAT_EQ(delta.y, 20.0f);
+}

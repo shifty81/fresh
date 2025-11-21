@@ -155,7 +155,8 @@ void InputManager::processMouseMovement(double xpos, double ypos)
         lastMouseX = xpos;
         lastMouseY = ypos;
         firstMouse = false;
-        return;
+        // Don't return early - we still want to process this movement
+        // but the delta will be zero since we just set lastMouse positions
     }
 
     float xOffset = static_cast<float>(xpos - lastMouseX);
