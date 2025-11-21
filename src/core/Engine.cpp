@@ -9,6 +9,7 @@
 
 #ifdef _WIN32
     #include <windows.h>
+    #include <shellapi.h>  // For ShellExecuteA
 #elif defined(__APPLE__)
     #include <mach-o/dyld.h>
     #include <limits.h>
@@ -40,6 +41,7 @@
 #include "ecs/MaterialComponent.h"
 #include "editor/EditorGUI.h"
 #include "editor/EditorManager.h"
+#include "editor/TerraformingSystem.h"
 #include "editor/TransformGizmo.h"
 #include "editor/WorldEditor.h"
 #include "gameplay/Player.h"
@@ -91,6 +93,7 @@ namespace fresh
     constexpr int KEY_W = 'W';
     constexpr int KEY_Y = 'Y';
     constexpr int KEY_Z = 'Z';
+    constexpr int KEY_ESCAPE = VK_ESCAPE;
     constexpr int KEY_LEFT_CONTROL = VK_LCONTROL;
     constexpr int KEY_RIGHT_CONTROL = VK_RCONTROL;
     constexpr int KEY_LEFT_SHIFT = VK_LSHIFT;
@@ -115,6 +118,7 @@ namespace fresh
     constexpr int KEY_W = GLFW_KEY_W;
     constexpr int KEY_Y = GLFW_KEY_Y;
     constexpr int KEY_Z = GLFW_KEY_Z;
+    constexpr int KEY_ESCAPE = GLFW_KEY_ESCAPE;
     constexpr int KEY_LEFT_CONTROL = GLFW_KEY_LEFT_CONTROL;
     constexpr int KEY_RIGHT_CONTROL = GLFW_KEY_RIGHT_CONTROL;
     constexpr int KEY_LEFT_SHIFT = GLFW_KEY_LEFT_SHIFT;
@@ -943,6 +947,14 @@ void Engine::processInput()
                 LOG_INFO_C("Mouse released - GUI mode enabled", "Engine");
             }
         }
+        
+        // ESC key to exit play mode (Unreal-style)
+        if (!guiCapturesKeyboard && m_inputManager->isKeyJustPressed(KEY_ESCAPE)) {
+            if (m_inGame) {
+                LOG_INFO_C("ESC pressed - Exiting play mode", "Engine");
+                exitPlayMode();
+            }
+        }
 
         // T key disabled - editor is always visible in new editor-first mode
         // Keeping this code commented out for reference
@@ -1736,23 +1748,37 @@ void Engine::setupNativeMenuBar()
     int viewMenu = menuBar->addMenu("View");
     menuBar->addMenuItem(viewMenu, "Perspective\t1", [this]() {
         LOG_INFO_C("Perspective view selected", "Engine");
-        // TODO: Switch to perspective view
+        if (m_editorManager) {
+            m_editorManager->setCameraViewMode("Perspective");
+        }
     });
     menuBar->addMenuItem(viewMenu, "Top\t2", [this]() {
         LOG_INFO_C("Top view selected", "Engine");
-        // TODO: Switch to top view
+        if (m_editorManager) {
+            m_editorManager->setCameraViewMode("Top");
+        }
     });
     menuBar->addMenuItem(viewMenu, "Front\t3", [this]() {
         LOG_INFO_C("Front view selected", "Engine");
-        // TODO: Switch to front view
+        if (m_editorManager) {
+            m_editorManager->setCameraViewMode("Front");
+        }
     });
     menuBar->addMenuItem(viewMenu, "Side\t4", [this]() {
         LOG_INFO_C("Side view selected", "Engine");
-        // TODO: Switch to side view
+        if (m_editorManager) {
+            m_editorManager->setCameraViewMode("Side");
+        }
     });
     menuBar->addMenuItem(viewMenu, "Reset Camera\tHome", [this]() {
         LOG_INFO_C("Reset Camera menu item clicked", "Engine");
-        // TODO: Reset camera position
+        if (m_editorManager) {
+            m_editorManager->setCameraViewMode("Perspective");
+        }
+        // Also reset player position if available
+        if (m_player) {
+            m_player->setPosition(glm::vec3(0.0f, 70.0f, 0.0f));
+        }
     });
     menuBar->addSeparator(viewMenu);
     menuBar->addMenuItem(viewMenu, "Content Browser\tCtrl+B", [this]() {
@@ -1782,30 +1808,39 @@ void Engine::setupNativeMenuBar()
     menuBar->addSeparator(viewMenu);
     menuBar->addMenuItem(viewMenu, "Toggle Fullscreen\tF11", [this]() {
         LOG_INFO_C("Toggle Fullscreen menu item clicked", "Engine");
-        // TODO: Toggle fullscreen
+        // TODO: Implement fullscreen toggle in Win32Window
+        // For now, user can use window maximize button
+        LOG_INFO_C("Fullscreen toggle not yet implemented - use window maximize", "Engine");
     });
     menuBar->addMenuItem(viewMenu, "Toggle UI\tU", [this]() {
         LOG_INFO_C("Toggle UI menu item clicked", "Engine");
-        // TODO: Toggle all UI visibility
+        if (m_editorManager) {
+            m_editorManager->toggle();
+        }
     });
     menuBar->addMenuItem(viewMenu, "Show Stats\tCtrl+Shift+S", [this]() {
         LOG_INFO_C("Show Stats toggled", "Engine");
-        // TODO: Toggle stats overlay
+        if (m_editorManager) {
+            m_editorManager->showEngineConfig();
+        }
     });
 
     // ========== WORLD MENU (Unreal-style) ==========
     int worldMenu = menuBar->addMenu("World");
     menuBar->addMenuItem(worldMenu, "Play\tAlt+P", [this]() {
         LOG_INFO_C("Play mode started", "Engine");
-        // TODO: Enter play mode
+        enterPlayMode();
     });
     menuBar->addMenuItem(worldMenu, "Pause\tAlt+Pause", [this]() {
         LOG_INFO_C("Play mode paused", "Engine");
-        // TODO: Pause game
+        // TODO: Implement pause (freeze time, stop physics updates)
+        if (m_physics) {
+            // m_physics->setPaused(!m_physics->isPaused());
+        }
     });
     menuBar->addMenuItem(worldMenu, "Stop\tEsc", [this]() {
         LOG_INFO_C("Play mode stopped", "Engine");
-        // TODO: Stop play mode
+        exitPlayMode();
     });
     menuBar->addSeparator(worldMenu);
     menuBar->addMenuItem(worldMenu, "Generate Terrain...", [this]() {
@@ -1830,45 +1865,63 @@ void Engine::setupNativeMenuBar()
     int toolsMenu = menuBar->addMenu("Tools");
     menuBar->addMenuItem(toolsMenu, "Brush\tB", [this]() {
         LOG_INFO_C("Brush tool selected", "Engine");
-        // TODO: Activate brush tool
+        if (m_worldEditor && m_worldEditor->getTerraformingSystem()) {
+            m_worldEditor->getTerraformingSystem()->setTool(TerraformTool::Brush);
+        }
     });
     menuBar->addMenuItem(toolsMenu, "Paint\tP", [this]() {
         LOG_INFO_C("Paint tool selected", "Engine");
-        // TODO: Activate paint tool
+        if (m_worldEditor && m_worldEditor->getTerraformingSystem()) {
+            m_worldEditor->getTerraformingSystem()->setTool(TerraformTool::Paint);
+        }
     });
     menuBar->addMenuItem(toolsMenu, "Sculpt\tS", [this]() {
-        LOG_INFO_C("Sculpt tool selected", "Engine");
-        // TODO: Activate sculpt tool
+        LOG_INFO_C("Sculpt tool selected (using FilledSphere)", "Engine");
+        if (m_worldEditor && m_worldEditor->getTerraformingSystem()) {
+            m_worldEditor->getTerraformingSystem()->setTool(TerraformTool::FilledSphere);
+        }
     });
     menuBar->addMenuItem(toolsMenu, "Smooth\tM", [this]() {
         LOG_INFO_C("Smooth tool selected", "Engine");
-        // TODO: Activate smooth tool
+        if (m_worldEditor && m_worldEditor->getTerraformingSystem()) {
+            m_worldEditor->getTerraformingSystem()->setTool(TerraformTool::Smooth);
+        }
     });
     menuBar->addSeparator(toolsMenu);
     menuBar->addMenuItem(toolsMenu, "Select\tV", [this]() {
         LOG_INFO_C("Select tool activated", "Engine");
-        // TODO: Activate selection tool
+        if (m_worldEditor && m_worldEditor->getTerraformingSystem()) {
+            m_worldEditor->getTerraformingSystem()->setTool(TerraformTool::SingleBlock);
+        }
     });
     menuBar->addMenuItem(toolsMenu, "Move\tW", [this]() {
         LOG_INFO_C("Move tool activated", "Engine");
-        // TODO: Activate move tool
+        if (m_editorManager && m_editorManager->getTransformGizmo()) {
+            m_editorManager->getTransformGizmo()->setMode(TransformGizmo::Mode::Translate);
+        }
     });
     menuBar->addMenuItem(toolsMenu, "Rotate\tE", [this]() {
         LOG_INFO_C("Rotate tool activated", "Engine");
-        // TODO: Activate rotate tool
+        if (m_editorManager && m_editorManager->getTransformGizmo()) {
+            m_editorManager->getTransformGizmo()->setMode(TransformGizmo::Mode::Rotate);
+        }
     });
     menuBar->addMenuItem(toolsMenu, "Scale\tR", [this]() {
         LOG_INFO_C("Scale tool activated", "Engine");
-        // TODO: Activate scale tool
+        if (m_editorManager && m_editorManager->getTransformGizmo()) {
+            m_editorManager->getTransformGizmo()->setMode(TransformGizmo::Mode::Scale);
+        }
     });
     menuBar->addSeparator(toolsMenu);
     menuBar->addMenuItem(toolsMenu, "Asset Manager...", [this]() {
         LOG_INFO_C("Asset Manager opened", "Engine");
-        // TODO: Show asset manager
+        if (m_editorManager) {
+            m_editorManager->toggleContentBrowser();
+        }
     });
     menuBar->addMenuItem(toolsMenu, "Material Editor...", [this]() {
         LOG_INFO_C("Material Editor opened", "Engine");
-        // TODO: Show material editor
+        // TODO: Show dedicated material editor (not yet implemented)
     });
 
     // ========== WINDOW MENU (Unreal-style) ==========
@@ -1914,34 +1967,75 @@ void Engine::setupNativeMenuBar()
     int helpMenu = menuBar->addMenu("Help");
     menuBar->addMenuItem(helpMenu, "Documentation\tF1", [this]() {
         LOG_INFO_C("Documentation menu item clicked", "Engine");
-        // TODO: Open documentation
+#ifdef _WIN32
+        // Open documentation in default browser
+        ShellExecuteA(NULL, "open", "https://github.com/shifty81/fresh/blob/main/DOCUMENTATION.md", NULL, NULL, SW_SHOWNORMAL);
+#endif
     });
     menuBar->addMenuItem(helpMenu, "Keyboard Shortcuts\tCtrl+?", [this]() {
         LOG_INFO_C("Keyboard Shortcuts displayed", "Engine");
-        // TODO: Show shortcuts reference
+#ifdef _WIN32
+        if (m_editorManager && m_editorManager->getEditorSettingsDialog()) {
+            m_editorManager->showEditorSettings();
+        } else {
+            MessageBoxA(NULL, 
+                "Editor Shortcuts:\n\n"
+                "F - Toggle cursor capture\n"
+                "ESC - Exit play mode\n"
+                "W/E/R - Transform tool (Move/Rotate/Scale)\n"
+                "Ctrl+Z - Undo\n"
+                "Ctrl+Y - Redo\n"
+                "Ctrl+S - Save\n"
+                "Alt+P - Play mode\n\n"
+                "Camera:\n"
+                "Right-click + drag - Free look\n"
+                "WASD - Move camera\n"
+                "Space/Ctrl - Up/Down\n"
+                "Shift - Speed boost",
+                "Keyboard Shortcuts", MB_OK | MB_ICONINFORMATION);
+        }
+#endif
     });
     menuBar->addSeparator(helpMenu);
     menuBar->addMenuItem(helpMenu, "Report Bug...", [this]() {
         LOG_INFO_C("Report Bug selected", "Engine");
-        // TODO: Open bug report
+#ifdef _WIN32
+        ShellExecuteA(NULL, "open", "https://github.com/shifty81/fresh/issues/new?template=bug_report.md", NULL, NULL, SW_SHOWNORMAL);
+#endif
     });
     menuBar->addMenuItem(helpMenu, "Feature Request...", [this]() {
         LOG_INFO_C("Feature Request selected", "Engine");
-        // TODO: Open feature request
+#ifdef _WIN32
+        ShellExecuteA(NULL, "open", "https://github.com/shifty81/fresh/issues/new?template=feature_request.md", NULL, NULL, SW_SHOWNORMAL);
+#endif
     });
     menuBar->addSeparator(helpMenu);
     menuBar->addMenuItem(helpMenu, "Check for Updates...", [this]() {
         LOG_INFO_C("Check for Updates selected", "Engine");
-        // TODO: Check for updates
+#ifdef _WIN32
+        ShellExecuteA(NULL, "open", "https://github.com/shifty81/fresh/releases", NULL, NULL, SW_SHOWNORMAL);
+#endif
     });
     menuBar->addMenuItem(helpMenu, "Release Notes", [this]() {
         LOG_INFO_C("Release Notes selected", "Engine");
-        // TODO: Show release notes
+#ifdef _WIN32
+        ShellExecuteA(NULL, "open", "https://github.com/shifty81/fresh/blob/main/CHANGELOG.md", NULL, NULL, SW_SHOWNORMAL);
+#endif
     });
     menuBar->addSeparator(helpMenu);
     menuBar->addMenuItem(helpMenu, "About Fresh Voxel Engine", [this]() {
         LOG_INFO_C("About menu item clicked", "Engine");
-        // TODO: Show about dialog
+#ifdef _WIN32
+        MessageBoxA(NULL,
+            "Fresh Voxel Engine v0.1.0\n\n"
+            "A professional Windows-exclusive voxel game development platform\n"
+            "built with C++20, featuring DirectX 12/11 rendering and an\n"
+            "Unreal Engine-like editor.\n\n"
+            "© 2024 Fresh Voxel Engine Project\n"
+            "Licensed under the MIT License\n\n"
+            "https://github.com/shifty81/fresh",
+            "About Fresh Voxel Engine", MB_OK | MB_ICONINFORMATION);
+#endif
     });
 
     LOG_INFO_C("Unreal-style native Win32 menu bar initialized with comprehensive menus", "Engine");
@@ -2008,17 +2102,17 @@ void Engine::setupNativeToolbar()
     // ========== PLAY CONTROLS GROUP (Unreal-style) ==========
     toolbar->addButton(5010, "Play", nullptr, [this]() {
         LOG_INFO_C("Play button clicked - entering play mode", "Engine");
-        // TODO: Enter play mode
+        enterPlayMode();
     });
     
     toolbar->addButton(5011, "Pause", nullptr, [this]() {
         LOG_INFO_C("Pause button clicked", "Engine");
-        // TODO: Pause game
+        // TODO: Pause game (freeze time, stop physics)
     });
     
     toolbar->addButton(5012, "Stop", nullptr, [this]() {
         LOG_INFO_C("Stop button clicked - exiting play mode", "Engine");
-        // TODO: Stop play mode
+        exitPlayMode();
     });
     
     toolbar->addSeparator();
@@ -2225,6 +2319,88 @@ void Engine::createDemoEntities()
 
     LOG_INFO_C("Demo entities created successfully! Select them in Scene Hierarchy to inspect.", "Engine");
 #endif
+}
+
+// Play mode management methods
+void Engine::enterPlayMode()
+{
+    if (m_inGame) {
+        LOG_WARNING_C("Already in play mode", "Engine");
+        return;
+    }
+    
+    LOG_INFO_C("Entering play mode", "Engine");
+    m_inGame = true;
+    
+    // Switch to game input mode (capture cursor for FPS controls)
+    if (m_inputManager) {
+        m_inputManager->setInputMode(InputMode::GameMode);
+    }
+    
+    // Hide editor panels, show game HUD
+    if (m_editorManager) {
+        m_editorManager->setVisible(false);
+        
+#ifdef _WIN32
+        // Show native HUD if available
+        auto* hotbar = m_editorManager->getHotbar();
+        if (hotbar) {
+            hotbar->setVisible(true);
+        }
+#endif
+    }
+    
+    // Disable free-flight mode for player (enable physics)
+    if (m_player) {
+        m_player->setFreeFlightMode(false);
+    }
+    
+    LOG_INFO_C("Play mode started - Press ESC to exit", "Engine");
+}
+
+void Engine::exitPlayMode()
+{
+    if (!m_inGame) {
+        LOG_WARNING_C("Not in play mode", "Engine");
+        return;
+    }
+    
+    LOG_INFO_C("Exiting play mode", "Engine");
+    m_inGame = false;
+    
+    // Switch back to editor UI mode (release cursor for UI interaction)
+    if (m_inputManager) {
+        m_inputManager->setInputMode(InputMode::UIMode);
+    }
+    
+    // Show editor panels, hide game HUD
+    if (m_editorManager) {
+        m_editorManager->setVisible(true);
+        
+#ifdef _WIN32
+        // Hide native HUD if available
+        auto* hotbar = m_editorManager->getHotbar();
+        if (hotbar) {
+            hotbar->setVisible(false);
+        }
+#endif
+    }
+    
+    // Enable free-flight mode for player (disable physics for editor camera)
+    if (m_player) {
+        m_player->setFreeFlightMode(true);
+    }
+    
+    LOG_INFO_C("Returned to editor mode", "Engine");
+}
+
+void Engine::togglePlayMode()
+{
+    if (m_inGame) {
+        exitPlayMode();
+    } else {
+        enterPlayMode();
+    }
 }
 
 } // namespace fresh

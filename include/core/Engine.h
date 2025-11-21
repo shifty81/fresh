@@ -104,6 +104,12 @@ private:
     void setupNativeToolbar();
 #endif
 
+    // Play mode methods
+    void enterPlayMode();
+    void exitPlayMode();
+    void togglePlayMode();
+    bool isInPlayMode() const { return m_inGame; }
+
 private:
     bool m_running;
     bool m_inGame;
