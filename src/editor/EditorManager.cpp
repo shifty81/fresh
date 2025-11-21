@@ -1192,6 +1192,7 @@ void EditorManager::newWorld()
         );
         
         if (result == MessageBoxResult::Yes) {
+#ifdef FRESH_IMGUI_AVAILABLE
             // Show the main menu panel to allow user to configure new world
             if (m_mainMenuPanel) {
                 m_mainMenuPanel->setMenuActive(true);
@@ -1199,6 +1200,27 @@ void EditorManager::newWorld()
                 m_mainMenuPanel->clearFlags();
                 LOG_INFO_C("Main menu activated for new world creation", "EditorManager");
             }
+#else
+            // ImGui not available - create world with default settings
+            // In future, this should show a native Win32 dialog for world configuration
+            LOG_INFO_C("Creating new world with default settings (ImGui not available)", "EditorManager");
+            
+            // TODO: Show native Win32 dialog to get world name and seed
+            // For now, use default values
+            std::string worldName = "NewWorld";
+            int worldSeed = 12345;
+            
+            // Notify engine to create world (engine will call createNewWorld)
+            // This is a temporary workaround - proper implementation would use a callback
+            if (m_windowsDialogManager) {
+                m_windowsDialogManager->showMessageBox(
+                    "World Creation",
+                    "Default world creation not yet implemented.\nPlease use the console menu on startup.",
+                    MessageBoxButtons::OK,
+                    MessageBoxIcon::Information
+                );
+            }
+#endif
         } else {
             LOG_INFO_C("New world cancelled by user", "EditorManager");
         }
