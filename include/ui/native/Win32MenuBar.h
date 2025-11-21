@@ -42,6 +42,14 @@ public:
     bool create(HWND hwnd);
 
     /**
+     * @brief Initialize menu bar (simplified interface)
+     * @param world VoxelWorld pointer (for future use)
+     * @param worldEditor WorldEditor pointer (for future use)
+     * @return true if successful
+     */
+    bool initialize(void* world, void* worldEditor);
+
+    /**
      * @brief Add a top-level menu
      * @param name Menu name (e.g., "File", "Edit")
      * @return Menu ID
@@ -97,6 +105,25 @@ public:
      */
     HMENU getHandle() const { return m_menuBar; }
 
+    /**
+     * @brief Set panel visibility flags (for integration with EditorManager)
+     */
+    void setSceneHierarchyVisible(bool* visible) { m_sceneHierarchyVisible = visible; }
+    void setInspectorVisible(bool* visible) { m_inspectorVisible = visible; }
+    void setContentBrowserVisible(bool* visible) { m_contentBrowserVisible = visible; }
+    void setConsoleVisible(bool* visible) { m_consoleVisible = visible; }
+    void setToolPaletteVisible(bool* visible) { m_toolPaletteVisible = visible; }
+
+    /**
+     * @brief Set callbacks for various menu actions
+     */
+    void setSettingsCallback(MenuCallback callback) { m_settingsCallback = callback; }
+    void setImportAssetsCallback(MenuCallback callback) { m_importAssetsCallback = callback; }
+    void setSelectAllCallback(MenuCallback callback) { m_selectAllCallback = callback; }
+    void setDeselectAllCallback(MenuCallback callback) { m_deselectAllCallback = callback; }
+    void setUndoCallback(MenuCallback callback) { m_undoCallback = callback; }
+    void setRedoCallback(MenuCallback callback) { m_redoCallback = callback; }
+
 private:
     struct MenuItem {
         int id;
@@ -110,6 +137,21 @@ private:
     std::map<int, HMENU> m_menus;
     std::map<int, MenuItem> m_items;
     int m_nextId;
+
+    // Panel visibility flags
+    bool* m_sceneHierarchyVisible = nullptr;
+    bool* m_inspectorVisible = nullptr;
+    bool* m_contentBrowserVisible = nullptr;
+    bool* m_consoleVisible = nullptr;
+    bool* m_toolPaletteVisible = nullptr;
+
+    // Menu action callbacks
+    MenuCallback m_settingsCallback;
+    MenuCallback m_importAssetsCallback;
+    MenuCallback m_selectAllCallback;
+    MenuCallback m_deselectAllCallback;
+    MenuCallback m_undoCallback;
+    MenuCallback m_redoCallback;
 
     HMENU getMenu(int menuId);
     std::wstring toWideString(const std::string& str);

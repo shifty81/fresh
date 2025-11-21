@@ -3,6 +3,10 @@
 #include "ui/WindowsThemeManager.h"
 #include "core/Logger.h"
 
+#ifdef FRESH_IMGUI_AVAILABLE
+#include <imgui.h>
+#endif
+
 #include <windows.h>
 #include <dwmapi.h>
 

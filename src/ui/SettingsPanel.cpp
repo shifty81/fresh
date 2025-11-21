@@ -3,6 +3,10 @@
 #include <fstream>
 #include <sstream>
 
+#ifdef FRESH_IMGUI_AVAILABLE
+#include <imgui.h>
+#endif
+
 #include "core/Logger.h"
 #ifdef _WIN32
     #include "core/Win32Window.h"

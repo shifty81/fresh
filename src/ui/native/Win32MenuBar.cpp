@@ -51,6 +51,15 @@ bool Win32MenuBar::create(HWND hwnd)
     return true;
 }
 
+bool Win32MenuBar::initialize(void* world, void* worldEditor)
+{
+    // For standalone initialization without window handle
+    // This is a stub that returns true to indicate the menu bar is ready to be created later
+    // The world and worldEditor pointers are stored for future use (currently unused)
+    LOG_INFO_C("Menu bar initialized (stub)", "Win32MenuBar");
+    return true;
+}
+
 int Win32MenuBar::addMenu(const std::string& name)
 {
     if (!m_menuBar) {

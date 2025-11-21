@@ -1,5 +1,9 @@
 #include "ui/EngineConfigPanel.h"
 
+#ifdef FRESH_IMGUI_AVAILABLE
+#include <imgui.h>
+#endif
+
 #include "core/Logger.h"
 #include "renderer/GraphicsAPI.h"
 #include "renderer/LightingSystem.h"

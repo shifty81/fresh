@@ -68,6 +68,15 @@ bool Win32SceneHierarchyPanel::create(HWND parent, int x, int y, int width, int 
     return true;
 }
 
+bool Win32SceneHierarchyPanel::initialize(VoxelWorld* world)
+{
+    // For standalone initialization without parent window
+    // Store the world reference for later use when create() is called
+    m_world = world;
+    LOG_INFO_C("Scene Hierarchy panel initialized (stub)", "Win32SceneHierarchyPanel");
+    return true;
+}
+
 void Win32SceneHierarchyPanel::refresh()
 {
     if (!m_treeView) {

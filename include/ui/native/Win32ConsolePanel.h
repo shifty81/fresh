@@ -49,6 +49,12 @@ public:
     virtual ~Win32ConsolePanel();
 
     /**
+     * @brief Initialize the console panel (simplified interface)
+     * @return true if successful
+     */
+    bool initialize();
+
+    /**
      * @brief Initialize the console panel
      * @param parent Parent window handle
      * @param x X position

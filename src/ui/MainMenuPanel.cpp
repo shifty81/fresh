@@ -5,6 +5,10 @@
 #include <filesystem>
 #include <fstream>
 
+#ifdef FRESH_IMGUI_AVAILABLE
+#include <imgui.h>
+#endif
+
 #include "core/Logger.h"
 
 namespace fs = std::filesystem;

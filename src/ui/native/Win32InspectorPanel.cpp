@@ -61,6 +61,15 @@ bool Win32InspectorPanel::create(HWND parent, int x, int y, int width, int heigh
     return true;
 }
 
+bool Win32InspectorPanel::initialize(ecs::EntityManager* entityManager)
+{
+    // For standalone initialization without parent window
+    // Store the entity manager reference for later use when create() is called
+    m_entityManager = entityManager;
+    LOG_INFO_C("Inspector panel initialized (stub)", "Win32InspectorPanel");
+    return true;
+}
+
 void Win32InspectorPanel::setInspectedNode(HierarchyNode* node)
 {
     m_inspectedNode = node;

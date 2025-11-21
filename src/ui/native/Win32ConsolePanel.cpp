@@ -49,6 +49,14 @@ bool Win32ConsolePanel::create(HWND parent, int x, int y, int width, int height)
     return true;
 }
 
+bool Win32ConsolePanel::initialize()
+{
+    // For standalone initialization without parent window
+    // This is a stub that returns true to indicate the panel is ready to be created later
+    LOG_INFO_C("Console panel initialized (stub)", "Win32ConsolePanel");
+    return true;
+}
+
 void Win32ConsolePanel::onCreate()
 {
     createControls();

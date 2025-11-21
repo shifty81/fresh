@@ -104,6 +104,16 @@ bool Win32ContentBrowserPanel::create(HWND parent, int x, int y, int width, int 
     return true;
 }
 
+bool Win32ContentBrowserPanel::initialize(const std::string& rootPath)
+{
+    // For standalone initialization without parent window
+    // Store the root path for later use when create() is called
+    m_rootPath = rootPath;
+    m_currentPath = rootPath;
+    LOG_INFO_C("Content Browser panel initialized (stub)", "Win32ContentBrowserPanel");
+    return true;
+}
+
 void Win32ContentBrowserPanel::createToolbar()
 {
     RECT clientRect;

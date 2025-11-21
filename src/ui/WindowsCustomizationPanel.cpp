@@ -6,6 +6,10 @@
 #include "ui/WindowsTaskbarManager.h"
 #include "core/Logger.h"
 
+#ifdef FRESH_IMGUI_AVAILABLE
+#include <imgui.h>
+#endif
+
 namespace fresh
 {
 
