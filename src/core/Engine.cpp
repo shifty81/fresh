@@ -91,6 +91,7 @@ namespace fresh
     constexpr int KEY_W = 'W';
     constexpr int KEY_Y = 'Y';
     constexpr int KEY_Z = 'Z';
+    constexpr int KEY_ESCAPE = VK_ESCAPE;
     constexpr int KEY_LEFT_CONTROL = VK_LCONTROL;
     constexpr int KEY_RIGHT_CONTROL = VK_RCONTROL;
     constexpr int KEY_LEFT_SHIFT = VK_LSHIFT;
@@ -115,6 +116,7 @@ namespace fresh
     constexpr int KEY_W = GLFW_KEY_W;
     constexpr int KEY_Y = GLFW_KEY_Y;
     constexpr int KEY_Z = GLFW_KEY_Z;
+    constexpr int KEY_ESCAPE = GLFW_KEY_ESCAPE;
     constexpr int KEY_LEFT_CONTROL = GLFW_KEY_LEFT_CONTROL;
     constexpr int KEY_RIGHT_CONTROL = GLFW_KEY_RIGHT_CONTROL;
     constexpr int KEY_LEFT_SHIFT = GLFW_KEY_LEFT_SHIFT;
@@ -943,6 +945,14 @@ void Engine::processInput()
                 LOG_INFO_C("Mouse released - GUI mode enabled", "Engine");
             }
         }
+        
+        // ESC key to exit play mode (Unreal-style)
+        if (!guiCapturesKeyboard && m_inputManager->isKeyJustPressed(KEY_ESCAPE)) {
+            if (m_inGame) {
+                LOG_INFO_C("ESC pressed - Exiting play mode", "Engine");
+                exitPlayMode();
+            }
+        }
 
         // T key disabled - editor is always visible in new editor-first mode
         // Keeping this code commented out for reference
@@ -1736,23 +1746,37 @@ void Engine::setupNativeMenuBar()
     int viewMenu = menuBar->addMenu("View");
     menuBar->addMenuItem(viewMenu, "Perspective\t1", [this]() {
         LOG_INFO_C("Perspective view selected", "Engine");
-        // TODO: Switch to perspective view
+        if (m_editorManager) {
+            m_editorManager->setCameraViewMode("Perspective");
+        }
     });
     menuBar->addMenuItem(viewMenu, "Top\t2", [this]() {
         LOG_INFO_C("Top view selected", "Engine");
-        // TODO: Switch to top view
+        if (m_editorManager) {
+            m_editorManager->setCameraViewMode("Top");
+        }
     });
     menuBar->addMenuItem(viewMenu, "Front\t3", [this]() {
         LOG_INFO_C("Front view selected", "Engine");
-        // TODO: Switch to front view
+        if (m_editorManager) {
+            m_editorManager->setCameraViewMode("Front");
+        }
     });
     menuBar->addMenuItem(viewMenu, "Side\t4", [this]() {
         LOG_INFO_C("Side view selected", "Engine");
-        // TODO: Switch to side view
+        if (m_editorManager) {
+            m_editorManager->setCameraViewMode("Side");
+        }
     });
     menuBar->addMenuItem(viewMenu, "Reset Camera\tHome", [this]() {
         LOG_INFO_C("Reset Camera menu item clicked", "Engine");
-        // TODO: Reset camera position
+        if (m_editorManager) {
+            m_editorManager->setCameraViewMode("Perspective");
+        }
+        // Also reset player position if available
+        if (m_player) {
+            m_player->setPosition(glm::vec3(0.0f, 70.0f, 0.0f));
+        }
     });
     menuBar->addSeparator(viewMenu);
     menuBar->addMenuItem(viewMenu, "Content Browser\tCtrl+B", [this]() {
@@ -1782,11 +1806,16 @@ void Engine::setupNativeMenuBar()
     menuBar->addSeparator(viewMenu);
     menuBar->addMenuItem(viewMenu, "Toggle Fullscreen\tF11", [this]() {
         LOG_INFO_C("Toggle Fullscreen menu item clicked", "Engine");
-        // TODO: Toggle fullscreen
+        if (m_window) {
+            // Toggle fullscreen mode
+            m_window->toggleFullscreen();
+        }
     });
     menuBar->addMenuItem(viewMenu, "Toggle UI\tU", [this]() {
         LOG_INFO_C("Toggle UI menu item clicked", "Engine");
-        // TODO: Toggle all UI visibility
+        if (m_editorManager) {
+            m_editorManager->toggle();
+        }
     });
     menuBar->addMenuItem(viewMenu, "Show Stats\tCtrl+Shift+S", [this]() {
         LOG_INFO_C("Show Stats toggled", "Engine");
@@ -1797,15 +1826,18 @@ void Engine::setupNativeMenuBar()
     int worldMenu = menuBar->addMenu("World");
     menuBar->addMenuItem(worldMenu, "Play\tAlt+P", [this]() {
         LOG_INFO_C("Play mode started", "Engine");
-        // TODO: Enter play mode
+        enterPlayMode();
     });
     menuBar->addMenuItem(worldMenu, "Pause\tAlt+Pause", [this]() {
         LOG_INFO_C("Play mode paused", "Engine");
-        // TODO: Pause game
+        // TODO: Implement pause (freeze time, stop physics updates)
+        if (m_physics) {
+            // m_physics->setPaused(!m_physics->isPaused());
+        }
     });
     menuBar->addMenuItem(worldMenu, "Stop\tEsc", [this]() {
         LOG_INFO_C("Play mode stopped", "Engine");
-        // TODO: Stop play mode
+        exitPlayMode();
     });
     menuBar->addSeparator(worldMenu);
     menuBar->addMenuItem(worldMenu, "Generate Terrain...", [this]() {
@@ -2008,17 +2040,17 @@ void Engine::setupNativeToolbar()
     // ========== PLAY CONTROLS GROUP (Unreal-style) ==========
     toolbar->addButton(5010, "Play", nullptr, [this]() {
         LOG_INFO_C("Play button clicked - entering play mode", "Engine");
-        // TODO: Enter play mode
+        enterPlayMode();
     });
     
     toolbar->addButton(5011, "Pause", nullptr, [this]() {
         LOG_INFO_C("Pause button clicked", "Engine");
-        // TODO: Pause game
+        // TODO: Pause game (freeze time, stop physics)
     });
     
     toolbar->addButton(5012, "Stop", nullptr, [this]() {
         LOG_INFO_C("Stop button clicked - exiting play mode", "Engine");
-        // TODO: Stop play mode
+        exitPlayMode();
     });
     
     toolbar->addSeparator();
@@ -2225,6 +2257,88 @@ void Engine::createDemoEntities()
 
     LOG_INFO_C("Demo entities created successfully! Select them in Scene Hierarchy to inspect.", "Engine");
 #endif
+}
+
+// Play mode management methods
+void Engine::enterPlayMode()
+{
+    if (m_inGame) {
+        LOG_WARNING_C("Already in play mode", "Engine");
+        return;
+    }
+    
+    LOG_INFO_C("Entering play mode", "Engine");
+    m_inGame = true;
+    
+    // Switch to game input mode (capture cursor for FPS controls)
+    if (m_inputManager) {
+        m_inputManager->setInputMode(InputMode::GameMode);
+    }
+    
+    // Hide editor panels, show game HUD
+    if (m_editorManager) {
+        m_editorManager->setVisible(false);
+        
+#ifdef _WIN32
+        // Show native HUD if available
+        auto* hotbar = m_editorManager->getHotbar();
+        if (hotbar) {
+            hotbar->setVisible(true);
+        }
+#endif
+    }
+    
+    // Disable free-flight mode for player (enable physics)
+    if (m_player) {
+        m_player->setFreeFlightMode(false);
+    }
+    
+    LOG_INFO_C("Play mode started - Press ESC to exit", "Engine");
+}
+
+void Engine::exitPlayMode()
+{
+    if (!m_inGame) {
+        LOG_WARNING_C("Not in play mode", "Engine");
+        return;
+    }
+    
+    LOG_INFO_C("Exiting play mode", "Engine");
+    m_inGame = false;
+    
+    // Switch back to editor UI mode (release cursor for UI interaction)
+    if (m_inputManager) {
+        m_inputManager->setInputMode(InputMode::UIMode);
+    }
+    
+    // Show editor panels, hide game HUD
+    if (m_editorManager) {
+        m_editorManager->setVisible(true);
+        
+#ifdef _WIN32
+        // Hide native HUD if available
+        auto* hotbar = m_editorManager->getHotbar();
+        if (hotbar) {
+            hotbar->setVisible(false);
+        }
+#endif
+    }
+    
+    // Enable free-flight mode for player (disable physics for editor camera)
+    if (m_player) {
+        m_player->setFreeFlightMode(true);
+    }
+    
+    LOG_INFO_C("Returned to editor mode", "Engine");
+}
+
+void Engine::togglePlayMode()
+{
+    if (m_inGame) {
+        exitPlayMode();
+    } else {
+        enterPlayMode();
+    }
 }
 
 } // namespace fresh
