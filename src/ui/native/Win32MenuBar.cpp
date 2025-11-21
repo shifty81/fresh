@@ -12,12 +12,6 @@ Win32MenuBar::Win32MenuBar()
     : m_hwnd(nullptr)
     , m_menuBar(nullptr)
     , m_nextId(1000)
-    , m_settingsCallback(nullptr)
-    , m_importAssetsCallback(nullptr)
-    , m_selectAllCallback(nullptr)
-    , m_deselectAllCallback(nullptr)
-    , m_undoCallback(nullptr)
-    , m_redoCallback(nullptr)
 {
 }
 
@@ -62,8 +56,8 @@ bool Win32MenuBar::initialize(void* world, void* worldEditor)
     // For standalone initialization without window handle
     // This is a stub that returns true to indicate the menu bar is ready to be created later
     // The world and worldEditor pointers are currently unused
-    // (void)world;      // Suppress unused parameter warning
-    // (void)worldEditor; // Suppress unused parameter warning
+    (void)world;      // Suppress unused parameter warning
+    (void)worldEditor; // Suppress unused parameter warning
     LOG_INFO_C("Menu bar initialized (stub)", "Win32MenuBar");
     return true;
 }

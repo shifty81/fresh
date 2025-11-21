@@ -146,12 +146,12 @@ private:
     bool* m_toolPaletteVisible = nullptr;
 
     // Menu action callbacks
-    MenuCallback m_settingsCallback;
-    MenuCallback m_importAssetsCallback;
-    MenuCallback m_selectAllCallback;
-    MenuCallback m_deselectAllCallback;
-    MenuCallback m_undoCallback;
-    MenuCallback m_redoCallback;
+    MenuCallback m_settingsCallback = nullptr;
+    MenuCallback m_importAssetsCallback = nullptr;
+    MenuCallback m_selectAllCallback = nullptr;
+    MenuCallback m_deselectAllCallback = nullptr;
+    MenuCallback m_undoCallback = nullptr;
+    MenuCallback m_redoCallback = nullptr;
 
     HMENU getMenu(int menuId);
     std::wstring toWideString(const std::string& str);
