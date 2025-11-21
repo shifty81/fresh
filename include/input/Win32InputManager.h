@@ -221,6 +221,7 @@ private:
     bool firstMouse = true;
     float sensitivity = 1.0f;
     bool cursorCaptured = false;
+    bool expectingRecenterEvent = false; // Flag to ignore SetCursorPos event
 
     // Input mode management
     InputMode currentMode = InputMode::GameMode;

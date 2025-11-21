@@ -66,6 +66,14 @@ void Win32InputManager::processKeyEvent(WPARAM vkCode, bool isDown)
 
 void Win32InputManager::processMouseMovement(int xpos, int ypos)
 {
+    // Ignore mouse movement events caused by SetCursorPos when re-centering
+    if (expectingRecenterEvent) {
+        expectingRecenterEvent = false;
+        lastMouseX = xpos;
+        lastMouseY = ypos;
+        return;
+    }
+
     if (firstMouse) {
         lastMouseX = xpos;
         lastMouseY = ypos;
@@ -75,9 +83,6 @@ void Win32InputManager::processMouseMovement(int xpos, int ypos)
 
     float xoffset = static_cast<float>(xpos - lastMouseX);
     float yoffset = static_cast<float>(lastMouseY - ypos); // Reversed since y-coordinates go from bottom to top
-
-    lastMouseX = xpos;
-    lastMouseY = ypos;
 
     if (cursorCaptured) {
         mouseDelta.x += xoffset * sensitivity;
@@ -91,13 +96,18 @@ void Win32InputManager::processMouseMovement(int xpos, int ypos)
             POINT center = {rect.right / 2, rect.bottom / 2};
             ClientToScreen(hwnd, &center);
             
+            // Set flag before SetCursorPos to ignore the resulting WM_MOUSEMOVE
+            expectingRecenterEvent = true;
             SetCursorPos(center.x, center.y);
             
-            // Update lastMouse to the center position to calculate delta correctly next frame
-            POINT clientCenter = {rect.right / 2, rect.bottom / 2};
-            lastMouseX = clientCenter.x;
-            lastMouseY = clientCenter.y;
+            // Update lastMouse to the center position
+            lastMouseX = rect.right / 2;
+            lastMouseY = rect.bottom / 2;
         }
+    } else {
+        // Not captured, just track position normally
+        lastMouseX = xpos;
+        lastMouseY = ypos;
     }
 }
 
