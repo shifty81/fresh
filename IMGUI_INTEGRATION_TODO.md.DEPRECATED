@@ -1,3 +1,16 @@
+# ⚠️ DEPRECATED - DO NOT IMPLEMENT
+
+**This document is DEPRECATED as of 2025-11-21.**
+
+Fresh Voxel Engine uses **Windows Native Win32 UI ONLY**.
+ImGui is not used and will not be integrated.
+
+See: WINDOWS_NATIVE_ONLY_POLICY.md and IMGUI_REMOVAL_ACTION_PLAN.md
+
+---
+
+# [Original content below - for historical reference only]
+
 # ImGui Integration TODO
 
 ## Overview
