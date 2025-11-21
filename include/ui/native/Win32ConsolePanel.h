@@ -14,6 +14,7 @@
 #include <vector>
 #include <functional>
 #include "ui/native/Win32Panel.h"
+#include "core/Logger.h" // For ILogListener
 
 namespace fresh
 {
@@ -27,8 +28,9 @@ namespace fresh
  * - Filter buttons (Info, Warning, Error)
  * - Clear and auto-scroll buttons
  * - Unreal Engine-like dark theme styling
+ * - Automatic integration with Logger system
  */
-class Win32ConsolePanel : public Win32Panel
+class Win32ConsolePanel : public Win32Panel, public ILogListener
 {
 public:
     enum class MessageType {
@@ -94,6 +96,9 @@ public:
      * @brief Set callback for command execution
      */
     void setCommandCallback(CommandCallback callback) { m_commandCallback = callback; }
+
+    // ILogListener interface
+    void onLogMessage(LogLevel level, const std::string& message, const std::string& component) override;
 
 protected:
     void onCreate() override;

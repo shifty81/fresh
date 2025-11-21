@@ -7,6 +7,7 @@
 #include <mutex>
 #include <sstream>
 #include <string>
+#include <vector>
 
 namespace fresh
 {
@@ -19,6 +20,16 @@ enum class LogLevel {
     WARNING,
     ERR, // Renamed from ERROR to avoid Windows macro conflict
     FATAL
+};
+
+/**
+ * @brief Interface for log listeners (e.g., UI console panels)
+ */
+class ILogListener
+{
+public:
+    virtual ~ILogListener() = default;
+    virtual void onLogMessage(LogLevel level, const std::string& message, const std::string& component) = 0;
 };
 
 /**
@@ -92,6 +103,18 @@ public:
         return m_initialized;
     }
 
+    /**
+     * @brief Add a log listener to receive log messages
+     * @param listener Pointer to listener (must remain valid until removed)
+     */
+    void addListener(ILogListener* listener);
+
+    /**
+     * @brief Remove a log listener
+     * @param listener Pointer to listener to remove
+     */
+    void removeListener(ILogListener* listener);
+
 private:
     Logger();
     ~Logger();
@@ -116,6 +139,7 @@ private:
     std::ofstream m_applicationLog;
     std::ofstream m_environmentLog;
     std::mutex m_mutex;
+    std::vector<ILogListener*> m_listeners;
 };
 
 // Convenience macros for logging

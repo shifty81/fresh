@@ -1,5 +1,6 @@
 #include "core/Logger.h"
 
+#include <algorithm>
 #include <ctime>
 #include <iostream>
 
@@ -128,6 +129,12 @@ void Logger::log(LogLevel level, const std::string& message, const std::string& 
         if (m_consoleOutput) {
             std::cerr << "[" << getLevelString(level) << "] " << message << std::endl;
         }
+        // Still notify listeners even if not fully initialized
+        for (auto* listener : m_listeners) {
+            if (listener) {
+                listener->onLogMessage(level, message, component);
+            }
+        }
         return;
     }
 
@@ -158,6 +165,13 @@ void Logger::log(LogLevel level, const std::string& message, const std::string& 
             std::cerr << logMessage;
         } else {
             std::cout << logMessage;
+        }
+    }
+
+    // Notify all listeners
+    for (auto* listener : m_listeners) {
+        if (listener) {
+            listener->onLogMessage(level, message, component);
         }
     }
 }
@@ -243,6 +257,25 @@ void Logger::writeToFile(std::ofstream& file, const std::string& message)
     if (file.is_open()) {
         file << message;
         file.flush(); // Ensure immediate write for crash scenarios
+    }
+}
+
+void Logger::addListener(ILogListener* listener)
+{
+    if (listener) {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        m_listeners.push_back(listener);
+    }
+}
+
+void Logger::removeListener(ILogListener* listener)
+{
+    if (listener) {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        m_listeners.erase(
+            std::remove(m_listeners.begin(), m_listeners.end(), listener),
+            m_listeners.end()
+        );
     }
 }
 
