@@ -63,6 +63,7 @@
     #include "ui/native/Win32HUD.h"
     #include "ui/native/Win32SettingsDialog.h"
     #include "ui/native/Win32TerraformingPanel.h"
+    #include "ui/native/Win32ViewportPanel.h"
 #endif
 
 namespace fresh
@@ -512,6 +513,29 @@ bool EditorManager::initialize(WindowType* window, IRenderContext* renderContext
             if (m_nativeTerraformingPanel->initialize(hwnd, worldEditor)) {
                 LOG_INFO_C("Native Win32 Terraforming Panel created", "EditorManager");
             }
+        }
+        
+        // Create native Viewport Panel (central 3D view)
+        // Position it to take most of the window, leaving space for UI panels
+        // Get window client area size
+        RECT clientRect;
+        GetClientRect(hwnd, &clientRect);
+        int clientWidth = clientRect.right - clientRect.left;
+        int clientHeight = clientRect.bottom - clientRect.top;
+        
+        // Position viewport in center-right area (leaving left for panels)
+        int viewportX = 680;  // Start after left panels
+        int viewportY = 80;   // Start below menu/toolbar
+        int viewportWidth = clientWidth - 680 - 10;  // Fill remaining width
+        int viewportHeight = clientHeight - 80 - 10;  // Fill remaining height
+        
+        m_viewportPanel = std::make_unique<Win32ViewportPanel>();
+        if (m_viewportPanel->create(hwnd, viewportX, viewportY, viewportWidth, viewportHeight)) {
+            LOG_INFO_C("Native Win32 Viewport Panel created at (" + 
+                      std::to_string(viewportX) + ", " + std::to_string(viewportY) + ") " +
+                      "size " + std::to_string(viewportWidth) + "x" + std::to_string(viewportHeight), "EditorManager");
+        } else {
+            LOG_ERROR_C("Failed to create Native Win32 Viewport Panel", "EditorManager");
         }
         
         LOG_INFO_C("All native Win32 UI panels initialized successfully", "EditorManager");

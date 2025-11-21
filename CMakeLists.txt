@@ -392,6 +392,7 @@ if(WIN32)
         src/ui/native/Win32ContentBrowserPanel.cpp
         src/ui/native/Win32SettingsDialog.cpp
         src/ui/native/Win32TerraformingPanel.cpp
+        src/ui/native/Win32ViewportPanel.cpp
         
         # Windows integration features
         src/ui/WindowsThemeManager.cpp
