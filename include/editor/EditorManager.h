@@ -1,5 +1,6 @@
 #pragma once
 
+#include <functional>
 #include <memory>
 #include <string>
 
@@ -190,6 +191,24 @@ public:
      * @return true if editor is using the keyboard
      */
     bool wantCaptureKeyboard() const;
+
+    /**
+     * @brief Set callback for world creation
+     * @param callback Function to call when a new world should be created (worldName, seed, is3D)
+     */
+    void setWorldCreationCallback(std::function<void(const std::string&, int, bool)> callback)
+    {
+        m_worldCreationCallback = callback;
+    }
+
+    /**
+     * @brief Set callback for world loading
+     * @param callback Function to call when a world should be loaded (worldName)
+     */
+    void setWorldLoadCallback(std::function<void(const std::string&)> callback)
+    {
+        m_worldLoadCallback = callback;
+    }
 
     // Removed ImGui-based panel getters (replaced with Win32 native versions):
     // MainMenuPanel* getMainMenuPanel() const
@@ -517,6 +536,10 @@ private:
     
     // World file path
     std::string m_currentWorldPath;
+
+    // Callbacks for world operations (set by Engine)
+    std::function<void(const std::string&, int, bool)> m_worldCreationCallback;
+    std::function<void(const std::string&)> m_worldLoadCallback;
 };
 
 } // namespace fresh

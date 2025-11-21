@@ -65,6 +65,7 @@
     #include "ui/native/Win32SettingsDialog.h"
     #include "ui/native/Win32TerraformingPanel.h"
     #include "ui/native/Win32ViewportPanel.h"
+    #include "ui/NativeMainMenu.h"
 #endif
 
 namespace fresh
@@ -1052,20 +1053,53 @@ void EditorManager::newWorld()
         );
         
         if (result == MessageBoxResult::Yes) {
-            // Native Win32 UI - world creation dialog not yet fully implemented
-            LOG_INFO_C("Native Win32 UI - world creation dialog not yet fully implemented", "EditorManager");
+            // Use NativeMainMenu to show world creation dialog
+            LOG_INFO_C("Showing native Win32 world creation dialog", "EditorManager");
             
-            // Show informative message to user
-            if (m_windowsDialogManager) {
+            // Create and show the native main menu dialog
+            NativeMainMenu mainMenu;
+            HWND parentHwnd = m_window ? m_window->getHandle() : nullptr;
+            
+            if (mainMenu.initialize(parentHwnd)) {
+                // Show the dialog - this will present world creation UI
+                if (mainMenu.show()) {
+                    if (mainMenu.shouldCreateNewWorld()) {
+                        // Get world parameters from dialog
+                        std::wstring wWorldName = mainMenu.getNewWorldName();
+                        // Convert wide string to narrow string
+                        std::string worldName(wWorldName.begin(), wWorldName.end());
+                        int seed = mainMenu.getWorldSeed();
+                        bool is3D = mainMenu.isWorld3D();
+                        
+                        LOG_INFO_C("World creation confirmed: " + worldName + 
+                                   ", seed=" + std::to_string(seed) + 
+                                   ", 3D=" + std::to_string(is3D), "EditorManager");
+                        
+                        // Call the callback to notify Engine to create the world
+                        if (m_worldCreationCallback) {
+                            m_worldCreationCallback(worldName, seed, is3D);
+                        } else {
+                            LOG_WARNING_C("World creation callback not set!", "EditorManager");
+                            m_windowsDialogManager->showMessageBox(
+                                "World Creation Error",
+                                "Cannot create world: callback not configured.",
+                                MessageBoxButtons::OK,
+                                MessageBoxIcon::Error
+                            );
+                        }
+                    } else {
+                        LOG_INFO_C("World creation cancelled by user", "EditorManager");
+                    }
+                } else {
+                    LOG_INFO_C("Native main menu dialog closed without selection", "EditorManager");
+                }
+            } else {
+                LOG_ERROR_C("Failed to initialize native main menu", "EditorManager");
                 m_windowsDialogManager->showMessageBox(
-                    "World Creation",
-                    "World creation dialog not yet implemented with native Win32 UI.\n\n"
-                    "To create a new world:\n"
-                    "1. Close the application\n"
-                    "2. Restart and use the console menu on startup\n\n"
-                    "This will be improved in a future update.",
+                    "World Creation Error",
+                    "Failed to initialize world creation dialog.",
                     MessageBoxButtons::OK,
-                    MessageBoxIcon::Information
+                    MessageBoxIcon::Error
                 );
             }
         } else {

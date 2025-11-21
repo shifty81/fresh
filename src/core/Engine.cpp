@@ -293,6 +293,18 @@ bool Engine::initialize()
         LOG_ERROR_C("Failed to initialize editor manager", "Engine");
         return false;
     }
+    
+    // Set callbacks for world operations so EditorManager can trigger them
+    m_editorManager->setWorldCreationCallback([this](const std::string& name, int seed, bool is3D) {
+        LOG_INFO_C("World creation callback triggered: " + name, "Engine");
+        this->createNewWorld(name, seed, is3D);
+    });
+    
+    m_editorManager->setWorldLoadCallback([this](const std::string& name) {
+        LOG_INFO_C("World load callback triggered: " + name, "Engine");
+        this->loadWorld(name);
+    });
+    
     m_editorManager->setVisible(true); // Show editor immediately
     std::cout << "Editor manager initialized" << std::endl;
     LOG_INFO_C("Editor manager initialized", "Engine");
