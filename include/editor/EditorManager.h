@@ -3,6 +3,16 @@
 #include <memory>
 #include <string>
 
+// Include stub headers OUTSIDE namespace to avoid nested namespace issues
+// These define type aliases for Windows builds: SceneHierarchyPanel, InspectorPanel, ContentBrowserPanel, ConsolePanel, EditorMenuBar
+#ifdef _WIN32
+#include "ui/SceneHierarchyPanel.h"
+#include "ui/InspectorPanel.h"
+#include "ui/ContentBrowserPanel.h"
+#include "ui/ConsolePanel.h"
+#include "ui/EditorMenuBar.h"
+#endif
+
 namespace fresh
 {
 
@@ -58,13 +68,6 @@ class Win32HUD;
 class Win32SettingsDialog;
 class Win32TerraformingPanel;
 class Win32MenuBar;
-// Include stub headers to define type aliases for Windows builds
-// These define: SceneHierarchyPanel, InspectorPanel, ContentBrowserPanel, ConsolePanel, EditorMenuBar
-#include "ui/SceneHierarchyPanel.h"
-#include "ui/InspectorPanel.h"
-#include "ui/ContentBrowserPanel.h"
-#include "ui/ConsolePanel.h"
-#include "ui/EditorMenuBar.h"
 #else
 // Forward declarations for non-Windows platforms
 class EditorMenuBar;
