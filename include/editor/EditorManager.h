@@ -68,6 +68,7 @@ class Win32HUD;
 class Win32SettingsDialog;
 class Win32TerraformingPanel;
 class Win32MenuBar;
+class Win32ViewportPanel;
 #else
 // Forward declarations for non-Windows platforms
 class EditorMenuBar;
@@ -297,6 +298,15 @@ public:
     {
         return m_nativeTerraformingPanel.get();
     }
+    
+    /**
+     * @brief Get the viewport panel
+     * @return Viewport panel pointer (nullptr if not on Windows or panel not created)
+     */
+    Win32ViewportPanel* getViewportPanel() const
+    {
+        return m_viewportPanel.get();
+    }
 #endif
 
     // ========== Editor Operations (for native menu integration) ==========
@@ -514,6 +524,7 @@ private:
     std::unique_ptr<Win32HUD> m_nativeHUD;
     std::unique_ptr<Win32SettingsDialog> m_nativeSettingsDialog;
     std::unique_ptr<Win32TerraformingPanel> m_nativeTerraformingPanel;
+    std::unique_ptr<Win32ViewportPanel> m_viewportPanel;
 #endif
 
     // References
