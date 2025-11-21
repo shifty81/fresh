@@ -33,9 +33,10 @@ class VoxelWorld;
 class WorldEditor;
 class EditorToolbar;
 class VoxelToolPalette;
-class MainMenuPanel;
-class SettingsPanel;
-class EngineConfigPanel;
+// Removed ImGui-based panels (replaced with Win32 native versions):
+// class MainMenuPanel;
+// class SettingsPanel;
+// class EngineConfigPanel;
 class HotbarPanel;
 class SelectionManager;
 class SelectionRenderer;
@@ -59,7 +60,7 @@ class DebugRenderer;
 class WindowsThemeManager;
 class WindowsDialogManager;
 class WindowsTaskbarManager;
-class WindowsCustomizationPanel;
+// Removed ImGui-based panel: class WindowsCustomizationPanel;
 class Win32InspectorPanel;
 class Win32SceneHierarchyPanel;
 class Win32ContentBrowserPanel;
@@ -190,23 +191,11 @@ public:
      */
     bool wantCaptureKeyboard() const;
 
-    /**
-     * @brief Get the main menu panel
-     * @return Main menu panel pointer
-     */
-    MainMenuPanel* getMainMenuPanel() const
-    {
-        return m_mainMenuPanel.get();
-    }
-
-    /**
-     * @brief Get the settings panel
-     * @return Settings panel pointer
-     */
-    SettingsPanel* getSettingsPanel() const
-    {
-        return m_settingsPanel.get();
-    }
+    // Removed ImGui-based panel getters (replaced with Win32 native versions):
+    // MainMenuPanel* getMainMenuPanel() const
+    // SettingsPanel* getSettingsPanel() const  
+    // EngineConfigPanel* getEngineConfigPanel() const
+    // WindowsCustomizationPanel* getWindowsCustomizationPanel() const
 
     /**
      * @brief Get the scene hierarchy panel
@@ -215,15 +204,6 @@ public:
     SceneHierarchyPanel* getSceneHierarchy() const
     {
         return m_sceneHierarchy.get();
-    }
-
-    /**
-     * @brief Get the engine configuration panel
-     * @return Engine configuration panel pointer
-     */
-    EngineConfigPanel* getEngineConfigPanel() const
-    {
-        return m_engineConfigPanel.get();
     }
 
     /**
@@ -281,14 +261,6 @@ public:
     }
 
 #ifdef _WIN32
-    /**
-     * @brief Get the Windows customization panel
-     * @return Windows customization panel pointer (nullptr if not on Windows)
-     */
-    WindowsCustomizationPanel* getWindowsCustomizationPanel() const
-    {
-        return m_windowsCustomizationPanel.get();
-    }
     
     /**
      * @brief Get the native Win32 terraforming panel
@@ -496,9 +468,10 @@ private:
     std::unique_ptr<ContentBrowserPanel> m_contentBrowser;
     std::unique_ptr<ConsolePanel> m_console;
     std::unique_ptr<VoxelToolPalette> m_voxelTools;
-    std::unique_ptr<MainMenuPanel> m_mainMenuPanel;
-    std::unique_ptr<SettingsPanel> m_settingsPanel;
-    std::unique_ptr<EngineConfigPanel> m_engineConfigPanel;
+    // Removed ImGui-based panels (replaced with Win32 native versions):
+    // std::unique_ptr<MainMenuPanel> m_mainMenuPanel;
+    // std::unique_ptr<SettingsPanel> m_settingsPanel;
+    // std::unique_ptr<EngineConfigPanel> m_engineConfigPanel;
     std::unique_ptr<HotbarPanel> m_hotbar;
     std::unique_ptr<SelectionManager> m_selectionManager;
     std::unique_ptr<SelectionRenderer> m_selectionRenderer;
@@ -514,7 +487,7 @@ private:
     std::unique_ptr<WindowsThemeManager> m_windowsThemeManager;
     std::unique_ptr<WindowsDialogManager> m_windowsDialogManager;
     std::unique_ptr<WindowsTaskbarManager> m_windowsTaskbarManager;
-    std::unique_ptr<WindowsCustomizationPanel> m_windowsCustomizationPanel;
+    // Removed ImGui-based panel: std::unique_ptr<WindowsCustomizationPanel> m_windowsCustomizationPanel;
     
     // Native Win32 UI panels (used when FRESH_WIN32_UI is defined)
     std::unique_ptr<Win32InspectorPanel> m_nativeInspector;

@@ -43,6 +43,13 @@ public:
     virtual ~Win32InspectorPanel();
 
     /**
+     * @brief Initialize the inspector panel (simplified interface)
+     * @param entityManager Optional entity manager for component editing
+     * @return true if successful
+     */
+    bool initialize(ecs::EntityManager* entityManager = nullptr);
+
+    /**
      * @brief Initialize the inspector panel
      * @param parent Parent window handle
      * @param x X position

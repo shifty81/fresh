@@ -59,6 +59,13 @@ public:
     virtual ~Win32SceneHierarchyPanel();
 
     /**
+     * @brief Initialize the scene hierarchy panel (simplified interface)
+     * @param world Voxel world to display
+     * @return true if successful
+     */
+    bool initialize(VoxelWorld* world);
+
+    /**
      * @brief Initialize the scene hierarchy panel
      * @param parent Parent window handle
      * @param x X position

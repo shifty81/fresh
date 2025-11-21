@@ -39,6 +39,13 @@ public:
     virtual ~Win32ContentBrowserPanel();
 
     /**
+     * @brief Initialize the content browser panel (simplified interface)
+     * @param rootPath Root directory path for content
+     * @return true if successful
+     */
+    bool initialize(const std::string& rootPath);
+
+    /**
      * @brief Initialize the content browser panel
      * @param parent Parent window handle
      * @param x X position

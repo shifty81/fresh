@@ -39,10 +39,11 @@
 #include "ui/HotbarPanel.h"
 #include "ui/ImGuiContext.h"
 #include "ui/InspectorPanel.h"
-#include "ui/MainMenuPanel.h"
+// Removed ImGui-based panels (replaced with Win32 native versions):
+// #include "ui/MainMenuPanel.h"
+// #include "ui/SettingsPanel.h"
+// #include "ui/EngineConfigPanel.h"
 #include "ui/SceneHierarchyPanel.h"
-#include "ui/SettingsPanel.h"
-#include "ui/EngineConfigPanel.h"
 #include "ui/VoxelToolPalette.h"
 #include "voxel/VoxelWorld.h"
 
@@ -55,7 +56,7 @@
     #include "ui/WindowsThemeManager.h"
     #include "ui/WindowsDialogManager.h"
     #include "ui/WindowsTaskbarManager.h"
-    #include "ui/WindowsCustomizationPanel.h"
+    // Removed ImGui-based panel: #include "ui/WindowsCustomizationPanel.h"
     #include "ui/native/Win32InspectorPanel.h"
     #include "ui/native/Win32SceneHierarchyPanel.h"
     #include "ui/native/Win32ContentBrowserPanel.h"
@@ -385,26 +386,10 @@ bool EditorManager::initialize(WindowType* window, IRenderContext* renderContext
         LOG_INFO_C("World and WorldEditor not provided, deferring initialization of world-dependent panels", "EditorManager");
     }
 
-    // Initialize main menu panel
-    m_mainMenuPanel = std::make_unique<MainMenuPanel>();
-    if (!m_mainMenuPanel->initialize()) {
-        LOG_ERROR_C("Failed to initialize Main Menu Panel", "EditorManager");
-        return false;
-    }
-
-    // Initialize settings panel
-    m_settingsPanel = std::make_unique<SettingsPanel>();
-    if (!m_settingsPanel->initialize(window, inputManager)) {
-        LOG_ERROR_C("Failed to initialize Settings Panel", "EditorManager");
-        return false;
-    }
-
-    // Initialize engine configuration panel
-    m_engineConfigPanel = std::make_unique<EngineConfigPanel>();
-    if (!m_engineConfigPanel->initialize(renderContext)) {
-        LOG_ERROR_C("Failed to initialize Engine Configuration Panel", "EditorManager");
-        return false;
-    }
+    // Removed ImGui-based panels (replaced with Win32 native versions):
+    // - MainMenuPanel -> replaced with Win32 native main menu
+    // - SettingsPanel -> replaced with Win32SettingsDialog
+    // - EngineConfigPanel -> replaced with Win32 property panels
 
     // Initialize hotbar panel (for play mode)
     m_hotbar = std::make_unique<HotbarPanel>();
@@ -447,15 +432,7 @@ bool EditorManager::initialize(WindowType* window, IRenderContext* renderContext
         LOG_WARNING_C("Failed to initialize Windows Taskbar Manager", "EditorManager");
     }
     
-    // Initialize Windows Customization Panel
-    m_windowsCustomizationPanel = std::make_unique<WindowsCustomizationPanel>();
-    if (m_windowsCustomizationPanel->initialize(m_windowsThemeManager.get(),
-                                                 m_windowsDialogManager.get(),
-                                                 m_windowsTaskbarManager.get())) {
-        LOG_INFO_C("Windows Customization Panel initialized", "EditorManager");
-    } else {
-        LOG_WARNING_C("Failed to initialize Windows Customization Panel", "EditorManager");
-    }
+    // Removed ImGui-based WindowsCustomizationPanel (replaced with native Win32 settings dialogs)
     
 #ifdef FRESH_WIN32_UI
     // Initialize native Win32 UI panels (replaces ImGui panels)
