@@ -1117,7 +1117,13 @@ void Engine::update(float deltaTime)
         if (m_rightMouseHeldForCamera) {
             glm::vec2 mouseDelta = m_inputManager->getMouseDelta();
             if (glm::length(mouseDelta) > 0.0f) {
+                LOG_INFO_C("Mouse delta: (" + std::to_string(mouseDelta.x) + ", " + std::to_string(mouseDelta.y) + ")", "Engine");
                 m_player->handleMouseMovement(mouseDelta.x, mouseDelta.y);
+            } else {
+                static int noMovementCount = 0;
+                if (++noMovementCount % 60 == 0) { // Log every 60 frames
+                    LOG_INFO_C("RMB held but no mouse delta detected (count: " + std::to_string(noMovementCount) + ")", "Engine");
+                }
             }
         }
 

@@ -814,6 +814,7 @@ if(BUILD_TESTS)
         tests/ecs/Transform2DTests.cpp            # Tests for 2D transform component
         tests/ecs/Collider2DTests.cpp             # Tests for 2D collider component
         tests/ecs/RigidBody2DTests.cpp            # Tests for 2D rigidbody component
+        tests/voxelship/VoxelBlockStretchTest.cpp # Tests for voxel block stretching
     )
     
     # Engine source files needed for tests (exclude main.cpp)
@@ -850,6 +851,7 @@ if(BUILD_TESTS)
         src/ecs/Collider2DComponent.cpp
         src/ecs/Animation2DComponent.cpp
         src/ecs/Camera2DComponent.cpp
+        src/voxelship/VoxelBlock.cpp
     )
     
     # Create test executable
