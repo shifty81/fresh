@@ -117,6 +117,12 @@ public:
     void beginFrame();
 
     /**
+     * @brief Update editor state
+     * @param deltaTime Time since last frame
+     */
+    void update(float deltaTime);
+
+    /**
      * @brief Render all editor UI
      */
     void render();
@@ -242,6 +248,17 @@ public:
     {
         return m_hotbar.get();
     }
+
+#ifdef _WIN32
+    /**
+     * @brief Get the native Win32 HUD
+     * @return Win32 HUD pointer
+     */
+    Win32HUD* getHUD() const
+    {
+        return m_nativeHUD.get();
+    }
+#endif
 
     /**
      * @brief Get the voxel tool palette

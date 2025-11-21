@@ -108,6 +108,22 @@ public:
         return freeFlightMode;
     }
 
+    // Health and stamina system (for HUD integration)
+    float getHealth() const { return m_health; }
+    float getMaxHealth() const { return m_maxHealth; }
+    float getStamina() const { return m_stamina; }
+    float getMaxStamina() const { return m_maxStamina; }
+    
+    void setHealth(float health) { m_health = glm::clamp(health, 0.0f, m_maxHealth); }
+    void setMaxHealth(float maxHealth) { m_maxHealth = maxHealth; }
+    void setStamina(float stamina) { m_stamina = glm::clamp(stamina, 0.0f, m_maxStamina); }
+    void setMaxStamina(float maxStamina) { m_maxStamina = maxStamina; }
+    
+    void takeDamage(float damage) { setHealth(m_health - damage); }
+    void heal(float amount) { setHealth(m_health + amount); }
+    void consumeStamina(float amount) { setStamina(m_stamina - amount); }
+    void restoreStamina(float amount) { setStamina(m_stamina + amount); }
+
 private:
     /**
      * @brief Apply gravity to player velocity
@@ -167,6 +183,12 @@ private:
     bool isSprinting = false;
     bool isCrouching = false;
     bool freeFlightMode = true; // New: Enable free-flying camera by default
+    
+    // Health and stamina
+    float m_health = 100.0f;
+    float m_maxHealth = 100.0f;
+    float m_stamina = 100.0f;
+    float m_maxStamina = 100.0f;
 };
 
 // Template implementation must be in header

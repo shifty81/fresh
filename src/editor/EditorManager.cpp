@@ -541,6 +541,35 @@ void EditorManager::beginFrame()
     }
 }
 
+void EditorManager::update(float deltaTime)
+{
+    if (!m_initialized) {
+        return;
+    }
+
+#ifdef _WIN32
+    // Update HUD with current player stats
+    if (m_nativeHUD && m_nativeHUD->isVisible() && m_player) {
+        Win32HUD::HUDStats stats;
+        stats.health = m_player->getHealth();
+        stats.maxHealth = m_player->getMaxHealth();
+        stats.stamina = m_player->getStamina();
+        stats.maxStamina = m_player->getMaxStamina();
+        
+        // Get player position
+        auto pos = m_player->getPosition();
+        stats.posX = pos.x;
+        stats.posY = pos.y;
+        stats.posZ = pos.z;
+        
+        // FPS can be set from Engine
+        // stats.fps is updated elsewhere
+        
+        m_nativeHUD->updateStats(stats);
+    }
+#endif
+}
+
 void EditorManager::render()
 {
     if (!m_initialized || !m_visible) {

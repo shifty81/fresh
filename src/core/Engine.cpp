@@ -1121,6 +1121,11 @@ void Engine::update(float deltaTime)
     if (m_worldEditor) {
         m_worldEditor->update(deltaTime);
     }
+
+    // Update editor manager (for HUD and other UI state)
+    if (m_editorManager) {
+        m_editorManager->update(deltaTime);
+    }
 }
 
 void Engine::render()
@@ -2321,6 +2326,11 @@ void Engine::enterPlayMode()
         
 #ifdef _WIN32
         // Show native HUD if available
+        auto* hud = m_editorManager->getHUD();
+        if (hud) {
+            hud->setVisible(true);
+        }
+        
         auto* hotbar = m_editorManager->getHotbar();
         if (hotbar) {
             hotbar->setVisible(true);
@@ -2357,6 +2367,11 @@ void Engine::exitPlayMode()
         
 #ifdef _WIN32
         // Hide native HUD if available
+        auto* hud = m_editorManager->getHUD();
+        if (hud) {
+            hud->setVisible(false);
+        }
+        
         auto* hotbar = m_editorManager->getHotbar();
         if (hotbar) {
             hotbar->setVisible(false);
