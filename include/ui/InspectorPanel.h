@@ -1,15 +1,9 @@
 #pragma once
 
-// This header is deprecated - Windows native UI is used instead
-// For Windows: Use ui/native/Win32InspectorPanel.h
-// This stub exists for backward compatibility during migration
+#include "ui/native/Win32InspectorPanel.h"
 
-#ifdef _WIN32
-    #include "ui/native/Win32InspectorPanel.h"
-    
-    namespace fresh
-    {
-        // Type alias for backward compatibility
-        using InspectorPanel = Win32InspectorPanel;
-    }
-#endif
+namespace fresh
+{
+    // Windows native UI implementation
+    using InspectorPanel = Win32InspectorPanel;
+}

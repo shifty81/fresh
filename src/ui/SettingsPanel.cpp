@@ -69,7 +69,6 @@ bool SettingsPanel::initialize(WindowType* window, InputManagerType* inputManage
 
 void SettingsPanel::render()
 {
-#ifdef FRESH_IMGUI_AVAILABLE
     if (!m_visible) {
         return;
     }
@@ -141,7 +140,6 @@ void SettingsPanel::render()
 
 void SettingsPanel::renderVideoSettings()
 {
-#ifdef FRESH_IMGUI_AVAILABLE
     ImGui::Spacing();
     ImGui::Text("Display Settings");
     ImGui::Separator();
@@ -209,7 +207,6 @@ void SettingsPanel::renderVideoSettings()
 
 void SettingsPanel::renderAudioSettings()
 {
-#ifdef FRESH_IMGUI_AVAILABLE
     ImGui::Spacing();
     ImGui::Text("Volume Settings");
     ImGui::Separator();
@@ -244,7 +241,6 @@ void SettingsPanel::renderAudioSettings()
 
 void SettingsPanel::renderControlsSettings()
 {
-#ifdef FRESH_IMGUI_AVAILABLE
     ImGui::Spacing();
     ImGui::Text("Mouse Settings");
     ImGui::Separator();
@@ -286,7 +282,6 @@ void SettingsPanel::renderControlsSettings()
 
 void SettingsPanel::renderGameplaySettings()
 {
-#ifdef FRESH_IMGUI_AVAILABLE
     ImGui::Spacing();
     ImGui::Text("Performance Settings");
     ImGui::Separator();

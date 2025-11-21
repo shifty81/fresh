@@ -125,7 +125,6 @@ uint32_t WindowsThemeManager::getWindowsAccentColor() const
 
 void WindowsThemeManager::applyToImGui()
 {
-#ifdef FRESH_IMGUI_AVAILABLE
     ImGuiStyle& style = ImGui::GetStyle();
     
     // Convert our RGBA colors to ImGui's format (ABGR)
