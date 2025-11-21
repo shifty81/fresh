@@ -1808,10 +1808,9 @@ void Engine::setupNativeMenuBar()
     menuBar->addSeparator(viewMenu);
     menuBar->addMenuItem(viewMenu, "Toggle Fullscreen\tF11", [this]() {
         LOG_INFO_C("Toggle Fullscreen menu item clicked", "Engine");
-        if (m_window) {
-            // Toggle fullscreen mode
-            m_window->toggleFullscreen();
-        }
+        // TODO: Implement fullscreen toggle in Win32Window
+        // For now, user can use window maximize button
+        LOG_INFO_C("Fullscreen toggle not yet implemented - use window maximize", "Engine");
     });
     menuBar->addMenuItem(viewMenu, "Toggle UI\tU", [this]() {
         LOG_INFO_C("Toggle UI menu item clicked", "Engine");
