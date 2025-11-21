@@ -284,7 +284,7 @@ bool Engine::initialize()
     std::cout << "Entity manager initialized" << std::endl;
     LOG_INFO_C("Entity manager initialized", "Engine");
 
-    // Create comprehensive editor manager (requires ImGui) - show immediately
+    // Create comprehensive editor manager (uses Windows Native Win32 UI) - show immediately
     m_editorManager = std::make_unique<EditorManager>();
     // Initialize with nullptr for world and worldEditor initially
     if (!m_editorManager->initialize(m_window.get(), m_renderer.get(), nullptr, nullptr,

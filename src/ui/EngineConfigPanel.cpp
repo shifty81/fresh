@@ -1,3 +1,8 @@
+// DEPRECATED: This file contains ImGui code and is no longer used.
+// Fresh Voxel Engine uses Windows Native Win32 UI exclusively.
+// See WINDOWS_NATIVE_ONLY_POLICY.md
+
+#if 0 // ImGui code disabled - not compiled
 #include "ui/EngineConfigPanel.h"
 
 #include "core/Logger.h"
@@ -1036,3 +1041,4 @@ bool EngineConfigPanel::loadConfig(const std::string& path)
 }
 
 } // namespace fresh
+#endif // ImGui code disabled

@@ -125,51 +125,9 @@ uint32_t WindowsThemeManager::getWindowsAccentColor() const
 
 void WindowsThemeManager::applyToImGui()
 {
-    ImGuiStyle& style = ImGui::GetStyle();
-    
-    // Convert our RGBA colors to ImGui's format (ABGR)
-    auto toImVec4 = [](uint32_t rgba) -> ImVec4 {
-        float r = ((rgba >> 24) & 0xFF) / 255.0f;
-        float g = ((rgba >> 16) & 0xFF) / 255.0f;
-        float b = ((rgba >> 8) & 0xFF) / 255.0f;
-        float a = (rgba & 0xFF) / 255.0f;
-        return ImVec4(r, g, b, a);
-    };
-
-    // Apply colors to ImGui style
-    style.Colors[ImGuiCol_WindowBg] = toImVec4(m_themeColors.background);
-    style.Colors[ImGuiCol_ChildBg] = toImVec4(m_themeColors.foreground);
-    style.Colors[ImGuiCol_PopupBg] = toImVec4(m_themeColors.foreground);
-    style.Colors[ImGuiCol_Border] = toImVec4(m_themeColors.border);
-    style.Colors[ImGuiCol_Text] = toImVec4(m_themeColors.text);
-    style.Colors[ImGuiCol_TextDisabled] = toImVec4(m_themeColors.textDisabled);
-    style.Colors[ImGuiCol_Header] = toImVec4(m_themeColors.accent);
-    style.Colors[ImGuiCol_HeaderHovered] = toImVec4(m_themeColors.highlight);
-    style.Colors[ImGuiCol_HeaderActive] = toImVec4(m_themeColors.accent);
-    
-    // Apply Windows 11 modern styling
-    style.WindowRounding = 8.0f;
-    style.ChildRounding = 4.0f;
-    style.FrameRounding = 4.0f;
-    style.PopupRounding = 4.0f;
-    style.ScrollbarRounding = 4.0f;
-    style.GrabRounding = 4.0f;
-    style.TabRounding = 4.0f;
-    
-    // Modern spacing
-    style.WindowPadding = ImVec2(12.0f, 12.0f);
-    style.FramePadding = ImVec2(8.0f, 4.0f);
-    style.ItemSpacing = ImVec2(8.0f, 8.0f);
-    style.ItemInnerSpacing = ImVec2(6.0f, 6.0f);
-    
-    // Borders
-    style.WindowBorderSize = 1.0f;
-    style.ChildBorderSize = 1.0f;
-    style.PopupBorderSize = 1.0f;
-    style.FrameBorderSize = 0.0f;
-
-    LOG_INFO_C("ImGui style updated with Windows theme", "WindowsThemeManager");
-#endif
+    // ImGui has been removed from this project (Windows Native Win32 UI only)
+    // This method is deprecated and does nothing
+    LOG_WARNING_C("applyToImGui() called but ImGui has been removed", "WindowsThemeManager");
 }
 
 void WindowsThemeManager::setCustomTheme(const ThemeColors& colors)
@@ -177,7 +135,7 @@ void WindowsThemeManager::setCustomTheme(const ThemeColors& colors)
     m_customThemeColors = colors;
     if (m_currentTheme == WindowsTheme::Custom) {
         m_themeColors = colors;
-        applyToImGui();
+        // ImGui removed - no need to apply
     }
 }
 
