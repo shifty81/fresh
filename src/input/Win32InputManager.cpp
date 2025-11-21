@@ -176,6 +176,12 @@ void Win32InputManager::setCursorMode(bool captured)
         POINT center = {rect.right / 2, rect.bottom / 2};
         ClientToScreen(hwnd, &center);
         
+        // Initialize lastMouse to center position to avoid jump
+        lastMouseX = rect.right / 2;
+        lastMouseY = rect.bottom / 2;
+        
+        // Set flag to ignore the SetCursorPos event
+        expectingRecenterEvent = true;
         SetCursorPos(center.x, center.y);
         ShowCursor(FALSE);
         
@@ -183,13 +189,14 @@ void Win32InputManager::setCursorMode(bool captured)
         RECT windowRect;
         GetWindowRect(hwnd, &windowRect);
         ClipCursor(&windowRect);
+        
+        // Don't set firstMouse = true here, we've already initialized lastMouse properly
     } else {
         // Show cursor and release clip
         ShowCursor(TRUE);
         ClipCursor(nullptr);
+        firstMouse = true; // Reset for next capture
     }
-
-    firstMouse = true; // Reset to avoid jump
 }
 
 void Win32InputManager::toggleCursorCapture()
