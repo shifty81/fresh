@@ -9,6 +9,7 @@
 
 #ifdef _WIN32
     #include <windows.h>
+    #include <shellapi.h>  // For ShellExecuteA
 #elif defined(__APPLE__)
     #include <mach-o/dyld.h>
     #include <limits.h>
@@ -1967,34 +1968,75 @@ void Engine::setupNativeMenuBar()
     int helpMenu = menuBar->addMenu("Help");
     menuBar->addMenuItem(helpMenu, "Documentation\tF1", [this]() {
         LOG_INFO_C("Documentation menu item clicked", "Engine");
-        // TODO: Open documentation
+#ifdef _WIN32
+        // Open documentation in default browser
+        ShellExecuteA(NULL, "open", "https://github.com/shifty81/fresh/blob/main/DOCUMENTATION.md", NULL, NULL, SW_SHOWNORMAL);
+#endif
     });
     menuBar->addMenuItem(helpMenu, "Keyboard Shortcuts\tCtrl+?", [this]() {
         LOG_INFO_C("Keyboard Shortcuts displayed", "Engine");
-        // TODO: Show shortcuts reference
+#ifdef _WIN32
+        if (m_editorManager && m_editorManager->getEditorSettingsDialog()) {
+            m_editorManager->showEditorSettings();
+        } else {
+            MessageBoxA(NULL, 
+                "Editor Shortcuts:\n\n"
+                "F - Toggle cursor capture\n"
+                "ESC - Exit play mode\n"
+                "W/E/R - Transform tool (Move/Rotate/Scale)\n"
+                "Ctrl+Z - Undo\n"
+                "Ctrl+Y - Redo\n"
+                "Ctrl+S - Save\n"
+                "Alt+P - Play mode\n\n"
+                "Camera:\n"
+                "Right-click + drag - Free look\n"
+                "WASD - Move camera\n"
+                "Space/Ctrl - Up/Down\n"
+                "Shift - Speed boost",
+                "Keyboard Shortcuts", MB_OK | MB_ICONINFORMATION);
+        }
+#endif
     });
     menuBar->addSeparator(helpMenu);
     menuBar->addMenuItem(helpMenu, "Report Bug...", [this]() {
         LOG_INFO_C("Report Bug selected", "Engine");
-        // TODO: Open bug report
+#ifdef _WIN32
+        ShellExecuteA(NULL, "open", "https://github.com/shifty81/fresh/issues/new?template=bug_report.md", NULL, NULL, SW_SHOWNORMAL);
+#endif
     });
     menuBar->addMenuItem(helpMenu, "Feature Request...", [this]() {
         LOG_INFO_C("Feature Request selected", "Engine");
-        // TODO: Open feature request
+#ifdef _WIN32
+        ShellExecuteA(NULL, "open", "https://github.com/shifty81/fresh/issues/new?template=feature_request.md", NULL, NULL, SW_SHOWNORMAL);
+#endif
     });
     menuBar->addSeparator(helpMenu);
     menuBar->addMenuItem(helpMenu, "Check for Updates...", [this]() {
         LOG_INFO_C("Check for Updates selected", "Engine");
-        // TODO: Check for updates
+#ifdef _WIN32
+        ShellExecuteA(NULL, "open", "https://github.com/shifty81/fresh/releases", NULL, NULL, SW_SHOWNORMAL);
+#endif
     });
     menuBar->addMenuItem(helpMenu, "Release Notes", [this]() {
         LOG_INFO_C("Release Notes selected", "Engine");
-        // TODO: Show release notes
+#ifdef _WIN32
+        ShellExecuteA(NULL, "open", "https://github.com/shifty81/fresh/blob/main/CHANGELOG.md", NULL, NULL, SW_SHOWNORMAL);
+#endif
     });
     menuBar->addSeparator(helpMenu);
     menuBar->addMenuItem(helpMenu, "About Fresh Voxel Engine", [this]() {
         LOG_INFO_C("About menu item clicked", "Engine");
-        // TODO: Show about dialog
+#ifdef _WIN32
+        MessageBoxA(NULL,
+            "Fresh Voxel Engine v0.1.0\n\n"
+            "A professional Windows-exclusive voxel game development platform\n"
+            "built with C++20, featuring DirectX 12/11 rendering and an\n"
+            "Unreal Engine-like editor.\n\n"
+            "© 2024 Fresh Voxel Engine Project\n"
+            "Licensed under the MIT License\n\n"
+            "https://github.com/shifty81/fresh",
+            "About Fresh Voxel Engine", MB_OK | MB_ICONINFORMATION);
+#endif
     });
 
     LOG_INFO_C("Unreal-style native Win32 menu bar initialized with comprehensive menus", "Engine");
