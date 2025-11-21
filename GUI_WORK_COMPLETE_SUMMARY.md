@@ -2,22 +2,36 @@
 
 **Date:** 2025-11-21  
 **Branch:** copilot/gui-work-completion-status  
-**Assessment:** Comprehensive Review of GUI Implementation
+**Assessment:** Comprehensive Review of GUI Implementation  
+**Policy:** **WINDOWS NATIVE WIN32 UI ONLY** (ImGui is DEPRECATED)
+
+---
+
+## 🚨 IMPORTANT: Windows Native UI Only Policy
+
+**Fresh Voxel Engine uses Windows Native Win32 UI EXCLUSIVELY.**
+
+- ✅ **Primary UI:** Native Windows Win32 controls (menu bars, toolbars, dialogs, panels)
+- ❌ **ImGui:** DEPRECATED and will be removed (see IMGUI_REMOVAL_ACTION_PLAN.md)
+- ❌ **Cross-platform UI:** Not supported (Windows 10/11 only)
+
+**See:** `WINDOWS_NATIVE_ONLY_POLICY.md` for full policy details and guidelines.
 
 ---
 
 ## Executive Summary
 
-The Fresh Voxel Engine's GUI implementation is **95-99% COMPLETE** for core functionality using a **hybrid architecture** with **Native Windows Win32 UI** as the primary interface.
+The Fresh Voxel Engine's GUI implementation is **95-99% COMPLETE** for core functionality using **Native Windows Win32 UI** throughout.
 
-### ✅ CLARIFICATION: Native Win32 UI (Not ImGui)
+### ✅ CLARIFICATION: Native Win32 UI (NOT ImGui)
 
-**Important:** The core editor uses **Native Windows Win32 controls**, NOT ImGui. ImGui is an optional dependency that may be used for fallback or compatibility purposes, but is NOT the primary UI system.
+**CRITICAL:** The core editor uses **Native Windows Win32 controls ONLY**. ImGui was added as an optional dependency but is NOT the primary UI system and will be completely removed.
 
 **Architecture:**
 - **Primary UI:** Native Win32 panels (Win32MenuBar, Win32Toolbar, Win32ConsolePanel, Win32SceneHierarchyPanel, Win32InspectorPanel, Win32ContentBrowserPanel, Win32HUD, Win32ViewportPanel)
-- **Optional:** ImGui available as fallback (defined by `FRESH_IMGUI_AVAILABLE` when vcpkg imgui package is found)
+- **ImGui:** DEPRECATED - Being removed from codebase (see IMGUI_REMOVAL_ACTION_PLAN.md)
 - **Platform:** Windows-exclusive (Windows 10/11)
+- **Policy:** Windows Native Win32 UI ONLY (see WINDOWS_NATIVE_ONLY_POLICY.md)
 
 ---
 
