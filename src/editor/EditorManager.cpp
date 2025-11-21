@@ -1203,19 +1203,17 @@ void EditorManager::newWorld()
 #else
             // ImGui not available - create world with default settings
             // In future, this should show a native Win32 dialog for world configuration
-            LOG_INFO_C("Creating new world with default settings (ImGui not available)", "EditorManager");
+            LOG_INFO_C("ImGui not available - cannot show world creation panel", "EditorManager");
             
-            // TODO: Show native Win32 dialog to get world name and seed
-            // For now, use default values
-            std::string worldName = "NewWorld";
-            int worldSeed = 12345;
-            
-            // Notify engine to create world (engine will call createNewWorld)
-            // This is a temporary workaround - proper implementation would use a callback
+            // Show informative message to user
             if (m_windowsDialogManager) {
                 m_windowsDialogManager->showMessageBox(
                     "World Creation",
-                    "Default world creation not yet implemented.\nPlease use the console menu on startup.",
+                    "World creation dialog not yet implemented with native Win32 UI.\n\n"
+                    "To create a new world:\n"
+                    "1. Close the application\n"
+                    "2. Restart and use the console menu on startup\n\n"
+                    "This will be improved in a future update.",
                     MessageBoxButtons::OK,
                     MessageBoxIcon::Information
                 );

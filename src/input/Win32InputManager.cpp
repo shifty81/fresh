@@ -190,7 +190,10 @@ void Win32InputManager::setCursorMode(bool captured)
         GetWindowRect(hwnd, &windowRect);
         ClipCursor(&windowRect);
         
-        // Don't set firstMouse = true here, we've already initialized lastMouse properly
+        // Don't set firstMouse = true here because we've properly initialized lastMouse.
+        // Setting firstMouse = true would cause the next real mouse movement to be
+        // ignored (early return in processMouseMovement), defeating the purpose of
+        // capturing the cursor for camera control.
     } else {
         // Show cursor and release clip
         ShowCursor(TRUE);
