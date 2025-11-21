@@ -37,7 +37,7 @@
 #include "ui/EditorMenuBar.h"
 #include "ui/EditorToolbar.h"
 #include "ui/HotbarPanel.h"
-#include "ui/ImGuiContext.h"
+// Removed: ImGuiContext.h (ImGui has been removed from this project)
 #include "ui/InspectorPanel.h"
 // Removed ImGui-based panels (replaced with Win32 native versions):
 // #include "ui/MainMenuPanel.h"

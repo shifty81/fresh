@@ -107,8 +107,7 @@ void WindowsThemeManager::setTheme(WindowsTheme theme)
         break;
     }
 
-    // Sync with ImGui
-    applyToImGui();
+    // Note: ImGui has been removed - themes now apply only to native Win32 UI
 
     LOG_INFO_C("Theme changed to: " + std::to_string(static_cast<int>(theme)), "WindowsThemeManager");
 }
@@ -121,13 +120,6 @@ bool WindowsThemeManager::isWindowsDarkMode() const
 uint32_t WindowsThemeManager::getWindowsAccentColor() const
 {
     return m_windowsAccentColor;
-}
-
-void WindowsThemeManager::applyToImGui()
-{
-    // ImGui has been removed from this project (Windows Native Win32 UI only)
-    // This method is deprecated and does nothing
-    LOG_WARNING_C("applyToImGui() called but ImGui has been removed", "WindowsThemeManager");
 }
 
 void WindowsThemeManager::setCustomTheme(const ThemeColors& colors)
