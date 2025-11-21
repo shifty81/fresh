@@ -405,14 +405,16 @@ if(WIN32)
         src/ui/native/Win32TerraformingPanel.cpp
         src/ui/native/Win32ViewportPanel.cpp
         
-        # Windows integration features
+        # Windows integration features (theme detection, dialogs, taskbar, etc.)
         src/ui/WindowsThemeManager.cpp
         src/ui/WindowsDialogManager.cpp
         src/ui/WindowsTaskbarManager.cpp
-        src/ui/WindowsCustomizationPanel.cpp
         src/ui/WindowsJumpListManager.cpp
         src/ui/WindowsToastManager.cpp
         src/ui/WindowsDPIManager.cpp
+        
+        # Note: WindowsCustomizationPanel removed - it was ImGui-based
+        # Native Windows settings are handled through Win32SettingsDialog
     )
     
     # Define that we're using native Win32 UI
@@ -420,15 +422,15 @@ if(WIN32)
     message(STATUS "Win32 native UI enabled")
 endif()
 
-# Always include non-ImGui UI components
+# Always include EditorManager (uses native Win32 UI on Windows)
 list(APPEND ENGINE_SOURCES
     src/editor/EditorManager.cpp
-    src/ui/MainMenuPanel.cpp
-    src/ui/SettingsPanel.cpp
     src/ui/HotbarPanel.cpp
-    src/ui/EngineConfigPanel.cpp
 )
 message(STATUS "Windows Native UI enabled")
+
+# Note: MainMenuPanel, SettingsPanel, EngineConfigPanel are deprecated ImGui-based panels
+# They have been replaced with Win32SettingsDialog and other native Win32 panels
 
 # Header files
 set(ENGINE_HEADERS

@@ -55,7 +55,7 @@
 #include "ui/EditorToolbar.h"
 #include "ui/HotbarPanel.h"
 #include "ui/MainMenu.h"
-#include "ui/MainMenuPanel.h"
+// Removed ImGui-based panel: #include "ui/MainMenuPanel.h"
 #include "ui/SceneHierarchyPanel.h"
 #include "ui/VoxelToolPalette.h"
 #include "voxel/Chunk.h"
@@ -679,42 +679,10 @@ void Engine::run()
                 m_editorManager->beginFrame();
                 m_editorManager->render();
 
-                // Check if user wants to create or load a world from GUI
-                auto* mainMenuPanel = m_editorManager->getMainMenuPanel();
-                bool worldActionRequested = false;
-                if (mainMenuPanel) {
-                    if (mainMenuPanel->shouldExit()) {
-                        // End the current ImGui frame before exiting to avoid frame lifecycle issues
-                        m_editorManager->endFrame();
-                        
-                        // Exit the application
-                        m_running = false;
-                        mainMenuPanel->clearFlags();
-                        worldActionRequested = true;
-                    } else if (mainMenuPanel->shouldCreateNewWorld()) {
-                        // End the current ImGui frame before world creation to avoid frame lifecycle issues
-                        m_editorManager->endFrame();
-                        
-                        createNewWorld(mainMenuPanel->getNewWorldName(),
-                                       mainMenuPanel->getWorldSeed(),
-                                       mainMenuPanel->isWorld3D(),
-                                       mainMenuPanel->get2DGameStyle());
-                        mainMenuPanel->clearFlags();
-                        worldActionRequested = true;
-                    } else if (mainMenuPanel->shouldLoadWorld()) {
-                        // End the current ImGui frame before world loading to avoid frame lifecycle issues
-                        m_editorManager->endFrame();
-                        
-                        loadWorld(mainMenuPanel->getLoadWorldName());
-                        mainMenuPanel->clearFlags();
-                        worldActionRequested = true;
-                    }
-                }
-
-                // Only call endFrame if we didn't already call it above
-                if (!worldActionRequested) {
-                    m_editorManager->endFrame();
-                }
+                // MainMenuPanel removed (ImGui-based) - world creation/loading now handled
+                // through native Win32 dialogs triggered from the menu bar
+                
+                m_editorManager->endFrame();
             }
 
             // End frame
