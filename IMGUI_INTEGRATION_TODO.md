@@ -23,12 +23,18 @@ ImGui has been added back as a dependency to support UI panels (MainMenuPanel, S
 
 ### 1. Add ImGui Backend Dependencies
 
-**vcpkg.json:**
+Note: ImGui backends may be included automatically with vcpkg imgui package.
+If not, you may need to download the backend files manually from the ImGui repository.
+
+**vcpkg.json** (ImGui should already be present from this PR):
 ```json
 "dependencies": [
-  "imgui[win32-binding,dx11-binding,dx12-binding]"
+  "imgui"
 ]
 ```
+
+The win32-binding and dx11/dx12-binding backends are typically included in the main imgui package.
+Check the vcpkg port to confirm what's included.
 
 ### 2. Initialize ImGui in Engine
 

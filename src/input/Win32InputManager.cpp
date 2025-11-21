@@ -172,11 +172,11 @@ void Win32InputManager::setCursorMode(bool captured)
         // Hide and lock cursor to center of window
         HWND hwnd = window->getHandle();
         RECT rect;
-        GetClientRect(hwnd, &rect);
+        GetClientRect(hwnd, &rect);  // Get client area dimensions (excludes title bar, borders)
         POINT center = {rect.right / 2, rect.bottom / 2};
         ClientToScreen(hwnd, &center);
         
-        // Initialize lastMouse to center position to avoid jump
+        // Initialize lastMouse to center position in client coordinates to avoid jump
         lastMouseX = rect.right / 2;
         lastMouseY = rect.bottom / 2;
         
@@ -191,9 +191,12 @@ void Win32InputManager::setCursorMode(bool captured)
         ClipCursor(&windowRect);
         
         // Don't set firstMouse = true here because we've properly initialized lastMouse.
+        // The firstMouse flag is used in processMouseMovement() to skip the first movement
+        // event after cursor state changes, preventing camera jumps from position deltas.
         // Setting firstMouse = true would cause the next real mouse movement to be
         // ignored (early return in processMouseMovement), defeating the purpose of
-        // capturing the cursor for camera control.
+        // capturing the cursor for camera control. Since we've initialized lastMouse
+        // to the current position, we don't need to skip any events.
     } else {
         // Show cursor and release clip
         ShowCursor(TRUE);
