@@ -1242,8 +1242,13 @@ void EditorManager::toggleContentBrowser()
 #ifdef FRESH_WIN32_UI
     // Toggle native Win32 panel visibility
     if (m_nativeContentBrowser) {
+        LOG_INFO_C("Calling setVisible(" + std::string(m_showContentBrowser ? "true" : "false") + ") on Content Browser", "EditorManager");
         m_nativeContentBrowser->setVisible(m_showContentBrowser);
+    } else {
+        LOG_WARNING_C("m_nativeContentBrowser is null, cannot toggle visibility", "EditorManager");
     }
+#else
+    LOG_WARNING_C("FRESH_WIN32_UI not defined, Content Browser toggle has no effect", "EditorManager");
 #endif
 }
 
