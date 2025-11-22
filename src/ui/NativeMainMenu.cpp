@@ -372,10 +372,9 @@ void NativeMainMenu::createWorldCreationDialog(HWND hwnd)
     y += 25;
 
     // 3D World radio button
-    HWND radio3D =
-        CreateWindowEx(0, L"BUTTON", L"3D World (Full Voxel)",
-                       WS_CHILD | WS_VISIBLE | BS_AUTORADIOBUTTON | WS_GROUP, controlX, y, 300, 20,
-                       hwnd, (HMENU)ID_RADIO_3D, GetModuleHandle(nullptr), nullptr);
+    CreateWindowEx(0, L"BUTTON", L"3D World (Full Voxel)",
+                   WS_CHILD | WS_VISIBLE | BS_AUTORADIOBUTTON | WS_GROUP, controlX, y, 300, 20,
+                   hwnd, (HMENU)ID_RADIO_3D, GetModuleHandle(nullptr), nullptr);
     CheckDlgButton(hwnd, ID_RADIO_3D, BST_CHECKED);
 
     y += 30;
