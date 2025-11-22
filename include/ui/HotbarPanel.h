@@ -15,6 +15,10 @@ namespace fresh
  * Displays a horizontal bar of 10 slots (1-0) at the bottom middle of the screen.
  * Each slot can be linked to an inventory item or tool.
  * Used during play mode for quick access to items and tools.
+ * 
+ * @note On Windows with FRESH_WIN32_UI defined, this class serves as a data model
+ * and API compatibility layer. The actual rendering is handled by Win32HUD in EditorManager.
+ * On non-Windows platforms, this class would need to implement its own rendering.
  */
 class HotbarPanel
 {

@@ -4,6 +4,10 @@
 
 #include <GLFW/glfw3.h>
 
+#ifdef _WIN32
+#include "ui/native/Win32HUD.h"
+#endif
+
 namespace fresh
 {
 
@@ -11,6 +15,12 @@ HotbarPanel::HotbarPanel() : m_visible(false), m_selectedSlot(0)
 {
     // Initialize all slots as empty
     clearAllSlots();
+    
+#ifdef _WIN32
+    // On Windows, we use Win32HUD for native rendering
+    // The Win32HUD instance is managed by EditorManager
+    // This class serves as a compatibility wrapper
+#endif
 }
 
 HotbarPanel::~HotbarPanel() {}
@@ -27,8 +37,16 @@ void HotbarPanel::render()
         return;
     }
 
-    // TODO: Implement with Windows native UI (ImGui has been removed from this project)
-    // Use Win32HUD or similar native UI component instead
+    // NOTE: On Windows with FRESH_WIN32_UI defined, the actual HUD rendering
+    // is handled by Win32HUD instance in EditorManager, which uses native Win32 GDI.
+    // This method is only called when FRESH_WIN32_UI is not defined (non-Windows builds).
+    // For Windows builds with native UI, this is a no-op as rendering is done elsewhere.
+    
+#ifndef _WIN32
+    // On non-Windows platforms, implement cross-platform HUD rendering here
+    // Currently not implemented as this is a Windows-exclusive project
+    LOG_WARNING_C("HotbarPanel::render() called on non-Windows platform - not implemented", "HotbarPanel");
+#endif
 }
 
 void HotbarPanel::renderSlot(int slotIndex, const HotbarSlot& slot, bool isSelected)
