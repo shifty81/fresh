@@ -504,7 +504,8 @@ void Engine::initializeGameSystems()
             }
         }
     }
-#endif // Initialize rendering based on API
+    
+    // Initialize rendering based on API
 #if defined(FRESH_OPENGL_SUPPORT) && defined(FRESH_GLEW_AVAILABLE)
     if (m_renderer->getAPI() == GraphicsAPI::OpenGL) {
         initializeRendering();
@@ -539,7 +540,8 @@ void Engine::initializeGameSystems()
         m_editorManager->setPlayer(m_player.get());
         LOG_INFO_C("Editor manager updated with player reference", "Engine");
     }
-#endif // Set up camera mode based on world type
+    
+    // Set up camera mode based on world type
     if (!m_isWorld3D) {
         Camera& camera = m_player->getCamera();
         if (m_world2DStyle == 0) {
@@ -680,17 +682,6 @@ void Engine::run()
             if (m_renderer) {
                 m_renderer->endFrame();
             }
-#else
-            // Fallback to console menu if ImGui not available
-            m_mainMenu->render();
-            if (m_mainMenu->shouldCreateNewWorld()) {
-                createNewWorld(m_mainMenu->getNewWorldName(), m_mainMenu->getWorldSeed());
-                m_mainMenu->clearFlags();
-            } else if (m_mainMenu->shouldLoadWorld()) {
-                loadWorld(m_mainMenu->getLoadWorldName());
-                m_mainMenu->clearFlags();
-            }
-            continue;
         }
 
         // Normal game loop
@@ -801,11 +792,8 @@ void Engine::processInput()
         bool guiCapturesMouse = m_editorManager && m_editorManager->wantCaptureMouse();
         (void)guiCapturesMouse; // May be unused in this scope
         bool guiCapturesKeyboard = m_editorManager && m_editorManager->wantCaptureKeyboard();
-#else
-        bool guiCapturesMouse = false;
-        (void)guiCapturesMouse; // Suppress unused warning
-        bool guiCapturesKeyboard = false;
-#endif // Handle hotbar key presses (1-0) when not in editor mode and GUI doesn't capture keyboard
+        
+        // Handle hotbar key presses (1-0) when not in editor mode and GUI doesn't capture keyboard
         if (!guiCapturesKeyboard && m_editorManager && m_editorManager->getHotbar()) {
             auto* hotbar = m_editorManager->getHotbar();
             if (hotbar->isVisible()) {
@@ -895,7 +883,8 @@ void Engine::processInput()
                 }
             }
         }
-#endif // F key to toggle mouse cursor capture (camera freelook vs GUI mode)
+        
+        // F key to toggle mouse cursor capture (camera freelook vs GUI mode)
         if (!guiCapturesKeyboard && m_inputManager->isKeyJustPressed(KEY_F)) {
             m_inputManager->toggleCursorCapture();
             m_userToggledCursor = true;  // Track that user explicitly toggled
@@ -960,10 +949,8 @@ void Engine::update(float deltaTime)
     // Check if GUI wants input before processing player updates
     bool guiCapturesMouse = m_editorManager && m_editorManager->wantCaptureMouse();
     bool guiCapturesKeyboard = m_editorManager && m_editorManager->wantCaptureKeyboard();
-#else
-    bool guiCapturesMouse = false;
-    bool guiCapturesKeyboard = false;
-#endif // ========================================================================
+    
+    // ========================================================================
     // UNREAL-STYLE MOUSE CONTROL SYSTEM
     // ========================================================================
     // In Unreal Engine:
@@ -2301,7 +2288,6 @@ void Engine::createDemoEntities()
     }
 
     LOG_INFO_C("Demo entities created successfully! Select them in Scene Hierarchy to inspect.", "Engine");
-#endif
 }
 
 // Play mode management methods
