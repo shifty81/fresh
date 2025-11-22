@@ -71,8 +71,9 @@ make
 2. **"'std::make_unique': no matching overloaded function"**
    - Solution: Fixed in latest version. Update your code or add `#include <memory>`
 
-3. **"'ImGuiConfigFlags_DockingEnable': undeclared identifier"**
-   - Solution: Install ImGui with docking: `vcpkg install imgui[docking-experimental]:x64-windows`
+3. **"Windows 10/11 SDK Required"**
+   - Solution: Fresh Voxel Engine requires Windows 10/11 SDK for native UI
+   - Install via Visual Studio Installer → Individual Components → Windows 10/11 SDK
    - See [VISUAL_STUDIO_SETUP.md](VISUAL_STUDIO_SETUP.md#common-compilation-errors)
 
 4. **"Unable to start program ... ALL_BUILD access is denied"**
@@ -277,8 +278,10 @@ For comprehensive Visual Studio troubleshooting, see:
 
 **Quick fixes for common VS errors**:
 - **ALL_BUILD access denied**: Right-click `FreshVoxelEngine` → Set as Startup Project
-- **ImGui errors**: Install with docking support: `vcpkg install imgui[docking-experimental]:x64-windows`
+- **Windows SDK missing**: Install Windows 10/11 SDK via Visual Studio Installer
 - **std::make_unique error**: Update to latest code (fixed) or add `#include <memory>`
+
+**Note**: ImGui has been removed from Fresh Voxel Engine. The engine uses Windows Native Win32 UI exclusively. See [IMGUI_DEPRECATION_NOTICE.md](../../IMGUI_DEPRECATION_NOTICE.md).
 
 ### Black screen / nothing renders
 
