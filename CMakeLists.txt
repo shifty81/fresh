@@ -289,6 +289,8 @@ set(ENGINE_SOURCES
     src/physics/PhysicsSystemEnhanced.cpp
     src/interaction/RaycastSystem.cpp
     src/interaction/VoxelInteraction.cpp
+    src/interaction/VoxelTool.cpp
+    src/interaction/ToolManager.cpp
     src/ai/AISystem.cpp
     src/ai/BehaviorTree.cpp
     src/audio/AudioEngine.cpp
