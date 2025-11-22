@@ -38,7 +38,7 @@ NativeMainMenu::NativeMainMenu()
       m_createNewWorld(false),
       m_loadWorld(false),
       m_isWorld3D(true),
-      m_world2DStyle(0),
+      m_world2DStyle(WorldStyle2D::Platformer),
       m_worldSeed(0)
 {
 }
@@ -303,7 +303,8 @@ INT_PTR CALLBACK NativeMainMenu::createWorldDialogProc(HWND hwnd, UINT msg, WPAR
             
             // Get 2D style if 2D world is selected
             if (!menu->m_isWorld3D) {
-                menu->m_world2DStyle = (IsDlgButtonChecked(hwnd, ID_RADIO_2D_PLATFORMER) == BST_CHECKED) ? 0 : 1;
+                bool isPlatformer = (IsDlgButtonChecked(hwnd, ID_RADIO_2D_PLATFORMER) == BST_CHECKED);
+                menu->m_world2DStyle = isPlatformer ? WorldStyle2D::Platformer : WorldStyle2D::TopDown;
             }
 
             LOG_INFO_C("Creating new world: " + toNarrowString(menu->m_newWorldName),
@@ -397,9 +398,9 @@ void NativeMainMenu::createWorldCreationDialog(HWND hwnd)
 
     y += 25;
 
-    // 2D Platformer radio button (indented)
+    // 2D Platformer radio button (sub-option, not a new group)
     CreateWindowEx(0, L"BUTTON", L"Platformer / Terraria-style (Side View)",
-                   WS_CHILD | WS_VISIBLE | BS_AUTORADIOBUTTON | WS_GROUP, controlX + 40, y, 300, 20,
+                   WS_CHILD | WS_VISIBLE | BS_AUTORADIOBUTTON, controlX + 40, y, 300, 20,
                    hwnd, (HMENU)ID_RADIO_2D_PLATFORMER, GetModuleHandle(nullptr), nullptr);
     CheckDlgButton(hwnd, ID_RADIO_2D_PLATFORMER, BST_CHECKED);
 

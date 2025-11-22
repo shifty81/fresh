@@ -10,6 +10,14 @@ namespace fresh
 {
 
 /**
+ * @brief 2D World style enumeration
+ */
+enum class WorldStyle2D {
+    Platformer = 0,  // Side-scrolling (Terraria-like)
+    TopDown = 1      // Overhead view (Zelda-like)
+};
+
+/**
  * @brief Native Windows Main Menu using Win32 API
  *
  * This is a proof-of-concept replacement for MainMenuPanel that uses
@@ -80,9 +88,9 @@ public:
     }
 
     /**
-     * @brief Get the 2D world style (0 = Platformer/Terraria, 1 = Top-down/Zelda)
+     * @brief Get the 2D world style
      */
-    int get2DWorldStyle() const
+    WorldStyle2D get2DWorldStyle() const
     {
         return m_world2DStyle;
     }
@@ -132,7 +140,7 @@ private:
     bool m_createNewWorld;
     bool m_loadWorld;
     bool m_isWorld3D;
-    int m_world2DStyle; // 0 = Platformer/Terraria, 1 = Top-down/Zelda
+    WorldStyle2D m_world2DStyle;
 
     // World data
     std::wstring m_newWorldName;

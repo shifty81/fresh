@@ -1146,7 +1146,8 @@ void EditorManager::newWorld()
                         std::string worldName = toNarrowString(wWorldName);
                         int seed = mainMenu.getWorldSeed();
                         bool is3D = mainMenu.isWorld3D();
-                        int gameStyle2D = mainMenu.get2DWorldStyle();
+                        WorldStyle2D style2D = mainMenu.get2DWorldStyle();
+                        int gameStyle2D = static_cast<int>(style2D);
                         
                         LOG_INFO_C("World creation confirmed: " + worldName + 
                                    ", seed=" + std::to_string(seed) + 
