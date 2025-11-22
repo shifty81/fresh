@@ -405,8 +405,9 @@ if(WIN32)
         src/ui/WindowsToastManager.cpp
         src/ui/WindowsDPIManager.cpp
         
-        # Note: WindowsCustomizationPanel removed - it was ImGui-based
-        # Native Windows settings are handled through Win32SettingsDialog
+        # Note: ImGui-based panels (WindowsCustomizationPanel, MainMenuPanel, SettingsPanel, EngineConfigPanel) 
+        # have been archived to archived/imgui-panels/ and are no longer compiled.
+        # All UI is now handled through native Win32 panels.
     )
     
     # Define that we're using native Win32 UI
@@ -421,8 +422,9 @@ list(APPEND ENGINE_SOURCES
 )
 message(STATUS "Windows Native UI enabled")
 
-# Note: MainMenuPanel, SettingsPanel, EngineConfigPanel are deprecated ImGui-based panels
-# They have been replaced with Win32SettingsDialog and other native Win32 panels
+# Note: ImGui has been completely removed from the project.
+# All deprecated ImGui-based panels have been archived to archived/imgui-panels/
+# The engine uses Windows Native Win32 UI exclusively. See WINDOWS_NATIVE_ONLY_POLICY.md
 
 # Header files
 set(ENGINE_HEADERS

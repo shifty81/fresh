@@ -1,6 +1,8 @@
 // DEPRECATED: This file contains ImGui code and is no longer used.
+// Archived: 2025-11-22
+// Replaced by: Win32SettingsDialog and Win32Panel-based configuration (native Win32 UI)
 // Fresh Voxel Engine uses Windows Native Win32 UI exclusively.
-// See WINDOWS_NATIVE_ONLY_POLICY.md
+// See WINDOWS_NATIVE_ONLY_POLICY.md and IMGUI_DEPRECATION_NOTICE.md
 
 #if 0 // ImGui code disabled - not compiled
 #include "ui/EngineConfigPanel.h"
