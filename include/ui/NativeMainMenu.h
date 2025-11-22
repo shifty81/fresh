@@ -80,6 +80,14 @@ public:
     }
 
     /**
+     * @brief Get the 2D world style (0 = Platformer/Terraria, 1 = Top-down/Zelda)
+     */
+    int get2DWorldStyle() const
+    {
+        return m_world2DStyle;
+    }
+
+    /**
      * @brief Get the world to load
      */
     const std::wstring& getLoadWorldName() const
@@ -124,6 +132,7 @@ private:
     bool m_createNewWorld;
     bool m_loadWorld;
     bool m_isWorld3D;
+    int m_world2DStyle; // 0 = Platformer/Terraria, 1 = Top-down/Zelda
 
     // World data
     std::wstring m_newWorldName;
@@ -145,6 +154,9 @@ private:
         ID_LIST_WORLDS = 1010,
         ID_BTN_LOAD = 1011,
         ID_STATIC_TITLE = 1012,
+        ID_RADIO_2D_PLATFORMER = 1013,
+        ID_RADIO_2D_TOPDOWN = 1014,
+        ID_STATIC_2D_STYLE = 1015,
     };
 
     // Unreal Engine dark theme colors

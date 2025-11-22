@@ -38,6 +38,7 @@ NativeMainMenu::NativeMainMenu()
       m_createNewWorld(false),
       m_loadWorld(false),
       m_isWorld3D(true),
+      m_world2DStyle(0),
       m_worldSeed(0)
 {
 }
@@ -299,6 +300,11 @@ INT_PTR CALLBACK NativeMainMenu::createWorldDialogProc(HWND hwnd, UINT msg, WPAR
 
             // Get world type
             menu->m_isWorld3D = (IsDlgButtonChecked(hwnd, ID_RADIO_3D) == BST_CHECKED);
+            
+            // Get 2D style if 2D world is selected
+            if (!menu->m_isWorld3D) {
+                menu->m_world2DStyle = (IsDlgButtonChecked(hwnd, ID_RADIO_2D_PLATFORMER) == BST_CHECKED) ? 0 : 1;
+            }
 
             LOG_INFO_C("Creating new world: " + toNarrowString(menu->m_newWorldName),
                        "NativeMainMenu");
@@ -331,7 +337,7 @@ INT_PTR CALLBACK NativeMainMenu::createWorldDialogProc(HWND hwnd, UINT msg, WPAR
 
 void NativeMainMenu::createWorldCreationDialog(HWND hwnd)
 {
-    SetWindowPos(hwnd, nullptr, 0, 0, 550, 400, SWP_NOMOVE | SWP_NOZORDER);
+    SetWindowPos(hwnd, nullptr, 0, 0, 550, 480, SWP_NOMOVE | SWP_NOZORDER);
 
     int y = 20;
     int labelX = 20;
@@ -383,7 +389,28 @@ void NativeMainMenu::createWorldCreationDialog(HWND hwnd)
     CreateWindowEx(0, L"BUTTON", L"2D World", WS_CHILD | WS_VISIBLE | BS_AUTORADIOBUTTON, controlX,
                    y, 300, 20, hwnd, (HMENU)ID_RADIO_2D, GetModuleHandle(nullptr), nullptr);
 
-    y = 320;
+    y += 40;
+
+    // 2D Style label (indented)
+    CreateWindowEx(0, L"STATIC", L"2D World Style:", WS_CHILD | WS_VISIBLE, controlX + 20, y, 120, 20, hwnd,
+                   (HMENU)ID_STATIC_2D_STYLE, GetModuleHandle(nullptr), nullptr);
+
+    y += 25;
+
+    // 2D Platformer radio button (indented)
+    CreateWindowEx(0, L"BUTTON", L"Platformer / Terraria-style (Side View)",
+                   WS_CHILD | WS_VISIBLE | BS_AUTORADIOBUTTON | WS_GROUP, controlX + 40, y, 300, 20,
+                   hwnd, (HMENU)ID_RADIO_2D_PLATFORMER, GetModuleHandle(nullptr), nullptr);
+    CheckDlgButton(hwnd, ID_RADIO_2D_PLATFORMER, BST_CHECKED);
+
+    y += 25;
+
+    // 2D Top-down radio button (indented)
+    CreateWindowEx(0, L"BUTTON", L"Top-down / Zelda-style",
+                   WS_CHILD | WS_VISIBLE | BS_AUTORADIOBUTTON, controlX + 40, y, 300, 20,
+                   hwnd, (HMENU)ID_RADIO_2D_TOPDOWN, GetModuleHandle(nullptr), nullptr);
+
+    y = 400;
 
     // Buttons
     int buttonWidth = 150;
