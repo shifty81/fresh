@@ -398,15 +398,15 @@ void NativeMainMenu::createWorldCreationDialog(HWND hwnd)
 
     y += 25;
 
-    // 2D Platformer radio button (sub-option, not a new group)
+    // 2D Platformer radio button (start of 2D style group)
     CreateWindowEx(0, L"BUTTON", L"Platformer / Terraria-style (Side View)",
-                   WS_CHILD | WS_VISIBLE | BS_AUTORADIOBUTTON, controlX + 40, y, 300, 20,
+                   WS_CHILD | WS_VISIBLE | BS_AUTORADIOBUTTON | WS_GROUP, controlX + 40, y, 300, 20,
                    hwnd, (HMENU)ID_RADIO_2D_PLATFORMER, GetModuleHandle(nullptr), nullptr);
     CheckDlgButton(hwnd, ID_RADIO_2D_PLATFORMER, BST_CHECKED);
 
     y += 25;
 
-    // 2D Top-down radio button (indented)
+    // 2D Top-down radio button (in same group as platformer)
     CreateWindowEx(0, L"BUTTON", L"Top-down / Zelda-style",
                    WS_CHILD | WS_VISIBLE | BS_AUTORADIOBUTTON, controlX + 40, y, 300, 20,
                    hwnd, (HMENU)ID_RADIO_2D_TOPDOWN, GetModuleHandle(nullptr), nullptr);
