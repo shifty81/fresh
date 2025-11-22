@@ -36,6 +36,7 @@ if(WIN32)
     add_definitions(-DFRESH_DIRECTX_SUPPORT)
     add_definitions(-DFRESH_WINDOWS_ONLY)
     add_definitions(-DNOMINMAX)  # Prevent Windows.h from defining min/max macros
+    add_definitions(-DUNICODE -D_UNICODE)  # Use Unicode (wide character) Windows APIs
 endif()
 if(ENABLE_OPENGL)
     add_definitions(-DFRESH_OPENGL_SUPPORT)
