@@ -1,5 +1,11 @@
 #include "core/Engine.h"
 
+// Suppress C4244 warning from MSVC STL headers (xutility)
+// This warning occurs in system headers when using certain Windows API types with STL containers
+#ifdef _MSC_VER
+    #pragma warning(disable: 4244)  // conversion from 'wchar_t' to 'char', possible loss of data
+#endif
+
 #include <chrono>
 #include <fstream>
 #include <iostream>
