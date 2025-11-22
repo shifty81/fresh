@@ -46,8 +46,11 @@ param(
 # Set error action preference
 $ErrorActionPreference = "Stop"
 
-# Setup logging
-$LogDir = "logs"
+# Get script directory (project root) early for absolute paths
+$ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
+
+# Setup logging with absolute paths
+$LogDir = Join-Path $ScriptDir "logs"
 if (-not (Test-Path $LogDir)) {
     New-Item -ItemType Directory -Path $LogDir | Out-Null
 }
@@ -108,8 +111,7 @@ function Write-Step {
 try {
     Write-Header "Fresh Voxel Engine - Automated Build Script"
     
-    # Get script directory (project root)
-    $ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
+    # Change to script directory (project root) - $ScriptDir already set at top
     Set-Location $ScriptDir
     Write-Info "Project directory: $ScriptDir"
     Write-Info "Log file: $LogFile"
@@ -340,26 +342,30 @@ try {
         Write-Log "Executing: cmake $($cmakeArgs -join ' ')" "INFO"
         Write-Host ""
         
+        # Use absolute paths for temporary files to avoid issues after Push-Location
+        $cmakeStdoutTmp = Join-Path $LogDir "cmake_stdout.tmp"
+        $cmakeStderrTmp = Join-Path $LogDir "cmake_stderr.tmp"
+        
         # Stream cmake output in real-time to both console and log file
-        $process = Start-Process -FilePath "cmake" -ArgumentList $cmakeArgs -NoNewWindow -PassThru -RedirectStandardOutput "$LogDir\cmake_stdout.tmp" -RedirectStandardError "$LogDir\cmake_stderr.tmp" -Wait
+        $process = Start-Process -FilePath "cmake" -ArgumentList $cmakeArgs -NoNewWindow -PassThru -RedirectStandardOutput $cmakeStdoutTmp -RedirectStandardError $cmakeStderrTmp -Wait
         
         # Read and display output
-        if (Test-Path "$LogDir\cmake_stdout.tmp") {
+        if (Test-Path $cmakeStdoutTmp) {
             $cmakeTimestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
-            Get-Content "$LogDir\cmake_stdout.tmp" | ForEach-Object {
+            Get-Content $cmakeStdoutTmp | ForEach-Object {
                 Write-Host $_
                 Add-Content -Path $LogFile -Value "[$cmakeTimestamp] [CMAKE] $_"
             }
-            Remove-Item "$LogDir\cmake_stdout.tmp" -ErrorAction SilentlyContinue
+            Remove-Item $cmakeStdoutTmp -ErrorAction SilentlyContinue
         }
         
-        if (Test-Path "$LogDir\cmake_stderr.tmp") {
+        if (Test-Path $cmakeStderrTmp) {
             $cmakeTimestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
-            Get-Content "$LogDir\cmake_stderr.tmp" | ForEach-Object {
+            Get-Content $cmakeStderrTmp | ForEach-Object {
                 Write-Host $_
                 Add-Content -Path $LogFile -Value "[$cmakeTimestamp] [CMAKE] $_"
             }
-            Remove-Item "$LogDir\cmake_stderr.tmp" -ErrorAction SilentlyContinue
+            Remove-Item $cmakeStderrTmp -ErrorAction SilentlyContinue
         }
         
         if ($process.ExitCode -ne 0) {
@@ -411,26 +417,30 @@ try {
             Write-Log "Executing: cmake $($cmakeBuildArgs -join ' ')" "INFO"
             Write-Host ""
             
+            # Use absolute paths for temporary files
+            $buildStdoutTmp = Join-Path $LogDir "build_stdout.tmp"
+            $buildStderrTmp = Join-Path $LogDir "build_stderr.tmp"
+            
             # Stream build output in real-time to both console and log file
-            $process = Start-Process -FilePath "cmake" -ArgumentList $cmakeBuildArgs -NoNewWindow -PassThru -RedirectStandardOutput "$LogDir\build_stdout.tmp" -RedirectStandardError "$LogDir\build_stderr.tmp" -Wait
+            $process = Start-Process -FilePath "cmake" -ArgumentList $cmakeBuildArgs -NoNewWindow -PassThru -RedirectStandardOutput $buildStdoutTmp -RedirectStandardError $buildStderrTmp -Wait
             
             # Read and display output
-            if (Test-Path "$LogDir\build_stdout.tmp") {
+            if (Test-Path $buildStdoutTmp) {
                 $buildTimestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
-                Get-Content "$LogDir\build_stdout.tmp" | ForEach-Object {
+                Get-Content $buildStdoutTmp | ForEach-Object {
                     Write-Host $_
                     Add-Content -Path $LogFile -Value "[$buildTimestamp] [BUILD] $_"
                 }
-                Remove-Item "$LogDir\build_stdout.tmp" -ErrorAction SilentlyContinue
+                Remove-Item $buildStdoutTmp -ErrorAction SilentlyContinue
             }
             
-            if (Test-Path "$LogDir\build_stderr.tmp") {
+            if (Test-Path $buildStderrTmp) {
                 $buildTimestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
-                Get-Content "$LogDir\build_stderr.tmp" | ForEach-Object {
+                Get-Content $buildStderrTmp | ForEach-Object {
                     Write-Host $_
                     Add-Content -Path $LogFile -Value "[$buildTimestamp] [BUILD] $_"
                 }
-                Remove-Item "$LogDir\build_stderr.tmp" -ErrorAction SilentlyContinue
+                Remove-Item $buildStderrTmp -ErrorAction SilentlyContinue
             }
             
             if ($process.ExitCode -ne 0) {
