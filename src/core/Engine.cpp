@@ -698,6 +698,9 @@ void Engine::run()
             if (m_renderer) {
                 m_renderer->endFrame();
             }
+            
+            // Skip normal game loop when not in game
+            continue;
         }
 
         // Normal game loop
