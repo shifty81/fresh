@@ -10,6 +10,14 @@ namespace fresh
 {
 
 /**
+ * @brief 2D World style enumeration
+ */
+enum class WorldStyle2D {
+    Platformer = 0,  // Side-scrolling (Terraria-like)
+    TopDown = 1      // Overhead view (Zelda-like)
+};
+
+/**
  * @brief Native Windows Main Menu using Win32 API
  *
  * This is a proof-of-concept replacement for MainMenuPanel that uses
@@ -80,6 +88,14 @@ public:
     }
 
     /**
+     * @brief Get the 2D world style
+     */
+    WorldStyle2D get2DWorldStyle() const
+    {
+        return m_world2DStyle;
+    }
+
+    /**
      * @brief Get the world to load
      */
     const std::wstring& getLoadWorldName() const
@@ -124,6 +140,7 @@ private:
     bool m_createNewWorld;
     bool m_loadWorld;
     bool m_isWorld3D;
+    WorldStyle2D m_world2DStyle;
 
     // World data
     std::wstring m_newWorldName;
@@ -145,6 +162,9 @@ private:
         ID_LIST_WORLDS = 1010,
         ID_BTN_LOAD = 1011,
         ID_STATIC_TITLE = 1012,
+        ID_RADIO_2D_PLATFORMER = 1013,
+        ID_RADIO_2D_TOPDOWN = 1014,
+        ID_STATIC_2D_STYLE = 1015,
     };
 
     // Unreal Engine dark theme colors

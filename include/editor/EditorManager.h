@@ -201,9 +201,9 @@ public:
 
     /**
      * @brief Set callback for world creation
-     * @param callback Function to call when a new world should be created (worldName, seed, is3D)
+     * @param callback Function to call when a new world should be created (worldName, seed, is3D, gameStyle2D)
      */
-    void setWorldCreationCallback(std::function<void(const std::string&, int, bool)> callback)
+    void setWorldCreationCallback(std::function<void(const std::string&, int, bool, int)> callback)
     {
         m_worldCreationCallback = callback;
     }
@@ -557,7 +557,7 @@ private:
     std::string m_currentWorldPath;
 
     // Callbacks for world operations (set by Engine)
-    std::function<void(const std::string&, int, bool)> m_worldCreationCallback;
+    std::function<void(const std::string&, int, bool, int)> m_worldCreationCallback;
     std::function<void(const std::string&)> m_worldLoadCallback;
 };
 

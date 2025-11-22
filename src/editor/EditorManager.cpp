@@ -1146,14 +1146,17 @@ void EditorManager::newWorld()
                         std::string worldName = toNarrowString(wWorldName);
                         int seed = mainMenu.getWorldSeed();
                         bool is3D = mainMenu.isWorld3D();
+                        WorldStyle2D style2D = mainMenu.get2DWorldStyle();
+                        int gameStyle2D = static_cast<int>(style2D);
                         
                         LOG_INFO_C("World creation confirmed: " + worldName + 
                                    ", seed=" + std::to_string(seed) + 
-                                   ", 3D=" + std::to_string(is3D), "EditorManager");
+                                   ", 3D=" + std::to_string(is3D) +
+                                   ", 2D style=" + std::to_string(gameStyle2D), "EditorManager");
                         
                         // Call the callback to notify Engine to create the world
                         if (m_worldCreationCallback) {
-                            m_worldCreationCallback(worldName, seed, is3D);
+                            m_worldCreationCallback(worldName, seed, is3D, gameStyle2D);
                         } else {
                             LOG_WARNING_C("World creation callback not set!", "EditorManager");
                             m_windowsDialogManager->showMessageBox(

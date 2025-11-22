@@ -311,9 +311,9 @@ bool Engine::initialize()
     }
     
     // Set callbacks for world operations so EditorManager can trigger them
-    m_editorManager->setWorldCreationCallback([this](const std::string& name, int seed, bool is3D) {
+    m_editorManager->setWorldCreationCallback([this](const std::string& name, int seed, bool is3D, int gameStyle2D) {
         LOG_INFO_C("World creation callback triggered: " + name, "Engine");
-        this->createNewWorld(name, seed, is3D);
+        this->createNewWorld(name, seed, is3D, gameStyle2D);
     });
     
     m_editorManager->setWorldLoadCallback([this](const std::string& name) {
@@ -698,6 +698,9 @@ void Engine::run()
             if (m_renderer) {
                 m_renderer->endFrame();
             }
+            
+            // Skip normal game loop when not in game
+            continue;
         }
 
         // Normal game loop
