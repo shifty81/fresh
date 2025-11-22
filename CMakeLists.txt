@@ -393,6 +393,7 @@ if(WIN32)
         src/ui/native/Win32SettingsDialog.cpp
         src/ui/native/Win32TerraformingPanel.cpp
         src/ui/native/Win32ViewportPanel.cpp
+        src/ui/NativeMainMenu.cpp
         
         # Windows integration features (theme detection, dialogs, taskbar, etc.)
         src/ui/WindowsThemeManager.cpp
@@ -460,6 +461,7 @@ set(ENGINE_HEADERS
     include/ui/SettingsPanel.h
     include/ui/HotbarPanel.h
     include/ui/EngineConfigPanel.h
+    include/ui/NativeMainMenu.h
     include/input/InputManager.h
     include/gameplay/Camera.h
     include/gameplay/Player.h
