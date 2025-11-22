@@ -58,6 +58,8 @@ void Win32HUDOverlay::shutdown()
         DestroyWindow(m_hwnd);
         m_hwnd = nullptr;
     }
+    m_parentHwnd = nullptr;
+    m_hud = nullptr;
     m_initialized = false;
 }
 
@@ -82,8 +84,10 @@ void Win32HUDOverlay::updatePosition()
     int height = bottomRight.y - topLeft.y;
 
     // Position the overlay to match parent client area
-    SetWindowPos(m_hwnd, HWND_TOP, topLeft.x, topLeft.y, width, height,
-                 SWP_NOACTIVATE | SWP_SHOWWINDOW);
+    // Use SWP_NOZORDER instead of HWND_TOP to avoid changing Z-order unnecessarily
+    // Don't use SWP_SHOWWINDOW as visibility is controlled by setVisible()
+    SetWindowPos(m_hwnd, nullptr, topLeft.x, topLeft.y, width, height,
+                 SWP_NOACTIVATE | SWP_NOZORDER);
 }
 
 void Win32HUDOverlay::setVisible(bool visible)
@@ -104,6 +108,13 @@ bool Win32HUDOverlay::registerWindowClass()
 {
     HINSTANCE hInstance = GetModuleHandle(nullptr);
 
+    // Check if class is already registered
+    WNDCLASSEXW existingClass = {};
+    if (GetClassInfoExW(hInstance, WINDOW_CLASS_NAME, &existingClass)) {
+        return true; // Already registered
+    }
+
+    // Register new window class
     WNDCLASSEXW wc = {};
     wc.cbSize = sizeof(WNDCLASSEXW);
     wc.style = CS_HREDRAW | CS_VREDRAW;
@@ -111,12 +122,6 @@ bool Win32HUDOverlay::registerWindowClass()
     wc.hInstance = hInstance;
     wc.hCursor = LoadCursor(nullptr, IDC_ARROW);
     wc.lpszClassName = WINDOW_CLASS_NAME;
-
-    // Check if class is already registered
-    WNDCLASSEXW existingClass = {};
-    if (GetClassInfoExW(hInstance, WINDOW_CLASS_NAME, &existingClass)) {
-        return true; // Already registered
-    }
 
     if (!RegisterClassExW(&wc)) {
         return false;
