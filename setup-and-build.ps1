@@ -345,17 +345,19 @@ try {
         
         # Read and display output
         if (Test-Path "$LogDir\cmake_stdout.tmp") {
+            $cmakeTimestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
             Get-Content "$LogDir\cmake_stdout.tmp" | ForEach-Object {
                 Write-Host $_
-                Add-Content -Path $LogFile -Value "[$Timestamp] [CMAKE] $_"
+                Add-Content -Path $LogFile -Value "[$cmakeTimestamp] [CMAKE] $_"
             }
             Remove-Item "$LogDir\cmake_stdout.tmp" -ErrorAction SilentlyContinue
         }
         
         if (Test-Path "$LogDir\cmake_stderr.tmp") {
+            $cmakeTimestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
             Get-Content "$LogDir\cmake_stderr.tmp" | ForEach-Object {
                 Write-Host $_
-                Add-Content -Path $LogFile -Value "[$Timestamp] [CMAKE] $_"
+                Add-Content -Path $LogFile -Value "[$cmakeTimestamp] [CMAKE] $_"
             }
             Remove-Item "$LogDir\cmake_stderr.tmp" -ErrorAction SilentlyContinue
         }
@@ -414,17 +416,19 @@ try {
             
             # Read and display output
             if (Test-Path "$LogDir\build_stdout.tmp") {
+                $buildTimestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
                 Get-Content "$LogDir\build_stdout.tmp" | ForEach-Object {
                     Write-Host $_
-                    Add-Content -Path $LogFile -Value "[$Timestamp] [BUILD] $_"
+                    Add-Content -Path $LogFile -Value "[$buildTimestamp] [BUILD] $_"
                 }
                 Remove-Item "$LogDir\build_stdout.tmp" -ErrorAction SilentlyContinue
             }
             
             if (Test-Path "$LogDir\build_stderr.tmp") {
+                $buildTimestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
                 Get-Content "$LogDir\build_stderr.tmp" | ForEach-Object {
                     Write-Host $_
-                    Add-Content -Path $LogFile -Value "[$Timestamp] [BUILD] $_"
+                    Add-Content -Path $LogFile -Value "[$buildTimestamp] [BUILD] $_"
                 }
                 Remove-Item "$LogDir\build_stderr.tmp" -ErrorAction SilentlyContinue
             }
