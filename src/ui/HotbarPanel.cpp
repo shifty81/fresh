@@ -42,9 +42,10 @@ void HotbarPanel::render()
     // This method is a no-op - Win32HUD uses native Win32 GDI for rendering.
     // See EditorManager::update() where Win32HUD stats are updated.
 #else
-    // For builds without FRESH_WIN32_UI (e.g., during potential porting efforts),
-    // implement HUD rendering here using the platform's native UI or a cross-platform UI library.
-    // Currently not implemented as Fresh Voxel Engine is Windows-exclusive.
+    // Fresh Voxel Engine is Windows-exclusive and FRESH_WIN32_UI is always defined on Windows.
+    // This code path would only execute if someone is porting to a non-Windows platform
+    // or building without FRESH_WIN32_UI for testing purposes.
+    // If porting: implement HUD rendering here using the platform's native UI or cross-platform library.
     LOG_INFO_C("HotbarPanel::render() called without FRESH_WIN32_UI - implement platform-specific rendering here", "HotbarPanel");
 #endif
 }
