@@ -2,10 +2,11 @@
 
 #include <algorithm>
 #include <cmath>
-#include <iostream>
 
+#include "core/Logger.h"
 #include "voxel/VoxelWorld.h"
 #include "voxel/Chunk.h"
+#include "voxel/VoxelTypes.h"
 
 namespace fresh
 {

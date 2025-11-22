@@ -1,6 +1,6 @@
 #include "interaction/ToolManager.h"
 #include "voxel/VoxelWorld.h"
-#include <iostream>
+#include "core/Logger.h"
 
 namespace fresh
 {
@@ -19,7 +19,7 @@ bool ToolManager::initialize(VoxelWorld* world)
     m_world = world;
     
     if (!m_world) {
-        std::cerr << "ToolManager: Cannot initialize without valid world" << std::endl;
+        LOG_ERROR_C("Cannot initialize without valid world", "ToolManager");
         return false;
     }
 
@@ -29,7 +29,7 @@ bool ToolManager::initialize(VoxelWorld* world)
     // Select default tool (Construction Hammer)
     selectTool(VoxelToolType::ConstructionHammer);
 
-    std::cout << "ToolManager initialized with " << m_tools.size() << " tools" << std::endl;
+    LOG_INFO_C("Initialized with " + std::to_string(m_tools.size()) + " tools", "ToolManager");
     return true;
 }
 
@@ -55,14 +55,14 @@ bool ToolManager::selectTool(VoxelToolType type)
 {
     auto it = m_tools.find(type);
     if (it == m_tools.end()) {
-        std::cerr << "ToolManager: Tool type not found" << std::endl;
+        LOG_ERROR_C("Tool type not found", "ToolManager");
         return false;
     }
 
     m_activeTool = it->second.get();
     m_activeToolType = type;
     
-    std::cout << "Selected tool: " << m_activeTool->getName() << std::endl;
+    LOG_INFO_C("Selected tool: " + m_activeTool->getName(), "ToolManager");
     return true;
 }
 
@@ -93,7 +93,7 @@ Rake* ToolManager::getRake() const
 bool ToolManager::useActiveTool(const WorldPos& pos, VoxelType voxelType)
 {
     if (!m_activeTool) {
-        std::cerr << "ToolManager: No active tool selected" << std::endl;
+        LOG_ERROR_C("No active tool selected", "ToolManager");
         return false;
     }
 
