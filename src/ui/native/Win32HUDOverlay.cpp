@@ -51,7 +51,10 @@ bool Win32HUDOverlay::initialize(HWND parentHwnd, Win32HUD* hud)
     // Create cached brush for clearing background
     m_clearBrush = CreateSolidBrush(RGB(0, 0, 0));
     if (!m_clearBrush) {
-        LOG_WARNING_C("Failed to create clear brush for HUD overlay", "Win32HUDOverlay");
+        LOG_ERROR_C("Failed to create clear brush for HUD overlay", "Win32HUDOverlay");
+        DestroyWindow(m_hwnd);
+        m_hwnd = nullptr;
+        return false;
     }
 
     m_initialized = true;
@@ -132,9 +135,13 @@ bool Win32HUDOverlay::registerWindowClass()
     wc.lpfnWndProc = WindowProc;
     wc.hInstance = hInstance;
     wc.hCursor = LoadCursor(nullptr, IDC_ARROW);
+    wc.hbrBackground = nullptr;  // We handle background painting manually
     wc.lpszClassName = WINDOW_CLASS_NAME;
 
     if (!RegisterClassExW(&wc)) {
+        DWORD error = GetLastError();
+        LOG_ERROR_C("Failed to register overlay window class. Error code: " + std::to_string(error), 
+                    "Win32HUDOverlay");
         return false;
     }
 
@@ -176,6 +183,9 @@ bool Win32HUDOverlay::createOverlayWindow()
     );
 
     if (!m_hwnd) {
+        DWORD error = GetLastError();
+        LOG_ERROR_C("Failed to create overlay window. Error code: " + std::to_string(error), 
+                    "Win32HUDOverlay");
         return false;
     }
 
