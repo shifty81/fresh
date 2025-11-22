@@ -12,6 +12,9 @@
 
 using namespace fresh;
 
+// Test constants
+constexpr unsigned int TEST_SEED = 12345;
+
 /**
  * Test fixture for VoxelTool tests
  */
@@ -20,7 +23,7 @@ protected:
     void SetUp() override {
         world = std::make_unique<VoxelWorld>();
         world->initialize();
-        world->setSeed(12345);
+        world->setSeed(TEST_SEED);
         
         // Load a chunk to work with
         chunk = world->loadChunk(ChunkPos(0, 0));
