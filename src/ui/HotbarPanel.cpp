@@ -4,7 +4,7 @@
 
 #include <GLFW/glfw3.h>
 
-#ifdef _WIN32
+#ifdef FRESH_WIN32_UI
 #include "ui/native/Win32HUD.h"
 #endif
 
@@ -16,10 +16,10 @@ HotbarPanel::HotbarPanel() : m_visible(false), m_selectedSlot(0)
     // Initialize all slots as empty
     clearAllSlots();
     
-#ifdef _WIN32
-    // On Windows, we use Win32HUD for native rendering
+#ifdef FRESH_WIN32_UI
+    // On Windows with native UI, we use Win32HUD for rendering
     // The Win32HUD instance is managed by EditorManager
-    // This class serves as a compatibility wrapper
+    // This class serves as a data model and API compatibility wrapper
 #endif
 }
 
