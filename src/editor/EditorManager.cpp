@@ -62,6 +62,7 @@
     #include "ui/native/Win32ContentBrowserPanel.h"
     #include "ui/native/Win32ConsolePanel.h"
     #include "ui/native/Win32HUD.h"
+    #include "ui/native/Win32HUDOverlay.h"
     #include "ui/native/Win32SettingsDialog.h"
     #include "ui/native/Win32TerraformingPanel.h"
     #include "ui/native/Win32ViewportPanel.h"
@@ -499,6 +500,14 @@ bool EditorManager::initialize(WindowType* window, IRenderContext* renderContext
         if (m_nativeHUD->initialize(hwnd)) {
             m_nativeHUD->setVisible(false); // Hidden by default
             LOG_INFO_C("Native Win32 HUD created", "EditorManager");
+            
+            // Create overlay window for HUD rendering
+            m_hudOverlay = std::make_unique<Win32HUDOverlay>();
+            if (m_hudOverlay->initialize(hwnd, m_nativeHUD.get())) {
+                LOG_INFO_C("Win32 HUD overlay window created", "EditorManager");
+            } else {
+                LOG_WARNING_C("Failed to create HUD overlay window", "EditorManager");
+            }
         }
         
         // Create native Settings Dialog
@@ -571,24 +580,36 @@ void EditorManager::update(float deltaTime)
     }
 
 #ifdef _WIN32
-    // Update HUD with current player stats
-    if (m_nativeHUD && m_nativeHUD->isVisible() && m_player) {
-        Win32HUD::HUDStats stats;
-        stats.health = m_player->getHealth();
-        stats.maxHealth = m_player->getMaxHealth();
-        stats.stamina = m_player->getStamina();
-        stats.maxStamina = m_player->getMaxStamina();
+    // Update HUD and overlay visibility/position
+    if (m_nativeHUD && m_hudOverlay && m_hudOverlay->isInitialized()) {
+        bool hudVisible = m_nativeHUD->isVisible();
         
-        // Get player position
-        auto pos = m_player->getPosition();
-        stats.posX = pos.x;
-        stats.posY = pos.y;
-        stats.posZ = pos.z;
+        // Show or hide overlay based on HUD visibility
+        m_hudOverlay->setVisible(hudVisible);
         
-        // FPS can be set from Engine
-        // stats.fps is updated elsewhere
-        
-        m_nativeHUD->updateStats(stats);
+        if (hudVisible && m_player) {
+            // Update HUD with current player stats
+            Win32HUD::HUDStats stats;
+            stats.health = m_player->getHealth();
+            stats.maxHealth = m_player->getMaxHealth();
+            stats.stamina = m_player->getStamina();
+            stats.maxStamina = m_player->getMaxStamina();
+            
+            // Get player position
+            auto pos = m_player->getPosition();
+            stats.posX = pos.x;
+            stats.posY = pos.y;
+            stats.posZ = pos.z;
+            
+            // FPS can be set from Engine
+            // stats.fps is updated elsewhere
+            
+            m_nativeHUD->updateStats(stats);
+            
+            // Update overlay position and trigger repaint
+            m_hudOverlay->updatePosition();
+            m_hudOverlay->invalidate();
+        }
     }
 #endif
 }
