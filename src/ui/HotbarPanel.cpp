@@ -37,17 +37,15 @@ void HotbarPanel::render()
         return;
     }
 
-    // NOTE: On Windows builds, FRESH_WIN32_UI is always defined (see CMakeLists.txt line 412),
-    // so this method becomes a no-op. The actual HUD rendering is handled by Win32HUD instance
-    // in EditorManager, which uses native Win32 GDI for rendering.
-    //
-    // For non-Windows builds (if ever ported), HUD rendering would be implemented here.
-    
-#ifndef _WIN32
-    // Fresh Voxel Engine is currently Windows-exclusive. If porting to other platforms,
+#ifdef FRESH_WIN32_UI
+    // On Windows with native UI, rendering is handled by Win32HUD in EditorManager.
+    // This method is a no-op - Win32HUD uses native Win32 GDI for rendering.
+    // See EditorManager::update() where Win32HUD stats are updated.
+#else
+    // For builds without FRESH_WIN32_UI (e.g., during potential porting efforts),
     // implement HUD rendering here using the platform's native UI or a cross-platform UI library.
-    // This is logged at info level since it's an expected code path during potential porting efforts.
-    LOG_INFO_C("HotbarPanel::render() called on non-Windows platform - implement platform-specific rendering here", "HotbarPanel");
+    // Currently not implemented as Fresh Voxel Engine is Windows-exclusive.
+    LOG_INFO_C("HotbarPanel::render() called without FRESH_WIN32_UI - implement platform-specific rendering here", "HotbarPanel");
 #endif
 }
 
