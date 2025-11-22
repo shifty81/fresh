@@ -2,6 +2,21 @@
 
 This directory contains information about the **actual playable gameplay demos** available in the Fresh Voxel Engine. Unlike traditional example files, all demos are **integrated directly into the main engine executable** and can be played immediately.
 
+## 📚 Editor Guides
+
+New to the Unreal Engine-inspired editor? Start here:
+
+- **[Unreal Editor Quick Start](UNREAL_EDITOR_QUICKSTART.md)** - Quick answers to common questions:
+  - How to customize the editor layout
+  - How to use Lua scripting for interactive elements (Blueprint alternative)
+  - How to sculpt terrain with voxel editing tools (Modeling Mode equivalent)
+
+- **[Complete Workflow Guide](../docs/guides/UNREAL_ENGINE_INSPIRED_WORKFLOW.md)** - Comprehensive guide covering:
+  - Core interface components
+  - Layout customization examples
+  - Interactive element scripting with Lua
+  - Advanced terrain sculpting techniques
+
 ## 🎮 How to Use These Demos
 
 All gameplay demos are accessible through the main `FreshVoxelEngine.exe` executable. Simply:
