@@ -463,10 +463,7 @@ set(ENGINE_HEADERS
     include/editor/SelectionRenderer.h
     include/serialization/WorldSerializer.h
     include/ui/MainMenu.h
-    include/ui/MainMenuPanel.h
-    include/ui/SettingsPanel.h
     include/ui/HotbarPanel.h
-    include/ui/EngineConfigPanel.h
     include/ui/NativeMainMenu.h
     include/input/InputManager.h
     include/gameplay/Camera.h

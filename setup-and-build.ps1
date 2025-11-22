@@ -46,35 +46,62 @@ param(
 # Set error action preference
 $ErrorActionPreference = "Stop"
 
-# Color output functions
+# Setup logging
+$LogDir = "logs"
+if (-not (Test-Path $LogDir)) {
+    New-Item -ItemType Directory -Path $LogDir | Out-Null
+}
+$Timestamp = Get-Date -Format "yyyyMMdd_HHmmss"
+$LogFile = Join-Path $LogDir "setup-and-build_$Timestamp.log"
+
+# Logging function
+function Write-Log {
+    param([string]$Message, [string]$Level = "INFO")
+    $timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
+    $logEntry = "[$timestamp] [$Level] $Message"
+    Add-Content -Path $LogFile -Value $logEntry
+}
+
+# Color output functions with logging
 function Write-Header {
     param([string]$Message)
+    $separator = "============================================================"
     Write-Host ""
-    Write-Host "============================================================" -ForegroundColor Cyan
+    Write-Host $separator -ForegroundColor Cyan
     Write-Host " $Message" -ForegroundColor Cyan
-    Write-Host "============================================================" -ForegroundColor Cyan
+    Write-Host $separator -ForegroundColor Cyan
     Write-Host ""
+    Write-Log "" "HEADER"
+    Write-Log $separator "HEADER"
+    Write-Log " $Message" "HEADER"
+    Write-Log $separator "HEADER"
+    Write-Log "" "HEADER"
 }
 
 function Write-Success {
     param([string]$Message)
     Write-Host "[OK] $Message" -ForegroundColor Green
+    Write-Log $Message "SUCCESS"
 }
 
 function Write-Info {
     param([string]$Message)
     Write-Host "[INFO] $Message" -ForegroundColor Yellow
+    Write-Log $Message "INFO"
 }
 
 function Write-ErrorMsg {
     param([string]$Message)
     Write-Host "[ERROR] $Message" -ForegroundColor Red
+    Write-Log $Message "ERROR"
 }
 
 function Write-Step {
     param([string]$Message)
     Write-Host ""
     Write-Host ">> $Message" -ForegroundColor Magenta
+    Write-Log "" "STEP"
+    Write-Log ">> $Message" "STEP"
 }
 
 # Main script
@@ -85,6 +112,11 @@ try {
     $ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
     Set-Location $ScriptDir
     Write-Info "Project directory: $ScriptDir"
+    Write-Info "Log file: $LogFile"
+    Write-Log "Script started from directory: $ScriptDir" "INFO"
+    Write-Log "Build configuration: $BuildConfig" "INFO"
+    Write-Log "Skip build: $SkipBuild" "INFO"
+    Write-Log "Open Visual Studio: $OpenVS" "INFO"
     
     # ============================================================================
     # Step 1: Check Prerequisites
@@ -290,6 +322,9 @@ try {
     Write-Info "Configuration: Windows x64 with DirectX 11/12"
     Write-Info "This may take 5-15 minutes on first run (vcpkg will download and build dependencies)"
     Write-Host ""
+    Write-Log "Starting CMake generation..." "INFO"
+    Write-Log "Build directory: $buildDir" "INFO"
+    Write-Log "vcpkg toolchain: $vcpkgToolchainFile" "INFO"
     
     try {
         Push-Location $buildDir
@@ -302,12 +337,33 @@ try {
         )
         
         Write-Host "Executing: cmake $($cmakeArgs -join ' ')" -ForegroundColor Gray
+        Write-Log "Executing: cmake $($cmakeArgs -join ' ')" "INFO"
         Write-Host ""
         
-        & cmake @cmakeArgs
+        # Stream cmake output in real-time to both console and log file
+        $process = Start-Process -FilePath "cmake" -ArgumentList $cmakeArgs -NoNewWindow -PassThru -RedirectStandardOutput "$LogDir\cmake_stdout.tmp" -RedirectStandardError "$LogDir\cmake_stderr.tmp" -Wait
         
-        if ($LASTEXITCODE -ne 0) {
-            throw "CMake generation failed with exit code $LASTEXITCODE"
+        # Read and display output
+        if (Test-Path "$LogDir\cmake_stdout.tmp") {
+            $cmakeTimestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
+            Get-Content "$LogDir\cmake_stdout.tmp" | ForEach-Object {
+                Write-Host $_
+                Add-Content -Path $LogFile -Value "[$cmakeTimestamp] [CMAKE] $_"
+            }
+            Remove-Item "$LogDir\cmake_stdout.tmp" -ErrorAction SilentlyContinue
+        }
+        
+        if (Test-Path "$LogDir\cmake_stderr.tmp") {
+            $cmakeTimestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
+            Get-Content "$LogDir\cmake_stderr.tmp" | ForEach-Object {
+                Write-Host $_
+                Add-Content -Path $LogFile -Value "[$cmakeTimestamp] [CMAKE] $_"
+            }
+            Remove-Item "$LogDir\cmake_stderr.tmp" -ErrorAction SilentlyContinue
+        }
+        
+        if ($process.ExitCode -ne 0) {
+            throw "CMake generation failed with exit code $($process.ExitCode)"
         }
         
         Pop-Location
@@ -341,6 +397,8 @@ try {
         
         Write-Info "This may take 2-5 minutes depending on your system"
         Write-Host ""
+        Write-Log "Starting build process..." "INFO"
+        Write-Log "Configuration: $BuildConfig" "INFO"
         
         try {
             $cmakeBuildArgs = @(
@@ -350,18 +408,41 @@ try {
             )
             
             Write-Host "Executing: cmake $($cmakeBuildArgs -join ' ')" -ForegroundColor Gray
+            Write-Log "Executing: cmake $($cmakeBuildArgs -join ' ')" "INFO"
             Write-Host ""
             
-            & cmake @cmakeBuildArgs
+            # Stream build output in real-time to both console and log file
+            $process = Start-Process -FilePath "cmake" -ArgumentList $cmakeBuildArgs -NoNewWindow -PassThru -RedirectStandardOutput "$LogDir\build_stdout.tmp" -RedirectStandardError "$LogDir\build_stderr.tmp" -Wait
             
-            if ($LASTEXITCODE -ne 0) {
-                throw "Build failed with exit code $LASTEXITCODE"
+            # Read and display output
+            if (Test-Path "$LogDir\build_stdout.tmp") {
+                $buildTimestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
+                Get-Content "$LogDir\build_stdout.tmp" | ForEach-Object {
+                    Write-Host $_
+                    Add-Content -Path $LogFile -Value "[$buildTimestamp] [BUILD] $_"
+                }
+                Remove-Item "$LogDir\build_stdout.tmp" -ErrorAction SilentlyContinue
+            }
+            
+            if (Test-Path "$LogDir\build_stderr.tmp") {
+                $buildTimestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
+                Get-Content "$LogDir\build_stderr.tmp" | ForEach-Object {
+                    Write-Host $_
+                    Add-Content -Path $LogFile -Value "[$buildTimestamp] [BUILD] $_"
+                }
+                Remove-Item "$LogDir\build_stderr.tmp" -ErrorAction SilentlyContinue
+            }
+            
+            if ($process.ExitCode -ne 0) {
+                throw "Build failed with exit code $($process.ExitCode)"
             }
             
             Write-Success "Build completed successfully!"
+            Write-Log "Build completed successfully" "SUCCESS"
         }
         catch {
             Write-ErrorMsg "Build failed"
+            Write-Log "Build failed: $_" "ERROR"
             Write-Host "Error: $_"
             Write-Host ""
             Write-Host "The Visual Studio solution has been generated."
@@ -394,6 +475,9 @@ try {
     Write-Host ""
     Write-Success "Fresh Voxel Engine setup completed successfully!"
     Write-Host ""
+    Write-Info "Full log saved to: $LogFile"
+    Write-Host ""
+    Write-Log "Setup completed successfully" "SUCCESS"
     
     if (-not $SkipBuild) {
         Write-Host "Next steps:" -ForegroundColor Cyan
@@ -455,6 +539,10 @@ catch {
     Write-ErrorMsg "An unexpected error occurred"
     Write-Host "Error: $_"
     Write-Host "Stack Trace: $($_.ScriptStackTrace)"
+    Write-Host ""
+    Write-Log "Unexpected error occurred: $_" "ERROR"
+    Write-Log "Stack trace: $($_.ScriptStackTrace)" "ERROR"
+    Write-Host "Full log saved to: $LogFile"
     Write-Host ""
     Write-Host "For help, see BUILD.md or open an issue at:"
     Write-Host "https://github.com/shifty81/fresh/issues"
