@@ -50,6 +50,11 @@ A professional **Windows-exclusive** voxel game development platform built with 
 - **Windows Native UI** - All editor panels use native Windows controls (tree views, list views, property grids)
 - **Windows Native Integration** - Native Windows 10/11 themes, dialogs, and taskbar features
 - **Terraforming Tools** - Brush, sphere, cube, flatten, smooth, paint for world building
+- **Voxel Building Tools** - Enshrouded-inspired building system with specialized tools
+  - **Construction Hammer** - Quick building with 7 blueprint types (walls, foundations, columns, floors, stairs, arches)
+  - **Pickaxe** - Mining and removal with area operations and bedrock protection
+  - **Rake** - Terrain leveling, flattening, and smoothing for foundations
+  - See [VOXEL_TOOLS.md](docs/guides/VOXEL_TOOLS.md) for complete guide
 - **NPC Creation System** - Easy-to-use interface for adding NPCs (villagers, traders, enemies)
   - Visual NPC placement in world editor
   - Dropdown behavior selection (Friendly, Trader, Hostile, Patrol, Guard, etc.)
@@ -280,6 +285,8 @@ fresh/
 - [docs/guides/CONTROLS.md](docs/guides/CONTROLS.md) - Complete control reference
 - [docs/editor/EDITOR_INTEGRATION.md](docs/editor/EDITOR_INTEGRATION.md) - Editor usage guide
 - [docs/guides/TERRAFORMING.md](docs/guides/TERRAFORMING.md) - Terraforming tools
+- [docs/guides/VOXEL_TOOLS.md](docs/guides/VOXEL_TOOLS.md) - Voxel building tools (Construction Hammer, Pickaxe, Rake)
+- [docs/guides/ADVANCED_MESH_GENERATION.md](docs/guides/ADVANCED_MESH_GENERATION.md) - Advanced mesh generation (marching cubes)
 - [docs/guides/INPUT_SYSTEM.md](docs/guides/INPUT_SYSTEM.md) - Input system documentation
 - [docs/guides/AUDIO_SYSTEM.md](docs/guides/AUDIO_SYSTEM.md) - Audio engine guide
 - [docs/guides/LOGGING.md](docs/guides/LOGGING.md) - Logging system
