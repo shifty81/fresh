@@ -1,0 +1,228 @@
+#ifdef _WIN32
+
+#include "ui/native/Win32HUDOverlay.h"
+#include "ui/native/Win32HUD.h"
+#include "core/Logger.h"
+
+namespace fresh
+{
+
+Win32HUDOverlay::Win32HUDOverlay()
+    : m_hwnd(nullptr)
+    , m_parentHwnd(nullptr)
+    , m_hud(nullptr)
+    , m_initialized(false)
+{
+}
+
+Win32HUDOverlay::~Win32HUDOverlay()
+{
+    shutdown();
+}
+
+bool Win32HUDOverlay::initialize(HWND parentHwnd, Win32HUD* hud)
+{
+    if (m_initialized) {
+        LOG_WARNING_C("Win32HUDOverlay already initialized", "Win32HUDOverlay");
+        return true;
+    }
+
+    if (!parentHwnd || !hud) {
+        LOG_ERROR_C("Invalid parameters for Win32HUDOverlay initialization", "Win32HUDOverlay");
+        return false;
+    }
+
+    m_parentHwnd = parentHwnd;
+    m_hud = hud;
+
+    // Register the window class
+    if (!registerWindowClass()) {
+        LOG_ERROR_C("Failed to register window class for HUD overlay", "Win32HUDOverlay");
+        return false;
+    }
+
+    // Create the overlay window
+    if (!createOverlayWindow()) {
+        LOG_ERROR_C("Failed to create HUD overlay window", "Win32HUDOverlay");
+        return false;
+    }
+
+    m_initialized = true;
+    LOG_INFO_C("Win32HUDOverlay initialized successfully", "Win32HUDOverlay");
+    return true;
+}
+
+void Win32HUDOverlay::shutdown()
+{
+    if (m_hwnd) {
+        DestroyWindow(m_hwnd);
+        m_hwnd = nullptr;
+    }
+    m_initialized = false;
+}
+
+void Win32HUDOverlay::updatePosition()
+{
+    if (!m_initialized || !m_hwnd || !m_parentHwnd) {
+        return;
+    }
+
+    // Get parent window client area
+    RECT parentRect;
+    GetClientRect(m_parentHwnd, &parentRect);
+
+    // Convert to screen coordinates
+    POINT topLeft = {parentRect.left, parentRect.top};
+    POINT bottomRight = {parentRect.right, parentRect.bottom};
+    ClientToScreen(m_parentHwnd, &topLeft);
+    ClientToScreen(m_parentHwnd, &bottomRight);
+
+    // Calculate dimensions
+    int width = bottomRight.x - topLeft.x;
+    int height = bottomRight.y - topLeft.y;
+
+    // Position the overlay to match parent client area
+    SetWindowPos(m_hwnd, HWND_TOP, topLeft.x, topLeft.y, width, height,
+                 SWP_NOACTIVATE | SWP_SHOWWINDOW);
+}
+
+void Win32HUDOverlay::invalidate()
+{
+    if (m_hwnd) {
+        InvalidateRect(m_hwnd, nullptr, FALSE);
+    }
+}
+
+bool Win32HUDOverlay::registerWindowClass()
+{
+    HINSTANCE hInstance = GetModuleHandle(nullptr);
+
+    WNDCLASSEXW wc = {};
+    wc.cbSize = sizeof(WNDCLASSEXW);
+    wc.style = CS_HREDRAW | CS_VREDRAW;
+    wc.lpfnWndProc = WindowProc;
+    wc.hInstance = hInstance;
+    wc.hCursor = LoadCursor(nullptr, IDC_ARROW);
+    wc.lpszClassName = WINDOW_CLASS_NAME;
+
+    // Check if class is already registered
+    WNDCLASSEXW existingClass = {};
+    if (GetClassInfoExW(hInstance, WINDOW_CLASS_NAME, &existingClass)) {
+        return true; // Already registered
+    }
+
+    if (!RegisterClassExW(&wc)) {
+        return false;
+    }
+
+    return true;
+}
+
+bool Win32HUDOverlay::createOverlayWindow()
+{
+    HINSTANCE hInstance = GetModuleHandle(nullptr);
+
+    // Get parent window dimensions
+    RECT parentRect;
+    GetClientRect(m_parentHwnd, &parentRect);
+
+    // Convert to screen coordinates
+    POINT topLeft = {parentRect.left, parentRect.top};
+    POINT bottomRight = {parentRect.right, parentRect.bottom};
+    ClientToScreen(m_parentHwnd, &topLeft);
+    ClientToScreen(m_parentHwnd, &bottomRight);
+
+    int width = bottomRight.x - topLeft.x;
+    int height = bottomRight.y - topLeft.y;
+
+    // Create the overlay window as a child of the parent
+    // WS_EX_LAYERED: Allows transparency
+    // WS_EX_TRANSPARENT: Click-through for input
+    // WS_EX_TOPMOST: Always on top (optional, using child window instead)
+    m_hwnd = CreateWindowExW(
+        WS_EX_LAYERED | WS_EX_TRANSPARENT,
+        WINDOW_CLASS_NAME,
+        L"HUD Overlay",
+        WS_POPUP | WS_VISIBLE,
+        topLeft.x, topLeft.y, width, height,
+        m_parentHwnd,
+        nullptr,
+        hInstance,
+        nullptr
+    );
+
+    if (!m_hwnd) {
+        return false;
+    }
+
+    // Set the window as click-through and semi-transparent
+    // The alpha value (255) means fully opaque - HUD will control its own transparency
+    SetLayeredWindowAttributes(m_hwnd, 0, 255, LWA_ALPHA);
+
+    // Store 'this' pointer in window user data for access in WindowProc
+    SetWindowLongPtrW(m_hwnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(this));
+
+    return true;
+}
+
+void Win32HUDOverlay::onPaint()
+{
+    if (!m_hud) {
+        return;
+    }
+
+    PAINTSTRUCT ps;
+    HDC hdc = BeginPaint(m_hwnd, &ps);
+
+    if (hdc) {
+        // Get client area
+        RECT clientRect;
+        GetClientRect(m_hwnd, &clientRect);
+
+        // Clear background to transparent
+        HBRUSH clearBrush = CreateSolidBrush(RGB(0, 0, 0));
+        FillRect(hdc, &clientRect, clearBrush);
+        DeleteObject(clearBrush);
+
+        // Render the HUD
+        m_hud->render(hdc, clientRect);
+    }
+
+    EndPaint(m_hwnd, &ps);
+}
+
+LRESULT CALLBACK Win32HUDOverlay::WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+{
+    // Retrieve the Win32HUDOverlay instance
+    Win32HUDOverlay* overlay = reinterpret_cast<Win32HUDOverlay*>(
+        GetWindowLongPtrW(hwnd, GWLP_USERDATA)
+    );
+
+    switch (uMsg) {
+        case WM_PAINT:
+            if (overlay) {
+                overlay->onPaint();
+                return 0;
+            }
+            break;
+
+        case WM_ERASEBKGND:
+            // Prevent default erase to avoid flicker
+            return 1;
+
+        case WM_DESTROY:
+            if (overlay) {
+                overlay->m_hwnd = nullptr;
+            }
+            return 0;
+
+        default:
+            break;
+    }
+
+    return DefWindowProcW(hwnd, uMsg, wParam, lParam);
+}
+
+} // namespace fresh
+
+#endif // _WIN32
