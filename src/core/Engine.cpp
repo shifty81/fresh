@@ -1,9 +1,14 @@
 #include "core/Engine.h"
 
-// Suppress C4244 warning from MSVC STL headers (xutility)
-// This warning occurs in system headers when using certain Windows API types with STL containers
+// Suppress C4244 warning from MSVC's xutility header (line 4813)
+// The warning "conversion from 'wchar_t' to 'char', possible loss of data" occurs in system
+// headers when STL containers/algorithms are instantiated with types from Windows API.
+// This is triggered by Win32Window's WINDOW_CLASS_NAME (wchar_t*) interacting with STL.
+// Since we use ANSI versions of Windows APIs (GetModuleFileNameA, MessageBoxA, etc.),
+// suppressing this system header warning is safe.
 #ifdef _MSC_VER
-    #pragma warning(disable: 4244)  // conversion from 'wchar_t' to 'char', possible loss of data
+    #pragma warning(push)
+    #pragma warning(disable: 4244)
 #endif
 
 #include <chrono>
@@ -12,6 +17,10 @@
 #include <sstream>
 #include <thread>
 #include <vector>
+
+#ifdef _MSC_VER
+    #pragma warning(pop)
+#endif
 
 #ifdef _WIN32
     #include <windows.h>
