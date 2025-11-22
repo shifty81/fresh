@@ -71,6 +71,24 @@
 namespace fresh
 {
 
+#ifdef _WIN32
+// Helper function to convert wide string to narrow string safely
+static std::string toNarrowString(const std::wstring& wstr)
+{
+    if (wstr.empty()) return std::string();
+    
+    int size_needed = WideCharToMultiByte(CP_UTF8, 0, wstr.c_str(), (int)wstr.size(), nullptr, 0, nullptr, nullptr);
+    if (size_needed <= 0) return std::string();
+    
+    std::string strTo(size_needed, 0);
+    int result = WideCharToMultiByte(CP_UTF8, 0, wstr.c_str(), (int)wstr.size(), &strTo[0], size_needed, nullptr, nullptr);
+    if (result <= 0) return std::string();
+    
+    return strTo;
+}
+#endif
+
+
 EditorManager::EditorManager()
     : m_initialized(false),
       m_visible(false),
@@ -1103,8 +1121,8 @@ void EditorManager::newWorld()
                     if (mainMenu.shouldCreateNewWorld()) {
                         // Get world parameters from dialog
                         std::wstring wWorldName = mainMenu.getNewWorldName();
-                        // Convert wide string to narrow string
-                        std::string worldName(wWorldName.begin(), wWorldName.end());
+                        // Convert wide string to narrow string using Windows API
+                        std::string worldName = toNarrowString(wWorldName);
                         int seed = mainMenu.getWorldSeed();
                         bool is3D = mainMenu.isWorld3D();
                         

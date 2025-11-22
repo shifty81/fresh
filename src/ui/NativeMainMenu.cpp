@@ -14,6 +14,24 @@ namespace fs = std::filesystem;
 namespace fresh
 {
 
+#ifdef _WIN32
+// Helper function to convert wide string to narrow string safely
+static std::string toNarrowString(const std::wstring& wstr)
+{
+    if (wstr.empty()) return std::string();
+    
+    int size_needed = WideCharToMultiByte(CP_UTF8, 0, wstr.c_str(), (int)wstr.size(), nullptr, 0, nullptr, nullptr);
+    if (size_needed <= 0) return std::string();
+    
+    std::string strTo(size_needed, 0);
+    int result = WideCharToMultiByte(CP_UTF8, 0, wstr.c_str(), (int)wstr.size(), &strTo[0], size_needed, nullptr, nullptr);
+    if (result <= 0) return std::string();
+    
+    return strTo;
+}
+#endif
+
+
 NativeMainMenu::NativeMainMenu()
     : m_parentWindow(nullptr),
       m_mainDialog(nullptr),
@@ -282,8 +300,7 @@ INT_PTR CALLBACK NativeMainMenu::createWorldDialogProc(HWND hwnd, UINT msg, WPAR
             // Get world type
             menu->m_isWorld3D = (IsDlgButtonChecked(hwnd, ID_RADIO_3D) == BST_CHECKED);
 
-            LOG_INFO_C("Creating new world: " +
-                           std::string(menu->m_newWorldName.begin(), menu->m_newWorldName.end()),
+            LOG_INFO_C("Creating new world: " + toNarrowString(menu->m_newWorldName),
                        "NativeMainMenu");
 
             EndDialog(hwnd, IDOK);
@@ -428,8 +445,7 @@ INT_PTR CALLBACK NativeMainMenu::loadWorldDialogProc(HWND hwnd, UINT msg, WPARAM
                 SendMessage(listBox, LB_GETTEXT, sel, (LPARAM)worldName);
                 menu->m_loadWorldName = worldName;
 
-                LOG_INFO_C("Loading world: " + std::string(menu->m_loadWorldName.begin(),
-                                                           menu->m_loadWorldName.end()),
+                LOG_INFO_C("Loading world: " + toNarrowString(menu->m_loadWorldName),
                            "NativeMainMenu");
 
                 EndDialog(hwnd, IDOK);
