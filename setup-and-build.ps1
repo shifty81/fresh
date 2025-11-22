@@ -340,15 +340,28 @@ try {
         Write-Log "Executing: cmake $($cmakeArgs -join ' ')" "INFO"
         Write-Host ""
         
-        # Capture cmake output to both console and log file
-        $cmakeOutput = & cmake @cmakeArgs 2>&1
-        $cmakeOutput | ForEach-Object {
-            Write-Host $_
-            Add-Content -Path $LogFile -Value "[$((Get-Date -Format 'yyyy-MM-dd HH:mm:ss'))] [CMAKE] $_"
+        # Stream cmake output in real-time to both console and log file
+        $process = Start-Process -FilePath "cmake" -ArgumentList $cmakeArgs -NoNewWindow -PassThru -RedirectStandardOutput "$LogDir\cmake_stdout.tmp" -RedirectStandardError "$LogDir\cmake_stderr.tmp" -Wait
+        
+        # Read and display output
+        if (Test-Path "$LogDir\cmake_stdout.tmp") {
+            Get-Content "$LogDir\cmake_stdout.tmp" | ForEach-Object {
+                Write-Host $_
+                Add-Content -Path $LogFile -Value "[$Timestamp] [CMAKE] $_"
+            }
+            Remove-Item "$LogDir\cmake_stdout.tmp" -ErrorAction SilentlyContinue
         }
         
-        if ($LASTEXITCODE -ne 0) {
-            throw "CMake generation failed with exit code $LASTEXITCODE"
+        if (Test-Path "$LogDir\cmake_stderr.tmp") {
+            Get-Content "$LogDir\cmake_stderr.tmp" | ForEach-Object {
+                Write-Host $_
+                Add-Content -Path $LogFile -Value "[$Timestamp] [CMAKE] $_"
+            }
+            Remove-Item "$LogDir\cmake_stderr.tmp" -ErrorAction SilentlyContinue
+        }
+        
+        if ($process.ExitCode -ne 0) {
+            throw "CMake generation failed with exit code $($process.ExitCode)"
         }
         
         Pop-Location
@@ -396,15 +409,28 @@ try {
             Write-Log "Executing: cmake $($cmakeBuildArgs -join ' ')" "INFO"
             Write-Host ""
             
-            # Capture build output to both console and log file
-            $buildOutput = & cmake @cmakeBuildArgs 2>&1
-            $buildOutput | ForEach-Object {
-                Write-Host $_
-                Add-Content -Path $LogFile -Value "[$((Get-Date -Format 'yyyy-MM-dd HH:mm:ss'))] [BUILD] $_"
+            # Stream build output in real-time to both console and log file
+            $process = Start-Process -FilePath "cmake" -ArgumentList $cmakeBuildArgs -NoNewWindow -PassThru -RedirectStandardOutput "$LogDir\build_stdout.tmp" -RedirectStandardError "$LogDir\build_stderr.tmp" -Wait
+            
+            # Read and display output
+            if (Test-Path "$LogDir\build_stdout.tmp") {
+                Get-Content "$LogDir\build_stdout.tmp" | ForEach-Object {
+                    Write-Host $_
+                    Add-Content -Path $LogFile -Value "[$Timestamp] [BUILD] $_"
+                }
+                Remove-Item "$LogDir\build_stdout.tmp" -ErrorAction SilentlyContinue
             }
             
-            if ($LASTEXITCODE -ne 0) {
-                throw "Build failed with exit code $LASTEXITCODE"
+            if (Test-Path "$LogDir\build_stderr.tmp") {
+                Get-Content "$LogDir\build_stderr.tmp" | ForEach-Object {
+                    Write-Host $_
+                    Add-Content -Path $LogFile -Value "[$Timestamp] [BUILD] $_"
+                }
+                Remove-Item "$LogDir\build_stderr.tmp" -ErrorAction SilentlyContinue
+            }
+            
+            if ($process.ExitCode -ne 0) {
+                throw "Build failed with exit code $($process.ExitCode)"
             }
             
             Write-Success "Build completed successfully!"

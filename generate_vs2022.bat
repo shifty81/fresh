@@ -109,13 +109,16 @@ call :log ""
 call :log "[STEP] Running CMake configuration..."
 call :log ""
 
+REM Create unique temp file in logs directory
+set "TEMP_LOG=%LOG_DIR%\cmake_output_%dt%.tmp"
+
 REM Run cmake and log output
-cmake -G "Visual Studio 17 2022" -A x64 -DCMAKE_TOOLCHAIN_FILE="%VCPKG_ROOT%\scripts\buildsystems\vcpkg.cmake" .. > "..\%LOG_FILE%.tmp" 2>&1
+cmake -G "Visual Studio 17 2022" -A x64 -DCMAKE_TOOLCHAIN_FILE="%VCPKG_ROOT%\scripts\buildsystems\vcpkg.cmake" .. > "%TEMP_LOG%" 2>&1
 
 REM Append cmake output to log and display to console
-type "..\%LOG_FILE%.tmp"
-type "..\%LOG_FILE%.tmp" >> "..\%LOG_FILE%"
-del "..\%LOG_FILE%.tmp"
+type "%TEMP_LOG%"
+type "%TEMP_LOG%" >> "%LOG_FILE%"
+del "%TEMP_LOG%"
 
 if %ERRORLEVEL% NEQ 0 (
     call :log ""
