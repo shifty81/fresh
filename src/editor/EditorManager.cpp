@@ -147,18 +147,20 @@ bool EditorManager::initialize(WindowType* window, IRenderContext* renderContext
         m_menuBar->setToolPaletteVisible(&m_showToolPalette);
 
         // Set settings callback to open settings panel
-        m_menuBar->setSettingsCallback([this]() {
-            if (m_settingsPanel) {
-                m_settingsPanel->setVisible(true);
-            }
-        });
+        // Removed: m_settingsPanel is commented out in header
+        // m_menuBar->setSettingsCallback([this]() {
+        //     if (m_settingsPanel) {
+        //         m_settingsPanel->setVisible(true);
+        //     }
+        // });
 
         // Set engine configuration callback to open engine config panel
-        m_menuBar->setEngineConfigCallback([this]() {
-            if (m_engineConfigPanel) {
-                m_engineConfigPanel->setVisible(true);
-            }
-        });
+        // Removed: m_engineConfigPanel is commented out in header
+        // m_menuBar->setEngineConfigCallback([this]() {
+        //     if (m_engineConfigPanel) {
+        //         m_engineConfigPanel->setVisible(true);
+        //     }
+        // });
         
         // Set editor settings callback to open editor settings dialog
         m_menuBar->setEditorSettingsCallback([this]() {
@@ -543,6 +545,9 @@ void EditorManager::beginFrame()
 
 void EditorManager::update(float deltaTime)
 {
+    // Silence unreferenced parameter warning
+    (void)deltaTime;
+    
     if (!m_initialized) {
         return;
     }
@@ -610,20 +615,20 @@ void EditorManager::render()
         m_voxelTools->render();
     }
 
-    // Render main menu panel if active
-    if (m_mainMenuPanel) {
-        m_mainMenuPanel->render();
-    }
+    // Removed: m_mainMenuPanel is commented out in header
+    // if (m_mainMenuPanel) {
+    //     m_mainMenuPanel->render();
+    // }
 
-    // Render settings panel if visible
-    if (m_settingsPanel) {
-        m_settingsPanel->render();
-    }
+    // Removed: m_settingsPanel is commented out in header
+    // if (m_settingsPanel) {
+    //     m_settingsPanel->render();
+    // }
 
-    // Render engine configuration panel if visible
-    if (m_engineConfigPanel) {
-        m_engineConfigPanel->render();
-    }
+    // Removed: m_engineConfigPanel is commented out in header
+    // if (m_engineConfigPanel) {
+    //     m_engineConfigPanel->render();
+    // }
     
     // Render editor settings dialog if visible
     if (m_editorSettingsDialog) {
@@ -649,10 +654,10 @@ void EditorManager::render()
     }
 
 #ifdef _WIN32
-    // Render Windows customization panel if available
-    if (m_windowsCustomizationPanel) {
-        m_windowsCustomizationPanel->render();
-    }
+    // Removed: m_windowsCustomizationPanel is commented out in header
+    // if (m_windowsCustomizationPanel) {
+    //     m_windowsCustomizationPanel->render();
+    // }
 #endif
 }
 
@@ -671,8 +676,10 @@ void EditorManager::shutdown()
 
     // Shutdown in reverse order
     m_hotbar.reset();
-    m_settingsPanel.reset();
-    m_mainMenuPanel.reset();
+    // Removed: m_settingsPanel is commented out in header
+    // m_settingsPanel.reset();
+    // Removed: m_mainMenuPanel is commented out in header
+    // m_mainMenuPanel.reset();
     m_voxelTools.reset();
     m_console.reset();
     m_contentBrowser.reset();
@@ -683,9 +690,10 @@ void EditorManager::shutdown()
 
 #ifdef _WIN32
     // Shutdown Windows-native features
-    if (m_windowsCustomizationPanel) {
-        m_windowsCustomizationPanel.reset();
-    }
+    // Removed: m_windowsCustomizationPanel is commented out in header
+    // if (m_windowsCustomizationPanel) {
+    //     m_windowsCustomizationPanel.reset();
+    // }
     if (m_windowsTaskbarManager) {
         m_windowsTaskbarManager->shutdown();
         m_windowsTaskbarManager.reset();
@@ -1205,18 +1213,20 @@ void EditorManager::toggleToolPalette()
 
 void EditorManager::showSettings()
 {
-    if (m_settingsPanel) {
-        m_settingsPanel->setVisible(true);
-        LOG_INFO_C("Settings panel shown", "EditorManager");
-    }
+    // Removed: m_settingsPanel is commented out in header
+    // if (m_settingsPanel) {
+    //     m_settingsPanel->setVisible(true);
+    //     LOG_INFO_C("Settings panel shown", "EditorManager");
+    // }
 }
 
 void EditorManager::showEngineConfig()
 {
-    if (m_engineConfigPanel) {
-        m_engineConfigPanel->setVisible(true);
-        LOG_INFO_C("Engine configuration panel shown", "EditorManager");
-    }
+    // Removed: m_engineConfigPanel is commented out in header
+    // if (m_engineConfigPanel) {
+    //     m_engineConfigPanel->setVisible(true);
+    //     LOG_INFO_C("Engine configuration panel shown", "EditorManager");
+    // }
 }
 
 void EditorManager::showEditorSettings()
