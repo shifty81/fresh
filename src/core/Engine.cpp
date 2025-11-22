@@ -18,10 +18,6 @@
 #include <thread>
 #include <vector>
 
-#ifdef _MSC_VER
-    #pragma warning(pop)
-#endif
-
 #ifdef _WIN32
     #include <windows.h>
     #include <shellapi.h>  // For ShellExecuteA
@@ -38,10 +34,15 @@
     #include "input/Win32InputManager.h"
     #include "ui/native/Win32MenuBar.h"
     #include "ui/native/Win32Toolbar.h"
+    #include "ui/native/Win32HUD.h"
 #else
     #include <GLFW/glfw3.h>
     #include "core/Window.h"
     #include "input/InputManager.h"
+#endif
+
+#ifdef _MSC_VER
+    #pragma warning(pop)
 #endif
 
 #include <glm/glm.hpp>
