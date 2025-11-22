@@ -100,6 +100,7 @@ private:
     HWND m_parentHwnd;        // Parent window handle
     Win32HUD* m_hud;          // HUD instance to render (not owned)
     bool m_initialized;       // Initialization flag
+    HBRUSH m_clearBrush;      // Cached brush for clearing background
     
     static constexpr const wchar_t* WINDOW_CLASS_NAME = L"FreshHUDOverlayWindow";
 };

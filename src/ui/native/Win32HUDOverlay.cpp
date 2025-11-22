@@ -12,6 +12,7 @@ Win32HUDOverlay::Win32HUDOverlay()
     , m_parentHwnd(nullptr)
     , m_hud(nullptr)
     , m_initialized(false)
+    , m_clearBrush(nullptr)
 {
 }
 
@@ -47,6 +48,12 @@ bool Win32HUDOverlay::initialize(HWND parentHwnd, Win32HUD* hud)
         return false;
     }
 
+    // Create cached brush for clearing background
+    m_clearBrush = CreateSolidBrush(RGB(0, 0, 0));
+    if (!m_clearBrush) {
+        LOG_WARNING_C("Failed to create clear brush for HUD overlay", "Win32HUDOverlay");
+    }
+
     m_initialized = true;
     LOG_INFO_C("Win32HUDOverlay initialized successfully", "Win32HUDOverlay");
     return true;
@@ -57,6 +64,10 @@ void Win32HUDOverlay::shutdown()
     if (m_hwnd) {
         DestroyWindow(m_hwnd);
         m_hwnd = nullptr;
+    }
+    if (m_clearBrush) {
+        DeleteObject(m_clearBrush);
+        m_clearBrush = nullptr;
     }
     m_parentHwnd = nullptr;
     m_hud = nullptr;
@@ -192,13 +203,19 @@ void Win32HUDOverlay::onPaint()
         RECT clientRect;
         GetClientRect(m_hwnd, &clientRect);
 
-        // Clear background to transparent
-        HBRUSH clearBrush = CreateSolidBrush(RGB(0, 0, 0));
-        FillRect(hdc, &clientRect, clearBrush);
-        DeleteObject(clearBrush);
+        // Clear background to transparent using cached brush
+        if (m_clearBrush) {
+            FillRect(hdc, &clientRect, m_clearBrush);
+        }
 
-        // Render the HUD
-        m_hud->render(hdc, clientRect);
+        // Render the HUD (wrapped in try-catch for safety)
+        try {
+            m_hud->render(hdc, clientRect);
+        } catch (...) {
+            // If HUD rendering fails, log error but continue
+            // The overlay will just show the black transparent background
+            LOG_ERROR_C("Exception occurred while rendering HUD", "Win32HUDOverlay");
+        }
     }
 
     EndPaint(m_hwnd, &ps);
