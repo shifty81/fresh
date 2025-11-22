@@ -51,7 +51,8 @@ void HotbarPanel::render()
 
 void HotbarPanel::renderSlot(int slotIndex, const HotbarSlot& slot, bool isSelected)
 {
-    // Stub - ImGui UI not available
+    // This is a stub method for API compatibility
+    // On Windows with FRESH_WIN32_UI, rendering is handled by Win32HUD
     (void)slotIndex;
     (void)slot;
     (void)isSelected;
