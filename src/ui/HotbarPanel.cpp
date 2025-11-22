@@ -43,8 +43,9 @@ void HotbarPanel::render()
     // For Windows builds with native UI, this is a no-op as rendering is done elsewhere.
     
 #ifndef _WIN32
-    // On non-Windows platforms, implement cross-platform HUD rendering here
-    // Currently not implemented as this is a Windows-exclusive project
+    // Fresh Voxel Engine is Windows-exclusive. This cross-platform code path exists
+    // for API consistency but is not expected to be used. If porting to other platforms,
+    // implement HUD rendering here using the platform's native UI or a cross-platform UI library.
     LOG_WARNING_C("HotbarPanel::render() called on non-Windows platform - not implemented", "HotbarPanel");
 #endif
 }
