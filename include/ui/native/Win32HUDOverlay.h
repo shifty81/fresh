@@ -52,6 +52,12 @@ public:
     void updatePosition();
 
     /**
+     * @brief Set overlay visibility
+     * @param visible true to show, false to hide
+     */
+    void setVisible(bool visible);
+
+    /**
      * @brief Invalidate the overlay to trigger a repaint
      */
     void invalidate();

@@ -584,6 +584,9 @@ void EditorManager::update(float deltaTime)
     if (m_nativeHUD && m_hudOverlay && m_hudOverlay->isInitialized()) {
         bool hudVisible = m_nativeHUD->isVisible();
         
+        // Show or hide overlay based on HUD visibility
+        m_hudOverlay->setVisible(hudVisible);
+        
         if (hudVisible && m_player) {
             // Update HUD with current player stats
             Win32HUD::HUDStats stats;

@@ -86,6 +86,13 @@ void Win32HUDOverlay::updatePosition()
                  SWP_NOACTIVATE | SWP_SHOWWINDOW);
 }
 
+void Win32HUDOverlay::setVisible(bool visible)
+{
+    if (m_hwnd) {
+        ShowWindow(m_hwnd, visible ? SW_SHOW : SW_HIDE);
+    }
+}
+
 void Win32HUDOverlay::invalidate()
 {
     if (m_hwnd) {
@@ -135,17 +142,18 @@ bool Win32HUDOverlay::createOverlayWindow()
     int width = bottomRight.x - topLeft.x;
     int height = bottomRight.y - topLeft.y;
 
-    // Create the overlay window as a child of the parent
-    // WS_EX_LAYERED: Allows transparency
-    // WS_EX_TRANSPARENT: Click-through for input
-    // WS_EX_TOPMOST: Always on top (optional, using child window instead)
+    // Create the overlay window as a popup window
+    // WS_EX_LAYERED: Allows transparency and alpha blending
+    // WS_EX_TRANSPARENT: Click-through for input (mouse events pass through)
+    // WS_POPUP: Frameless top-level window
+    // Initially hidden - will be shown when HUD is visible
     m_hwnd = CreateWindowExW(
-        WS_EX_LAYERED | WS_EX_TRANSPARENT,
+        WS_EX_LAYERED | WS_EX_TRANSPARENT | WS_EX_TOPMOST,
         WINDOW_CLASS_NAME,
         L"HUD Overlay",
-        WS_POPUP | WS_VISIBLE,
+        WS_POPUP,  // Hidden initially (no WS_VISIBLE)
         topLeft.x, topLeft.y, width, height,
-        m_parentHwnd,
+        nullptr,  // No parent for popup window
         nullptr,
         hInstance,
         nullptr
@@ -155,9 +163,9 @@ bool Win32HUDOverlay::createOverlayWindow()
         return false;
     }
 
-    // Set the window as click-through and semi-transparent
-    // The alpha value (255) means fully opaque - HUD will control its own transparency
-    SetLayeredWindowAttributes(m_hwnd, 0, 255, LWA_ALPHA);
+    // Make the window fully opaque initially
+    // We use RGB(0,0,0) as transparent color key for the background
+    SetLayeredWindowAttributes(m_hwnd, RGB(0, 0, 0), 0, LWA_COLORKEY);
 
     // Store 'this' pointer in window user data for access in WindowProc
     SetWindowLongPtrW(m_hwnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(this));
