@@ -72,8 +72,9 @@ make
    - Solution: Fixed in latest version. Update your code or add `#include <memory>`
 
 3. **"Windows 10/11 SDK Required"**
-   - Solution: Fresh Voxel Engine requires Windows 10/11 SDK for native UI
-   - Install via Visual Studio Installer → Individual Components → Windows 10/11 SDK
+   - Solution: Fresh Voxel Engine requires Windows 10 SDK (version 10.0.19041.0 or later) for native UI
+   - Install via Visual Studio Installer → Individual Components → Windows 10 SDK (10.0.19041.0) or newer
+   - Windows 11 SDK is also supported
    - See [VISUAL_STUDIO_SETUP.md](VISUAL_STUDIO_SETUP.md#common-compilation-errors)
 
 4. **"Unable to start program ... ALL_BUILD access is denied"**

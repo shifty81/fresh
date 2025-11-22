@@ -7,17 +7,20 @@
 
 ---
 
-## ⚠️ IMPORTANT UPDATE: ImGui Removed (2025-11-21)
+## ⚠️ IMPORTANT UPDATE: ImGui Removed (2025-11-22)
 
 **ImGui has been completely removed from the codebase.**
 
 Fresh Voxel Engine now uses **Windows Native Win32 UI exclusively**. All references to ImGui have been removed:
-- Removed from vcpkg.json dependencies
-- Removed from CMakeLists.txt
-- All FRESH_IMGUI_AVAILABLE conditionals removed
-- Panel headers updated to use Win32 native implementations only
+- Removed from vcpkg.json dependencies (completed earlier)
+- Removed from CMakeLists.txt (completed earlier)
+- All FRESH_IMGUI_AVAILABLE conditionals removed (completed earlier)
+- Panel headers updated to use Win32 native implementations only (completed earlier)
+- **NEW (2025-11-22)**: Deprecated ImGui panel files archived to `archived/imgui-panels/`
+- **NEW (2025-11-22)**: Documentation updated with deprecation notices
+- **NEW (2025-11-22)**: Created comprehensive IMGUI_DEPRECATION_NOTICE.md
 
-See: WINDOWS_NATIVE_ONLY_POLICY.md and IMGUI_REMOVAL_ACTION_PLAN.md
+See: WINDOWS_NATIVE_ONLY_POLICY.md, IMGUI_REMOVAL_ACTION_PLAN.md, and IMGUI_DEPRECATION_NOTICE.md
 
 ---
 
