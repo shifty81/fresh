@@ -258,6 +258,8 @@ endif()
 # Enable GLM experimental features
 add_definitions(-DGLM_ENABLE_EXPERIMENTAL)
 
+message(STATUS "Preparing to define source files...")
+
 # Source files
 set(ENGINE_SOURCES
     src/main.cpp
@@ -499,8 +501,12 @@ set(ENGINE_HEADERS
     include/character/VoxelCharacter.h
 )
 
+message(STATUS "Source and header files defined. Creating executable target...")
+
 # Create executable
 add_executable(${PROJECT_NAME} ${ENGINE_SOURCES} ${ENGINE_HEADERS})
+
+message(STATUS "Executable target '${PROJECT_NAME}' created successfully")
 
 # Make it a proper Windows GUI application (no console in Release)
 if(WIN32 AND CMAKE_BUILD_TYPE STREQUAL "Release")
@@ -926,3 +932,9 @@ endif()
 message(STATUS "Examples are integrated into main engine executable")
 message(STATUS "Run FreshVoxelEngine.exe and select from the main menu")
 message(STATUS "See examples/README.md for demo documentation")
+
+message(STATUS "")
+message(STATUS "========================================================================")
+message(STATUS "CMake configuration completed successfully!")
+message(STATUS "========================================================================")
+message(STATUS "")
