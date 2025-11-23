@@ -51,6 +51,7 @@ $CMAKE_MIN_MAJOR = 3
 $CMAKE_MIN_MINOR = 20
 $CMAKE_RECOMMENDED_VERSION = "3.30.x or 3.31.x"
 $CMAKE_TESTED_RANGE = "3.20 through 3.31"
+$CMAKE_VERSION_REGEX = "cmake version (\d+)\.(\d+)\.(\d+)(-rc\d*|-alpha\d*|-beta\d*|-pre|-dev)?"
 
 # Get script directory (project root) early for absolute paths
 $ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
@@ -151,7 +152,7 @@ try {
         
         # Verify CMake version is 3.20 or higher
         # Full version match to capture major, minor, patch, and any suffix (rc, alpha, beta)
-        $versionMatch = $cmakeVersion -match "cmake version (\d+)\.(\d+)\.(\d+)(-rc\d*|-alpha\d*|-beta\d*|-pre|-dev)?"
+        $versionMatch = $cmakeVersion -match $CMAKE_VERSION_REGEX
         if ($versionMatch) {
             $major = [int]$matches[1]
             $minor = [int]$matches[2]
@@ -167,7 +168,7 @@ try {
             }
             
             # Warn about unstable versions (rc, alpha, beta, pre, dev)
-            if (-not [string]::IsNullOrEmpty($suffix)) {
+            if ($suffix) {
                 Write-Host ""
                 Write-Host "WARNING: You are using an unstable CMake version!" -ForegroundColor Red
                 Write-Host "  Current version: $major.$minor.$patch$suffix" -ForegroundColor Yellow
@@ -182,7 +183,7 @@ try {
                 # Ask user if they want to continue
                 Write-Host "Do you want to continue anyway? (y/n): " -NoNewline -ForegroundColor Yellow
                 $response = Read-Host
-                if ($response -ne "y" -and $response -ne "Y") {
+                if ($response -notmatch '^[yY]$') {
                     Write-Host ""
                     Write-Host "Build cancelled. Please install a stable CMake version and try again." -ForegroundColor Yellow
                     Write-Log "Build cancelled due to unstable CMake version" "INFO"
@@ -209,7 +210,7 @@ try {
                 # Ask user if they want to continue
                 Write-Host "Do you want to continue anyway? (y/n): " -NoNewline -ForegroundColor Yellow
                 $response = Read-Host
-                if ($response -ne "y" -and $response -ne "Y") {
+                if ($response -notmatch '^[yY]$') {
                     Write-Host ""
                     Write-Host "Build cancelled. Please install CMake $CMAKE_RECOMMENDED_VERSION and try again." -ForegroundColor Yellow
                     Write-Log "Build cancelled due to CMake $major.x version" "INFO"
