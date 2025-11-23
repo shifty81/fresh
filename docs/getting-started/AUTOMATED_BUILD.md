@@ -69,9 +69,12 @@ The script will check for these prerequisites and guide you if anything is missi
 - **Visual Studio 2022** (Community, Professional, or Enterprise)
   - With "Desktop development with C++" workload
   - Download: https://visualstudio.microsoft.com/downloads/
-- **CMake 3.20+**
+- **CMake 3.20-3.31** (stable releases only)
+  - ⚠️ **Important:** Use stable releases only (e.g., 3.31.7)
+  - ❌ **Avoid:** CMake 4.x or pre-release versions (rc, alpha, beta)
   - Download: https://cmake.org/download/
   - Must be in system PATH
+  - The script will warn if an unstable version is detected
 - **Git for Windows**
   - Download: https://git-scm.com/download/win
 
@@ -130,7 +133,69 @@ See [ARCHIVED.md](ARCHIVED.md) for more information about archived features.
 
 ---
 
+## Troubleshooting
+
+### CMake Version Issues
+
+**Problem:** Build fails with "Failed to generate Visual Studio solution"
+
+**Possible Cause:** You may be using CMake 4.x or a pre-release version (e.g., 4.2.0-rc2)
+
+**Solution:**
+1. Check your CMake version: `cmake --version`
+2. If you see version 4.x or a version with `-rc`, `-alpha`, or `-beta`:
+   - Uninstall the current CMake version
+   - Download CMake 3.31.x from https://cmake.org/download/
+   - Install and ensure it's added to PATH
+   - Run `.\setup-and-build.ps1` again
+
+**Why this happens:**
+- CMake 4.x has breaking changes and is not yet stable
+- Pre-release versions may have bugs
+- This project is tested with CMake 3.20-3.31
+
+The automated script will now warn you if it detects an unstable CMake version.
+
+### vcpkg Bootstrap Issues
+
+**Problem:** vcpkg fails to bootstrap
+
+**Solution:**
+1. Delete the `vcpkg` directory in the project root
+2. Run `.\setup-and-build.ps1` again
+3. The script will re-clone and bootstrap vcpkg
+
+### Visual Studio Not Found
+
+**Problem:** Script can't find Visual Studio 2022
+
+**Solution:**
+1. Ensure Visual Studio 2022 is installed
+2. Verify "Desktop development with C++" workload is installed
+3. Run Visual Studio Installer to modify/repair installation
+
+### Build Fails with Missing Dependencies
+
+**Problem:** Build fails with errors about missing libraries
+
+**Solution:**
+1. Delete the `vcpkg` directory
+2. Delete the `build` directory
+3. Run `.\setup-and-build.ps1` again to start fresh
+
+### More Help
+
+For detailed troubleshooting:
+- See [CMAKE_TROUBLESHOOTING.md](../../CMAKE_TROUBLESHOOTING.md) for CMake-specific issues
+- See [BUILD.md](BUILD.md) for manual build instructions
+- Open an issue: https://github.com/shifty81/fresh/issues
+
+---
+
+## Workflows
+
 ### First Time Setup
+
 ```powershell
 # Clone repository
 git clone https://github.com/shifty81/fresh.git

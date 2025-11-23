@@ -44,10 +44,18 @@ Before you begin, ensure you have the following installed:
 - **Note:** This installation includes the Windows SDK needed for DirectX 11/12
 
 ### 2. CMake
-- **Version:** 3.20 or higher
+- **Version:** 3.20 or higher (tested with 3.20-3.31)
+- **⚠️ Important:** Use stable releases only (e.g., 3.31.7)
+- **❌ Avoid:** CMake 4.x or pre-release versions (rc, alpha, beta)
 - **Download:** https://cmake.org/download/
-- **Important:** During installation, select "Add CMake to system PATH"
+- **Installation:** Select "Add CMake to system PATH" during installation
 - **Verify:** Open Command Prompt and run `cmake --version`
+  - Should show: `cmake version 3.X.Y` (where X is 20-31)
+  
+**Troubleshooting CMake Version Issues:**
+- If you have CMake 4.x or a pre-release version (e.g., 4.2.0-rc2), uninstall it and install CMake 3.31.x
+- CMake 4.x has breaking changes and may not work correctly with this project
+- See [CMAKE_TROUBLESHOOTING.md](../../CMAKE_TROUBLESHOOTING.md) for detailed guidance
 
 ### 3. Git for Windows
 - **Download:** https://git-scm.com/download/win
