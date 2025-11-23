@@ -1,5 +1,42 @@
 # CMake Configuration Troubleshooting Guide
 
+## ⚠️ CRITICAL: CMake Version Compatibility
+
+**If you're experiencing CMake generation failures, check your CMake version first!**
+
+### Quick Check
+Run this command:
+```powershell
+cmake --version
+```
+
+### Supported Versions
+- ✅ **Recommended**: CMake 3.20 through 3.31 (stable releases)
+- ⚠️ **Not Recommended**: CMake 4.x or pre-release versions (rc, alpha, beta)
+- ❌ **Not Supported**: CMake versions below 3.20
+
+### Common Issue: CMake 4.x or Pre-Release Versions
+
+**Symptoms:**
+```
+[ERROR] Failed to generate Visual Studio solution
+CMake exit code: 1
+```
+
+**If you have CMake 4.2.0-rc2 or similar:**
+1. This is a pre-release version with potential bugs and breaking changes
+2. CMake 4.x is a major version bump not yet fully tested with this project
+3. **Solution**: Install CMake 3.31.x (latest stable 3.x) from https://cmake.org/download/
+
+**Quick Fix:**
+1. Uninstall current CMake version
+2. Download CMake 3.31.x: https://cmake.org/download/
+3. Install and ensure it's added to PATH
+4. Verify: `cmake --version` should show `cmake version 3.31.x`
+5. Re-run: `.\setup-and-build.ps1`
+
+---
+
 ## Recent Improvements
 
 This document describes recent improvements made to the build system to help diagnose and fix CMake configuration issues on Windows.
@@ -121,13 +158,61 @@ CMake Error: Could not find a toolchain file for Visual Studio 17 2022
 
 **Solution**: Ensure Visual Studio 2022 with "Desktop development with C++" workload is installed
 
-### Issue 3: CMake Version
-If you see warnings about CMake version:
+### Issue 3: CMake Version Issues
+
+#### Issue 3a: CMake Version Too Old
+If you see an error about CMake version:
 ```
-CMake Warning: CMake version X.Y.Z may not work correctly
+CMake version 3.20 or higher is required
+Current version: 3.15.0
 ```
 
-**Solution**: Ensure you have CMake 3.20 or higher installed. Note that release candidates (like 4.2.0-rc2) may have issues.
+**Solution**: Update to CMake 3.20 or higher:
+1. Download from: https://cmake.org/download/
+2. Install and ensure it's in your system PATH
+3. Verify: `cmake --version`
+
+#### Issue 3b: CMake Pre-Release or Unstable Version
+If you see a warning about unstable CMake:
+```
+WARNING: You are using an unstable CMake version!
+  Current version: 4.2.0-rc2
+  This is a pre-release version and may have bugs or breaking changes.
+```
+
+**Solution**: Use a stable CMake 3.x release:
+1. Uninstall the pre-release CMake version
+2. Download a stable version (3.30.x or 3.31.x) from: https://cmake.org/download/
+3. Install and verify: `cmake --version`
+
+**Why this matters:**
+- Pre-release versions (rc, alpha, beta) may have bugs
+- CMake 4.x introduces major breaking changes
+- This project is tested with CMake 3.20 through 3.31
+- Using stable versions ensures compatibility
+
+#### Issue 3c: CMake 4.x Detected
+If you see a warning about CMake 4.x:
+```
+WARNING: CMake 4.x or higher detected!
+  Current version: 4.2.0
+  CMake 4.x introduces major changes and may not be compatible.
+```
+
+**Solution**: Downgrade to CMake 3.30.x or 3.31.x:
+1. Uninstall CMake 4.x
+2. Download CMake 3.31.x (latest stable 3.x): https://cmake.org/download/
+3. Install and verify: `cmake --version`
+4. Re-run the build script: `.\setup-and-build.ps1`
+
+**Technical Details:**
+CMake 4.x is a major version bump with potential breaking changes:
+- Generator behavior may be different
+- Policy changes may affect how CMakeLists.txt is interpreted
+- vcpkg integration may not be fully compatible
+- Visual Studio generator may have changes
+
+The Fresh Voxel Engine has been developed and tested with CMake 3.20-3.31. Using CMake 4.x is not recommended until it's officially released and tested.
 
 ## Understanding the Logs
 
