@@ -93,3 +93,4 @@ docs/api/latex/
 docs/api/xml/
 *.doxygen.log
 RELEASE_NOTES.md
+test_build/
