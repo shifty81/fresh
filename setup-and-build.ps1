@@ -344,14 +344,28 @@ try {
         
         # Stream cmake output in real-time to both console and log file
         # Use & operator instead of Start-Process to properly handle arguments with spaces
-        & cmake $cmakeArgs 2>&1 | ForEach-Object {
-            Write-Host $_
-            $cmakeTimestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
-            Add-Content -Path $LogFile -Value "[$cmakeTimestamp] [CMAKE] $_"
-        }
+        # Capture output to a variable first to preserve exit code
+        $cmakeOutput = @()
+        $cmakeExitCode = $null
         
-        if ($LASTEXITCODE -ne 0) {
-            throw "CMake generation failed with exit code $LASTEXITCODE"
+        try {
+            $cmakeOutput = & cmake $cmakeArgs 2>&1
+            $cmakeExitCode = $LASTEXITCODE
+            
+            # Display and log the output
+            foreach ($line in $cmakeOutput) {
+                Write-Host $line
+                $cmakeTimestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
+                Add-Content -Path $LogFile -Value "[$cmakeTimestamp] [CMAKE] $line"
+            }
+            
+            if ($cmakeExitCode -ne 0) {
+                throw "CMake generation failed with exit code $cmakeExitCode"
+            }
+        }
+        catch {
+            # Re-throw to outer catch block
+            throw
         }
         
         Pop-Location
@@ -362,10 +376,22 @@ try {
         Write-ErrorMsg "Failed to generate Visual Studio solution"
         Write-Host "Error: $_"
         Write-Host ""
+        if ($null -ne $cmakeExitCode) {
+            Write-Host "CMake exit code: $cmakeExitCode"
+            Write-Host ""
+        }
+        if ($cmakeOutput -and $cmakeOutput.Count -gt 0) {
+            Write-Host "Last 20 lines of CMake output:"
+            $cmakeOutput | Select-Object -Last 20 | ForEach-Object {
+                Write-Host "  $_" -ForegroundColor Yellow
+            }
+            Write-Host ""
+        }
         Write-Host "Troubleshooting:"
         Write-Host "  1. Verify all prerequisites are installed"
         Write-Host "  2. Check that vcpkg is properly set up"
         Write-Host "  3. See BUILD.md for detailed instructions"
+        Write-Host "  4. Check the full log file for more details: $LogFile"
         exit 1
     }
     
@@ -401,14 +427,28 @@ try {
             
             # Stream build output in real-time to both console and log file
             # Use & operator instead of Start-Process to properly handle arguments with spaces
-            & cmake $cmakeBuildArgs 2>&1 | ForEach-Object {
-                Write-Host $_
-                $buildTimestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
-                Add-Content -Path $LogFile -Value "[$buildTimestamp] [BUILD] $_"
-            }
+            # Capture output to a variable first to preserve exit code
+            $buildOutput = @()
+            $buildExitCode = $null
             
-            if ($LASTEXITCODE -ne 0) {
-                throw "Build failed with exit code $LASTEXITCODE"
+            try {
+                $buildOutput = & cmake $cmakeBuildArgs 2>&1
+                $buildExitCode = $LASTEXITCODE
+                
+                # Display and log the output
+                foreach ($line in $buildOutput) {
+                    Write-Host $line
+                    $buildTimestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
+                    Add-Content -Path $LogFile -Value "[$buildTimestamp] [BUILD] $line"
+                }
+                
+                if ($buildExitCode -ne 0) {
+                    throw "Build failed with exit code $buildExitCode"
+                }
+            }
+            catch {
+                # Re-throw to outer catch block
+                throw
             }
             
             Write-Success "Build completed successfully!"
@@ -419,9 +459,22 @@ try {
             Write-Log "Build failed: $_" "ERROR"
             Write-Host "Error: $_"
             Write-Host ""
+            if ($null -ne $buildExitCode) {
+                Write-Host "Build exit code: $buildExitCode"
+                Write-Host ""
+            }
+            if ($buildOutput -and $buildOutput.Count -gt 0) {
+                Write-Host "Last 30 lines of build output:"
+                $buildOutput | Select-Object -Last 30 | ForEach-Object {
+                    Write-Host "  $_" -ForegroundColor Yellow
+                }
+                Write-Host ""
+            }
             Write-Host "The Visual Studio solution has been generated."
             Write-Host "You can open it manually to investigate build errors:"
             Write-Host "  $solutionFile"
+            Write-Host ""
+            Write-Host "Check the full log file for more details: $LogFile"
             exit 1
         }
         

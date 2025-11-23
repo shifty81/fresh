@@ -102,6 +102,8 @@ find_package(OpenAL QUIET)
 if(NOT OpenAL_FOUND)
     message(WARNING "OpenAL not found. Audio features will be disabled.")
     message(WARNING "  vcpkg install openal-soft:x64-windows")
+else()
+    message(STATUS "OpenAL found successfully")
 endif()
 
 # Vorbis for OGG audio support
@@ -109,6 +111,8 @@ find_package(Vorbis QUIET CONFIG)
 if(NOT Vorbis_FOUND)
     message(WARNING "libvorbis not found. OGG audio support will be disabled.")
     message(WARNING "  vcpkg install libvorbis:x64-windows")
+else()
+    message(STATUS "libvorbis found successfully")
 endif()
 
 # Lua for scripting
@@ -173,6 +177,8 @@ find_package(nlohmann_json QUIET CONFIG)
 if(NOT nlohmann_json_FOUND)
     message(WARNING "nlohmann-json not found. Asset pack manifest parsing will be limited.")
     message(WARNING "  vcpkg install nlohmann-json:x64-windows")
+else()
+    message(STATUS "nlohmann-json found successfully")
 endif()
 
 # Native File Dialog Extended for file dialogs
@@ -180,7 +186,11 @@ find_package(nfd QUIET CONFIG)
 if(NOT nfd_FOUND)
     message(WARNING "Native File Dialog Extended (nfd) not found. File dialogs will not be available.")
     message(WARNING "  vcpkg install nativefiledialog-extended:x64-windows")
+else()
+    message(STATUS "Native File Dialog Extended found successfully")
 endif()
+
+message(STATUS "All find_package calls completed")
 
 # ==============================================================================
 # Dependency Check Summary
@@ -255,8 +265,12 @@ elseif(NOT USING_VCPKG AND DEPENDENCIES_OK)
     message("")
 endif()
 
+message(STATUS "Dependency checking completed")
+
 # Enable GLM experimental features
 add_definitions(-DGLM_ENABLE_EXPERIMENTAL)
+
+message(STATUS "Preparing to define source files...")
 
 # Source files
 set(ENGINE_SOURCES
@@ -499,8 +513,12 @@ set(ENGINE_HEADERS
     include/character/VoxelCharacter.h
 )
 
+message(STATUS "Source and header files defined. Creating executable target...")
+
 # Create executable
 add_executable(${PROJECT_NAME} ${ENGINE_SOURCES} ${ENGINE_HEADERS})
+
+message(STATUS "Executable target '${PROJECT_NAME}' created successfully")
 
 # Make it a proper Windows GUI application (no console in Release)
 if(WIN32 AND CMAKE_BUILD_TYPE STREQUAL "Release")
@@ -926,3 +944,9 @@ endif()
 message(STATUS "Examples are integrated into main engine executable")
 message(STATUS "Run FreshVoxelEngine.exe and select from the main menu")
 message(STATUS "See examples/README.md for demo documentation")
+
+message(STATUS "")
+message(STATUS "========================================================================")
+message(STATUS "CMake configuration completed successfully!")
+message(STATUS "========================================================================")
+message(STATUS "")
