@@ -346,7 +346,7 @@ try {
         # Use & operator instead of Start-Process to properly handle arguments with spaces
         # Capture output to a variable first to preserve exit code
         $cmakeOutput = @()
-        $cmakeExitCode = -1
+        $cmakeExitCode = $null
         
         try {
             $cmakeOutput = & cmake $cmakeArgs 2>&1
@@ -376,7 +376,7 @@ try {
         Write-ErrorMsg "Failed to generate Visual Studio solution"
         Write-Host "Error: $_"
         Write-Host ""
-        if ($cmakeExitCode -and $cmakeExitCode -ne -1) {
+        if (($null -ne $cmakeExitCode)) {
             Write-Host "CMake exit code: $cmakeExitCode"
             Write-Host ""
         }
@@ -429,7 +429,7 @@ try {
             # Use & operator instead of Start-Process to properly handle arguments with spaces
             # Capture output to a variable first to preserve exit code
             $buildOutput = @()
-            $buildExitCode = -1
+            $buildExitCode = $null
             
             try {
                 $buildOutput = & cmake $cmakeBuildArgs 2>&1
@@ -459,7 +459,7 @@ try {
             Write-Log "Build failed: $_" "ERROR"
             Write-Host "Error: $_"
             Write-Host ""
-            if ($buildExitCode -and $buildExitCode -ne -1) {
+            if (($null -ne $buildExitCode)) {
                 Write-Host "Build exit code: $buildExitCode"
                 Write-Host ""
             }
