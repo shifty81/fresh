@@ -376,7 +376,7 @@ try {
         Write-ErrorMsg "Failed to generate Visual Studio solution"
         Write-Host "Error: $_"
         Write-Host ""
-        if (($null -ne $cmakeExitCode)) {
+        if ($null -ne $cmakeExitCode) {
             Write-Host "CMake exit code: $cmakeExitCode"
             Write-Host ""
         }
@@ -459,7 +459,7 @@ try {
             Write-Log "Build failed: $_" "ERROR"
             Write-Host "Error: $_"
             Write-Host ""
-            if (($null -ne $buildExitCode)) {
+            if ($null -ne $buildExitCode) {
                 Write-Host "Build exit code: $buildExitCode"
                 Write-Host ""
             }
