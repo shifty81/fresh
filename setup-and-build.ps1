@@ -342,20 +342,13 @@ try {
         Write-Log "Executing: cmake $($cmakeArgs -join ' ')" "INFO"
         Write-Host ""
         
-        # Use absolute paths for temporary files to avoid issues after Push-Location
-        $cmakeStdoutTmp = Join-Path $LogDir "cmake_stdout.tmp"
-        $cmakeStderrTmp = Join-Path $LogDir "cmake_stderr.tmp"
-        
         # Stream cmake output in real-time to both console and log file
         # Use & operator instead of Start-Process to properly handle arguments with spaces
-        & cmake $cmakeArgs 2>&1 | Tee-Object -FilePath $cmakeStdoutTmp | ForEach-Object {
+        & cmake $cmakeArgs 2>&1 | ForEach-Object {
             Write-Host $_
             $cmakeTimestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
             Add-Content -Path $LogFile -Value "[$cmakeTimestamp] [CMAKE] $_"
         }
-        
-        # Clean up temp file
-        Remove-Item $cmakeStdoutTmp -ErrorAction SilentlyContinue
         
         if ($LASTEXITCODE -ne 0) {
             throw "CMake generation failed with exit code $LASTEXITCODE"
@@ -406,19 +399,13 @@ try {
             Write-Log "Executing: cmake $($cmakeBuildArgs -join ' ')" "INFO"
             Write-Host ""
             
-            # Use absolute paths for temporary files
-            $buildStdoutTmp = Join-Path $LogDir "build_stdout.tmp"
-            
             # Stream build output in real-time to both console and log file
             # Use & operator instead of Start-Process to properly handle arguments with spaces
-            & cmake $cmakeBuildArgs 2>&1 | Tee-Object -FilePath $buildStdoutTmp | ForEach-Object {
+            & cmake $cmakeBuildArgs 2>&1 | ForEach-Object {
                 Write-Host $_
                 $buildTimestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
                 Add-Content -Path $LogFile -Value "[$buildTimestamp] [BUILD] $_"
             }
-            
-            # Clean up temp file
-            Remove-Item $buildStdoutTmp -ErrorAction SilentlyContinue
             
             if ($LASTEXITCODE -ne 0) {
                 throw "Build failed with exit code $LASTEXITCODE"
