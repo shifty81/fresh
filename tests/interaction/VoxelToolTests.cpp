@@ -55,7 +55,9 @@ TEST_F(VoxelToolTest, ConstructionHammer_PlacesSingleBlock) {
     
     // Assert
     EXPECT_TRUE(result);
-    EXPECT_EQ(world->getVoxel(pos).type, VoxelType::Stone);
+    Voxel* voxel = world->getVoxel(pos);
+    ASSERT_NE(voxel, nullptr);
+    EXPECT_EQ(voxel->type, VoxelType::Stone);
 }
 
 /**
@@ -80,7 +82,8 @@ TEST_F(VoxelToolTest, ConstructionHammer_PlacesWall) {
     for (int y = 0; y < 5; ++y) {
         for (int x = -1; x <= 1; ++x) {
             WorldPos checkPos(pos.x + x, pos.y + y, pos.z);
-            if (world->getVoxel(checkPos).type == VoxelType::Stone) {
+            Voxel* voxel = world->getVoxel(checkPos);
+            if (voxel && voxel->type == VoxelType::Stone) {
                 placedBlocks++;
             }
         }
@@ -110,7 +113,8 @@ TEST_F(VoxelToolTest, ConstructionHammer_PlacesFoundation) {
     for (int x = -1; x <= 1; ++x) {
         for (int z = -1; z <= 1; ++z) {
             WorldPos checkPos(pos.x + x, pos.y, pos.z + z);
-            if (world->getVoxel(checkPos).type == VoxelType::Cobblestone) {
+            Voxel* voxel = world->getVoxel(checkPos);
+            if (voxel && voxel->type == VoxelType::Cobblestone) {
                 placedBlocks++;
             }
         }
@@ -135,7 +139,9 @@ TEST_F(VoxelToolTest, Pickaxe_RemovesSingleVoxel) {
     
     // Assert
     EXPECT_TRUE(result);
-    EXPECT_EQ(world->getVoxel(pos).type, VoxelType::Air);
+    Voxel* voxel = world->getVoxel(pos);
+    ASSERT_NE(voxel, nullptr);
+    EXPECT_EQ(voxel->type, VoxelType::Air);
 }
 
 /**
@@ -154,7 +160,9 @@ TEST_F(VoxelToolTest, Pickaxe_DoesNotRemoveBedrock) {
     
     // Assert
     EXPECT_FALSE(result);
-    EXPECT_EQ(world->getVoxel(pos).type, VoxelType::Bedrock);
+    Voxel* voxel = world->getVoxel(pos);
+    ASSERT_NE(voxel, nullptr);
+    EXPECT_EQ(voxel->type, VoxelType::Bedrock);
 }
 
 /**
@@ -186,9 +194,17 @@ TEST_F(VoxelToolTest, Pickaxe_RemovesArea) {
     
     // Check that blocks within radius are removed
     // Center and immediate neighbors should be air
-    EXPECT_EQ(world->getVoxel(centerPos).type, VoxelType::Air);
-    EXPECT_EQ(world->getVoxel(WorldPos(centerPos.x + 1, centerPos.y, centerPos.z)).type, VoxelType::Air);
-    EXPECT_EQ(world->getVoxel(WorldPos(centerPos.x, centerPos.y + 1, centerPos.z)).type, VoxelType::Air);
+    Voxel* centerVoxel = world->getVoxel(centerPos);
+    ASSERT_NE(centerVoxel, nullptr);
+    EXPECT_EQ(centerVoxel->type, VoxelType::Air);
+    
+    Voxel* xNeighbor = world->getVoxel(WorldPos(centerPos.x + 1, centerPos.y, centerPos.z));
+    ASSERT_NE(xNeighbor, nullptr);
+    EXPECT_EQ(xNeighbor->type, VoxelType::Air);
+    
+    Voxel* yNeighbor = world->getVoxel(WorldPos(centerPos.x, centerPos.y + 1, centerPos.z));
+    ASSERT_NE(yNeighbor, nullptr);
+    EXPECT_EQ(yNeighbor->type, VoxelType::Air);
 }
 
 /**
@@ -214,7 +230,9 @@ TEST_F(VoxelToolTest, Rake_LevelsGround) {
     
     // The terrain should be flattened to the target height (pos.y)
     // Check that blocks above pos.y in the radius are removed
-    EXPECT_EQ(world->getVoxel(WorldPos(pos.x, pos.y + 2, pos.z)).type, VoxelType::Air);
+    Voxel* voxel = world->getVoxel(WorldPos(pos.x, pos.y + 2, pos.z));
+    ASSERT_NE(voxel, nullptr);
+    EXPECT_EQ(voxel->type, VoxelType::Air);
 }
 
 /**
@@ -287,5 +305,7 @@ TEST_F(VoxelToolTest, ToolManager_UsesActiveTool) {
     
     // Assert
     EXPECT_TRUE(result);
-    EXPECT_EQ(world->getVoxel(pos).type, VoxelType::Wood);
+    Voxel* voxel = world->getVoxel(pos);
+    ASSERT_NE(voxel, nullptr);
+    EXPECT_EQ(voxel->type, VoxelType::Wood);
 }

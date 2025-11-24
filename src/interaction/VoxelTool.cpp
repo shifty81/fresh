@@ -34,6 +34,7 @@ void VoxelTool::setSize(int size)
 bool VoxelTool::useToolDirectional(const WorldPos& pos, const glm::vec3& direction, 
                                    VoxelType voxelType)
 {
+    (void)direction; // Unused parameter
     // Default implementation delegates to basic useTool
     return useTool(pos, voxelType);
 }
@@ -61,6 +62,7 @@ bool ConstructionHammer::useTool(const WorldPos& pos, VoxelType voxelType)
 bool ConstructionHammer::useToolDirectional(const WorldPos& pos, const glm::vec3& direction,
                                            VoxelType voxelType)
 {
+    (void)direction; // Unused parameter - future enhancement for oriented placement
     if (!m_world) {
         return false;
     }
@@ -182,7 +184,7 @@ Pickaxe::Pickaxe()
 
 bool Pickaxe::useTool(const WorldPos& pos, VoxelType voxelType)
 {
-    // Pickaxe removes blocks, voxelType is ignored
+    (void)voxelType; // Pickaxe removes blocks, voxelType is ignored
     if (m_size == 1) {
         return removeVoxel(pos);
     } else {
@@ -197,7 +199,11 @@ bool Pickaxe::removeVoxel(const WorldPos& pos)
     }
 
     // Get current voxel
-    Voxel currentVoxel = m_world->getVoxel(pos);
+    Voxel* voxelPtr = m_world->getVoxel(pos);
+    if (!voxelPtr) {
+        return false;
+    }
+    Voxel currentVoxel = *voxelPtr;
     
     // Don't remove air or bedrock
     if (currentVoxel.type == VoxelType::Air || currentVoxel.type == VoxelType::Bedrock) {
@@ -268,7 +274,9 @@ bool Rake::flattenToHeight(const WorldPos& pos, int targetHeight, int radius)
                 // Fill from bottom to target height with dirt
                 for (int y = 0; y <= targetHeight; ++y) {
                     WorldPos blockPos(columnPos.x, y, columnPos.z);
-                    Voxel currentVoxel = m_world->getVoxel(blockPos);
+                    Voxel* voxelPtr = m_world->getVoxel(blockPos);
+                    if (!voxelPtr) continue;
+                    Voxel currentVoxel = *voxelPtr;
                     
                     if (y < targetHeight) {
                         // Fill below target height
@@ -286,7 +294,9 @@ bool Rake::flattenToHeight(const WorldPos& pos, int targetHeight, int radius)
                 // Remove blocks above target height
                 for (int y = targetHeight + 1; y < CHUNK_HEIGHT; ++y) {
                     WorldPos blockPos(columnPos.x, y, columnPos.z);
-                    Voxel currentVoxel = m_world->getVoxel(blockPos);
+                    Voxel* voxelPtr = m_world->getVoxel(blockPos);
+                    if (!voxelPtr) break;
+                    Voxel currentVoxel = *voxelPtr;
                     
                     // Stop at first air block (no need to continue up)
                     if (currentVoxel.type == VoxelType::Air) {
@@ -323,7 +333,9 @@ bool Rake::smoothTerrain(const WorldPos& pos, int radius)
                 
                 // Find surface height
                 for (int y = CHUNK_HEIGHT - 1; y >= 0; --y) {
-                    Voxel voxel = m_world->getVoxel(WorldPos(columnPos.x, y, columnPos.z));
+                    Voxel* voxelPtr = m_world->getVoxel(WorldPos(columnPos.x, y, columnPos.z));
+                    if (!voxelPtr) continue;
+                    Voxel voxel = *voxelPtr;
                     if (voxel.isSolid()) {
                         totalHeight += y;
                         count++;
