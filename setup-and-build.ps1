@@ -46,6 +46,13 @@ param(
 # Set error action preference
 $ErrorActionPreference = "Stop"
 
+# CMake version configuration
+$CMAKE_MIN_MAJOR = 3
+$CMAKE_MIN_MINOR = 20
+$CMAKE_RECOMMENDED_VERSION = "3.30.x or 3.31.x"
+$CMAKE_TESTED_RANGE = "3.20 through 3.31"
+$CMAKE_VERSION_REGEX = "cmake version (\d+)\.(\d+)\.(\d+)(-rc\d*|-alpha\d*|-beta\d*|-pre|-dev)?"
+
 # Get script directory (project root) early for absolute paths
 $ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 
@@ -144,15 +151,74 @@ try {
         Write-Success "CMake found: $cmakeVersion"
         
         # Verify CMake version is 3.20 or higher
-        $versionMatch = $cmakeVersion -match "cmake version (\d+)\.(\d+)"
+        # Full version match to capture major, minor, patch, and any suffix (rc, alpha, beta)
+        $versionMatch = $cmakeVersion -match $CMAKE_VERSION_REGEX
         if ($versionMatch) {
             $major = [int]$matches[1]
             $minor = [int]$matches[2]
-            if ($major -lt 3 -or ($major -eq 3 -and $minor -lt 20)) {
-                Write-ErrorMsg "CMake version 3.20 or higher is required"
-                Write-Host "Current version: $major.$minor"
+            $patch = [int]$matches[3]
+            $suffix = $matches[4]
+            
+            # Check for minimum version
+            if ($major -lt $CMAKE_MIN_MAJOR -or ($major -eq $CMAKE_MIN_MAJOR -and $minor -lt $CMAKE_MIN_MINOR)) {
+                Write-ErrorMsg "CMake version $CMAKE_MIN_MAJOR.$CMAKE_MIN_MINOR or higher is required"
+                Write-Host "Current version: $major.$minor.$patch"
                 Write-Host "Please update CMake from: https://cmake.org/download/"
                 exit 1
+            }
+            
+            # Warn about unstable versions (rc, alpha, beta, pre, dev)
+            if ($suffix) {
+                Write-Host ""
+                Write-Host "WARNING: You are using an unstable CMake version!" -ForegroundColor Red
+                Write-Host "  Current version: $major.$minor.$patch$suffix" -ForegroundColor Yellow
+                Write-Host "  This is a pre-release version and may have bugs or breaking changes." -ForegroundColor Yellow
+                Write-Host ""
+                Write-Host "RECOMMENDATION: Use the latest stable CMake 3.x release" -ForegroundColor Cyan
+                Write-Host "  Download from: https://cmake.org/download/" -ForegroundColor White
+                Write-Host "  Recommended: CMake $CMAKE_RECOMMENDED_VERSION" -ForegroundColor White
+                Write-Host ""
+                Write-Log "WARNING: Unstable CMake version detected: $major.$minor.$patch$suffix" "WARNING"
+                
+                # Ask user if they want to continue
+                Write-Host "Do you want to continue anyway? (y/n): " -NoNewline -ForegroundColor Yellow
+                $response = Read-Host
+                if ($response -notmatch '^[yY]$') {
+                    Write-Host ""
+                    Write-Host "Build cancelled. Please install a stable CMake version and try again." -ForegroundColor Yellow
+                    Write-Log "Build cancelled due to unstable CMake version" "INFO"
+                    exit 0
+                }
+                Write-Host ""
+                Write-Info "Continuing with unstable CMake version at user's request..."
+                Write-Log "User chose to continue with unstable CMake version" "INFO"
+            }
+            
+            # Warn about CMake 4.x and higher (major version changes)
+            if ($major -ge 4) {
+                Write-Host ""
+                Write-Host "WARNING: CMake 4.x or higher detected!" -ForegroundColor Red
+                Write-Host "  Current version: $major.$minor.$patch$suffix" -ForegroundColor Yellow
+                Write-Host "  CMake 4.x introduces major changes and may not be compatible." -ForegroundColor Yellow
+                Write-Host ""
+                Write-Host "STRONG RECOMMENDATION: Use CMake $CMAKE_RECOMMENDED_VERSION instead" -ForegroundColor Cyan
+                Write-Host "  This project has been tested with CMake $CMAKE_TESTED_RANGE" -ForegroundColor White
+                Write-Host "  Download stable version from: https://cmake.org/download/" -ForegroundColor White
+                Write-Host ""
+                Write-Log "WARNING: CMake $major.x detected - may have compatibility issues" "WARNING"
+                
+                # Ask user if they want to continue
+                Write-Host "Do you want to continue anyway? (y/n): " -NoNewline -ForegroundColor Yellow
+                $response = Read-Host
+                if ($response -notmatch '^[yY]$') {
+                    Write-Host ""
+                    Write-Host "Build cancelled. Please install CMake $CMAKE_RECOMMENDED_VERSION and try again." -ForegroundColor Yellow
+                    Write-Log "Build cancelled due to CMake $major.x version" "INFO"
+                    exit 0
+                }
+                Write-Host ""
+                Write-Info "Continuing with CMake $major.x at user's request..."
+                Write-Log "User chose to continue with CMake $major.x" "INFO"
             }
         }
     }

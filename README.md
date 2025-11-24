@@ -3,7 +3,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![C++20](https://img.shields.io/badge/C++-20-blue.svg)](https://en.cppreference.com/w/cpp/20)
 [![.NET 9](https://img.shields.io/badge/.NET-9.0-512BD4.svg)](https://dotnet.microsoft.com/)
-[![CMake](https://img.shields.io/badge/CMake-3.20+-064F8C.svg)](https://cmake.org/)
+[![CMake](https://img.shields.io/badge/CMake-3.20--3.31-064F8C.svg)](https://cmake.org/)
 [![Platform](https://img.shields.io/badge/Platform-Windows%2010%2F11-0078D4.svg)](https://github.com/shifty81/fresh)
 [![Graphics](https://img.shields.io/badge/Graphics-DirectX%2012%2F11-00B2FF.svg)](https://github.com/shifty81/fresh)
 [![Editor](https://img.shields.io/badge/Editor-Unreal--like-orange.svg)](https://github.com/shifty81/fresh)
@@ -96,7 +96,9 @@ A professional **Windows-exclusive** voxel game development platform built with 
 
 - **Windows 10/11** (x64) - Required
 - **Visual Studio 2022** with "Desktop development with C++" - Required
-- **CMake 3.20+** - Required
+- **CMake 3.20-3.31** (stable releases only) - Required
+  - ⚠️ **Avoid**: CMake 4.x or pre-release versions (may cause build failures)
+  - Download: https://cmake.org/download/
 - **Git for Windows** - Required
 - **.NET 9 SDK** (optional, for C# scripting bindings)
 - **Windows 10 SDK** (included with Visual Studio) - For DirectX support
