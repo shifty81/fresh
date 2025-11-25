@@ -272,6 +272,48 @@ if (panel) {
 - Coordinates with other Win32 panels
 - Full keyboard shortcut support via WorldEditor
 
+### Win32StatusBar
+
+**File**: `include/ui/native/Win32StatusBar.h`
+
+Native status bar component for displaying editor state information:
+
+```cpp
+class Win32StatusBar {
+    bool create(HWND parent, int numPanes = 3, const PaneConfig* paneConfigs = nullptr);
+    void setPaneText(int paneIndex, const std::wstring& text);
+    void setStatusText(const std::wstring& text);
+    void setCursorPosition(float x, float y, float z = 0.0f);
+    void setSelectionInfo(int count, const std::wstring& type);
+    void setFPS(float fps);
+    void updateLayout();
+};
+```
+
+**Features:**
+- Multi-pane status bar with customizable layout
+- Dark theme styling matching Unreal Engine
+- Automatic resize handling
+- Pre-built methods for common status information:
+  - Ready/idle status text
+  - Cursor position (X, Y, Z coordinates)
+  - Selection info (count and type)
+  - FPS display
+  - Memory usage display
+
+**Usage:**
+```cpp
+// Create status bar with 4 panes
+Win32StatusBar statusBar;
+statusBar.create(hwnd, 4);
+
+// Update status information
+statusBar.setStatusText(L"Ready");
+statusBar.setCursorPosition(100.0f, 50.0f, 25.0f);
+statusBar.setSelectionInfo(5, L"entities");
+statusBar.setFPS(60.0f);
+```
+
 ---
 
 ## Dark Theme System
@@ -311,6 +353,33 @@ themeManager.applyToWindow(hwnd);
 // Apply theme colors
 HBRUSH bgBrush = CreateSolidBrush(UnrealStyleTheme::WindowBackground);
 SetClassLongPtr(hwnd, GCLP_HBRBACKGROUND, (LONG_PTR)bgBrush);
+```
+
+### Theme Helper Functions
+
+The theme provides several helper functions for consistent styling:
+
+```cpp
+// Get pre-configured fonts
+HFONT font = UnrealStyleTheme::GetFont();          // Normal UI font
+HFONT boldFont = UnrealStyleTheme::GetBoldFont();  // Bold for section headers
+HFONT titleFont = UnrealStyleTheme::GetTitleFont(); // Title font for panel headers
+HFONT monoFont = UnrealStyleTheme::GetMonospaceFont(); // For console/code
+
+// Get cached brushes
+HBRUSH panelBg = UnrealStyleTheme::GetPanelBackgroundBrush();
+HBRUSH darkBg = UnrealStyleTheme::GetDarkBackgroundBrush();
+HBRUSH inputBg = UnrealStyleTheme::GetInputBackgroundBrush();
+
+// Draw themed UI elements
+UnrealStyleTheme::DrawPanelTitleBar(hdc, rect, L"Inspector", true);
+UnrealStyleTheme::DrawSectionHeader(hdc, rect, L"Transform", false);
+UnrealStyleTheme::DrawSeparator(hdc, x1, y1, x2, y2);
+
+// Color helpers
+COLORREF hover = UnrealStyleTheme::GetHoverColor(baseColor);
+COLORREF pressed = UnrealStyleTheme::GetPressedColor(baseColor);
+COLORREF blended = UnrealStyleTheme::BlendColors(color1, color2, 0.5f);
 ```
 
 ---

@@ -131,6 +131,16 @@ struct UnrealStyleTheme
     static constexpr int IconMedium = 24;
     static constexpr int IconLarge = 32;
     
+    // Panel title bar colors
+    static constexpr COLORREF TitleBarBackground = RGB(45, 45, 48);         // #2D2D30
+    static constexpr COLORREF TitleBarText = RGB(241, 241, 241);            // #F1F1F1
+    static constexpr COLORREF TitleBarAccent = RGB(0, 122, 204);            // #007ACC
+    static constexpr int TitleBarHeight = 26;
+    
+    // Hover and focus states
+    static constexpr COLORREF FocusBorder = RGB(0, 122, 204);               // #007ACC
+    static constexpr COLORREF HoverOverlay = RGB(255, 255, 255);            // 10% white overlay effect
+    
     // Helper functions for applying theme
     /**
      * @brief Apply theme colors to a window
@@ -143,14 +153,30 @@ struct UnrealStyleTheme
     }
     
     /**
+     * @brief Calculate font height for a given point size
+     * Uses system DPI for proper scaling on high-DPI displays
+     * @param pointSize Font size in points
+     * @return Font height in pixels (negative for character height)
+     */
+    static int GetFontHeight(int pointSize) {
+        // Get system DPI - default to 96 if unable to retrieve
+        HDC hdc = GetDC(nullptr);
+        int dpi = hdc ? GetDeviceCaps(hdc, LOGPIXELSY) : 96;
+        if (hdc) ReleaseDC(nullptr, hdc);
+        
+        // Formula: height = -(pointSize * DPI / 72)
+        return -MulDiv(pointSize, dpi, 72);
+    }
+    
+    /**
      * @brief Get default font for UI elements
-     * @return Handle to default font
+     * @return Handle to default font (9pt, DPI-aware)
      */
     static HFONT GetFont() {
         static HFONT hFont = nullptr;
         if (!hFont) {
             hFont = CreateFontW(
-                FontSizeNormal,
+                GetFontHeight(FontSizeNormal),  // 9pt, DPI-aware
                 0, 0, 0,
                 FW_NORMAL,
                 FALSE, FALSE, FALSE,
@@ -163,6 +189,318 @@ struct UnrealStyleTheme
             );
         }
         return hFont;
+    }
+    
+    /**
+     * @brief Get bold font for section headers
+     * @return Handle to bold font (9pt, DPI-aware)
+     */
+    static HFONT GetBoldFont() {
+        static HFONT hBoldFont = nullptr;
+        if (!hBoldFont) {
+            hBoldFont = CreateFontW(
+                GetFontHeight(FontSizeNormal),  // 9pt, DPI-aware
+                0, 0, 0,
+                FW_SEMIBOLD,
+                FALSE, FALSE, FALSE,
+                DEFAULT_CHARSET,
+                OUT_DEFAULT_PRECIS,
+                CLIP_DEFAULT_PRECIS,
+                CLEARTYPE_QUALITY,
+                DEFAULT_PITCH | FF_DONTCARE,
+                L"Segoe UI"
+            );
+        }
+        return hBoldFont;
+    }
+    
+    /**
+     * @brief Get title font for panel headers
+     * @return Handle to title font (12pt, DPI-aware)
+     */
+    static HFONT GetTitleFont() {
+        static HFONT hTitleFont = nullptr;
+        if (!hTitleFont) {
+            hTitleFont = CreateFontW(
+                GetFontHeight(FontSizeTitle),  // 12pt, DPI-aware
+                0, 0, 0,
+                FW_SEMIBOLD,
+                FALSE, FALSE, FALSE,
+                DEFAULT_CHARSET,
+                OUT_DEFAULT_PRECIS,
+                CLIP_DEFAULT_PRECIS,
+                CLEARTYPE_QUALITY,
+                DEFAULT_PITCH | FF_DONTCARE,
+                L"Segoe UI"
+            );
+        }
+        return hTitleFont;
+    }
+    
+    /**
+     * @brief Get monospace font for console/code display
+     * @return Handle to monospace font (9pt, DPI-aware)
+     */
+    static HFONT GetMonospaceFont() {
+        static HFONT hMonoFont = nullptr;
+        if (!hMonoFont) {
+            hMonoFont = CreateFontW(
+                GetFontHeight(FontSizeNormal),  // 9pt, DPI-aware
+                0, 0, 0,
+                FW_NORMAL,
+                FALSE, FALSE, FALSE,
+                DEFAULT_CHARSET,
+                OUT_DEFAULT_PRECIS,
+                CLIP_DEFAULT_PRECIS,
+                CLEARTYPE_QUALITY,
+                FIXED_PITCH | FF_MODERN,
+                L"Consolas"
+            );
+        }
+        return hMonoFont;
+    }
+    
+    /**
+     * @brief Create a brush for the specified color
+     * @param color The color for the brush
+     * @return Handle to the created brush (caller should manage lifetime)
+     */
+    static HBRUSH CreateBrush(COLORREF color) {
+        return CreateSolidBrush(color);
+    }
+    
+    /**
+     * @brief Get a cached brush for panel background
+     * @return Handle to panel background brush
+     */
+    static HBRUSH GetPanelBackgroundBrush() {
+        static HBRUSH hBrush = nullptr;
+        if (!hBrush) {
+            hBrush = CreateSolidBrush(PanelBackground);
+        }
+        return hBrush;
+    }
+    
+    /**
+     * @brief Get a cached brush for dark background
+     * @return Handle to dark background brush
+     */
+    static HBRUSH GetDarkBackgroundBrush() {
+        static HBRUSH hBrush = nullptr;
+        if (!hBrush) {
+            hBrush = CreateSolidBrush(DarkBackground);
+        }
+        return hBrush;
+    }
+    
+    /**
+     * @brief Get a cached brush for input background
+     * @return Handle to input background brush
+     */
+    static HBRUSH GetInputBackgroundBrush() {
+        static HBRUSH hBrush = nullptr;
+        if (!hBrush) {
+            hBrush = CreateSolidBrush(InputBackground);
+        }
+        return hBrush;
+    }
+    
+    /**
+     * @brief Get a cached brush for title bar background
+     * @return Handle to title bar background brush
+     */
+    static HBRUSH GetTitleBarBackgroundBrush() {
+        static HBRUSH hBrush = nullptr;
+        if (!hBrush) {
+            hBrush = CreateSolidBrush(TitleBarBackground);
+        }
+        return hBrush;
+    }
+    
+    /**
+     * @brief Get a cached pen for accent line
+     * @return Handle to accent pen
+     */
+    static HPEN GetAccentPen() {
+        static HPEN hPen = nullptr;
+        if (!hPen) {
+            hPen = CreatePen(PS_SOLID, 2, TitleBarAccent);
+        }
+        return hPen;
+    }
+    
+    /**
+     * @brief Get a cached pen for dark borders
+     * @return Handle to dark border pen
+     */
+    static HPEN GetBorderDarkPen() {
+        static HPEN hPen = nullptr;
+        if (!hPen) {
+            hPen = CreatePen(PS_SOLID, 1, BorderDark);
+        }
+        return hPen;
+    }
+    
+    /**
+     * @brief Draw a panel title bar with accent line
+     * @param hdc Device context
+     * @param rect Rectangle for the title bar
+     * @param title Title text to display
+     * @param showAccent Whether to show the accent line
+     */
+    static void DrawPanelTitleBar(HDC hdc, const RECT& rect, const wchar_t* title, bool showAccent = true) {
+        // Fill title bar background using cached brush
+        FillRect(hdc, &rect, GetTitleBarBackgroundBrush());
+        
+        // Draw accent line at top using cached pen
+        if (showAccent) {
+            HPEN oldPen = (HPEN)SelectObject(hdc, GetAccentPen());
+            MoveToEx(hdc, rect.left, rect.top, nullptr);
+            LineTo(hdc, rect.right, rect.top);
+            SelectObject(hdc, oldPen);
+        }
+        
+        // Draw title text
+        SetBkMode(hdc, TRANSPARENT);
+        SetTextColor(hdc, TitleBarText);
+        HFONT oldFont = (HFONT)SelectObject(hdc, GetTitleFont());
+        
+        RECT textRect = rect;
+        textRect.left += PaddingMedium;
+        textRect.top += 2;  // Offset for accent line
+        DrawTextW(hdc, title, -1, &textRect, DT_LEFT | DT_VCENTER | DT_SINGLELINE);
+        
+        SelectObject(hdc, oldFont);
+    }
+    
+    /**
+     * @brief Get a cached brush for button background
+     * @return Handle to button background brush
+     */
+    static HBRUSH GetButtonBackgroundBrush() {
+        static HBRUSH hBrush = nullptr;
+        if (!hBrush) {
+            hBrush = CreateSolidBrush(ButtonNormal);
+        }
+        return hBrush;
+    }
+    
+    /**
+     * @brief Get a cached pen for separators
+     * @return Handle to separator pen
+     */
+    static HPEN GetSeparatorPen() {
+        static HPEN hPen = nullptr;
+        if (!hPen) {
+            hPen = CreatePen(PS_SOLID, 1, Separator);
+        }
+        return hPen;
+    }
+    
+    /**
+     * @brief Draw a separator line
+     * @param hdc Device context
+     * @param x1 Start X coordinate
+     * @param y1 Start Y coordinate
+     * @param x2 End X coordinate
+     * @param y2 End Y coordinate
+     */
+    static void DrawSeparator(HDC hdc, int x1, int y1, int x2, int y2) {
+        HPEN oldPen = (HPEN)SelectObject(hdc, GetSeparatorPen());
+        MoveToEx(hdc, x1, y1, nullptr);
+        LineTo(hdc, x2, y2);
+        SelectObject(hdc, oldPen);
+    }
+    
+    /**
+     * @brief Draw a section header with optional collapse indicator
+     * @param hdc Device context
+     * @param rect Rectangle for the header
+     * @param title Section title
+     * @param collapsed Whether section is collapsed
+     */
+    static void DrawSectionHeader(HDC hdc, const RECT& rect, const wchar_t* title, bool collapsed = false) {
+        // Fill background with cached brush
+        FillRect(hdc, &rect, GetButtonBackgroundBrush());
+        
+        // Draw collapse indicator (triangle)
+        SetTextColor(hdc, TextSecondary);
+        SetBkMode(hdc, TRANSPARENT);
+        HFONT oldFont = (HFONT)SelectObject(hdc, GetFont());
+        
+        RECT indicatorRect = rect;
+        indicatorRect.left += PaddingSmall;
+        indicatorRect.right = indicatorRect.left + IconSmall;
+        const wchar_t* indicator = collapsed ? L"\x25B6" : L"\x25BC";  // Right or Down triangle
+        DrawTextW(hdc, indicator, -1, &indicatorRect, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
+        
+        // Draw title
+        SetTextColor(hdc, TextPrimary);
+        SelectObject(hdc, GetBoldFont());
+        
+        RECT textRect = rect;
+        textRect.left += IconSmall + PaddingMedium;
+        DrawTextW(hdc, title, -1, &textRect, DT_LEFT | DT_VCENTER | DT_SINGLELINE);
+        
+        SelectObject(hdc, oldFont);
+    }
+    
+    /**
+     * @brief Get RGB components from COLORREF
+     * @param color The color to decompose
+     * @param r Output red component (0-255)
+     * @param g Output green component (0-255)
+     * @param b Output blue component (0-255)
+     */
+    static void GetRGB(COLORREF color, BYTE& r, BYTE& g, BYTE& b) {
+        r = GetRValue(color);
+        g = GetGValue(color);
+        b = GetBValue(color);
+    }
+    
+    /**
+     * @brief Blend two colors together
+     * @param color1 First color
+     * @param color2 Second color
+     * @param factor Blend factor (0.0 = color1, 1.0 = color2), clamped to [0.0, 1.0]
+     * @return Blended color
+     */
+    static COLORREF BlendColors(COLORREF color1, COLORREF color2, float factor) {
+        // Clamp factor to valid range
+        if (factor < 0.0f) factor = 0.0f;
+        if (factor > 1.0f) factor = 1.0f;
+        
+        BYTE r1, g1, b1, r2, g2, b2;
+        GetRGB(color1, r1, g1, b1);
+        GetRGB(color2, r2, g2, b2);
+        
+        // Helper lambda to blend a single channel with clamping
+        auto blendChannel = [factor](BYTE c1, BYTE c2) -> BYTE {
+            int result = static_cast<int>(c1) + static_cast<int>((c2 - c1) * factor);
+            if (result < 0) return 0;
+            if (result > 255) return 255;
+            return static_cast<BYTE>(result);
+        };
+        
+        return RGB(blendChannel(r1, r2), blendChannel(g1, g2), blendChannel(b1, b2));
+    }
+    
+    /**
+     * @brief Create a hover effect by lightening a color
+     * @param color Base color
+     * @return Lightened color suitable for hover state
+     */
+    static COLORREF GetHoverColor(COLORREF color) {
+        return BlendColors(color, RGB(255, 255, 255), 0.15f);
+    }
+    
+    /**
+     * @brief Create a pressed effect by darkening a color
+     * @param color Base color
+     * @return Darkened color suitable for pressed state
+     */
+    static COLORREF GetPressedColor(COLORREF color) {
+        return BlendColors(color, RGB(0, 0, 0), 0.2f);
     }
 };
 

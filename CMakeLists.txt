@@ -411,6 +411,7 @@ if(WIN32)
         src/ui/native/Win32SettingsDialog.cpp
         src/ui/native/Win32TerraformingPanel.cpp
         src/ui/native/Win32ViewportPanel.cpp
+        src/ui/native/Win32StatusBar.cpp
         src/ui/NativeMainMenu.cpp
         
         # Windows integration features (theme detection, dialogs, taskbar, etc.)

@@ -198,14 +198,8 @@ void Win32InspectorPanel::addSectionHeader(const std::wstring& text, int& yPos)
         m_hwnd, nullptr, GetModuleHandle(nullptr), nullptr
     );
     
-    // Use bold font for headers
-    HFONT boldFont = CreateFontW(
-        14, 0, 0, 0, FW_BOLD, FALSE, FALSE, FALSE,
-        DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS,
-        CLEARTYPE_QUALITY, DEFAULT_PITCH | FF_DONTCARE, L"Segoe UI"
-    );
-    
-    SendMessageW(header, WM_SETFONT, (WPARAM)boldFont, TRUE);
+    // Use the theme's bold font for headers
+    SendMessageW(header, WM_SETFONT, (WPARAM)UnrealStyleTheme::GetBoldFont(), TRUE);
     UnrealStyleTheme::ApplyToWindow(header);
     
     yPos += SECTION_HEIGHT + 5;
