@@ -123,6 +123,24 @@ public:
     }
 
     /**
+     * @brief Set the aspect ratio for the camera
+     * @param aspectRatio Width/Height ratio of viewport
+     */
+    void setAspectRatio(float aspectRatio)
+    {
+        m_aspectRatio = aspectRatio;
+    }
+
+    /**
+     * @brief Get the stored aspect ratio
+     * @return Stored aspect ratio (or 16:9 default if not set)
+     */
+    [[nodiscard]] float getAspectRatio() const noexcept
+    {
+        return m_aspectRatio;
+    }
+
+    /**
      * @brief Set orthographic zoom for 2D cameras
      * @param zoom Zoom level (higher = zoomed in)
      */
@@ -151,6 +169,7 @@ private:
     
     CameraMode m_cameraMode = CameraMode::Perspective3D;
     float m_orthoZoom = 1.0f; // Zoom level for orthographic cameras
+    float m_aspectRatio = 16.0f / 9.0f; // Stored aspect ratio (default 16:9)
 };
 
 } // namespace fresh
