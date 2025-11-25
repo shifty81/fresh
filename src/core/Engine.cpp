@@ -35,6 +35,7 @@
     #include "ui/native/Win32MenuBar.h"
     #include "ui/native/Win32Toolbar.h"
     #include "ui/native/Win32HUD.h"
+    #include "ui/native/Win32ViewportPanel.h"
 #else
     #include <GLFW/glfw3.h>
     #include "core/Window.h"

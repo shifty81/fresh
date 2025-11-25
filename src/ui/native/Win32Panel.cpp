@@ -194,6 +194,7 @@ void Win32Panel::paintTitleBar(HDC hdc)
 
 bool Win32Panel::handleMessage(UINT msg, WPARAM wParam, LPARAM lParam, LRESULT& result)
 {
+    (void)lParam; // Suppress unreferenced parameter warning
     switch (msg) {
         case WM_ERASEBKGND:
             // We handle background painting ourselves for flicker-free rendering
