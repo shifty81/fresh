@@ -2,6 +2,8 @@
 
 #include <filesystem>
 #include <sstream>
+#include <cstring>
+#include <vector>
 
 #include "core/Logger.h"
 
@@ -29,6 +31,56 @@ static std::string toNarrowString(const std::wstring& wstr)
     
     return strTo;
 }
+
+/**
+ * @brief Creates an in-memory dialog template for use with DialogBoxIndirectParam
+ * 
+ * This function creates a minimal dialog template structure that can be used
+ * to create modal dialogs without resource files.
+ * 
+ * @param width Dialog width in dialog units
+ * @param height Dialog height in dialog units
+ * @param title Dialog title (wide string)
+ * @return Vector containing the dialog template bytes
+ */
+static std::vector<BYTE> createDialogTemplate(WORD width, WORD height, const wchar_t* title)
+{
+    // Calculate template size
+    // DLGTEMPLATE + menu (null) + class (null) + title + font size + font name
+    size_t titleLen = wcslen(title);
+    size_t templateSize = sizeof(DLGTEMPLATE) + 
+                          sizeof(WORD) * 2 +  // menu and class (both null = 0)
+                          (titleLen + 1) * sizeof(wchar_t);  // title including null
+    
+    // Align to DWORD boundary
+    templateSize = (templateSize + 3) & ~3;
+    
+    std::vector<BYTE> buffer(templateSize, 0);
+    
+    // Fill in the DLGTEMPLATE structure
+    DLGTEMPLATE* dlgTemplate = reinterpret_cast<DLGTEMPLATE*>(buffer.data());
+    dlgTemplate->style = WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU | DS_MODALFRAME | DS_CENTER;
+    dlgTemplate->dwExtendedStyle = 0;
+    dlgTemplate->cdit = 0;  // No controls defined in template (we create them dynamically)
+    dlgTemplate->x = 0;
+    dlgTemplate->y = 0;
+    dlgTemplate->cx = width;
+    dlgTemplate->cy = height;
+    
+    // After DLGTEMPLATE comes:
+    // 1. Menu (sz_Or_Ord) - 0 for no menu
+    // 2. Class (sz_Or_Ord) - 0 for default dialog class
+    // 3. Title (sz_Or_Ord) - the dialog title
+    WORD* pMenu = reinterpret_cast<WORD*>(dlgTemplate + 1);
+    *pMenu++ = 0;  // No menu
+    *pMenu++ = 0;  // Default class
+    
+    // Copy title
+    wchar_t* pTitle = reinterpret_cast<wchar_t*>(pMenu);
+    wcscpy(pTitle, title);
+    
+    return buffer;
+}
 #endif
 
 
@@ -55,13 +107,54 @@ bool NativeMainMenu::initialize(HWND parentWindow)
 
 bool NativeMainMenu::show()
 {
-    // Create and show modal dialog
+    // Create in-memory dialog template for the main menu
+    // Size in dialog units (approximately 1.5x pixels for width, 1.75x for height)
+    auto dialogTemplate = createDialogTemplate(400, 230, L"Fresh Voxel Engine");
+    
+    // Create and show modal dialog using the in-memory template
     INT_PTR result =
-        DialogBoxParam(GetModuleHandle(nullptr),
-                       nullptr, // We'll create it dynamically
-                       m_parentWindow, mainMenuDialogProc, reinterpret_cast<LPARAM>(this));
+        DialogBoxIndirectParam(GetModuleHandle(nullptr),
+                               reinterpret_cast<LPCDLGTEMPLATE>(dialogTemplate.data()),
+                               m_parentWindow, mainMenuDialogProc, reinterpret_cast<LPARAM>(this));
 
     return result == IDOK;
+}
+
+bool NativeMainMenu::showCreateWorldDialog()
+{
+    // Reset state
+    m_createNewWorld = false;
+    
+    // Show create world dialog directly using in-memory template
+    auto dialogTemplate = createDialogTemplate(370, 290, L"Create New World");
+    INT_PTR result = DialogBoxIndirectParam(GetModuleHandle(nullptr), 
+                                    reinterpret_cast<LPCDLGTEMPLATE>(dialogTemplate.data()), 
+                                    m_parentWindow, createWorldDialogProc, reinterpret_cast<LPARAM>(this));
+
+    if (result == IDOK) {
+        m_createNewWorld = true;
+        return true;
+    }
+    return false;
+}
+
+bool NativeMainMenu::showLoadWorldDialog()
+{
+    // Reset state and rescan for saved worlds
+    m_loadWorld = false;
+    scanWorldSaves();
+    
+    // Show load world dialog directly using in-memory template
+    auto dialogTemplate = createDialogTemplate(340, 260, L"Load World");
+    INT_PTR result = DialogBoxIndirectParam(GetModuleHandle(nullptr), 
+                                    reinterpret_cast<LPCDLGTEMPLATE>(dialogTemplate.data()), 
+                                    m_parentWindow, loadWorldDialogProc, reinterpret_cast<LPARAM>(this));
+
+    if (result == IDOK) {
+        m_loadWorld = true;
+        return true;
+    }
+    return false;
 }
 
 void NativeMainMenu::applyDarkTheme(HWND hwnd)
@@ -156,9 +249,11 @@ INT_PTR CALLBACK NativeMainMenu::mainMenuDialogProc(HWND hwnd, UINT msg, WPARAM 
     case WM_COMMAND: {
         switch (LOWORD(wParam)) {
         case ID_BTN_CREATE_WORLD: {
-            // Show create world dialog
-            INT_PTR result = DialogBoxParam(GetModuleHandle(nullptr), nullptr, hwnd,
-                                            createWorldDialogProc, reinterpret_cast<LPARAM>(menu));
+            // Show create world dialog using in-memory template
+            auto dialogTemplate = createDialogTemplate(370, 290, L"Create New World");
+            INT_PTR result = DialogBoxIndirectParam(GetModuleHandle(nullptr), 
+                                            reinterpret_cast<LPCDLGTEMPLATE>(dialogTemplate.data()), 
+                                            hwnd, createWorldDialogProc, reinterpret_cast<LPARAM>(menu));
 
             if (result == IDOK) {
                 menu->m_createNewWorld = true;
@@ -168,9 +263,11 @@ INT_PTR CALLBACK NativeMainMenu::mainMenuDialogProc(HWND hwnd, UINT msg, WPARAM 
         }
 
         case ID_BTN_LOAD_WORLD: {
-            // Show load world dialog
-            INT_PTR result = DialogBoxParam(GetModuleHandle(nullptr), nullptr, hwnd,
-                                            loadWorldDialogProc, reinterpret_cast<LPARAM>(menu));
+            // Show load world dialog using in-memory template
+            auto dialogTemplate = createDialogTemplate(340, 260, L"Load World");
+            INT_PTR result = DialogBoxIndirectParam(GetModuleHandle(nullptr), 
+                                            reinterpret_cast<LPCDLGTEMPLATE>(dialogTemplate.data()), 
+                                            hwnd, loadWorldDialogProc, reinterpret_cast<LPARAM>(menu));
 
             if (result == IDOK) {
                 menu->m_loadWorld = true;

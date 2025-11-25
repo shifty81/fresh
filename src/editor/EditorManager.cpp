@@ -1129,48 +1129,44 @@ void EditorManager::newWorld()
         );
         
         if (result == MessageBoxResult::Yes) {
-            // Use NativeMainMenu to show world creation dialog
+            // Use NativeMainMenu to show world creation dialog directly
             LOG_INFO_C("Showing native Win32 world creation dialog", "EditorManager");
             
-            // Create and show the native main menu dialog
+            // Create and show the world creation dialog directly
             NativeMainMenu mainMenu;
             HWND parentHwnd = m_window ? m_window->getHandle() : nullptr;
             
             if (mainMenu.initialize(parentHwnd)) {
-                // Show the dialog - this will present world creation UI
-                if (mainMenu.show()) {
-                    if (mainMenu.shouldCreateNewWorld()) {
-                        // Get world parameters from dialog
-                        std::wstring wWorldName = mainMenu.getNewWorldName();
-                        // Convert wide string to narrow string using Windows API
-                        std::string worldName = toNarrowString(wWorldName);
-                        int seed = mainMenu.getWorldSeed();
-                        bool is3D = mainMenu.isWorld3D();
-                        WorldStyle2D style2D = mainMenu.get2DWorldStyle();
-                        int gameStyle2D = static_cast<int>(style2D);
-                        
-                        LOG_INFO_C("World creation confirmed: " + worldName + 
-                                   ", seed=" + std::to_string(seed) + 
-                                   ", 3D=" + std::to_string(is3D) +
-                                   ", 2D style=" + std::to_string(gameStyle2D), "EditorManager");
-                        
-                        // Call the callback to notify Engine to create the world
-                        if (m_worldCreationCallback) {
-                            m_worldCreationCallback(worldName, seed, is3D, gameStyle2D);
-                        } else {
-                            LOG_WARNING_C("World creation callback not set!", "EditorManager");
-                            m_windowsDialogManager->showMessageBox(
-                                "World Creation Error",
-                                "Cannot create world: callback not configured.",
-                                MessageBoxButtons::OK,
-                                MessageBoxIcon::Error
-                            );
-                        }
+                // Show the create world dialog directly (skips main menu)
+                if (mainMenu.showCreateWorldDialog()) {
+                    // Get world parameters from dialog
+                    std::wstring wWorldName = mainMenu.getNewWorldName();
+                    // Convert wide string to narrow string using Windows API
+                    std::string worldName = toNarrowString(wWorldName);
+                    int seed = mainMenu.getWorldSeed();
+                    bool is3D = mainMenu.isWorld3D();
+                    WorldStyle2D style2D = mainMenu.get2DWorldStyle();
+                    int gameStyle2D = static_cast<int>(style2D);
+                    
+                    LOG_INFO_C("World creation confirmed: " + worldName + 
+                               ", seed=" + std::to_string(seed) + 
+                               ", 3D=" + std::to_string(is3D) +
+                               ", 2D style=" + std::to_string(gameStyle2D), "EditorManager");
+                    
+                    // Call the callback to notify Engine to create the world
+                    if (m_worldCreationCallback) {
+                        m_worldCreationCallback(worldName, seed, is3D, gameStyle2D);
                     } else {
-                        LOG_INFO_C("World creation cancelled by user", "EditorManager");
+                        LOG_WARNING_C("World creation callback not set!", "EditorManager");
+                        m_windowsDialogManager->showMessageBox(
+                            "World Creation Error",
+                            "Cannot create world: callback not configured.",
+                            MessageBoxButtons::OK,
+                            MessageBoxIcon::Error
+                        );
                     }
                 } else {
-                    LOG_INFO_C("Native main menu dialog closed without selection", "EditorManager");
+                    LOG_INFO_C("World creation cancelled by user", "EditorManager");
                 }
             } else {
                 LOG_ERROR_C("Failed to initialize native main menu", "EditorManager");
