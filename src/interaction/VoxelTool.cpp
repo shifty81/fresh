@@ -253,6 +253,7 @@ Rake::Rake()
 
 bool Rake::useTool(const WorldPos& pos, VoxelType voxelType)
 {
+    (void)voxelType; // Unused parameter
     // Rake levels ground at current height
     return levelGround(pos);
 }
