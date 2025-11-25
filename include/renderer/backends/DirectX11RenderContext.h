@@ -55,6 +55,21 @@ public:
         return height;
     }
 
+    /**
+     * @brief Set the viewport child window for rendering
+     * @param viewportHwnd HWND of the viewport child window
+     * @return true if successful
+     */
+    bool setViewportWindow(void* viewportHwnd) override;
+
+    /**
+     * @brief Recreate the swap chain with new dimensions
+     * @param newWidth New width in pixels
+     * @param newHeight New height in pixels
+     * @return true if successful
+     */
+    bool recreateSwapChain(int newWidth, int newHeight) override;
+
     // DirectX 11 specific getters for ImGui integration
     ID3D11Device* getD3D11Device() const
     {
@@ -90,7 +105,8 @@ private:
     ComPtr<ID3D11DepthStencilView> depthStencilView;
     ComPtr<ID3D11Texture2D> depthStencilBuffer;
 
-    void* window = nullptr;  // Points to Window or Win32Window
+    void* window = nullptr;  // Points to Window or Win32Window (main window)
+    void* viewportHwnd = nullptr;  // Viewport child window handle (if set)
     int width = 0;
     int height = 0;
     float clearColorValue[4] = {0.53f, 0.81f, 0.92f, 1.0f}; // Sky blue default

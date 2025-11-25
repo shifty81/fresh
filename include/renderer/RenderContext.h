@@ -95,6 +95,27 @@ public:
      */
     virtual int getSwapchainHeight() const = 0;
 
+    /**
+     * @brief Set the viewport child window for rendering
+     * @param viewportHwnd Handle to the viewport child window (cast from HWND on Windows)
+     * @return true if successful
+     * 
+     * This allows rendering to a child window instead of the main window,
+     * enabling proper editor layout where the 3D view is contained within a viewport panel.
+     * The swap chain will be recreated to target the viewport window.
+     */
+    virtual bool setViewportWindow(void* viewportHwnd) = 0;
+
+    /**
+     * @brief Recreate the swap chain with new dimensions
+     * @param width New width in pixels
+     * @param height New height in pixels
+     * @return true if successful
+     * 
+     * Call this when the viewport panel is resized to update the swap chain.
+     */
+    virtual bool recreateSwapChain(int width, int height) = 0;
+
     // Resource creation
     virtual std::shared_ptr<RenderBuffer> createVertexBuffer(const void* data, size_t size) = 0;
     virtual std::shared_ptr<RenderBuffer> createIndexBuffer(const void* data, size_t size) = 0;

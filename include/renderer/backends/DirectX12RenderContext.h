@@ -56,6 +56,21 @@ public:
         return height;
     }
 
+    /**
+     * @brief Set the viewport child window for rendering
+     * @param viewportHwnd HWND of the viewport child window
+     * @return true if successful
+     */
+    bool setViewportWindow(void* viewportHwnd) override;
+
+    /**
+     * @brief Recreate the swap chain with new dimensions
+     * @param newWidth New width in pixels
+     * @param newHeight New height in pixels
+     * @return true if successful
+     */
+    bool recreateSwapChain(int newWidth, int newHeight) override;
+
     // DirectX 12 specific getters for ImGui integration
     ID3D12Device* getD3D12Device() const
     {
@@ -136,7 +151,8 @@ private:
     UINT currentFrame = 0;
     DXGI_FORMAT rtvFormat = DXGI_FORMAT_R8G8B8A8_UNORM; // Store actual format
 
-    void* window = nullptr;  // Points to Window or Win32Window
+    void* window = nullptr;  // Points to Window or Win32Window (main window)
+    void* viewportHwnd = nullptr;  // Viewport child window handle (if set)
     int width = 0;
     int height = 0;
     float clearColorValue[4] = {0.53f, 0.81f, 0.92f, 1.0f}; // Sky blue default
