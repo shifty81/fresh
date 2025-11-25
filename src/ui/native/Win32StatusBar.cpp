@@ -114,12 +114,18 @@ void Win32StatusBar::setPaneText(int paneIndex, const std::wstring& text)
 void Win32StatusBar::setPaneText(int paneIndex, const std::string& text)
 {
     // Convert narrow string to wide string
+    // First call gets required buffer length including null terminator
     int wideLength = MultiByteToWideChar(CP_UTF8, 0, text.c_str(), -1, nullptr, 0);
     if (wideLength <= 0) {
         return;
     }
-    std::wstring wideText(static_cast<size_t>(wideLength - 1), L'\0');  // Exclude null terminator
+    
+    // Allocate buffer for the full length including null terminator
+    std::wstring wideText(static_cast<size_t>(wideLength), L'\0');
     MultiByteToWideChar(CP_UTF8, 0, text.c_str(), -1, wideText.data(), wideLength);
+    
+    // Remove the null terminator from the string length (it's still there in the buffer)
+    wideText.resize(static_cast<size_t>(wideLength - 1));
     
     setPaneText(paneIndex, wideText);
 }

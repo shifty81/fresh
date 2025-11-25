@@ -474,17 +474,15 @@ struct UnrealStyleTheme
         GetRGB(color1, r1, g1, b1);
         GetRGB(color2, r2, g2, b2);
         
-        // Use signed integers for intermediate calculation to avoid underflow
-        int r = static_cast<int>(r1) + static_cast<int>((static_cast<int>(r2) - static_cast<int>(r1)) * factor);
-        int g = static_cast<int>(g1) + static_cast<int>((static_cast<int>(g2) - static_cast<int>(g1)) * factor);
-        int b = static_cast<int>(b1) + static_cast<int>((static_cast<int>(b2) - static_cast<int>(b1)) * factor);
+        // Helper lambda to blend a single channel with clamping
+        auto blendChannel = [factor](BYTE c1, BYTE c2) -> BYTE {
+            int result = static_cast<int>(c1) + static_cast<int>((c2 - c1) * factor);
+            if (result < 0) return 0;
+            if (result > 255) return 255;
+            return static_cast<BYTE>(result);
+        };
         
-        // Clamp to valid byte range
-        r = (r < 0) ? 0 : ((r > 255) ? 255 : r);
-        g = (g < 0) ? 0 : ((g > 255) ? 255 : g);
-        b = (b < 0) ? 0 : ((b > 255) ? 255 : b);
-        
-        return RGB(static_cast<BYTE>(r), static_cast<BYTE>(g), static_cast<BYTE>(b));
+        return RGB(blendChannel(r1, r2), blendChannel(g1, g2), blendChannel(b1, b2));
     }
     
     /**
