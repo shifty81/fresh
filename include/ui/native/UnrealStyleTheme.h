@@ -159,8 +159,9 @@ struct UnrealStyleTheme
     static HFONT GetFont() {
         static HFONT hFont = nullptr;
         if (!hFont) {
+            // Font height: -12 pixels = 9pt at 96 DPI (points * DPI / 72)
             hFont = CreateFontW(
-                -12,  // Use negative for height in pixels (approx 9pt at 96 DPI)
+                -12,
                 0, 0, 0,
                 FW_NORMAL,
                 FALSE, FALSE, FALSE,
@@ -182,8 +183,9 @@ struct UnrealStyleTheme
     static HFONT GetBoldFont() {
         static HFONT hBoldFont = nullptr;
         if (!hBoldFont) {
+            // Font height: -12 pixels = 9pt at 96 DPI
             hBoldFont = CreateFontW(
-                -12,  // Use negative for height in pixels
+                -12,
                 0, 0, 0,
                 FW_SEMIBOLD,
                 FALSE, FALSE, FALSE,
@@ -290,6 +292,30 @@ struct UnrealStyleTheme
     }
     
     /**
+     * @brief Get a cached brush for title bar background
+     * @return Handle to title bar background brush
+     */
+    static HBRUSH GetTitleBarBackgroundBrush() {
+        static HBRUSH hBrush = nullptr;
+        if (!hBrush) {
+            hBrush = CreateSolidBrush(TitleBarBackground);
+        }
+        return hBrush;
+    }
+    
+    /**
+     * @brief Get a cached pen for accent line
+     * @return Handle to accent pen
+     */
+    static HPEN GetAccentPen() {
+        static HPEN hPen = nullptr;
+        if (!hPen) {
+            hPen = CreatePen(PS_SOLID, 2, TitleBarAccent);
+        }
+        return hPen;
+    }
+    
+    /**
      * @brief Draw a panel title bar with accent line
      * @param hdc Device context
      * @param rect Rectangle for the title bar
@@ -297,19 +323,15 @@ struct UnrealStyleTheme
      * @param showAccent Whether to show the accent line
      */
     static void DrawPanelTitleBar(HDC hdc, const RECT& rect, const wchar_t* title, bool showAccent = true) {
-        // Fill title bar background
-        HBRUSH bgBrush = CreateSolidBrush(TitleBarBackground);
-        FillRect(hdc, &rect, bgBrush);
-        DeleteObject(bgBrush);
+        // Fill title bar background using cached brush
+        FillRect(hdc, &rect, GetTitleBarBackgroundBrush());
         
-        // Draw accent line at top
+        // Draw accent line at top using cached pen
         if (showAccent) {
-            HPEN accentPen = CreatePen(PS_SOLID, 2, TitleBarAccent);
-            HPEN oldPen = (HPEN)SelectObject(hdc, accentPen);
+            HPEN oldPen = (HPEN)SelectObject(hdc, GetAccentPen());
             MoveToEx(hdc, rect.left, rect.top, nullptr);
             LineTo(hdc, rect.right, rect.top);
             SelectObject(hdc, oldPen);
-            DeleteObject(accentPen);
         }
         
         // Draw title text
@@ -326,6 +348,30 @@ struct UnrealStyleTheme
     }
     
     /**
+     * @brief Get a cached brush for button background
+     * @return Handle to button background brush
+     */
+    static HBRUSH GetButtonBackgroundBrush() {
+        static HBRUSH hBrush = nullptr;
+        if (!hBrush) {
+            hBrush = CreateSolidBrush(ButtonNormal);
+        }
+        return hBrush;
+    }
+    
+    /**
+     * @brief Get a cached pen for separators
+     * @return Handle to separator pen
+     */
+    static HPEN GetSeparatorPen() {
+        static HPEN hPen = nullptr;
+        if (!hPen) {
+            hPen = CreatePen(PS_SOLID, 1, Separator);
+        }
+        return hPen;
+    }
+    
+    /**
      * @brief Draw a separator line
      * @param hdc Device context
      * @param x1 Start X coordinate
@@ -334,12 +380,10 @@ struct UnrealStyleTheme
      * @param y2 End Y coordinate
      */
     static void DrawSeparator(HDC hdc, int x1, int y1, int x2, int y2) {
-        HPEN sepPen = CreatePen(PS_SOLID, 1, Separator);
-        HPEN oldPen = (HPEN)SelectObject(hdc, sepPen);
+        HPEN oldPen = (HPEN)SelectObject(hdc, GetSeparatorPen());
         MoveToEx(hdc, x1, y1, nullptr);
         LineTo(hdc, x2, y2);
         SelectObject(hdc, oldPen);
-        DeleteObject(sepPen);
     }
     
     /**
@@ -350,10 +394,8 @@ struct UnrealStyleTheme
      * @param collapsed Whether section is collapsed
      */
     static void DrawSectionHeader(HDC hdc, const RECT& rect, const wchar_t* title, bool collapsed = false) {
-        // Fill background with slightly lighter shade
-        HBRUSH bgBrush = CreateSolidBrush(ButtonNormal);
-        FillRect(hdc, &rect, bgBrush);
-        DeleteObject(bgBrush);
+        // Fill background with cached brush
+        FillRect(hdc, &rect, GetButtonBackgroundBrush());
         
         // Draw collapse indicator (triangle)
         SetTextColor(hdc, TextSecondary);

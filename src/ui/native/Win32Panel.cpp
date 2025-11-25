@@ -161,19 +161,19 @@ void Win32Panel::paintBackground(HDC hdc)
     RECT clientRect;
     GetClientRect(m_hwnd, &clientRect);
     
-    // Fill background with dark theme color
-    HBRUSH bgBrush = CreateSolidBrush(UnrealStyleTheme::PanelBackground);
-    FillRect(hdc, &clientRect, bgBrush);
-    DeleteObject(bgBrush);
+    // Use cached brush from theme for better performance
+    FillRect(hdc, &clientRect, UnrealStyleTheme::GetPanelBackgroundBrush());
     
-    // Draw border
-    HPEN borderPen = CreatePen(PS_SOLID, 1, UnrealStyleTheme::BorderDark);
-    HPEN oldPen = (HPEN)SelectObject(hdc, borderPen);
+    // Draw border using cached pen
+    static HPEN s_borderPen = nullptr;
+    if (!s_borderPen) {
+        s_borderPen = CreatePen(PS_SOLID, 1, UnrealStyleTheme::BorderDark);
+    }
+    HPEN oldPen = (HPEN)SelectObject(hdc, s_borderPen);
     HBRUSH oldBrush = (HBRUSH)SelectObject(hdc, GetStockObject(NULL_BRUSH));
     Rectangle(hdc, clientRect.left, clientRect.top, clientRect.right, clientRect.bottom);
     SelectObject(hdc, oldPen);
     SelectObject(hdc, oldBrush);
-    DeleteObject(borderPen);
 }
 
 void Win32Panel::paintTitleBar(HDC hdc)

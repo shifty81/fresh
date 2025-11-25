@@ -115,9 +115,11 @@ void Win32StatusBar::setPaneText(int paneIndex, const std::string& text)
 {
     // Convert narrow string to wide string
     int wideLength = MultiByteToWideChar(CP_UTF8, 0, text.c_str(), -1, nullptr, 0);
-    std::wstring wideText(wideLength, L'\0');
-    MultiByteToWideChar(CP_UTF8, 0, text.c_str(), -1, &wideText[0], wideLength);
-    wideText.pop_back();  // Remove null terminator from string
+    if (wideLength <= 0) {
+        return;
+    }
+    std::wstring wideText(static_cast<size_t>(wideLength - 1), L'\0');  // Exclude null terminator
+    MultiByteToWideChar(CP_UTF8, 0, text.c_str(), -1, wideText.data(), wideLength);
     
     setPaneText(paneIndex, wideText);
 }
