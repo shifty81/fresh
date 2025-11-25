@@ -68,12 +68,15 @@ public:
 
     /**
      * @brief Recreate the swap chain (stub for OpenGL)
-     * @param newWidth New width (not used - OpenGL resizes automatically)
-     * @param newHeight New height (not used - OpenGL resizes automatically)
-     * @return true (no-op on OpenGL)
+     * @param newWidth New width (OpenGL resizes automatically)
+     * @param newHeight New height (OpenGL resizes automatically)
+     * @return true if dimensions are valid
      */
     bool recreateSwapChain(int newWidth, int newHeight) override
     {
+        if (newWidth <= 0 || newHeight <= 0) {
+            return false; // Invalid dimensions
+        }
         width = newWidth;
         height = newHeight;
         return true; // OpenGL doesn't have a swap chain to recreate
