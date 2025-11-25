@@ -307,9 +307,9 @@ void Win32ContentBrowserPanel::showContextMenu(int x, int y)
         return;
     }
     
-    POINT pt = { x, y };
-    ClientToScreen(m_hwnd, &pt);
-    TrackPopupMenu(m_contextMenu, TPM_RIGHTBUTTON, pt.x, pt.y, 0, m_hwnd, nullptr);
+    // Show menu - x,y are already in screen coordinates from WM_CONTEXTMENU
+    // Do NOT call ClientToScreen here as that would double the offset
+    TrackPopupMenu(m_contextMenu, TPM_RIGHTBUTTON, x, y, 0, m_hwnd, nullptr);
 }
 
 void Win32ContentBrowserPanel::showImportDialog()
