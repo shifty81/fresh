@@ -777,6 +777,110 @@ bool DirectX12RenderContext::createDepthStencil()
     return true;
 }
 
+bool DirectX12RenderContext::setViewportWindow(void* viewportHandle)
+{
+    if (!viewportHandle) {
+        LOG_ERROR_C("Invalid viewport window handle", "DirectX12");
+        return false;
+    }
+
+    viewportHwnd = viewportHandle;
+    LOG_INFO_C("Viewport window handle set", "DirectX12");
+    
+    return true;
+}
+
+bool DirectX12RenderContext::recreateSwapChain(int newWidth, int newHeight)
+{
+    if (newWidth <= 0 || newHeight <= 0) {
+        LOG_ERROR_C("Invalid swap chain dimensions: " + std::to_string(newWidth) + "x" + std::to_string(newHeight), "DirectX12");
+        return false;
+    }
+
+    LOG_INFO_C("Recreating DirectX 12 swap chain for viewport: " + std::to_string(newWidth) + "x" + std::to_string(newHeight), "DirectX12");
+
+    // Wait for GPU to finish all work
+    waitForGPU();
+
+    // Update dimensions
+    width = newWidth;
+    height = newHeight;
+
+    // Release existing swap chain resources
+    for (UINT i = 0; i < FRAME_COUNT; i++) {
+        renderTargets[i].Reset();
+        fenceValues[i] = fenceValues[currentFrame];
+    }
+    depthStencil.Reset();
+    swapchain.Reset();
+
+    // Get the target window handle (use viewport HWND if set, otherwise main window)
+    HWND targetHwnd = viewportHwnd ? static_cast<HWND>(viewportHwnd) : static_cast<HWND>(WindowAdapter::getNativeHandle(window));
+    if (!targetHwnd) {
+        LOG_ERROR_C("No valid window handle for swap chain", "DirectX12");
+        return false;
+    }
+
+    // Get DXGI factory
+    ComPtr<IDXGIFactory4> factory;
+    HRESULT hr = CreateDXGIFactory2(0, IID_PPV_ARGS(&factory));
+    if (FAILED(hr)) {
+        LOG_ERROR_C("Failed to create DXGI factory for swap chain recreation", "DirectX12");
+        return false;
+    }
+
+    // Create swap chain description for viewport
+    DXGI_SWAP_CHAIN_DESC1 swapchainDesc = {};
+    swapchainDesc.Width = width;
+    swapchainDesc.Height = height;
+    swapchainDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+    swapchainDesc.Stereo = FALSE;
+    swapchainDesc.SampleDesc.Count = 1;
+    swapchainDesc.SampleDesc.Quality = 0;
+    swapchainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
+    swapchainDesc.BufferCount = FRAME_COUNT;
+    swapchainDesc.Scaling = DXGI_SCALING_STRETCH;
+    swapchainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
+    swapchainDesc.AlphaMode = DXGI_ALPHA_MODE_UNSPECIFIED;
+    swapchainDesc.Flags = 0;
+
+    // Create new swapchain for viewport
+    ComPtr<IDXGISwapChain1> swapchain1;
+    hr = factory->CreateSwapChainForHwnd(commandQueue.Get(), targetHwnd, &swapchainDesc, nullptr, nullptr, &swapchain1);
+    if (FAILED(hr)) {
+        LOG_ERROR_C("Failed to create new swapchain for viewport", "DirectX12");
+        return false;
+    }
+
+    // Query for IDXGISwapChain3
+    hr = swapchain1.As(&swapchain);
+    if (FAILED(hr)) {
+        LOG_ERROR_C("Failed to query IDXGISwapChain3", "DirectX12");
+        return false;
+    }
+
+    // Disable Alt+Enter
+    factory->MakeWindowAssociation(targetHwnd, DXGI_MWA_NO_ALT_ENTER);
+
+    // Get current frame index
+    currentFrame = swapchain->GetCurrentBackBufferIndex();
+
+    // Recreate render targets
+    if (!createRenderTargets()) {
+        LOG_ERROR_C("Failed to recreate render targets", "DirectX12");
+        return false;
+    }
+
+    // Recreate depth stencil
+    if (!createDepthStencil()) {
+        LOG_ERROR_C("Failed to recreate depth stencil", "DirectX12");
+        return false;
+    }
+
+    LOG_INFO_C("DirectX 12 swap chain recreated successfully for viewport: " + std::to_string(width) + "x" + std::to_string(height), "DirectX12");
+    return true;
+}
+
 bool DirectX12RenderContext::createDescriptorHeaps()
 {
     // Create RTV descriptor heap

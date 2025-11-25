@@ -55,6 +55,30 @@ public:
         return height;
     }
 
+    /**
+     * @brief Set the viewport child window for rendering (stub for OpenGL)
+     * @param viewportHwnd Handle to viewport window (not used in OpenGL)
+     * @return true (no-op on OpenGL)
+     */
+    bool setViewportWindow(void* viewportHwnd) override
+    {
+        (void)viewportHwnd;
+        return true; // OpenGL doesn't need this - it renders to the context's window
+    }
+
+    /**
+     * @brief Recreate the swap chain (stub for OpenGL)
+     * @param newWidth New width (not used - OpenGL resizes automatically)
+     * @param newHeight New height (not used - OpenGL resizes automatically)
+     * @return true (no-op on OpenGL)
+     */
+    bool recreateSwapChain(int newWidth, int newHeight) override
+    {
+        width = newWidth;
+        height = newHeight;
+        return true; // OpenGL doesn't have a swap chain to recreate
+    }
+
     std::shared_ptr<RenderBuffer> createVertexBuffer(const void* data, size_t size) override;
     std::shared_ptr<RenderBuffer> createIndexBuffer(const void* data, size_t size) override;
     std::shared_ptr<RenderBuffer> createUniformBuffer(size_t size) override;

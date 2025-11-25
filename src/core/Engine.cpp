@@ -636,14 +636,46 @@ void Engine::initializeGameSystems()
         m_editorManager->setVisible(true);
     }
     
-    // TODO: VIEWPORT INTEGRATION - After viewport panel is created, update DirectX renderer
-    // to use the viewport child window for rendering instead of main window.
-    // See VIEWPORT_INTEGRATION_TODO.md for complete implementation details.
-    // Key steps:
-    // 1. Get viewport HWND: m_editorManager->getViewportPanel()->getHandle()
-    // 2. Call m_renderer->setViewportWindow(viewportHwnd)
-    // 3. Recreate DirectX swap chain with viewport dimensions
-    // This allows 3D world to render only within the viewport panel, not full screen.
+#ifdef _WIN32
+    // VIEWPORT INTEGRATION - Update DirectX renderer to use viewport child window for rendering
+    // This allows the 3D world to render only within the viewport panel, not full screen
+    if (m_editorManager && m_editorManager->getViewportPanel() && m_renderer) {
+        auto* viewportPanel = m_editorManager->getViewportPanel();
+        HWND viewportHwnd = viewportPanel->getHandle();
+        
+        if (viewportHwnd) {
+            LOG_INFO_C("Updating renderer to use viewport child window", "Engine");
+            
+            // Set viewport window handle in renderer
+            if (m_renderer->setViewportWindow(viewportHwnd)) {
+                // Recreate swap chain for viewport
+                int vpWidth = viewportPanel->getWidth();
+                int vpHeight = viewportPanel->getHeight();
+                
+                if (vpWidth > 0 && vpHeight > 0) {
+                    if (m_renderer->recreateSwapChain(vpWidth, vpHeight)) {
+                        LOG_INFO_C("DirectX swap chain created for viewport: " + 
+                                   std::to_string(vpWidth) + "x" + std::to_string(vpHeight), "Engine");
+                        
+                        // Update camera aspect ratio
+                        if (m_player) {
+                            float aspectRatio = static_cast<float>(vpWidth) / static_cast<float>(vpHeight);
+                            m_player->getCamera().setAspectRatio(aspectRatio);
+                        }
+                    } else {
+                        LOG_ERROR_C("Failed to recreate DirectX swap chain for viewport", "Engine");
+                    }
+                } else {
+                    LOG_WARNING_C("Viewport dimensions are invalid, skipping swap chain recreation", "Engine");
+                }
+            } else {
+                LOG_ERROR_C("Failed to set viewport window handle", "Engine");
+            }
+        } else {
+            LOG_WARNING_C("Viewport panel has no valid handle", "Engine");
+        }
+    }
+#endif
     
     // Create demo entities for Inspector demonstration
     createDemoEntities();
@@ -955,15 +987,33 @@ void Engine::update(float deltaTime)
         return;
     }
 
-    // TODO: VIEWPORT INTEGRATION - Check if viewport was resized
-    // If viewport panel exists and was resized, recreate DirectX swap chain
-    // See VIEWPORT_INTEGRATION_TODO.md section 3 for implementation.
-    // Example:
-    // if (m_editorManager && m_editorManager->getViewportPanel() && 
-    //     m_editorManager->getViewportPanel()->wasResized()) {
-    //     // Recreate swap chain with new viewport dimensions
-    //     // Update camera aspect ratio
-    // }
+#ifdef _WIN32
+    // VIEWPORT RESIZE HANDLING - Check if viewport was resized and recreate swap chain
+    if (m_editorManager && m_editorManager->getViewportPanel() && m_renderer) {
+        auto* viewportPanel = m_editorManager->getViewportPanel();
+        
+        if (viewportPanel->wasResized()) {
+            int vpWidth = viewportPanel->getWidth();
+            int vpHeight = viewportPanel->getHeight();
+            
+            LOG_INFO_C("Viewport resized, recreating swap chain: " + 
+                       std::to_string(vpWidth) + "x" + std::to_string(vpHeight), "Engine");
+            
+            // Recreate swap chain with new viewport dimensions
+            if (vpWidth > 0 && vpHeight > 0) {
+                if (m_renderer->recreateSwapChain(vpWidth, vpHeight)) {
+                    // Update camera aspect ratio
+                    if (m_player) {
+                        float aspectRatio = static_cast<float>(vpWidth) / static_cast<float>(vpHeight);
+                        m_player->getCamera().setAspectRatio(aspectRatio);
+                    }
+                }
+            }
+            
+            viewportPanel->clearResizedFlag();
+        }
+    }
+#endif
 
     // Check if GUI wants input before processing player updates
     bool guiCapturesMouse = m_editorManager && m_editorManager->wantCaptureMouse();
@@ -978,17 +1028,18 @@ void Engine::update(float deltaTime)
     // - This prevents the cursor from "snapping" to camera control automatically
     // ========================================================================
     
-    // TODO: VIEWPORT INTEGRATION - Only allow camera control when mouse is within viewport
-    // Check if mouse is in viewport bounds before processing RMB camera control
-    // See VIEWPORT_INTEGRATION_TODO.md section 4 for implementation.
-    // Example:
-    // bool mouseInViewport = false;
-    // if (m_editorManager && m_editorManager->getViewportPanel()) {
-    //     POINT cursorPos;
-    //     GetCursorPos(&cursorPos);
-    //     mouseInViewport = m_editorManager->getViewportPanel()->isMouseInViewport(cursorPos.x, cursorPos.y);
-    // }
-    // Then use mouseInViewport in the RMB check below
+#ifdef _WIN32
+    // VIEWPORT INTEGRATION - Only allow camera control when mouse is within viewport
+    bool mouseInViewport = true; // Default to true if viewport not available
+    if (m_editorManager && m_editorManager->getViewportPanel()) {
+        POINT cursorPos;
+        if (GetCursorPos(&cursorPos)) {
+            mouseInViewport = m_editorManager->getViewportPanel()->isMouseInViewport(cursorPos.x, cursorPos.y);
+        }
+    }
+#else
+    bool mouseInViewport = true;
+#endif
     
     if (m_inputManager) {
         InputMode currentMode = m_inputManager->getInputMode();
@@ -999,18 +1050,20 @@ void Engine::update(float deltaTime)
         
         // Always update m_rightMouseHeldForCamera based on current RMB state
         // This ensures the flag is properly cleared when button is released
+        // Also require mouse to be in viewport for camera control
         bool wasHoldingForCamera = m_rightMouseHeldForCamera;
-        m_rightMouseHeldForCamera = rightMousePressed && !guiCapturesMouse;
+        m_rightMouseHeldForCamera = rightMousePressed && !guiCapturesMouse && mouseInViewport;
         
         // Determine if we should capture cursor based on RMB state
-        // Only capture when RMB is held AND GUI doesn't want the mouse
+        // Only capture when RMB is held AND GUI doesn't want the mouse AND mouse is in viewport
         bool shouldCaptureCursor = false;
         
         if (currentMode == InputMode::UIMode) {
             // In UI mode (editor), only capture cursor when:
             // 1. Right mouse button is held (Unreal-style free look)
             // 2. GUI is not capturing mouse (not hovering over UI elements)
-            // 3. User hasn't explicitly toggled cursor with F key
+            // 3. Mouse is within the viewport panel
+            // 4. User hasn't explicitly toggled cursor with F key
             if (!m_userToggledCursor) {
                 shouldCaptureCursor = m_rightMouseHeldForCamera;
             } else {
@@ -1140,9 +1193,8 @@ void Engine::render()
         return;
     }
 
-    // TODO: VIEWPORT INTEGRATION - Set viewport to match viewport panel dimensions
-    // Currently renders to full window. Should render only to viewport child window.
-    // See VIEWPORT_INTEGRATION_TODO.md section 5 for implementation.
+    // VIEWPORT INTEGRATION - Viewport size is now controlled by the viewport panel
+    // The swap chain is created for the viewport child window, so we just use its dimensions
 
     // Set clear color (sky blue) before beginning frame
     m_renderer->clearColor(0.53f, 0.81f, 0.92f, 1.0f);
@@ -1151,7 +1203,7 @@ void Engine::render()
         return;
     }
 
-    // Set viewport to match window size
+    // Set viewport to match swap chain size (which is now the viewport panel size)
     m_renderer->setViewport(0, 0, m_renderer->getSwapchainWidth(),
                             m_renderer->getSwapchainHeight());
 
