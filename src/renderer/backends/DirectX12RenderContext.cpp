@@ -815,7 +815,8 @@ bool DirectX12RenderContext::recreateSwapChain(int newWidth, int newHeight)
     swapchain.Reset();
 
     // Get the target window handle (use viewport HWND if set, otherwise main window)
-    HWND targetHwnd = viewportHwnd ? static_cast<HWND>(viewportHwnd) : static_cast<HWND>(WindowAdapter::getNativeHandle(window));
+    HWND mainWindowHwnd = static_cast<HWND>(WindowAdapter::getNativeHandle(window));
+    HWND targetHwnd = viewportHwnd ? static_cast<HWND>(viewportHwnd) : mainWindowHwnd;
     if (!targetHwnd) {
         LOG_ERROR_C("No valid window handle for swap chain", "DirectX12");
         return false;

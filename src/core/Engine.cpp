@@ -1048,14 +1048,17 @@ void Engine::update(float deltaTime)
         // Check if right mouse button is currently held (for Unreal-style camera control)
         bool rightMousePressed = m_inputManager->isMouseButtonPressed(MOUSE_BUTTON_RIGHT);
         
+        // Determine if camera control should be active
+        // Requires: right mouse pressed, GUI not capturing, mouse in viewport
+        bool canControlCamera = rightMousePressed && !guiCapturesMouse && mouseInViewport;
+        
         // Always update m_rightMouseHeldForCamera based on current RMB state
         // This ensures the flag is properly cleared when button is released
-        // Also require mouse to be in viewport for camera control
         bool wasHoldingForCamera = m_rightMouseHeldForCamera;
-        m_rightMouseHeldForCamera = rightMousePressed && !guiCapturesMouse && mouseInViewport;
+        m_rightMouseHeldForCamera = canControlCamera;
         
         // Determine if we should capture cursor based on RMB state
-        // Only capture when RMB is held AND GUI doesn't want the mouse AND mouse is in viewport
+        // Only capture when camera control is active
         bool shouldCaptureCursor = false;
         
         if (currentMode == InputMode::UIMode) {

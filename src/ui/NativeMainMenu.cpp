@@ -75,13 +75,23 @@ static std::vector<BYTE> createDialogTemplate(WORD width, WORD height, const wch
     *pMenu++ = 0;  // No menu
     *pMenu++ = 0;  // Default class
     
-    // Copy title safely
+    // Copy title safely with bounds checking
     wchar_t* pTitle = reinterpret_cast<wchar_t*>(pMenu);
-    // Calculate remaining space in buffer for title
-    size_t remainingBytes = buffer.size() - (reinterpret_cast<BYTE*>(pTitle) - buffer.data());
-    size_t remainingChars = remainingBytes / sizeof(wchar_t);
-    // Use wcscpy_s for safe string copy with bounds checking
-    wcscpy_s(pTitle, remainingChars, title);
+    
+    // Calculate how much space remains in the buffer for the title
+    BYTE* titleStart = reinterpret_cast<BYTE*>(pTitle);
+    size_t bytesUsed = titleStart - buffer.data();
+    size_t remainingBytes = buffer.size() - bytesUsed;
+    size_t maxTitleChars = remainingBytes / sizeof(wchar_t);
+    
+    // Verify title fits in buffer (title length + 1 for null terminator)
+    if (titleLen + 1 > maxTitleChars) {
+        // Buffer too small - should not happen with correct size calculation
+        return buffer;
+    }
+    
+    // Use wcscpy_s for safe string copy
+    wcscpy_s(pTitle, maxTitleChars, title);
     
     return buffer;
 }
