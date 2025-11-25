@@ -15,10 +15,11 @@ namespace fresh
 {
 
 /**
- * @brief Base class for Win32 UI panels
+ * @brief Base class for Win32 UI panels with dark theme support
  * 
  * Provides common functionality for all Win32-based UI panels
- * including window management, message handling, and lifecycle.
+ * including window management, message handling, lifecycle,
+ * and Unreal Engine-style dark theme styling.
  */
 class Win32Panel
 {
@@ -83,6 +84,38 @@ public:
      */
     int getHeight() const { return m_height; }
 
+    /**
+     * @brief Set whether to show the title bar
+     * @param show true to show title bar, false to hide
+     */
+    void setShowTitleBar(bool show) { m_showTitleBar = show; }
+
+    /**
+     * @brief Check if title bar is shown
+     */
+    bool getShowTitleBar() const { return m_showTitleBar; }
+
+    /**
+     * @brief Set the panel title
+     * @param title New title text
+     */
+    void setTitle(const wchar_t* title);
+
+    /**
+     * @brief Get the panel title
+     */
+    const std::wstring& getTitle() const { return m_title; }
+
+    /**
+     * @brief Get the content area height (total height minus title bar if shown)
+     */
+    int getContentHeight() const;
+
+    /**
+     * @brief Get the content area Y offset (title bar height if shown, 0 otherwise)
+     */
+    int getContentYOffset() const;
+
 protected:
     /**
      * @brief Called when panel is created
@@ -123,15 +156,30 @@ protected:
      */
     static bool registerWindowClass();
 
+    /**
+     * @brief Paint the panel background with dark theme
+     * @param hdc Device context for drawing
+     */
+    void paintBackground(HDC hdc);
+
+    /**
+     * @brief Paint the title bar if enabled
+     * @param hdc Device context for drawing
+     */
+    void paintTitleBar(HDC hdc);
+
     HWND m_hwnd;
     HWND m_parent;
     int m_width;
     int m_height;
+    bool m_showTitleBar;
+    std::wstring m_title;
 
 private:
     static LRESULT CALLBACK WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
     static const wchar_t* WINDOW_CLASS_NAME;
     static bool s_classRegistered;
+    static HBRUSH s_backgroundBrush;
 };
 
 } // namespace fresh

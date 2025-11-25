@@ -131,6 +131,16 @@ struct UnrealStyleTheme
     static constexpr int IconMedium = 24;
     static constexpr int IconLarge = 32;
     
+    // Panel title bar colors
+    static constexpr COLORREF TitleBarBackground = RGB(45, 45, 48);         // #2D2D30
+    static constexpr COLORREF TitleBarText = RGB(241, 241, 241);            // #F1F1F1
+    static constexpr COLORREF TitleBarAccent = RGB(0, 122, 204);            // #007ACC
+    static constexpr int TitleBarHeight = 26;
+    
+    // Hover and focus states
+    static constexpr COLORREF FocusBorder = RGB(0, 122, 204);               // #007ACC
+    static constexpr COLORREF HoverOverlay = RGB(255, 255, 255);            // 10% white overlay effect
+    
     // Helper functions for applying theme
     /**
      * @brief Apply theme colors to a window
@@ -150,7 +160,7 @@ struct UnrealStyleTheme
         static HFONT hFont = nullptr;
         if (!hFont) {
             hFont = CreateFontW(
-                FontSizeNormal,
+                -12,  // Use negative for height in pixels (approx 9pt at 96 DPI)
                 0, 0, 0,
                 FW_NORMAL,
                 FALSE, FALSE, FALSE,
@@ -163,6 +173,258 @@ struct UnrealStyleTheme
             );
         }
         return hFont;
+    }
+    
+    /**
+     * @brief Get bold font for section headers
+     * @return Handle to bold font
+     */
+    static HFONT GetBoldFont() {
+        static HFONT hBoldFont = nullptr;
+        if (!hBoldFont) {
+            hBoldFont = CreateFontW(
+                -12,  // Use negative for height in pixels
+                0, 0, 0,
+                FW_SEMIBOLD,
+                FALSE, FALSE, FALSE,
+                DEFAULT_CHARSET,
+                OUT_DEFAULT_PRECIS,
+                CLIP_DEFAULT_PRECIS,
+                CLEARTYPE_QUALITY,
+                DEFAULT_PITCH | FF_DONTCARE,
+                L"Segoe UI"
+            );
+        }
+        return hBoldFont;
+    }
+    
+    /**
+     * @brief Get title font for panel headers
+     * @return Handle to title font
+     */
+    static HFONT GetTitleFont() {
+        static HFONT hTitleFont = nullptr;
+        if (!hTitleFont) {
+            hTitleFont = CreateFontW(
+                -14,  // Slightly larger for titles
+                0, 0, 0,
+                FW_SEMIBOLD,
+                FALSE, FALSE, FALSE,
+                DEFAULT_CHARSET,
+                OUT_DEFAULT_PRECIS,
+                CLIP_DEFAULT_PRECIS,
+                CLEARTYPE_QUALITY,
+                DEFAULT_PITCH | FF_DONTCARE,
+                L"Segoe UI"
+            );
+        }
+        return hTitleFont;
+    }
+    
+    /**
+     * @brief Get monospace font for console/code display
+     * @return Handle to monospace font
+     */
+    static HFONT GetMonospaceFont() {
+        static HFONT hMonoFont = nullptr;
+        if (!hMonoFont) {
+            hMonoFont = CreateFontW(
+                -12,
+                0, 0, 0,
+                FW_NORMAL,
+                FALSE, FALSE, FALSE,
+                DEFAULT_CHARSET,
+                OUT_DEFAULT_PRECIS,
+                CLIP_DEFAULT_PRECIS,
+                CLEARTYPE_QUALITY,
+                FIXED_PITCH | FF_MODERN,
+                L"Consolas"
+            );
+        }
+        return hMonoFont;
+    }
+    
+    /**
+     * @brief Create a brush for the specified color
+     * @param color The color for the brush
+     * @return Handle to the created brush (caller should manage lifetime)
+     */
+    static HBRUSH CreateBrush(COLORREF color) {
+        return CreateSolidBrush(color);
+    }
+    
+    /**
+     * @brief Get a cached brush for panel background
+     * @return Handle to panel background brush
+     */
+    static HBRUSH GetPanelBackgroundBrush() {
+        static HBRUSH hBrush = nullptr;
+        if (!hBrush) {
+            hBrush = CreateSolidBrush(PanelBackground);
+        }
+        return hBrush;
+    }
+    
+    /**
+     * @brief Get a cached brush for dark background
+     * @return Handle to dark background brush
+     */
+    static HBRUSH GetDarkBackgroundBrush() {
+        static HBRUSH hBrush = nullptr;
+        if (!hBrush) {
+            hBrush = CreateSolidBrush(DarkBackground);
+        }
+        return hBrush;
+    }
+    
+    /**
+     * @brief Get a cached brush for input background
+     * @return Handle to input background brush
+     */
+    static HBRUSH GetInputBackgroundBrush() {
+        static HBRUSH hBrush = nullptr;
+        if (!hBrush) {
+            hBrush = CreateSolidBrush(InputBackground);
+        }
+        return hBrush;
+    }
+    
+    /**
+     * @brief Draw a panel title bar with accent line
+     * @param hdc Device context
+     * @param rect Rectangle for the title bar
+     * @param title Title text to display
+     * @param showAccent Whether to show the accent line
+     */
+    static void DrawPanelTitleBar(HDC hdc, const RECT& rect, const wchar_t* title, bool showAccent = true) {
+        // Fill title bar background
+        HBRUSH bgBrush = CreateSolidBrush(TitleBarBackground);
+        FillRect(hdc, &rect, bgBrush);
+        DeleteObject(bgBrush);
+        
+        // Draw accent line at top
+        if (showAccent) {
+            HPEN accentPen = CreatePen(PS_SOLID, 2, TitleBarAccent);
+            HPEN oldPen = (HPEN)SelectObject(hdc, accentPen);
+            MoveToEx(hdc, rect.left, rect.top, nullptr);
+            LineTo(hdc, rect.right, rect.top);
+            SelectObject(hdc, oldPen);
+            DeleteObject(accentPen);
+        }
+        
+        // Draw title text
+        SetBkMode(hdc, TRANSPARENT);
+        SetTextColor(hdc, TitleBarText);
+        HFONT oldFont = (HFONT)SelectObject(hdc, GetTitleFont());
+        
+        RECT textRect = rect;
+        textRect.left += PaddingMedium;
+        textRect.top += 2;  // Offset for accent line
+        DrawTextW(hdc, title, -1, &textRect, DT_LEFT | DT_VCENTER | DT_SINGLELINE);
+        
+        SelectObject(hdc, oldFont);
+    }
+    
+    /**
+     * @brief Draw a separator line
+     * @param hdc Device context
+     * @param x1 Start X coordinate
+     * @param y1 Start Y coordinate
+     * @param x2 End X coordinate
+     * @param y2 End Y coordinate
+     */
+    static void DrawSeparator(HDC hdc, int x1, int y1, int x2, int y2) {
+        HPEN sepPen = CreatePen(PS_SOLID, 1, Separator);
+        HPEN oldPen = (HPEN)SelectObject(hdc, sepPen);
+        MoveToEx(hdc, x1, y1, nullptr);
+        LineTo(hdc, x2, y2);
+        SelectObject(hdc, oldPen);
+        DeleteObject(sepPen);
+    }
+    
+    /**
+     * @brief Draw a section header with optional collapse indicator
+     * @param hdc Device context
+     * @param rect Rectangle for the header
+     * @param title Section title
+     * @param collapsed Whether section is collapsed
+     */
+    static void DrawSectionHeader(HDC hdc, const RECT& rect, const wchar_t* title, bool collapsed = false) {
+        // Fill background with slightly lighter shade
+        HBRUSH bgBrush = CreateSolidBrush(ButtonNormal);
+        FillRect(hdc, &rect, bgBrush);
+        DeleteObject(bgBrush);
+        
+        // Draw collapse indicator (triangle)
+        SetTextColor(hdc, TextSecondary);
+        SetBkMode(hdc, TRANSPARENT);
+        HFONT oldFont = (HFONT)SelectObject(hdc, GetFont());
+        
+        RECT indicatorRect = rect;
+        indicatorRect.left += PaddingSmall;
+        indicatorRect.right = indicatorRect.left + IconSmall;
+        const wchar_t* indicator = collapsed ? L"\x25B6" : L"\x25BC";  // Right or Down triangle
+        DrawTextW(hdc, indicator, -1, &indicatorRect, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
+        
+        // Draw title
+        SetTextColor(hdc, TextPrimary);
+        SelectObject(hdc, GetBoldFont());
+        
+        RECT textRect = rect;
+        textRect.left += IconSmall + PaddingMedium;
+        DrawTextW(hdc, title, -1, &textRect, DT_LEFT | DT_VCENTER | DT_SINGLELINE);
+        
+        SelectObject(hdc, oldFont);
+    }
+    
+    /**
+     * @brief Get RGB components from COLORREF
+     * @param color The color to decompose
+     * @param r Output red component (0-255)
+     * @param g Output green component (0-255)
+     * @param b Output blue component (0-255)
+     */
+    static void GetRGB(COLORREF color, BYTE& r, BYTE& g, BYTE& b) {
+        r = GetRValue(color);
+        g = GetGValue(color);
+        b = GetBValue(color);
+    }
+    
+    /**
+     * @brief Blend two colors together
+     * @param color1 First color
+     * @param color2 Second color
+     * @param factor Blend factor (0.0 = color1, 1.0 = color2)
+     * @return Blended color
+     */
+    static COLORREF BlendColors(COLORREF color1, COLORREF color2, float factor) {
+        BYTE r1, g1, b1, r2, g2, b2;
+        GetRGB(color1, r1, g1, b1);
+        GetRGB(color2, r2, g2, b2);
+        
+        BYTE r = static_cast<BYTE>(r1 + (r2 - r1) * factor);
+        BYTE g = static_cast<BYTE>(g1 + (g2 - g1) * factor);
+        BYTE b = static_cast<BYTE>(b1 + (b2 - b1) * factor);
+        
+        return RGB(r, g, b);
+    }
+    
+    /**
+     * @brief Create a hover effect by lightening a color
+     * @param color Base color
+     * @return Lightened color suitable for hover state
+     */
+    static COLORREF GetHoverColor(COLORREF color) {
+        return BlendColors(color, RGB(255, 255, 255), 0.15f);
+    }
+    
+    /**
+     * @brief Create a pressed effect by darkening a color
+     * @param color Base color
+     * @return Darkened color suitable for pressed state
+     */
+    static COLORREF GetPressedColor(COLORREF color) {
+        return BlendColors(color, RGB(0, 0, 0), 0.2f);
     }
 };
 
