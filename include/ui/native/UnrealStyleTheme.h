@@ -153,15 +153,30 @@ struct UnrealStyleTheme
     }
     
     /**
+     * @brief Calculate font height for a given point size
+     * Uses system DPI for proper scaling on high-DPI displays
+     * @param pointSize Font size in points
+     * @return Font height in pixels (negative for character height)
+     */
+    static int GetFontHeight(int pointSize) {
+        // Get system DPI - default to 96 if unable to retrieve
+        HDC hdc = GetDC(nullptr);
+        int dpi = hdc ? GetDeviceCaps(hdc, LOGPIXELSY) : 96;
+        if (hdc) ReleaseDC(nullptr, hdc);
+        
+        // Formula: height = -(pointSize * DPI / 72)
+        return -MulDiv(pointSize, dpi, 72);
+    }
+    
+    /**
      * @brief Get default font for UI elements
-     * @return Handle to default font
+     * @return Handle to default font (9pt, DPI-aware)
      */
     static HFONT GetFont() {
         static HFONT hFont = nullptr;
         if (!hFont) {
-            // Font height: -12 pixels = 9pt at 96 DPI (points * DPI / 72)
             hFont = CreateFontW(
-                -12,
+                GetFontHeight(FontSizeNormal),  // 9pt, DPI-aware
                 0, 0, 0,
                 FW_NORMAL,
                 FALSE, FALSE, FALSE,
@@ -178,14 +193,13 @@ struct UnrealStyleTheme
     
     /**
      * @brief Get bold font for section headers
-     * @return Handle to bold font
+     * @return Handle to bold font (9pt, DPI-aware)
      */
     static HFONT GetBoldFont() {
         static HFONT hBoldFont = nullptr;
         if (!hBoldFont) {
-            // Font height: -12 pixels = 9pt at 96 DPI
             hBoldFont = CreateFontW(
-                -12,
+                GetFontHeight(FontSizeNormal),  // 9pt, DPI-aware
                 0, 0, 0,
                 FW_SEMIBOLD,
                 FALSE, FALSE, FALSE,
@@ -202,13 +216,13 @@ struct UnrealStyleTheme
     
     /**
      * @brief Get title font for panel headers
-     * @return Handle to title font
+     * @return Handle to title font (12pt, DPI-aware)
      */
     static HFONT GetTitleFont() {
         static HFONT hTitleFont = nullptr;
         if (!hTitleFont) {
             hTitleFont = CreateFontW(
-                -14,  // Slightly larger for titles
+                GetFontHeight(FontSizeTitle),  // 12pt, DPI-aware
                 0, 0, 0,
                 FW_SEMIBOLD,
                 FALSE, FALSE, FALSE,
@@ -225,13 +239,13 @@ struct UnrealStyleTheme
     
     /**
      * @brief Get monospace font for console/code display
-     * @return Handle to monospace font
+     * @return Handle to monospace font (9pt, DPI-aware)
      */
     static HFONT GetMonospaceFont() {
         static HFONT hMonoFont = nullptr;
         if (!hMonoFont) {
             hMonoFont = CreateFontW(
-                -12,
+                GetFontHeight(FontSizeNormal),  // 9pt, DPI-aware
                 0, 0, 0,
                 FW_NORMAL,
                 FALSE, FALSE, FALSE,
@@ -311,6 +325,18 @@ struct UnrealStyleTheme
         static HPEN hPen = nullptr;
         if (!hPen) {
             hPen = CreatePen(PS_SOLID, 2, TitleBarAccent);
+        }
+        return hPen;
+    }
+    
+    /**
+     * @brief Get a cached pen for dark borders
+     * @return Handle to dark border pen
+     */
+    static HPEN GetBorderDarkPen() {
+        static HPEN hPen = nullptr;
+        if (!hPen) {
+            hPen = CreatePen(PS_SOLID, 1, BorderDark);
         }
         return hPen;
     }
@@ -436,19 +462,29 @@ struct UnrealStyleTheme
      * @brief Blend two colors together
      * @param color1 First color
      * @param color2 Second color
-     * @param factor Blend factor (0.0 = color1, 1.0 = color2)
+     * @param factor Blend factor (0.0 = color1, 1.0 = color2), clamped to [0.0, 1.0]
      * @return Blended color
      */
     static COLORREF BlendColors(COLORREF color1, COLORREF color2, float factor) {
+        // Clamp factor to valid range
+        if (factor < 0.0f) factor = 0.0f;
+        if (factor > 1.0f) factor = 1.0f;
+        
         BYTE r1, g1, b1, r2, g2, b2;
         GetRGB(color1, r1, g1, b1);
         GetRGB(color2, r2, g2, b2);
         
-        BYTE r = static_cast<BYTE>(r1 + (r2 - r1) * factor);
-        BYTE g = static_cast<BYTE>(g1 + (g2 - g1) * factor);
-        BYTE b = static_cast<BYTE>(b1 + (b2 - b1) * factor);
+        // Use signed integers for intermediate calculation to avoid underflow
+        int r = static_cast<int>(r1) + static_cast<int>((static_cast<int>(r2) - static_cast<int>(r1)) * factor);
+        int g = static_cast<int>(g1) + static_cast<int>((static_cast<int>(g2) - static_cast<int>(g1)) * factor);
+        int b = static_cast<int>(b1) + static_cast<int>((static_cast<int>(b2) - static_cast<int>(b1)) * factor);
         
-        return RGB(r, g, b);
+        // Clamp to valid byte range
+        r = (r < 0) ? 0 : ((r > 255) ? 255 : r);
+        g = (g < 0) ? 0 : ((g > 255) ? 255 : g);
+        b = (b < 0) ? 0 : ((b > 255) ? 255 : b);
+        
+        return RGB(static_cast<BYTE>(r), static_cast<BYTE>(g), static_cast<BYTE>(b));
     }
     
     /**

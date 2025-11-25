@@ -245,9 +245,10 @@ void Win32StatusBar::calculatePaneWidths()
     int totalWidth = parentRect.right - parentRect.left;
 
     // Calculate actual pane positions (cumulative widths from left)
+    // SB_SETPARTS expects the right edge of each pane
     std::vector<int> panePositions(m_numPanes);
     
-    // First, sum up fixed-width panes
+    // First, sum up fixed-width panes and find stretch pane
     int fixedWidth = 0;
     int stretchPaneIndex = -1;
     
@@ -259,18 +260,25 @@ void Win32StatusBar::calculatePaneWidths()
         }
     }
 
-    // Calculate positions from right to left
-    int currentPos = totalWidth;
+    // Calculate stretch pane width (remaining space after fixed panes)
+    int stretchWidth = totalWidth - fixedWidth;
+    if (stretchWidth < 50) stretchWidth = 50;  // Minimum width for stretch pane
+
+    // Calculate positions from left to right
+    int currentPos = 0;
     
-    for (int i = m_numPanes - 1; i >= 0; --i) {
+    for (int i = 0; i < m_numPanes; ++i) {
         if (m_paneWidths[i] == -1) {
             // Stretch pane gets remaining space
-            panePositions[i] = currentPos;
+            currentPos += stretchWidth;
         } else {
-            panePositions[i] = currentPos;
-            currentPos -= m_paneWidths[i];
+            currentPos += m_paneWidths[i];
         }
+        panePositions[i] = currentPos;
     }
+    
+    // Last pane extends to the right edge
+    panePositions[m_numPanes - 1] = -1;
 
     // Set the pane positions
     SendMessage(m_hwnd, SB_SETPARTS, m_numPanes, reinterpret_cast<LPARAM>(panePositions.data()));

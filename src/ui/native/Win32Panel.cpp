@@ -164,12 +164,8 @@ void Win32Panel::paintBackground(HDC hdc)
     // Use cached brush from theme for better performance
     FillRect(hdc, &clientRect, UnrealStyleTheme::GetPanelBackgroundBrush());
     
-    // Draw border using cached pen
-    static HPEN s_borderPen = nullptr;
-    if (!s_borderPen) {
-        s_borderPen = CreatePen(PS_SOLID, 1, UnrealStyleTheme::BorderDark);
-    }
-    HPEN oldPen = (HPEN)SelectObject(hdc, s_borderPen);
+    // Draw border using theme's cached pen
+    HPEN oldPen = (HPEN)SelectObject(hdc, UnrealStyleTheme::GetBorderDarkPen());
     HBRUSH oldBrush = (HBRUSH)SelectObject(hdc, GetStockObject(NULL_BRUSH));
     Rectangle(hdc, clientRect.left, clientRect.top, clientRect.right, clientRect.bottom);
     SelectObject(hdc, oldPen);
