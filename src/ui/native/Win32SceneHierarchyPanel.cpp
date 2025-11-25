@@ -198,10 +198,9 @@ void Win32SceneHierarchyPanel::showContextMenu(int x, int y)
     EnableMenuItem(m_contextMenu, CMD_DUPLICATE, MF_BYCOMMAND | enableFlags);
     EnableMenuItem(m_contextMenu, CMD_DELETE, MF_BYCOMMAND | enableFlags);
     
-    // Show menu
-    POINT pt = { x, y };
-    ClientToScreen(m_hwnd, &pt);
-    TrackPopupMenu(m_contextMenu, TPM_RIGHTBUTTON, pt.x, pt.y, 0, m_hwnd, nullptr);
+    // Show menu - x,y are already in screen coordinates from WM_CONTEXTMENU
+    // Do NOT call ClientToScreen here as that would double the offset
+    TrackPopupMenu(m_contextMenu, TPM_RIGHTBUTTON, x, y, 0, m_hwnd, nullptr);
 }
 
 bool Win32SceneHierarchyPanel::renameSelectedNode()

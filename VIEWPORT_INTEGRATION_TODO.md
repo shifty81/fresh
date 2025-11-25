@@ -20,6 +20,27 @@ The Win32ViewportPanel provides a dedicated child window for 3D rendering, separ
 - ✅ Viewport resize triggers swap chain recreation
 - ✅ Camera aspect ratio updates on viewport resize
 
+## Recent Bug Fixes (2025-11-25)
+
+### Context Menu Position Bug - FIXED ✅
+**Issue:** Right-click context menus were appearing far to the right and down from the mouse pointer.
+
+**Root Cause:** The `WM_CONTEXTMENU` Windows message provides coordinates that are *already* in screen coordinates. However, the `showContextMenu()` function was calling `ClientToScreen()` on these coordinates, which doubled the offset.
+
+**Fix:** Removed the unnecessary `ClientToScreen()` call from:
+- `Win32SceneHierarchyPanel::showContextMenu()`
+- `Win32ContentBrowserPanel::showContextMenu()`
+
+### Panel Layout Notes
+Current panel positions (fixed pixel coordinates):
+- **Inspector:** x=10, y=80, w=350, h=500
+- **Scene Hierarchy:** x=370, y=80, w=300, h=500  
+- **Content Browser:** x=10, y=600, w=660, h=350
+- **Console:** x=680, y=600, w=600, h=350
+- **Viewport:** x=680, y=80, dynamic width/height
+
+**Note:** The viewport is positioned to fill the area above the console panel. On smaller window sizes, proper layout management may be needed to prevent overlap.
+
 ## Implementation Details
 
 ### 1. IRenderContext Interface Updates
