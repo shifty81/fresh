@@ -152,6 +152,15 @@ public:
      */
     void setPlayer(class Player* player);
 
+#ifdef _WIN32
+    /**
+     * @brief Handle window resize - updates layout of all panels including viewport
+     * @param clientWidth New client area width
+     * @param clientHeight New client area height
+     */
+    void onWindowResize(int clientWidth, int clientHeight);
+#endif
+
     /**
      * @brief Check if editor is initialized
      * @return true if initialized
