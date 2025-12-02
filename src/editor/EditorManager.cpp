@@ -89,6 +89,21 @@ static std::string toNarrowString(const std::wstring& wstr)
 }
 #endif
 
+// Panel layout constants
+namespace {
+    constexpr int PANEL_MARGIN = 10;           // Spacing between panels
+    constexpr int TOOLBAR_HEIGHT = 80;         // Height reserved for menu/toolbar
+    constexpr int CONSOLE_Y_POSITION = 600;    // Y position where console panel starts
+    constexpr int LEFT_PANEL_WIDTH = 680;      // Total width of left column panels
+    constexpr int INSPECTOR_WIDTH = 350;
+    constexpr int SCENE_HIERARCHY_X = 370;
+    constexpr int SCENE_HIERARCHY_WIDTH = 300;
+    constexpr int CONTENT_BROWSER_WIDTH = 660;
+    constexpr int PANEL_HEIGHT = 350;          // Standard panel height
+    constexpr int MIN_VIEWPORT_WIDTH = 400;
+    constexpr int MIN_VIEWPORT_HEIGHT = 300;
+    constexpr int MIN_CONSOLE_WIDTH = 600;
+} // anonymous namespace
 
 EditorManager::EditorManager()
     : m_initialized(false),
@@ -467,13 +482,13 @@ bool EditorManager::initialize(WindowType* window, IRenderContext* renderContext
         
         // Create native Inspector panel
         m_nativeInspector = std::make_unique<Win32InspectorPanel>();
-        if (m_nativeInspector->create(hwnd, 10, 80, 350, 500, m_entityManager)) {
+        if (m_nativeInspector->create(hwnd, PANEL_MARGIN, TOOLBAR_HEIGHT, INSPECTOR_WIDTH, 500, m_entityManager)) {
             LOG_INFO_C("Native Win32 Inspector Panel created", "EditorManager");
         }
         
         // Create native Scene Hierarchy panel
         m_nativeSceneHierarchy = std::make_unique<Win32SceneHierarchyPanel>();
-        if (m_nativeSceneHierarchy->create(hwnd, 370, 80, 300, 500, world)) {
+        if (m_nativeSceneHierarchy->create(hwnd, SCENE_HIERARCHY_X, TOOLBAR_HEIGHT, SCENE_HIERARCHY_WIDTH, 500, world)) {
             // Set selection callback to update inspector
             m_nativeSceneHierarchy->setSelectionCallback([this](HierarchyNode* node) {
                 if (m_nativeInspector) {
@@ -485,13 +500,13 @@ bool EditorManager::initialize(WindowType* window, IRenderContext* renderContext
         
         // Create native Content Browser panel
         m_nativeContentBrowser = std::make_unique<Win32ContentBrowserPanel>();
-        if (m_nativeContentBrowser->create(hwnd, 10, 600, 660, 350, "assets")) {
+        if (m_nativeContentBrowser->create(hwnd, PANEL_MARGIN, CONSOLE_Y_POSITION, CONTENT_BROWSER_WIDTH, PANEL_HEIGHT, "assets")) {
             LOG_INFO_C("Native Win32 Content Browser Panel created", "EditorManager");
         }
         
         // Create native Console panel
         m_nativeConsole = std::make_unique<Win32ConsolePanel>();
-        if (m_nativeConsole->create(hwnd, 680, 600, 600, 350)) {
+        if (m_nativeConsole->create(hwnd, LEFT_PANEL_WIDTH, CONSOLE_Y_POSITION, MIN_CONSOLE_WIDTH, PANEL_HEIGHT)) {
             LOG_INFO_C("Native Win32 Console Panel created", "EditorManager");
         }
         
@@ -531,11 +546,11 @@ bool EditorManager::initialize(WindowType* window, IRenderContext* renderContext
         int clientHeight = clientRect.bottom - clientRect.top;
         
         // Position viewport in center-right area (leaving left for panels)
-        // Viewport fills space above the console panel (which is at y=600)
-        int viewportX = 680;  // Start after left panels
-        int viewportY = 80;   // Start below menu/toolbar
-        int viewportWidth = clientWidth - 680 - 10;  // Fill remaining width
-        int viewportHeight = 600 - 80 - 10;  // Fill space above console panel (y=600)
+        // Viewport fills space above the console panel
+        int viewportX = LEFT_PANEL_WIDTH;
+        int viewportY = TOOLBAR_HEIGHT;
+        int viewportWidth = clientWidth - LEFT_PANEL_WIDTH - PANEL_MARGIN;
+        int viewportHeight = CONSOLE_Y_POSITION - TOOLBAR_HEIGHT - PANEL_MARGIN;
         
         m_viewportPanel = std::make_unique<Win32ViewportPanel>();
         if (m_viewportPanel->create(hwnd, viewportX, viewportY, viewportWidth, viewportHeight)) {
@@ -1540,47 +1555,38 @@ void EditorManager::onWindowResize(int clientWidth, int clientHeight)
         return;
     }
     
-    // Panel positions (fixed)
-    const int leftPanelsX = 10;
-    const int panelY = 80;  // Below menu/toolbar
-    const int bottomPanelsY = 600;
-    
-    // Left column panels (fixed size)
+    // Left column panels (fixed position and size)
     if (m_nativeInspector) {
-        m_nativeInspector->setPosition(leftPanelsX, panelY);
+        m_nativeInspector->setPosition(PANEL_MARGIN, TOOLBAR_HEIGHT);
         // Keep fixed size: 350x500
     }
     
     if (m_nativeSceneHierarchy) {
-        m_nativeSceneHierarchy->setPosition(370, panelY);
+        m_nativeSceneHierarchy->setPosition(SCENE_HIERARCHY_X, TOOLBAR_HEIGHT);
         // Keep fixed size: 300x500
     }
     
-    // Bottom panels - resize width to match window
-    const int bottomPanelWidth = std::max(660, clientWidth - 680 - 10);
-    
+    // Bottom panels
     if (m_nativeContentBrowser) {
-        m_nativeContentBrowser->setPosition(leftPanelsX, bottomPanelsY);
-        m_nativeContentBrowser->setSize(660, 350);  // Keep fixed size
+        m_nativeContentBrowser->setPosition(PANEL_MARGIN, CONSOLE_Y_POSITION);
+        m_nativeContentBrowser->setSize(CONTENT_BROWSER_WIDTH, PANEL_HEIGHT);  // Keep fixed size
     }
     
     if (m_nativeConsole) {
-        const int consoleWidth = std::max(600, clientWidth - 680 - 10);
-        m_nativeConsole->setPosition(680, bottomPanelsY);
-        m_nativeConsole->setSize(consoleWidth, 350);
+        const int consoleWidth = std::max(MIN_CONSOLE_WIDTH, clientWidth - LEFT_PANEL_WIDTH - PANEL_MARGIN);
+        m_nativeConsole->setPosition(LEFT_PANEL_WIDTH, CONSOLE_Y_POSITION);
+        m_nativeConsole->setSize(consoleWidth, PANEL_HEIGHT);
     }
     
     // Viewport - resize to fill available space
     if (m_viewportPanel) {
-        const int viewportX = 680;
-        const int viewportY = panelY;
-        const int viewportWidth = std::max(400, clientWidth - 680 - 10);
-        const int viewportHeight = std::max(300, bottomPanelsY - panelY - 10);
+        const int viewportX = LEFT_PANEL_WIDTH;
+        const int viewportY = TOOLBAR_HEIGHT;
+        const int viewportWidth = std::max(MIN_VIEWPORT_WIDTH, clientWidth - LEFT_PANEL_WIDTH - PANEL_MARGIN);
+        const int viewportHeight = std::max(MIN_VIEWPORT_HEIGHT, CONSOLE_Y_POSITION - TOOLBAR_HEIGHT - PANEL_MARGIN);
         
         m_viewportPanel->setPosition(viewportX, viewportY);
         m_viewportPanel->setSize(viewportWidth, viewportHeight);
-        
-        LOG_INFO_C("Viewport resized to " + std::to_string(viewportWidth) + "x" + std::to_string(viewportHeight), "EditorManager");
     }
 }
 #endif

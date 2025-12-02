@@ -993,6 +993,8 @@ void Engine::update(float deltaTime)
     if (m_window && m_editorManager) {
         Win32Window* win32Window = dynamic_cast<Win32Window*>(m_window);
         if (win32Window && win32Window->wasFramebufferResized()) {
+            win32Window->resetFramebufferResizedFlag();  // Reset flag immediately to prevent repeated logging
+            
             RECT clientRect;
             HWND hwnd = win32Window->getHandle();
             if (hwnd && GetClientRect(hwnd, &clientRect)) {
@@ -1002,7 +1004,6 @@ void Engine::update(float deltaTime)
                 LOG_INFO_C("Window resized, updated panel layouts: " + 
                           std::to_string(clientWidth) + "x" + std::to_string(clientHeight), "Engine");
             }
-            win32Window->resetFramebufferResizedFlag();
         }
     }
     
