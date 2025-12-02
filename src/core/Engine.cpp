@@ -989,6 +989,23 @@ void Engine::update(float deltaTime)
     }
 
 #ifdef _WIN32
+    // WINDOW RESIZE HANDLING - Update panel layouts when main window is resized
+    if (m_window && m_editorManager) {
+        Win32Window* win32Window = dynamic_cast<Win32Window*>(m_window);
+        if (win32Window && win32Window->wasFramebufferResized()) {
+            RECT clientRect;
+            HWND hwnd = win32Window->getHandle();
+            if (hwnd && GetClientRect(hwnd, &clientRect)) {
+                int clientWidth = clientRect.right - clientRect.left;
+                int clientHeight = clientRect.bottom - clientRect.top;
+                m_editorManager->onWindowResize(clientWidth, clientHeight);
+                LOG_INFO_C("Window resized, updated panel layouts: " + 
+                          std::to_string(clientWidth) + "x" + std::to_string(clientHeight), "Engine");
+            }
+            win32Window->resetFramebufferResizedFlag();
+        }
+    }
+    
     // VIEWPORT RESIZE HANDLING - Check if viewport was resized and recreate swap chain
     if (m_editorManager && m_editorManager->getViewportPanel() && m_renderer) {
         auto* viewportPanel = m_editorManager->getViewportPanel();

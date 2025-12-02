@@ -531,10 +531,11 @@ bool EditorManager::initialize(WindowType* window, IRenderContext* renderContext
         int clientHeight = clientRect.bottom - clientRect.top;
         
         // Position viewport in center-right area (leaving left for panels)
+        // Viewport fills space above the console panel (which is at y=600)
         int viewportX = 680;  // Start after left panels
         int viewportY = 80;   // Start below menu/toolbar
         int viewportWidth = clientWidth - 680 - 10;  // Fill remaining width
-        int viewportHeight = clientHeight - 80 - 10;  // Fill remaining height
+        int viewportHeight = 600 - 80 - 10;  // Fill space above console panel (y=600)
         
         m_viewportPanel = std::make_unique<Win32ViewportPanel>();
         if (m_viewportPanel->create(hwnd, viewportX, viewportY, viewportWidth, viewportHeight)) {
@@ -1518,5 +1519,70 @@ void EditorManager::frameSelection()
     m_cameraController->frameBox(boundsMin, boundsMax);
     LOG_INFO_C("Framed selection in view", "EditorManager");
 }
+
+#ifdef _WIN32
+void EditorManager::onWindowResize(int clientWidth, int clientHeight)
+{
+    // Update panel layout when window is resized
+    // This ensures panels maintain proper positions and sizes
+    
+    if (!m_window) {
+        return;
+    }
+    
+    Win32Window* win32Window = dynamic_cast<Win32Window*>(m_window);
+    if (!win32Window) {
+        return;
+    }
+    
+    HWND hwnd = win32Window->getHandle();
+    if (!hwnd) {
+        return;
+    }
+    
+    // Panel positions (fixed)
+    const int leftPanelsX = 10;
+    const int panelY = 80;  // Below menu/toolbar
+    const int bottomPanelsY = 600;
+    
+    // Left column panels (fixed size)
+    if (m_nativeInspector) {
+        m_nativeInspector->setPosition(leftPanelsX, panelY);
+        // Keep fixed size: 350x500
+    }
+    
+    if (m_nativeSceneHierarchy) {
+        m_nativeSceneHierarchy->setPosition(370, panelY);
+        // Keep fixed size: 300x500
+    }
+    
+    // Bottom panels - resize width to match window
+    const int bottomPanelWidth = std::max(660, clientWidth - 680 - 10);
+    
+    if (m_nativeContentBrowser) {
+        m_nativeContentBrowser->setPosition(leftPanelsX, bottomPanelsY);
+        m_nativeContentBrowser->setSize(660, 350);  // Keep fixed size
+    }
+    
+    if (m_nativeConsole) {
+        const int consoleWidth = std::max(600, clientWidth - 680 - 10);
+        m_nativeConsole->setPosition(680, bottomPanelsY);
+        m_nativeConsole->setSize(consoleWidth, 350);
+    }
+    
+    // Viewport - resize to fill available space
+    if (m_viewportPanel) {
+        const int viewportX = 680;
+        const int viewportY = panelY;
+        const int viewportWidth = std::max(400, clientWidth - 680 - 10);
+        const int viewportHeight = std::max(300, bottomPanelsY - panelY - 10);
+        
+        m_viewportPanel->setPosition(viewportX, viewportY);
+        m_viewportPanel->setSize(viewportWidth, viewportHeight);
+        
+        LOG_INFO_C("Viewport resized to " + std::to_string(viewportWidth) + "x" + std::to_string(viewportHeight), "EditorManager");
+    }
+}
+#endif
 
 } // namespace fresh
