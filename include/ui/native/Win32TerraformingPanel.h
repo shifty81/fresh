@@ -116,6 +116,7 @@ private:
     HWND m_sizeLabel;
     HWND m_undoButton;
     HWND m_redoButton;
+    HWND m_tooltipControl;  // Tooltip control for hover hints
 
     // GDI resources for custom drawing
     HBRUSH m_bgBrush;

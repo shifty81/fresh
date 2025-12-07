@@ -60,6 +60,7 @@ Win32TerraformingPanel::Win32TerraformingPanel()
     , m_sizeLabel(nullptr)
     , m_undoButton(nullptr)
     , m_redoButton(nullptr)
+    , m_tooltipControl(nullptr)
     , m_bgBrush(nullptr)
     , m_selectedBrush(nullptr)
     , m_buttonBrush(nullptr)
@@ -80,6 +81,12 @@ Win32TerraformingPanel::Win32TerraformingPanel()
 
 Win32TerraformingPanel::~Win32TerraformingPanel()
 {
+    // Clean up tooltip control
+    if (m_tooltipControl) {
+        DestroyWindow(m_tooltipControl);
+        m_tooltipControl = nullptr;
+    }
+    
     // Clean up GDI resources
     if (m_bgBrush) DeleteObject(m_bgBrush);
     if (m_selectedBrush) DeleteObject(m_selectedBrush);
@@ -137,6 +144,29 @@ void Win32TerraformingPanel::onCreate()
 
 void Win32TerraformingPanel::createControls()
 {
+    // Create tooltip control for hover hints
+    m_tooltipControl = CreateWindowExW(
+        WS_EX_TOPMOST,
+        TOOLTIPS_CLASSW,
+        nullptr,
+        WS_POPUP | TTS_ALWAYSTIP | TTS_BALLOON,
+        CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT,
+        m_hwnd,
+        nullptr,
+        GetModuleHandle(nullptr),
+        nullptr
+    );
+    
+    if (m_tooltipControl) {
+        // Set tooltip delay times (faster appearance)
+        SendMessageW(m_tooltipControl, TTM_SETDELAYTIME, TTDT_AUTOPOP, MAKELONG(10000, 0));  // Display for 10 seconds
+        SendMessageW(m_tooltipControl, TTM_SETDELAYTIME, TTDT_INITIAL, MAKELONG(500, 0));     // Show after 0.5 seconds
+        SendMessageW(m_tooltipControl, TTM_SETDELAYTIME, TTDT_RESHOW, MAKELONG(200, 0));      // Re-show after 0.2 seconds
+        
+        // Set max width for multi-line tooltips
+        SendMessageW(m_tooltipControl, TTM_SETMAXTIPWIDTH, 0, 300);
+    }
+    
     // Create tool buttons
     // Removed unused variable: int yPos = MARGIN;
     
@@ -173,6 +203,20 @@ void Win32TerraformingPanel::createToolButtons()
         L"Smooth",
         L"Paint"
     };
+    
+    // Tooltip descriptions for each tool
+    const wchar_t* toolTooltips[] = {
+        L"Single Block - Place or remove one block at a time",
+        L"Brush - Paint voxels in a circular area",
+        L"Sphere - Create a hollow sphere shape",
+        L"Filled Sphere - Create a solid sphere shape",
+        L"Cube - Create a hollow cube shape",
+        L"Filled Cube - Create a solid cube shape",
+        L"Line - Draw a straight line of voxels",
+        L"Flatten - Level terrain to create flat surfaces",
+        L"Smooth - Blend and smooth terrain irregularities",
+        L"Paint - Change voxel types without affecting shape"
+    };
 
     int cmdIds[] = {
         CMD_TOOL_SINGLE_BLOCK,
@@ -202,6 +246,17 @@ void Win32TerraformingPanel::createToolButtons()
         
         if (m_toolButtons[i]) {
             SendMessage(m_toolButtons[i], WM_SETFONT, (WPARAM)m_textFont, TRUE);
+            
+            // Add tooltip for this tool button
+            if (m_tooltipControl) {
+                TOOLINFOW ti = { 0 };
+                ti.cbSize = sizeof(TOOLINFOW);
+                ti.uFlags = TTF_IDISHWND | TTF_SUBCLASS;
+                ti.hwnd = m_hwnd;
+                ti.uId = (UINT_PTR)m_toolButtons[i];
+                ti.lpszText = const_cast<LPWSTR>(toolTooltips[i]);
+                SendMessageW(m_tooltipControl, TTM_ADDTOOLW, 0, (LPARAM)&ti);
+            }
         }
         
         yPos += BUTTON_HEIGHT + BUTTON_SPACING;
@@ -211,6 +266,11 @@ void Win32TerraformingPanel::createToolButtons()
 void Win32TerraformingPanel::createModeButtons()
 {
     const wchar_t* modeNames[] = { L"Place", L"Remove", L"Replace" };
+    const wchar_t* modeTooltips[] = {
+        L"Place Mode - Add new voxels to the world",
+        L"Remove Mode - Delete voxels from the world",
+        L"Replace Mode - Change existing voxels to a new type"
+    };
     int cmdIds[] = { CMD_MODE_PLACE, CMD_MODE_REMOVE, CMD_MODE_REPLACE };
 
     int yPos = MARGIN + 30 + (BUTTON_HEIGHT + BUTTON_SPACING) * 10 + SECTION_SPACING + 30;
@@ -231,6 +291,17 @@ void Win32TerraformingPanel::createModeButtons()
         
         if (m_modeButtons[i]) {
             SendMessage(m_modeButtons[i], WM_SETFONT, (WPARAM)m_textFont, TRUE);
+            
+            // Add tooltip for this mode button
+            if (m_tooltipControl) {
+                TOOLINFOW ti = { 0 };
+                ti.cbSize = sizeof(TOOLINFOW);
+                ti.uFlags = TTF_IDISHWND | TTF_SUBCLASS;
+                ti.hwnd = m_hwnd;
+                ti.uId = (UINT_PTR)m_modeButtons[i];
+                ti.lpszText = const_cast<LPWSTR>(modeTooltips[i]);
+                SendMessageW(m_tooltipControl, TTM_ADDTOOLW, 0, (LPARAM)&ti);
+            }
         }
     }
 }
@@ -241,6 +312,20 @@ void Win32TerraformingPanel::createMaterialPicker()
     const wchar_t* materialNames[NUM_MATERIALS] = {
         L"Stone", L"Dirt", L"Grass", L"Sand", L"Water",
         L"Wood", L"Leaves", L"Cobblestone", L"Planks", L"Glass"
+    };
+    
+    // Tooltip descriptions for each material
+    const wchar_t* materialTooltips[NUM_MATERIALS] = {
+        L"Stone - Basic building block from underground",
+        L"Dirt - Common earth material for terrain",
+        L"Grass - Surface terrain with vegetation",
+        L"Sand - Desert and beach material",
+        L"Water - Liquid block for lakes and oceans",
+        L"Wood - Natural log material from trees",
+        L"Leaves - Foliage blocks from trees",
+        L"Cobblestone - Crafted stone variant",
+        L"Planks - Processed wood building material",
+        L"Glass - Transparent building material"
     };
 
     int yPos = MARGIN + 30 + (BUTTON_HEIGHT + BUTTON_SPACING) * 10 + 
@@ -258,6 +343,17 @@ void Win32TerraformingPanel::createMaterialPicker()
             GetModuleHandle(nullptr),
             nullptr
         );
+        
+        // Add tooltip for this material button
+        if (m_materialButtons[i] && m_tooltipControl) {
+            TOOLINFOW ti = { 0 };
+            ti.cbSize = sizeof(TOOLINFOW);
+            ti.uFlags = TTF_IDISHWND | TTF_SUBCLASS;
+            ti.hwnd = m_hwnd;
+            ti.uId = (UINT_PTR)m_materialButtons[i];
+            ti.lpszText = const_cast<LPWSTR>(materialTooltips[i]);
+            SendMessageW(m_tooltipControl, TTM_ADDTOOLW, 0, (LPARAM)&ti);
+        }
         
         yPos += BUTTON_HEIGHT + BUTTON_SPACING;
     }
