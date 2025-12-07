@@ -7,6 +7,7 @@
     #endif
 #endif
 
+#include <climits>
 #include <cmath>
 #include "core/Logger.h"
 #include "ecs/EntityManager.h"
@@ -66,6 +67,7 @@
     #include "ui/native/Win32SettingsDialog.h"
     #include "ui/native/Win32TerraformingPanel.h"
     #include "ui/native/Win32ViewportPanel.h"
+    #include "ui/native/Win32StatusBar.h"
     #include "ui/NativeMainMenu.h"
 #endif
 
@@ -561,6 +563,15 @@ bool EditorManager::initialize(WindowType* window, IRenderContext* renderContext
             LOG_ERROR_C("Failed to create Native Win32 Viewport Panel", "EditorManager");
         }
         
+        // Create native Status Bar at bottom of window
+        m_statusBar = std::make_unique<Win32StatusBar>();
+        if (m_statusBar->create(hwnd, 4)) {  // 4 panes: Status | Position | Selection | FPS
+            m_statusBar->setStatusText(L"Ready");
+            LOG_INFO_C("Native Win32 Status Bar created", "EditorManager");
+        } else {
+            LOG_ERROR_C("Failed to create Native Win32 Status Bar", "EditorManager");
+        }
+        
         LOG_INFO_C("All native Win32 UI panels initialized successfully", "EditorManager");
     } else {
         LOG_WARNING_C("Win32Window not available, native panels not created", "EditorManager");
@@ -625,6 +636,61 @@ void EditorManager::update(float deltaTime)
             // Update overlay position and trigger repaint
             m_hudOverlay->updatePosition();
             m_hudOverlay->invalidate();
+        }
+    }
+    
+    // Update Status Bar with current editor state
+    if (m_statusBar) {
+        // Update position display
+        if (m_player) {
+            auto pos = m_player->getPosition();
+            m_statusBar->setCursorPosition(pos.x, pos.y, pos.z);
+        }
+        
+        // Update selection count
+        if (m_selectionManager && m_selectionManager->hasSelection()) {
+            size_t selectionSize = m_selectionManager->getSelectionSize();
+            // Clamp to INT_MAX to prevent overflow
+            int selectionCount = (selectionSize > static_cast<size_t>(INT_MAX)) ? 
+                                INT_MAX : static_cast<int>(selectionSize);
+            m_statusBar->setSelectionInfo(selectionCount, L"voxels");
+        } else {
+            m_statusBar->setSelectionInfo(0, L"voxels");
+        }
+        
+        // Update current tool/mode information
+        if (m_worldEditor && m_worldEditor->getTerraformingSystem()) {
+            auto* terraform = m_worldEditor->getTerraformingSystem();
+            std::wstring toolInfo = L"Tool: ";
+            
+            // Get current tool name
+            switch(terraform->getCurrentTool()) {
+                case TerraformTool::SingleBlock: toolInfo += L"Single Block"; break;
+                case TerraformTool::Brush: toolInfo += L"Brush"; break;
+                case TerraformTool::Sphere: toolInfo += L"Sphere"; break;
+                case TerraformTool::FilledSphere: toolInfo += L"Filled Sphere"; break;
+                case TerraformTool::Cube: toolInfo += L"Cube"; break;
+                case TerraformTool::FilledCube: toolInfo += L"Filled Cube"; break;
+                case TerraformTool::Line: toolInfo += L"Line"; break;
+                case TerraformTool::Flatten: toolInfo += L"Flatten"; break;
+                case TerraformTool::Smooth: toolInfo += L"Smooth"; break;
+                case TerraformTool::Paint: toolInfo += L"Paint"; break;
+                default: toolInfo += L"Unknown"; break;
+            }
+            
+            // Add mode
+            toolInfo += L" (";
+            switch(terraform->getCurrentMode()) {
+                case TerraformMode::Place: toolInfo += L"Place"; break;
+                case TerraformMode::Remove: toolInfo += L"Remove"; break;
+                case TerraformMode::Replace: toolInfo += L"Replace"; break;
+                default: toolInfo += L"Unknown"; break;
+            }
+            toolInfo += L")";
+            
+            m_statusBar->setStatusText(toolInfo);
+        } else {
+            m_statusBar->setStatusText(L"Ready");
         }
     }
 #endif
@@ -1533,6 +1599,29 @@ void EditorManager::frameSelection()
     
     m_cameraController->frameBox(boundsMin, boundsMax);
     LOG_INFO_C("Framed selection in view", "EditorManager");
+}
+
+void EditorManager::setFPS(float fps)
+{
+#ifdef _WIN32
+    if (m_statusBar) {
+        m_statusBar->setFPS(fps);
+    }
+#else
+    (void)fps;  // Unused parameter on non-Windows platforms
+#endif
+}
+
+void EditorManager::setMemoryUsage(float usedMB, float totalMB)
+{
+#ifdef _WIN32
+    if (m_statusBar) {
+        m_statusBar->setMemoryUsage(usedMB, totalMB);
+    }
+#else
+    (void)usedMB;   // Unused parameter on non-Windows platforms
+    (void)totalMB;  // Unused parameter on non-Windows platforms
+#endif
 }
 
 #ifdef _WIN32
