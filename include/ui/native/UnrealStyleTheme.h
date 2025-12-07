@@ -8,6 +8,9 @@
 #endif
 
 #include <windows.h>
+#include <dwmapi.h>
+
+#pragma comment(lib, "dwmapi.lib")
 
 namespace fresh
 {
@@ -147,9 +150,17 @@ struct UnrealStyleTheme
      * @param hwnd Window handle to apply theme to
      */
     static void ApplyToWindow(HWND hwnd) {
-        // Set background color using window subclassing or custom painting
-        // This is a placeholder implementation
-        (void)hwnd;
+        if (!hwnd) return;
+        
+        // Set background color
+        SetClassLongPtrW(hwnd, GCLP_HBRBACKGROUND, (LONG_PTR)CreateSolidBrush(PanelBackground));
+        
+        // Apply dark theme to window
+        BOOL useDarkMode = TRUE;
+        DwmSetWindowAttribute(hwnd, 20 /*DWMWA_USE_IMMERSIVE_DARK_MODE*/, &useDarkMode, sizeof(useDarkMode));
+        
+        // Set text color for the window
+        InvalidateRect(hwnd, nullptr, TRUE);
     }
     
     /**
