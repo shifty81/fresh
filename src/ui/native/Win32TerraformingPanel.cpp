@@ -32,6 +32,13 @@ namespace fresh
 #define CMD_REDO                2203
 
 #define CMD_MATERIAL_BASE       3000  // Materials start at 3000
+#define NUM_MATERIAL_BUTTONS    10    // Number of material buttons to display
+
+// Static material type mapping for button indices
+const VoxelType Win32TerraformingPanel::s_materialTypes[Win32TerraformingPanel::NUM_MATERIALS] = {
+    VoxelType::Stone, VoxelType::Dirt, VoxelType::Grass, VoxelType::Sand, VoxelType::Water,
+    VoxelType::Wood, VoxelType::Leaves, VoxelType::Cobblestone, VoxelType::Planks, VoxelType::Glass
+};
 
 Win32TerraformingPanel::Win32TerraformingPanel()
     : Win32Panel()
@@ -231,21 +238,16 @@ void Win32TerraformingPanel::createModeButtons()
 void Win32TerraformingPanel::createMaterialPicker()
 {
     // Create material buttons with color indicators for common voxel types
-    const wchar_t* materialNames[] = {
+    const wchar_t* materialNames[NUM_MATERIALS] = {
         L"Stone", L"Dirt", L"Grass", L"Sand", L"Water",
         L"Wood", L"Leaves", L"Cobblestone", L"Planks", L"Glass"
-    };
-    
-    const VoxelType materialTypes[] = {
-        VoxelType::Stone, VoxelType::Dirt, VoxelType::Grass, VoxelType::Sand, VoxelType::Water,
-        VoxelType::Wood, VoxelType::Leaves, VoxelType::Cobblestone, VoxelType::Planks, VoxelType::Glass
     };
 
     int yPos = MARGIN + 30 + (BUTTON_HEIGHT + BUTTON_SPACING) * 10 + 
                SECTION_SPACING + 30 + BUTTON_HEIGHT + SECTION_SPACING + 30;
     
     // Create buttons with owner-draw style for custom color rendering
-    for (int i = 0; i < 10 && i < 15; ++i) {
+    for (int i = 0; i < NUM_MATERIALS; ++i) {
         m_materialButtons[i] = CreateWindowW(
             L"BUTTON",
             materialNames[i],
@@ -260,6 +262,7 @@ void Win32TerraformingPanel::createMaterialPicker()
         yPos += BUTTON_HEIGHT + BUTTON_SPACING;
     }
 }
+
 
 void Win32TerraformingPanel::createSizeControl()
 {
@@ -448,10 +451,10 @@ bool Win32TerraformingPanel::handleMessage(UINT msg, WPARAM wParam, LPARAM lPara
         DRAWITEMSTRUCT* dis = reinterpret_cast<DRAWITEMSTRUCT*>(lParam);
         if (dis && dis->CtlType == ODT_BUTTON) {
             int cmdId = static_cast<int>(dis->CtlID);
-            if (cmdId >= CMD_MATERIAL_BASE && cmdId < CMD_MATERIAL_BASE + 10) {
+            if (cmdId >= CMD_MATERIAL_BASE && cmdId < CMD_MATERIAL_BASE + NUM_MATERIALS) {
                 // This is a material button - draw it with color indicator
                 int materialIndex = cmdId - CMD_MATERIAL_BASE;
-                VoxelType type = static_cast<VoxelType>(materialIndex + 1); // +1 because Air is 0
+                VoxelType type = s_materialTypes[materialIndex]; // Use static material type array
                 
                 // Get button state
                 bool isSelected = (dis->itemState & ODS_SELECTED) != 0;
@@ -530,9 +533,9 @@ bool Win32TerraformingPanel::handleMessage(UINT msg, WPARAM wParam, LPARAM lPara
         }
 
         // Handle material selection
-        if (cmdId >= CMD_MATERIAL_BASE && cmdId < CMD_MATERIAL_BASE + 15) {
+        if (cmdId >= CMD_MATERIAL_BASE && cmdId < CMD_MATERIAL_BASE + NUM_MATERIALS) {
             int materialIndex = cmdId - CMD_MATERIAL_BASE;
-            VoxelType type = static_cast<VoxelType>(materialIndex + 1);  // +1 because Air is 0
+            VoxelType type = s_materialTypes[materialIndex];  // Use static material type array
             onMaterialSelect(type);
             result = 0;
             return true;

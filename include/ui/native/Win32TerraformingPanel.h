@@ -130,6 +130,10 @@ private:
     static constexpr int BUTTON_HEIGHT = 30;
     static constexpr int SECTION_SPACING = 15;
     static constexpr int BUTTON_SPACING = 5;
+    static constexpr int NUM_MATERIALS = 10;
+    
+    // Material type mapping for buttons (matches button indices)
+    static const VoxelType s_materialTypes[NUM_MATERIALS];
 };
 
 } // namespace fresh

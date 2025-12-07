@@ -7,6 +7,7 @@
     #endif
 #endif
 
+#include <climits>
 #include <cmath>
 #include "core/Logger.h"
 #include "ecs/EntityManager.h"
@@ -648,7 +649,10 @@ void EditorManager::update(float deltaTime)
         
         // Update selection count
         if (m_selectionManager && m_selectionManager->hasSelection()) {
-            int selectionCount = static_cast<int>(m_selectionManager->getSelectionSize());
+            size_t selectionSize = m_selectionManager->getSelectionSize();
+            // Clamp to INT_MAX to prevent overflow
+            int selectionCount = (selectionSize > static_cast<size_t>(INT_MAX)) ? 
+                                INT_MAX : static_cast<int>(selectionSize);
             m_statusBar->setSelectionInfo(selectionCount, L"voxels");
         } else {
             m_statusBar->setSelectionInfo(0, L"voxels");
