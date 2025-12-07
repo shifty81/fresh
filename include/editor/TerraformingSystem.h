@@ -81,6 +81,15 @@ public:
     }
 
     /**
+     * @brief Get current tool (alias for getTool)
+     * @return Current tool
+     */
+    TerraformTool getCurrentTool() const
+    {
+        return m_currentTool;
+    }
+
+    /**
      * @brief Set the current mode
      * @param mode Mode to use
      */
@@ -94,6 +103,15 @@ public:
      * @return Current mode
      */
     TerraformMode getMode() const
+    {
+        return m_currentMode;
+    }
+
+    /**
+     * @brief Get current mode (alias for getMode)
+     * @return Current mode
+     */
+    TerraformMode getCurrentMode() const
     {
         return m_currentMode;
     }

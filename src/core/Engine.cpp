@@ -322,6 +322,16 @@ bool Engine::initialize()
         this->loadWorld(name);
     });
     
+    m_editorManager->setEnterPlayModeCallback([this]() {
+        LOG_INFO_C("Enter play mode callback triggered", "Engine");
+        this->enterPlayMode();
+    });
+    
+    m_editorManager->setExitPlayModeCallback([this]() {
+        LOG_INFO_C("Exit play mode callback triggered", "Engine");
+        this->exitPlayMode();
+    });
+    
     m_editorManager->setVisible(true); // Show editor immediately
     std::cout << "Editor manager initialized" << std::endl;
     LOG_INFO_C("Editor manager initialized", "Engine");
@@ -991,7 +1001,7 @@ void Engine::update(float deltaTime)
 #ifdef _WIN32
     // WINDOW RESIZE HANDLING - Update panel layouts when main window is resized
     if (m_window && m_editorManager) {
-        Win32Window* win32Window = dynamic_cast<Win32Window*>(m_window);
+        Win32Window* win32Window = dynamic_cast<Win32Window*>(m_window.get());
         if (win32Window && win32Window->wasFramebufferResized()) {
             win32Window->resetFramebufferResizedFlag();  // Reset flag immediately to prevent repeated logging
             

@@ -121,7 +121,8 @@ EditorManager::EditorManager()
       m_showInspector(true),
       m_showContentBrowser(true),
       m_showConsole(true),
-      m_showToolPalette(true)
+      m_showToolPalette(true),
+      m_showGrid(false)  // Grid display initially disabled
 {
 }
 
@@ -552,6 +553,7 @@ bool EditorManager::initialize(WindowType* window, IRenderContext* renderContext
         GetClientRect(hwnd, &clientRect);
         int clientWidth = clientRect.right - clientRect.left;
         int clientHeight = clientRect.bottom - clientRect.top;
+        (void)clientHeight;  // Reserved for future dynamic layout adjustments
         
         // Position viewport in center-right area (leaving left for panels)
         // Viewport fills space above the console panel
@@ -1335,6 +1337,24 @@ void EditorManager::toggleToolPalette()
 {
     m_showToolPalette = !m_showToolPalette;
     LOG_INFO_C("Tool Palette toggled: " + std::string(m_showToolPalette ? "shown" : "hidden"), "EditorManager");
+}
+
+void EditorManager::enterPlayMode()
+{
+    if (m_enterPlayModeCallback) {
+        m_enterPlayModeCallback();
+    } else {
+        LOG_WARNING_C("Enter play mode callback not set", "EditorManager");
+    }
+}
+
+void EditorManager::exitPlayMode()
+{
+    if (m_exitPlayModeCallback) {
+        m_exitPlayModeCallback();
+    } else {
+        LOG_WARNING_C("Exit play mode callback not set", "EditorManager");
+    }
 }
 
 void EditorManager::showSettings()

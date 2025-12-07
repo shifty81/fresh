@@ -227,6 +227,24 @@ public:
         m_worldLoadCallback = callback;
     }
 
+    /**
+     * @brief Set callback for entering play mode
+     * @param callback Function to call when entering play mode
+     */
+    void setEnterPlayModeCallback(std::function<void()> callback)
+    {
+        m_enterPlayModeCallback = callback;
+    }
+
+    /**
+     * @brief Set callback for exiting play mode
+     * @param callback Function to call when exiting play mode
+     */
+    void setExitPlayModeCallback(std::function<void()> callback)
+    {
+        m_exitPlayModeCallback = callback;
+    }
+
     // Removed ImGui-based panel getters (replaced with Win32 native versions):
     // MainMenuPanel* getMainMenuPanel() const
     // SettingsPanel* getSettingsPanel() const  
@@ -416,6 +434,16 @@ public:
     void toggleToolPalette();
     
     /**
+     * @brief Enter play mode (delegates to Engine via callback)
+     */
+    void enterPlayMode();
+    
+    /**
+     * @brief Exit play mode (delegates to Engine via callback)
+     */
+    void exitPlayMode();
+    
+    /**
      * @brief Show settings panel
      */
     void showSettings();
@@ -584,6 +612,7 @@ private:
     bool m_showContentBrowser;
     bool m_showConsole;
     bool m_showToolPalette;
+    bool m_showGrid;  // Grid display toggle
     
     // World file path
     std::string m_currentWorldPath;
@@ -591,6 +620,8 @@ private:
     // Callbacks for world operations (set by Engine)
     std::function<void(const std::string&, int, bool, int)> m_worldCreationCallback;
     std::function<void(const std::string&)> m_worldLoadCallback;
+    std::function<void()> m_enterPlayModeCallback;
+    std::function<void()> m_exitPlayModeCallback;
 };
 
 } // namespace fresh
