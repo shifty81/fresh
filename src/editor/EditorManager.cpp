@@ -1613,6 +1613,24 @@ void EditorManager::setFPS(float fps)
     if (m_statusBar) {
         m_statusBar->setFPS(fps);
     }
+    
+    // Also update HUD if visible and in play mode
+    if (m_nativeHUD && m_nativeHUD->isVisible()) {
+        // Get current stats
+        Win32HUD::HUDStats stats;
+        if (m_player) {
+            stats.health = m_player->getHealth();
+            stats.maxHealth = m_player->getMaxHealth();
+            stats.stamina = m_player->getStamina();
+            stats.maxStamina = m_player->getMaxStamina();
+            auto pos = m_player->getPosition();
+            stats.posX = pos.x;
+            stats.posY = pos.y;
+            stats.posZ = pos.z;
+        }
+        stats.fps = static_cast<int>(fps);
+        m_nativeHUD->updateStats(stats);
+    }
 #else
     (void)fps;  // Unused parameter on non-Windows platforms
 #endif
