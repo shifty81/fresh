@@ -72,6 +72,7 @@ class Win32SettingsDialog;
 class Win32TerraformingPanel;
 class Win32MenuBar;
 class Win32ViewportPanel;
+class Win32StatusBar;
 #else
 // Forward declarations for non-Windows platforms
 class EditorMenuBar;
@@ -501,6 +502,19 @@ public:
      * @brief Frame selection in view
      */
     void frameSelection();
+    
+    /**
+     * @brief Update FPS display in status bar
+     * @param fps Current frames per second
+     */
+    void setFPS(float fps);
+    
+    /**
+     * @brief Update memory usage display in status bar
+     * @param usedMB Memory used in megabytes
+     * @param totalMB Total available memory in megabytes
+     */
+    void setMemoryUsage(float usedMB, float totalMB);
 
 private:
     bool m_initialized;
@@ -545,6 +559,7 @@ private:
     std::unique_ptr<Win32SettingsDialog> m_nativeSettingsDialog;
     std::unique_ptr<Win32TerraformingPanel> m_nativeTerraformingPanel;
     std::unique_ptr<Win32ViewportPanel> m_viewportPanel;
+    std::unique_ptr<Win32StatusBar> m_statusBar;
 #endif
 
     // References
