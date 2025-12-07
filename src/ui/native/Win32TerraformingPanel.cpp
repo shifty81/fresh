@@ -457,9 +457,8 @@ bool Win32TerraformingPanel::handleMessage(UINT msg, WPARAM wParam, LPARAM lPara
                 VoxelType type = s_materialTypes[materialIndex]; // Use static material type array
                 
                 // Get button state
-                bool isSelected = (dis->itemState & ODS_SELECTED) != 0;
-                bool isFocused = (dis->itemState & ODS_FOCUS) != 0;
                 bool isPressed = (dis->itemState & ODS_SELECTED) != 0;
+                bool isFocused = (dis->itemState & ODS_FOCUS) != 0;
                 
                 HDC hdc = dis->hDC;
                 RECT rect = dis->rcItem;
