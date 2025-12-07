@@ -61,6 +61,7 @@ Win32TerraformingPanel::Win32TerraformingPanel()
     , m_undoButton(nullptr)
     , m_redoButton(nullptr)
     , m_tooltipControl(nullptr)
+    , m_shortcutsLabel(nullptr)
     , m_bgBrush(nullptr)
     , m_selectedBrush(nullptr)
     , m_buttonBrush(nullptr)
@@ -184,6 +185,9 @@ void Win32TerraformingPanel::createControls()
     
     // Undo/Redo section
     createUndoRedoDisplay();
+    
+    // Keyboard shortcuts display
+    createShortcutsDisplay();
 }
 
 void Win32TerraformingPanel::createToolButtons()
@@ -440,6 +444,31 @@ void Win32TerraformingPanel::createUndoRedoDisplay()
 
     if (m_undoButton) SendMessage(m_undoButton, WM_SETFONT, (WPARAM)m_textFont, TRUE);
     if (m_redoButton) SendMessage(m_redoButton, WM_SETFONT, (WPARAM)m_textFont, TRUE);
+}
+
+void Win32TerraformingPanel::createShortcutsDisplay()
+{
+    // Create a multi-line static text control to display keyboard shortcuts
+    int yPos = m_height - 35;  // Position at the very bottom
+    
+    m_shortcutsLabel = CreateWindowW(
+        L"STATIC",
+        L"Shortcuts: U=Undo | R=Redo | [/]=Size",
+        WS_CHILD | WS_VISIBLE | SS_CENTER | SS_SUNKEN,
+        MARGIN, yPos, m_width - 2 * MARGIN, 25,
+        m_hwnd,
+        nullptr,
+        GetModuleHandle(nullptr),
+        nullptr
+    );
+    
+    if (m_shortcutsLabel) {
+        // Use a smaller font for the shortcuts display
+        HFONT smallFont = CreateFontW(11, 0, 0, 0, FW_NORMAL, FALSE, FALSE, FALSE,
+                                     DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS,
+                                     CLEARTYPE_QUALITY, DEFAULT_PITCH | FF_DONTCARE, L"Segoe UI");
+        SendMessage(m_shortcutsLabel, WM_SETFONT, (WPARAM)smallFont, TRUE);
+    }
 }
 
 void Win32TerraformingPanel::update()
