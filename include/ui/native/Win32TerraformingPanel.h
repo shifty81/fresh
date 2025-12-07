@@ -86,6 +86,7 @@ private:
     std::wstring getToolName(TerraformTool tool) const;
     std::wstring getModeName(TerraformMode mode) const;
     std::wstring getMaterialName(VoxelType type) const;
+    COLORREF getVoxelColor(VoxelType type) const;  // Get representative color for voxel type
 
 private:
     WorldEditor* m_worldEditor;

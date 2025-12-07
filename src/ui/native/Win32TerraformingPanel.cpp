@@ -230,30 +230,32 @@ void Win32TerraformingPanel::createModeButtons()
 
 void Win32TerraformingPanel::createMaterialPicker()
 {
-    // Create a few material buttons
-    // In a full implementation, use icons/colors for materials
+    // Create material buttons with color indicators for common voxel types
     const wchar_t* materialNames[] = {
-        L"Stone", L"Dirt", L"Grass", L"Sand", L"Water"
+        L"Stone", L"Dirt", L"Grass", L"Sand", L"Water",
+        L"Wood", L"Leaves", L"Cobblestone", L"Planks", L"Glass"
+    };
+    
+    const VoxelType materialTypes[] = {
+        VoxelType::Stone, VoxelType::Dirt, VoxelType::Grass, VoxelType::Sand, VoxelType::Water,
+        VoxelType::Wood, VoxelType::Leaves, VoxelType::Cobblestone, VoxelType::Planks, VoxelType::Glass
     };
 
     int yPos = MARGIN + 30 + (BUTTON_HEIGHT + BUTTON_SPACING) * 10 + 
                SECTION_SPACING + 30 + BUTTON_HEIGHT + SECTION_SPACING + 30;
     
-    for (int i = 0; i < 5; ++i) {
+    // Create buttons with owner-draw style for custom color rendering
+    for (int i = 0; i < 10 && i < 15; ++i) {
         m_materialButtons[i] = CreateWindowW(
             L"BUTTON",
             materialNames[i],
-            WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,
+            WS_CHILD | WS_VISIBLE | BS_OWNERDRAW,  // Use owner-draw for custom rendering
             MARGIN, yPos, m_width - 2 * MARGIN, BUTTON_HEIGHT,
             m_hwnd,
             (HMENU)(LONG_PTR)(CMD_MATERIAL_BASE + i),
             GetModuleHandle(nullptr),
             nullptr
         );
-        
-        if (m_materialButtons[i]) {
-            SendMessage(m_materialButtons[i], WM_SETFONT, (WPARAM)m_textFont, TRUE);
-        }
         
         yPos += BUTTON_HEIGHT + BUTTON_SPACING;
     }
@@ -441,7 +443,73 @@ void Win32TerraformingPanel::onResize(int width, int height)
 
 bool Win32TerraformingPanel::handleMessage(UINT msg, WPARAM wParam, LPARAM lParam, LRESULT& result)
 {
-    (void)lParam;  // Unused parameter
+    if (msg == WM_DRAWITEM) {
+        // Handle owner-draw material buttons
+        DRAWITEMSTRUCT* dis = reinterpret_cast<DRAWITEMSTRUCT*>(lParam);
+        if (dis && dis->CtlType == ODT_BUTTON) {
+            int cmdId = static_cast<int>(dis->CtlID);
+            if (cmdId >= CMD_MATERIAL_BASE && cmdId < CMD_MATERIAL_BASE + 10) {
+                // This is a material button - draw it with color indicator
+                int materialIndex = cmdId - CMD_MATERIAL_BASE;
+                VoxelType type = static_cast<VoxelType>(materialIndex + 1); // +1 because Air is 0
+                
+                // Get button state
+                bool isSelected = (dis->itemState & ODS_SELECTED) != 0;
+                bool isFocused = (dis->itemState & ODS_FOCUS) != 0;
+                bool isPressed = (dis->itemState & ODS_SELECTED) != 0;
+                
+                HDC hdc = dis->hDC;
+                RECT rect = dis->rcItem;
+                
+                // Draw button background
+                COLORREF bgColor = isPressed ? UnrealStyleTheme::ButtonPressed : 
+                                  (isFocused ? UnrealStyleTheme::ButtonHover : UnrealStyleTheme::ButtonNormal);
+                HBRUSH bgBrush = CreateSolidBrush(bgColor);
+                FillRect(hdc, &rect, bgBrush);
+                DeleteObject(bgBrush);
+                
+                // Draw colored square indicator on the left
+                RECT colorRect = rect;
+                colorRect.left += 5;
+                colorRect.top += 5;
+                colorRect.right = colorRect.left + 20;
+                colorRect.bottom = colorRect.top + 20;
+                
+                COLORREF voxelColor = getVoxelColor(type);
+                HBRUSH colorBrush = CreateSolidBrush(voxelColor);
+                FillRect(hdc, &colorRect, colorBrush);
+                DeleteObject(colorBrush);
+                
+                // Draw border around color square
+                HPEN borderPen = CreatePen(PS_SOLID, 1, RGB(255, 255, 255));
+                HPEN oldPen = (HPEN)SelectObject(hdc, borderPen);
+                MoveToEx(hdc, colorRect.left, colorRect.top, nullptr);
+                LineTo(hdc, colorRect.right, colorRect.top);
+                LineTo(hdc, colorRect.right, colorRect.bottom);
+                LineTo(hdc, colorRect.left, colorRect.bottom);
+                LineTo(hdc, colorRect.left, colorRect.top);
+                SelectObject(hdc, oldPen);
+                DeleteObject(borderPen);
+                
+                // Draw material name text
+                std::wstring materialName = getMaterialName(type);
+                RECT textRect = rect;
+                textRect.left += 35; // Leave space for color square
+                
+                SetBkMode(hdc, TRANSPARENT);
+                SetTextColor(hdc, UnrealStyleTheme::TextNormal);
+                if (m_textFont) {
+                    SelectObject(hdc, m_textFont);
+                }
+                DrawTextW(hdc, materialName.c_str(), -1, &textRect, 
+                         DT_LEFT | DT_VCENTER | DT_SINGLELINE);
+                
+                result = TRUE;
+                return true;
+            }
+        }
+    }
+    
     if (msg == WM_COMMAND) {
         int cmdId = LOWORD(wParam);
 
@@ -598,6 +666,35 @@ std::wstring Win32TerraformingPanel::getMaterialName(VoxelType type) const
         default: return L"Unknown";
     }
 }
+
+COLORREF Win32TerraformingPanel::getVoxelColor(VoxelType type) const
+{
+    // Return representative colors for each voxel type for visual display
+    switch (type) {
+        case VoxelType::Stone:       return RGB(128, 128, 128);  // Gray
+        case VoxelType::Dirt:        return RGB(139, 69, 19);    // Brown
+        case VoxelType::Grass:       return RGB(34, 139, 34);    // Green
+        case VoxelType::Sand:        return RGB(238, 214, 175);  // Tan
+        case VoxelType::Water:       return RGB(65, 105, 225);   // Blue
+        case VoxelType::Wood:        return RGB(101, 67, 33);    // Dark brown
+        case VoxelType::Leaves:      return RGB(0, 128, 0);      // Dark green
+        case VoxelType::Glass:       return RGB(173, 216, 230);  // Light blue (transparent)
+        case VoxelType::Cobblestone: return RGB(112, 128, 144);  // Slate gray
+        case VoxelType::Planks:      return RGB(205, 133, 63);   // Peru (wood color)
+        case VoxelType::Snow:        return RGB(255, 250, 250);  // Snow white
+        case VoxelType::Ice:         return RGB(175, 238, 238);  // Pale turquoise
+        case VoxelType::Obsidian:    return RGB(25, 25, 25);     // Nearly black
+        case VoxelType::Bedrock:     return RGB(64, 64, 64);     // Dark gray
+        case VoxelType::Brick:       return RGB(178, 34, 34);    // Fire brick red
+        case VoxelType::Gravel:      return RGB(169, 169, 169);  // Dark gray
+        case VoxelType::Coal:        return RGB(54, 54, 54);     // Coal black
+        case VoxelType::Iron:        return RGB(192, 192, 192);  // Silver
+        case VoxelType::Gold:        return RGB(255, 215, 0);    // Gold
+        case VoxelType::Diamond:     return RGB(0, 191, 255);    // Deep sky blue
+        default:                     return RGB(200, 200, 200);  // Default light gray
+    }
+}
+
 
 } // namespace fresh
 
