@@ -68,6 +68,7 @@ Win32TerraformingPanel::Win32TerraformingPanel()
     , m_borderPen(nullptr)
     , m_titleFont(nullptr)
     , m_textFont(nullptr)
+    , m_shortcutsFont(nullptr)
 {
     for (int i = 0; i < 10; ++i) {
         m_toolButtons[i] = nullptr;
@@ -95,6 +96,7 @@ Win32TerraformingPanel::~Win32TerraformingPanel()
     if (m_borderPen) DeleteObject(m_borderPen);
     if (m_titleFont) DeleteObject(m_titleFont);
     if (m_textFont) DeleteObject(m_textFont);
+    if (m_shortcutsFont) DeleteObject(m_shortcutsFont);
 }
 
 bool Win32TerraformingPanel::initialize(HWND parent, WorldEditor* worldEditor)
@@ -463,11 +465,11 @@ void Win32TerraformingPanel::createShortcutsDisplay()
     );
     
     if (m_shortcutsLabel) {
-        // Use a smaller font for the shortcuts display
-        HFONT smallFont = CreateFontW(11, 0, 0, 0, FW_NORMAL, FALSE, FALSE, FALSE,
+        // Create and store a smaller font for the shortcuts display
+        m_shortcutsFont = CreateFontW(11, 0, 0, 0, FW_NORMAL, FALSE, FALSE, FALSE,
                                      DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS,
                                      CLEARTYPE_QUALITY, DEFAULT_PITCH | FF_DONTCARE, L"Segoe UI");
-        SendMessage(m_shortcutsLabel, WM_SETFONT, (WPARAM)smallFont, TRUE);
+        SendMessage(m_shortcutsLabel, WM_SETFONT, (WPARAM)m_shortcutsFont, TRUE);
     }
 }
 

@@ -1735,8 +1735,6 @@ void EditorManager::handleConsoleCommand(const std::string& command)
         LOG_INFO_C("Available commands:", "Console");
         LOG_INFO_C("  help - Show this help message", "Console");
         LOG_INFO_C("  clear - Clear the console", "Console");
-        LOG_INFO_C("  fps - Show current FPS", "Console");
-        LOG_INFO_C("  wireframe [on|off] - Toggle wireframe mode", "Console");
         LOG_INFO_C("  grid [on|off] - Toggle grid display", "Console");
         LOG_INFO_C("  play - Enter play mode", "Console");
         LOG_INFO_C("  stop - Exit play mode", "Console");
@@ -1749,24 +1747,6 @@ void EditorManager::handleConsoleCommand(const std::string& command)
         if (m_nativeConsole) {
             m_nativeConsole->clear();
             LOG_INFO_C("Console cleared", "Console");
-        }
-    }
-    else if (cmdName == "fps") {
-        // FPS display would require access to renderer statistics
-        LOG_INFO_C("FPS display command received (implementation pending)", "Console");
-    }
-    else if (cmdName == "wireframe") {
-        if (!cmdArgs.empty()) {
-            std::transform(cmdArgs.begin(), cmdArgs.end(), cmdArgs.begin(), ::tolower);
-            if (cmdArgs == "on") {
-                LOG_INFO_C("Wireframe mode enabled (implementation pending)", "Console");
-            } else if (cmdArgs == "off") {
-                LOG_INFO_C("Wireframe mode disabled (implementation pending)", "Console");
-            } else {
-                LOG_WARNING_C("Usage: wireframe [on|off]", "Console");
-            }
-        } else {
-            LOG_INFO_C("Wireframe mode toggled (implementation pending)", "Console");
         }
     }
     else if (cmdName == "grid") {

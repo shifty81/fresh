@@ -127,6 +127,7 @@ private:
     HPEN m_borderPen;
     HFONT m_titleFont;
     HFONT m_textFont;
+    HFONT m_shortcutsFont;  // Small font for shortcuts display
 
     // Layout constants
     static constexpr int MARGIN = 10;
