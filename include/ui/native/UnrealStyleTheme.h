@@ -37,6 +37,7 @@ struct UnrealStyleTheme
     
     // Text colors (high contrast white/gray)
     static constexpr COLORREF TextPrimary = RGB(241, 241, 241);             // #F1F1F1
+    static constexpr COLORREF TextNormal = RGB(241, 241, 241);              // #F1F1F1 - Alias for TextPrimary
     static constexpr COLORREF TextSecondary = RGB(180, 180, 180);           // #B4B4B4
     static constexpr COLORREF TextDisabled = RGB(108, 108, 108);            // #6C6C6C
     static constexpr COLORREF TextHighlight = RGB(255, 255, 255);           // #FFFFFF
@@ -51,6 +52,7 @@ struct UnrealStyleTheme
     static constexpr COLORREF ButtonNormal = RGB(60, 60, 60);               // #3C3C3C
     static constexpr COLORREF ButtonHover = RGB(80, 80, 80);                // #505050
     static constexpr COLORREF ButtonActive = RGB(48, 48, 48);               // #303030
+    static constexpr COLORREF ButtonPressed = RGB(48, 48, 48);              // #303030 - Alias for ButtonActive
     static constexpr COLORREF ButtonDisabled = RGB(45, 45, 45);             // #2D2D2D
     
     // Input field colors

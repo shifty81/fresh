@@ -991,7 +991,7 @@ void Engine::update(float deltaTime)
 #ifdef _WIN32
     // WINDOW RESIZE HANDLING - Update panel layouts when main window is resized
     if (m_window && m_editorManager) {
-        Win32Window* win32Window = dynamic_cast<Win32Window*>(m_window);
+        Win32Window* win32Window = dynamic_cast<Win32Window*>(m_window.get());
         if (win32Window && win32Window->wasFramebufferResized()) {
             win32Window->resetFramebufferResizedFlag();  // Reset flag immediately to prevent repeated logging
             
