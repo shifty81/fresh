@@ -82,11 +82,11 @@ public:
     const Settings& getSettings() const { return m_settings; }
 
 private:
-    // Dialog procedure
-    static INT_PTR CALLBACK DialogProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
+    // Window procedure
+    static LRESULT CALLBACK WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
     
-    // Instance dialog procedure
-    INT_PTR handleMessage(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
+    // Instance message handler
+    LRESULT handleWindowMessage(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
     // Message handlers
     void onInitDialog(HWND hwnd);
@@ -97,7 +97,13 @@ private:
     void onCancel(HWND hwnd);
 
     // Helper functions
-    void createControls(HWND hwnd);
+    void centerDialog(HWND parentHwnd);
+    void createControlsTab(HWND hwnd);
+    void createVideoTab(HWND hwnd);
+    void createAudioTab(HWND hwnd);
+    void createGameplayTab(HWND hwnd);
+    void createButtons(HWND hwnd);
+    void showTab(int tabIndex);
     void loadSettings(HWND hwnd);
     void saveSettings(HWND hwnd);
     void updateSliderLabel(HWND slider, HWND label, float min, float max);
@@ -105,6 +111,9 @@ private:
 
     // Control IDs
     enum ControlID {
+        // Tab control
+        IDC_TAB_CONTROL = 1000,
+        
         // Controls tab
         IDC_MOUSE_SENSITIVITY_SLIDER = 1001,
         IDC_MOUSE_SENSITIVITY_LABEL = 1002,
@@ -139,6 +148,38 @@ private:
     ApplyCallback m_applyCallback;
     HWND m_hwnd;
     bool m_applied;
+    
+    // Dialog state
+    bool m_dialogRunning;
+    int m_dialogResult;
+    
+    // Control handles
+    HWND m_tabControl;
+    
+    // Controls tab
+    HWND m_mouseSensSlider;
+    HWND m_mouseSensLabel;
+    HWND m_invertYCheck;
+    HWND m_fovSlider;
+    HWND m_fovLabel;
+    
+    // Video tab
+    HWND m_resolutionCombo;
+    HWND m_vsyncCheck;
+    HWND m_fpsLimitEdit;
+    HWND m_fullscreenCheck;
+    
+    // Audio tab
+    HWND m_masterVolSlider;
+    HWND m_masterVolLabel;
+    HWND m_musicVolSlider;
+    HWND m_musicVolLabel;
+    HWND m_sfxVolSlider;
+    HWND m_sfxVolLabel;
+    
+    // Gameplay tab
+    HWND m_renderDistSlider;
+    HWND m_renderDistLabel;
 
     // Available resolutions
     static const Resolution RESOLUTIONS[];
