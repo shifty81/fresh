@@ -7,6 +7,7 @@
     #endif
 #endif
 
+#include <algorithm>
 #include <climits>
 #include <cmath>
 #include "core/Logger.h"
@@ -510,6 +511,11 @@ bool EditorManager::initialize(WindowType* window, IRenderContext* renderContext
         m_nativeConsole = std::make_unique<Win32ConsolePanel>();
         if (m_nativeConsole->create(hwnd, LEFT_PANEL_WIDTH, CONSOLE_Y_POSITION, MIN_CONSOLE_WIDTH, PANEL_HEIGHT)) {
             LOG_INFO_C("Native Win32 Console Panel created", "EditorManager");
+            
+            // Set up command callback for console command execution
+            m_nativeConsole->setCommandCallback([this](const std::string& command) {
+                handleConsoleCommand(command);
+            });
         }
         
         // Create native HUD (for play mode)
@@ -1607,6 +1613,24 @@ void EditorManager::setFPS(float fps)
     if (m_statusBar) {
         m_statusBar->setFPS(fps);
     }
+    
+    // Also update HUD if visible and in play mode
+    if (m_nativeHUD && m_nativeHUD->isVisible()) {
+        // Get current stats
+        Win32HUD::HUDStats stats;
+        if (m_player) {
+            stats.health = m_player->getHealth();
+            stats.maxHealth = m_player->getMaxHealth();
+            stats.stamina = m_player->getStamina();
+            stats.maxStamina = m_player->getMaxStamina();
+            auto pos = m_player->getPosition();
+            stats.posX = pos.x;
+            stats.posY = pos.y;
+            stats.posZ = pos.z;
+        }
+        stats.fps = static_cast<int>(fps);
+        m_nativeHUD->updateStats(stats);
+    }
 #else
     (void)fps;  // Unused parameter on non-Windows platforms
 #endif
@@ -1676,6 +1700,103 @@ void EditorManager::onWindowResize(int clientWidth, int clientHeight)
         
         m_viewportPanel->setPosition(viewportX, viewportY);
         m_viewportPanel->setSize(viewportWidth, viewportHeight);
+    }
+}
+
+void EditorManager::handleConsoleCommand(const std::string& command)
+{
+    // Trim whitespace
+    std::string cmd = command;
+    cmd.erase(0, cmd.find_first_not_of(" \t\r\n"));
+    cmd.erase(cmd.find_last_not_of(" \t\r\n") + 1);
+    
+    if (cmd.empty()) {
+        return;
+    }
+    
+    LOG_INFO_C("Console command: " + cmd, "EditorManager");
+    
+    // Parse command
+    std::string cmdName;
+    std::string cmdArgs;
+    size_t spacePos = cmd.find(' ');
+    if (spacePos != std::string::npos) {
+        cmdName = cmd.substr(0, spacePos);
+        cmdArgs = cmd.substr(spacePos + 1);
+    } else {
+        cmdName = cmd;
+    }
+    
+    // Convert to lowercase for case-insensitive comparison
+    std::transform(cmdName.begin(), cmdName.end(), cmdName.begin(), ::tolower);
+    
+    // Handle commands
+    if (cmdName == "help") {
+        LOG_INFO_C("Available commands:", "Console");
+        LOG_INFO_C("  help - Show this help message", "Console");
+        LOG_INFO_C("  clear - Clear the console", "Console");
+        LOG_INFO_C("  grid [on|off] - Toggle grid display", "Console");
+        LOG_INFO_C("  play - Enter play mode", "Console");
+        LOG_INFO_C("  stop - Exit play mode", "Console");
+        LOG_INFO_C("  save - Save current world", "Console");
+        LOG_INFO_C("  load - Load a world", "Console");
+        LOG_INFO_C("  new - Create a new world", "Console");
+        LOG_INFO_C("  quit - Exit the editor", "Console");
+    }
+    else if (cmdName == "clear") {
+        if (m_nativeConsole) {
+            m_nativeConsole->clear();
+            LOG_INFO_C("Console cleared", "Console");
+        }
+    }
+    else if (cmdName == "grid") {
+        if (!cmdArgs.empty()) {
+            std::transform(cmdArgs.begin(), cmdArgs.end(), cmdArgs.begin(), ::tolower);
+            if (cmdArgs == "on") {
+                m_showGrid = true;
+                LOG_INFO_C("Grid display enabled", "Console");
+            } else if (cmdArgs == "off") {
+                m_showGrid = false;
+                LOG_INFO_C("Grid display disabled", "Console");
+            } else {
+                LOG_WARNING_C("Usage: grid [on|off]", "Console");
+            }
+        } else {
+            m_showGrid = !m_showGrid;
+            LOG_INFO_C(m_showGrid ? "Grid display enabled" : "Grid display disabled", "Console");
+        }
+    }
+    else if (cmdName == "play") {
+        enterPlayMode();
+        LOG_INFO_C("Entering play mode", "Console");
+    }
+    else if (cmdName == "stop") {
+        exitPlayMode();
+        LOG_INFO_C("Exiting play mode", "Console");
+    }
+    else if (cmdName == "save") {
+        saveWorld();
+        LOG_INFO_C("Save world command executed", "Console");
+    }
+    else if (cmdName == "load") {
+        loadWorld();
+        LOG_INFO_C("Load world command executed", "Console");
+    }
+    else if (cmdName == "new") {
+        newWorld();
+        LOG_INFO_C("New world command executed", "Console");
+    }
+    else if (cmdName == "quit" || cmdName == "exit") {
+        LOG_INFO_C("Quit command received", "Console");
+        // Request application exit
+        #ifdef _WIN32
+        if (m_window) {
+            PostMessageW(m_window->getHandle(), WM_CLOSE, 0, 0);
+        }
+        #endif
+    }
+    else {
+        LOG_WARNING_C("Unknown command: " + cmdName + " (type 'help' for available commands)", "Console");
     }
 }
 #endif

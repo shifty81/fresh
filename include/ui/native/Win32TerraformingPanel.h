@@ -63,6 +63,7 @@ private:
     void createMaterialPicker();
     void createSizeControl();
     void createUndoRedoDisplay();
+    void createShortcutsDisplay();
 
     // Update functions
     void updateToolSelection();
@@ -116,6 +117,8 @@ private:
     HWND m_sizeLabel;
     HWND m_undoButton;
     HWND m_redoButton;
+    HWND m_tooltipControl;  // Tooltip control for hover hints
+    HWND m_shortcutsLabel;   // Label displaying keyboard shortcuts
 
     // GDI resources for custom drawing
     HBRUSH m_bgBrush;
@@ -124,6 +127,7 @@ private:
     HPEN m_borderPen;
     HFONT m_titleFont;
     HFONT m_textFont;
+    HFONT m_shortcutsFont;  // Small font for shortcuts display
 
     // Layout constants
     static constexpr int MARGIN = 10;

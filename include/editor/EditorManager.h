@@ -517,6 +517,14 @@ public:
     void setMemoryUsage(float usedMB, float totalMB);
 
 private:
+#ifdef _WIN32
+    /**
+     * @brief Handle console command execution
+     * @param command The command string entered by the user
+     */
+    void handleConsoleCommand(const std::string& command);
+#endif
+
     bool m_initialized;
     bool m_visible;
 

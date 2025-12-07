@@ -60,12 +60,15 @@ Win32TerraformingPanel::Win32TerraformingPanel()
     , m_sizeLabel(nullptr)
     , m_undoButton(nullptr)
     , m_redoButton(nullptr)
+    , m_tooltipControl(nullptr)
+    , m_shortcutsLabel(nullptr)
     , m_bgBrush(nullptr)
     , m_selectedBrush(nullptr)
     , m_buttonBrush(nullptr)
     , m_borderPen(nullptr)
     , m_titleFont(nullptr)
     , m_textFont(nullptr)
+    , m_shortcutsFont(nullptr)
 {
     for (int i = 0; i < 10; ++i) {
         m_toolButtons[i] = nullptr;
@@ -80,6 +83,12 @@ Win32TerraformingPanel::Win32TerraformingPanel()
 
 Win32TerraformingPanel::~Win32TerraformingPanel()
 {
+    // Clean up tooltip control
+    if (m_tooltipControl) {
+        DestroyWindow(m_tooltipControl);
+        m_tooltipControl = nullptr;
+    }
+    
     // Clean up GDI resources
     if (m_bgBrush) DeleteObject(m_bgBrush);
     if (m_selectedBrush) DeleteObject(m_selectedBrush);
@@ -87,6 +96,7 @@ Win32TerraformingPanel::~Win32TerraformingPanel()
     if (m_borderPen) DeleteObject(m_borderPen);
     if (m_titleFont) DeleteObject(m_titleFont);
     if (m_textFont) DeleteObject(m_textFont);
+    if (m_shortcutsFont) DeleteObject(m_shortcutsFont);
 }
 
 bool Win32TerraformingPanel::initialize(HWND parent, WorldEditor* worldEditor)
@@ -137,6 +147,29 @@ void Win32TerraformingPanel::onCreate()
 
 void Win32TerraformingPanel::createControls()
 {
+    // Create tooltip control for hover hints
+    m_tooltipControl = CreateWindowExW(
+        WS_EX_TOPMOST,
+        TOOLTIPS_CLASSW,
+        nullptr,
+        WS_POPUP | TTS_ALWAYSTIP | TTS_BALLOON,
+        CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT,
+        m_hwnd,
+        nullptr,
+        GetModuleHandle(nullptr),
+        nullptr
+    );
+    
+    if (m_tooltipControl) {
+        // Set tooltip delay times (faster appearance)
+        SendMessageW(m_tooltipControl, TTM_SETDELAYTIME, TTDT_AUTOPOP, MAKELONG(10000, 0));  // Display for 10 seconds
+        SendMessageW(m_tooltipControl, TTM_SETDELAYTIME, TTDT_INITIAL, MAKELONG(500, 0));     // Show after 0.5 seconds
+        SendMessageW(m_tooltipControl, TTM_SETDELAYTIME, TTDT_RESHOW, MAKELONG(200, 0));      // Re-show after 0.2 seconds
+        
+        // Set max width for multi-line tooltips
+        SendMessageW(m_tooltipControl, TTM_SETMAXTIPWIDTH, 0, 300);
+    }
+    
     // Create tool buttons
     // Removed unused variable: int yPos = MARGIN;
     
@@ -154,6 +187,9 @@ void Win32TerraformingPanel::createControls()
     
     // Undo/Redo section
     createUndoRedoDisplay();
+    
+    // Keyboard shortcuts display
+    createShortcutsDisplay();
 }
 
 void Win32TerraformingPanel::createToolButtons()
@@ -172,6 +208,20 @@ void Win32TerraformingPanel::createToolButtons()
         L"Flatten",
         L"Smooth",
         L"Paint"
+    };
+    
+    // Tooltip descriptions for each tool
+    const wchar_t* toolTooltips[] = {
+        L"Single Block - Place or remove one block at a time",
+        L"Brush - Paint voxels in a circular area",
+        L"Sphere - Create a hollow sphere shape",
+        L"Filled Sphere - Create a solid sphere shape",
+        L"Cube - Create a hollow cube shape",
+        L"Filled Cube - Create a solid cube shape",
+        L"Line - Draw a straight line of voxels",
+        L"Flatten - Level terrain to create flat surfaces",
+        L"Smooth - Blend and smooth terrain irregularities",
+        L"Paint - Change voxel types without affecting shape"
     };
 
     int cmdIds[] = {
@@ -202,6 +252,17 @@ void Win32TerraformingPanel::createToolButtons()
         
         if (m_toolButtons[i]) {
             SendMessage(m_toolButtons[i], WM_SETFONT, (WPARAM)m_textFont, TRUE);
+            
+            // Add tooltip for this tool button
+            if (m_tooltipControl) {
+                TOOLINFOW ti = { 0 };
+                ti.cbSize = sizeof(TOOLINFOW);
+                ti.uFlags = TTF_IDISHWND | TTF_SUBCLASS;
+                ti.hwnd = m_hwnd;
+                ti.uId = (UINT_PTR)m_toolButtons[i];
+                ti.lpszText = const_cast<LPWSTR>(toolTooltips[i]);
+                SendMessageW(m_tooltipControl, TTM_ADDTOOLW, 0, (LPARAM)&ti);
+            }
         }
         
         yPos += BUTTON_HEIGHT + BUTTON_SPACING;
@@ -211,6 +272,11 @@ void Win32TerraformingPanel::createToolButtons()
 void Win32TerraformingPanel::createModeButtons()
 {
     const wchar_t* modeNames[] = { L"Place", L"Remove", L"Replace" };
+    const wchar_t* modeTooltips[] = {
+        L"Place Mode - Add new voxels to the world",
+        L"Remove Mode - Delete voxels from the world",
+        L"Replace Mode - Change existing voxels to a new type"
+    };
     int cmdIds[] = { CMD_MODE_PLACE, CMD_MODE_REMOVE, CMD_MODE_REPLACE };
 
     int yPos = MARGIN + 30 + (BUTTON_HEIGHT + BUTTON_SPACING) * 10 + SECTION_SPACING + 30;
@@ -231,6 +297,17 @@ void Win32TerraformingPanel::createModeButtons()
         
         if (m_modeButtons[i]) {
             SendMessage(m_modeButtons[i], WM_SETFONT, (WPARAM)m_textFont, TRUE);
+            
+            // Add tooltip for this mode button
+            if (m_tooltipControl) {
+                TOOLINFOW ti = { 0 };
+                ti.cbSize = sizeof(TOOLINFOW);
+                ti.uFlags = TTF_IDISHWND | TTF_SUBCLASS;
+                ti.hwnd = m_hwnd;
+                ti.uId = (UINT_PTR)m_modeButtons[i];
+                ti.lpszText = const_cast<LPWSTR>(modeTooltips[i]);
+                SendMessageW(m_tooltipControl, TTM_ADDTOOLW, 0, (LPARAM)&ti);
+            }
         }
     }
 }
@@ -241,6 +318,20 @@ void Win32TerraformingPanel::createMaterialPicker()
     const wchar_t* materialNames[NUM_MATERIALS] = {
         L"Stone", L"Dirt", L"Grass", L"Sand", L"Water",
         L"Wood", L"Leaves", L"Cobblestone", L"Planks", L"Glass"
+    };
+    
+    // Tooltip descriptions for each material
+    const wchar_t* materialTooltips[NUM_MATERIALS] = {
+        L"Stone - Basic building block from underground",
+        L"Dirt - Common earth material for terrain",
+        L"Grass - Surface terrain with vegetation",
+        L"Sand - Desert and beach material",
+        L"Water - Liquid block for lakes and oceans",
+        L"Wood - Natural log material from trees",
+        L"Leaves - Foliage blocks from trees",
+        L"Cobblestone - Crafted stone variant",
+        L"Planks - Processed wood building material",
+        L"Glass - Transparent building material"
     };
 
     int yPos = MARGIN + 30 + (BUTTON_HEIGHT + BUTTON_SPACING) * 10 + 
@@ -258,6 +349,17 @@ void Win32TerraformingPanel::createMaterialPicker()
             GetModuleHandle(nullptr),
             nullptr
         );
+        
+        // Add tooltip for this material button
+        if (m_materialButtons[i] && m_tooltipControl) {
+            TOOLINFOW ti = { 0 };
+            ti.cbSize = sizeof(TOOLINFOW);
+            ti.uFlags = TTF_IDISHWND | TTF_SUBCLASS;
+            ti.hwnd = m_hwnd;
+            ti.uId = (UINT_PTR)m_materialButtons[i];
+            ti.lpszText = const_cast<LPWSTR>(materialTooltips[i]);
+            SendMessageW(m_tooltipControl, TTM_ADDTOOLW, 0, (LPARAM)&ti);
+        }
         
         yPos += BUTTON_HEIGHT + BUTTON_SPACING;
     }
@@ -344,6 +446,31 @@ void Win32TerraformingPanel::createUndoRedoDisplay()
 
     if (m_undoButton) SendMessage(m_undoButton, WM_SETFONT, (WPARAM)m_textFont, TRUE);
     if (m_redoButton) SendMessage(m_redoButton, WM_SETFONT, (WPARAM)m_textFont, TRUE);
+}
+
+void Win32TerraformingPanel::createShortcutsDisplay()
+{
+    // Create a multi-line static text control to display keyboard shortcuts
+    int yPos = m_height - 35;  // Position at the very bottom
+    
+    m_shortcutsLabel = CreateWindowW(
+        L"STATIC",
+        L"Shortcuts: U=Undo | R=Redo | [/]=Size",
+        WS_CHILD | WS_VISIBLE | SS_CENTER | SS_SUNKEN,
+        MARGIN, yPos, m_width - 2 * MARGIN, 25,
+        m_hwnd,
+        nullptr,
+        GetModuleHandle(nullptr),
+        nullptr
+    );
+    
+    if (m_shortcutsLabel) {
+        // Create and store a smaller font for the shortcuts display
+        m_shortcutsFont = CreateFontW(11, 0, 0, 0, FW_NORMAL, FALSE, FALSE, FALSE,
+                                     DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS,
+                                     CLEARTYPE_QUALITY, DEFAULT_PITCH | FF_DONTCARE, L"Segoe UI");
+        SendMessage(m_shortcutsLabel, WM_SETFONT, (WPARAM)m_shortcutsFont, TRUE);
+    }
 }
 
 void Win32TerraformingPanel::update()
