@@ -1674,6 +1674,8 @@ void EditorManager::onWindowResize(int clientWidth, int clientHeight)
     // Update panel layout when window is resized
     // This ensures panels maintain proper positions and sizes
     
+    (void)clientHeight;  // Reserved for future dynamic layout adjustments
+    
     if (!m_window) {
         return;
     }
