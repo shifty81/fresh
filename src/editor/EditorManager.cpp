@@ -580,6 +580,34 @@ bool EditorManager::initialize(WindowType* window, IRenderContext* renderContext
             LOG_ERROR_C("Failed to create Native Win32 Status Bar", "EditorManager");
         }
         
+        // Force initial paint of all panels by invalidating their client areas
+        // This ensures panels are visible immediately on startup
+        if (m_nativeInspector && m_nativeInspector->getHandle()) {
+            InvalidateRect(m_nativeInspector->getHandle(), nullptr, TRUE);
+        }
+        if (m_nativeSceneHierarchy && m_nativeSceneHierarchy->getHandle()) {
+            InvalidateRect(m_nativeSceneHierarchy->getHandle(), nullptr, TRUE);
+        }
+        if (m_nativeContentBrowser && m_nativeContentBrowser->getHandle()) {
+            InvalidateRect(m_nativeContentBrowser->getHandle(), nullptr, TRUE);
+        }
+        if (m_nativeConsole && m_nativeConsole->getHandle()) {
+            InvalidateRect(m_nativeConsole->getHandle(), nullptr, TRUE);
+        }
+        if (m_viewportPanel && m_viewportPanel->getHandle()) {
+            InvalidateRect(m_viewportPanel->getHandle(), nullptr, TRUE);
+        }
+        if (m_statusBar && m_statusBar->getHandle()) {
+            InvalidateRect(m_statusBar->getHandle(), nullptr, TRUE);
+        }
+        if (m_nativeTerraformingPanel && m_nativeTerraformingPanel->getHandle()) {
+            InvalidateRect(m_nativeTerraformingPanel->getHandle(), nullptr, TRUE);
+        }
+        
+        // Also invalidate the main window to ensure proper initial layout
+        InvalidateRect(hwnd, nullptr, TRUE);
+        UpdateWindow(hwnd);
+        
         LOG_INFO_C("All native Win32 UI panels initialized successfully", "EditorManager");
     } else {
         LOG_WARNING_C("Win32Window not available, native panels not created", "EditorManager");

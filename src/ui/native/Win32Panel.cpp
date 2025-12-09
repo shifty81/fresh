@@ -80,7 +80,7 @@ bool Win32Panel::create(HWND parent, int x, int y, int width, int height, const 
         0,
         WINDOW_CLASS_NAME,
         title,
-        WS_CHILD | WS_VISIBLE | WS_CLIPCHILDREN,
+        WS_CHILD | WS_VISIBLE | WS_CLIPCHILDREN | WS_CLIPSIBLINGS,
         x, y, width, height,
         parent,
         nullptr,

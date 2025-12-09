@@ -332,6 +332,49 @@ bool Engine::initialize()
         this->exitPlayMode();
     });
     
+#ifdef _WIN32
+    // VIEWPORT INTEGRATION - Set up viewport rendering immediately after EditorManager creation
+    // This ensures DirectX renders to the viewport child window from the start
+    if (m_editorManager->getViewportPanel() && m_renderer) {
+        auto* viewportPanel = m_editorManager->getViewportPanel();
+        HWND viewportHwnd = viewportPanel->getHandle();
+        
+        if (viewportHwnd) {
+            LOG_INFO_C("Setting up renderer to use viewport child window", "Engine");
+            
+            // Set viewport window handle in renderer
+            if (m_renderer->setViewportWindow(viewportHwnd)) {
+                // Recreate swap chain for viewport
+                int vpWidth = viewportPanel->getWidth();
+                int vpHeight = viewportPanel->getHeight();
+                
+                if (vpWidth > 0 && vpHeight > 0) {
+                    if (m_renderer->recreateSwapChain(vpWidth, vpHeight)) {
+                        LOG_INFO_C("DirectX swap chain created for viewport: " + 
+                                   std::to_string(vpWidth) + "x" + std::to_string(vpHeight), "Engine");
+                        
+                        // Update camera aspect ratio if player exists
+                        if (m_player) {
+                            float aspectRatio = static_cast<float>(vpWidth) / static_cast<float>(vpHeight);
+                            m_player->getCamera().setAspectRatio(aspectRatio);
+                        }
+                    } else {
+                        LOG_ERROR_C("Failed to recreate DirectX swap chain for viewport during initialization", "Engine");
+                    }
+                } else {
+                    LOG_WARNING_C("Viewport dimensions are invalid during initialization", "Engine");
+                }
+            } else {
+                LOG_ERROR_C("Failed to set viewport window handle during initialization", "Engine");
+            }
+        } else {
+            LOG_WARNING_C("Viewport panel has no valid handle during initialization", "Engine");
+        }
+    } else {
+        LOG_WARNING_C("Viewport panel not available during initialization", "Engine");
+    }
+#endif
+    
     m_editorManager->setVisible(true); // Show editor immediately
     std::cout << "Editor manager initialized" << std::endl;
     LOG_INFO_C("Editor manager initialized", "Engine");
