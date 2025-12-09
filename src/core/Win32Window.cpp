@@ -340,6 +340,21 @@ LRESULT CALLBACK Win32Window::WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LP
             return 0;
         }
 
+        case WM_PAINT: {
+            // Properly handle paint message to validate window area
+            PAINTSTRUCT ps;
+            HDC hdc = BeginPaint(hwnd, &ps);
+            // DirectX/child windows handle their own rendering
+            // Just validate the window to prevent continuous WM_PAINT messages
+            EndPaint(hwnd, &ps);
+            return 0;
+        }
+
+        case WM_ERASEBKGND:
+            // Don't erase background - DirectX and child windows handle their own rendering
+            // This prevents flicker and ensures child windows are properly visible
+            return 1;
+
         case WM_DESTROY:
             PostQuitMessage(0);
             return 0;
