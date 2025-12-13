@@ -92,20 +92,27 @@ static std::string toNarrowString(const std::wstring& wstr)
 }
 #endif
 
-// Panel layout constants
+// Panel layout constants - Unreal Engine style layout
 namespace {
-    constexpr int PANEL_MARGIN = 10;           // Spacing between panels
+    constexpr int PANEL_MARGIN = 5;            // Spacing between panels (tight like Unreal)
     constexpr int TOOLBAR_HEIGHT = 80;         // Height reserved for menu/toolbar
-    constexpr int CONSOLE_Y_POSITION = 600;    // Y position where console panel starts
-    constexpr int LEFT_PANEL_WIDTH = 680;      // Total width of left column panels
-    constexpr int INSPECTOR_WIDTH = 350;
-    constexpr int SCENE_HIERARCHY_X = 370;
-    constexpr int SCENE_HIERARCHY_WIDTH = 300;
-    constexpr int CONTENT_BROWSER_WIDTH = 660;
-    constexpr int PANEL_HEIGHT = 350;          // Standard panel height
+    
+    // Left side - Asset/Content Browser panel (narrow vertical)
+    constexpr int LEFT_PANEL_WIDTH = 220;      // Asset browser on left (narrow like Unreal)
+    
+    // Right side - Outliner + Inspector panels (stacked vertically)
+    constexpr int RIGHT_PANEL_WIDTH = 350;     // World Outliner + Inspector on right
+    constexpr float OUTLINER_HEIGHT_RATIO = 0.40f;  // Outliner takes 40% of right panel height
+    constexpr float INSPECTOR_HEIGHT_RATIO = 0.60f; // Inspector takes 60% of right panel height
+    
+    // Bottom - Content Browser + Console (horizontal strip below viewport)
+    constexpr int BOTTOM_PANEL_HEIGHT = 220;   // Content Browser + Console at bottom
+    constexpr int CONTENT_BROWSER_WIDTH = 700; // Content Browser width in bottom panel
+    
+    // Minimum sizes
     constexpr int MIN_VIEWPORT_WIDTH = 400;
     constexpr int MIN_VIEWPORT_HEIGHT = 300;
-    constexpr int MIN_CONSOLE_WIDTH = 600;
+    constexpr int MIN_CONSOLE_WIDTH = 300;  // Console needs reasonable width for command input/output
 } // anonymous namespace
 
 EditorManager::EditorManager()
@@ -484,34 +491,91 @@ bool EditorManager::initialize(WindowType* window, IRenderContext* renderContext
     if (win32Window) {
         HWND hwnd = win32Window->getHandle();
         
-        // Create native Inspector panel
-        m_nativeInspector = std::make_unique<Win32InspectorPanel>();
-        if (m_nativeInspector->create(hwnd, PANEL_MARGIN, TOOLBAR_HEIGHT, INSPECTOR_WIDTH, 500, m_entityManager)) {
-            LOG_INFO_C("Native Win32 Inspector Panel created", "EditorManager");
+        // Get window client area size for layout calculations
+        RECT clientRect;
+        GetClientRect(hwnd, &clientRect);
+        int clientWidth = clientRect.right - clientRect.left;
+        int clientHeight = clientRect.bottom - clientRect.top;
+        
+        // Calculate panel positions - Unreal Engine style layout:
+        // - Left: Asset browser (narrow vertical panel)
+        // - Center: Viewport (large central area)
+        // - Right: World Outliner (top) + Inspector (bottom) stacked vertically
+        // - Bottom: Content Browser + Console (horizontal strip below viewport)
+        // 
+        // Window size requirements:
+        // - Minimum recommended: 1280x720 for comfortable editing
+        // - Absolute minimum: 800x600 (panels may overlap or become cramped)
+        // - Below 800x600: Layout degrades - viewport/console enforced to MIN sizes
+        // - Fixed-width panels (left 220px, right 350px) always maintain size
+        // - Dynamic panels (viewport, console) adjust to fill available space
+        
+        // Left panel - Asset/Terraforming tools (narrow vertical, full height minus bottom panel)
+        int leftPanelX = PANEL_MARGIN;
+        int leftPanelY = TOOLBAR_HEIGHT;
+        int leftPanelHeight = clientHeight - TOOLBAR_HEIGHT - BOTTOM_PANEL_HEIGHT - PANEL_MARGIN * 2;
+        
+        // Right panel - split vertically between Outliner (top) and Inspector (bottom)
+        int rightPanelX = clientWidth - RIGHT_PANEL_WIDTH - PANEL_MARGIN;
+        int rightPanelY = TOOLBAR_HEIGHT;
+        int rightPanelUsableHeight = clientHeight - TOOLBAR_HEIGHT - BOTTOM_PANEL_HEIGHT - PANEL_MARGIN * 2;
+        int outlinerHeight = static_cast<int>(rightPanelUsableHeight * OUTLINER_HEIGHT_RATIO);
+        // Inspector height is derived rather than calculated separately to ensure heights sum exactly
+        // to rightPanelUsableHeight (accounting for margin), avoiding pixel gaps from rounding errors
+        int inspectorHeight = rightPanelUsableHeight - outlinerHeight - PANEL_MARGIN;
+        
+        // Bottom panel - Content Browser + Console (horizontal strip)
+        int bottomPanelY = clientHeight - BOTTOM_PANEL_HEIGHT - PANEL_MARGIN;
+        
+        // Viewport - center area between left and right panels
+        int viewportX = LEFT_PANEL_WIDTH + PANEL_MARGIN * 2;
+        int viewportY = TOOLBAR_HEIGHT;
+        int viewportWidth = std::max(MIN_VIEWPORT_WIDTH, rightPanelX - viewportX - PANEL_MARGIN);
+        int viewportHeight = std::max(MIN_VIEWPORT_HEIGHT, bottomPanelY - TOOLBAR_HEIGHT - PANEL_MARGIN);
+        
+        // Create native Terraforming Panel (left side, where asset browser would be in Unreal)
+        // This serves as our "tools" panel similar to Unreal's left panel
+        if (worldEditor) {
+            m_nativeTerraformingPanel = std::make_unique<Win32TerraformingPanel>();
+            if (m_nativeTerraformingPanel->initialize(hwnd, worldEditor)) {
+                // Position on the left side
+                m_nativeTerraformingPanel->setPosition(leftPanelX, leftPanelY);
+                m_nativeTerraformingPanel->setSize(LEFT_PANEL_WIDTH, leftPanelHeight);
+                LOG_INFO_C("Native Win32 Terraforming Panel created (left side)", "EditorManager");
+            }
         }
         
-        // Create native Scene Hierarchy panel
+        // Create native Scene Hierarchy panel (right side, top position - World Outliner)
         m_nativeSceneHierarchy = std::make_unique<Win32SceneHierarchyPanel>();
-        if (m_nativeSceneHierarchy->create(hwnd, SCENE_HIERARCHY_X, TOOLBAR_HEIGHT, SCENE_HIERARCHY_WIDTH, 500, world)) {
+        if (m_nativeSceneHierarchy->create(hwnd, rightPanelX, rightPanelY, RIGHT_PANEL_WIDTH, outlinerHeight, world)) {
             // Set selection callback to update inspector
             m_nativeSceneHierarchy->setSelectionCallback([this](HierarchyNode* node) {
                 if (m_nativeInspector) {
                     m_nativeInspector->setInspectedNode(node);
                 }
             });
-            LOG_INFO_C("Native Win32 Scene Hierarchy Panel created", "EditorManager");
+            LOG_INFO_C("Native Win32 Scene Hierarchy Panel created (right top)", "EditorManager");
         }
         
-        // Create native Content Browser panel
+        // Create native Inspector panel (right side, bottom position - Details panel)
+        int inspectorY = rightPanelY + outlinerHeight + PANEL_MARGIN;
+        m_nativeInspector = std::make_unique<Win32InspectorPanel>();
+        if (m_nativeInspector->create(hwnd, rightPanelX, inspectorY, RIGHT_PANEL_WIDTH, inspectorHeight, m_entityManager)) {
+            LOG_INFO_C("Native Win32 Inspector Panel created (right bottom)", "EditorManager");
+        }
+        
+        // Create native Content Browser panel (bottom left)
         m_nativeContentBrowser = std::make_unique<Win32ContentBrowserPanel>();
-        if (m_nativeContentBrowser->create(hwnd, PANEL_MARGIN, CONSOLE_Y_POSITION, CONTENT_BROWSER_WIDTH, PANEL_HEIGHT, "assets")) {
-            LOG_INFO_C("Native Win32 Content Browser Panel created", "EditorManager");
+        if (m_nativeContentBrowser->create(hwnd, PANEL_MARGIN, bottomPanelY, CONTENT_BROWSER_WIDTH, BOTTOM_PANEL_HEIGHT, "assets")) {
+            LOG_INFO_C("Native Win32 Content Browser Panel created (bottom left)", "EditorManager");
         }
         
-        // Create native Console panel
+        // Create native Console panel (bottom right, next to content browser)
+        int consoleX = PANEL_MARGIN + CONTENT_BROWSER_WIDTH + PANEL_MARGIN;
+        int consoleWidth = std::max(MIN_CONSOLE_WIDTH, clientWidth - consoleX - PANEL_MARGIN);
         m_nativeConsole = std::make_unique<Win32ConsolePanel>();
-        if (m_nativeConsole->create(hwnd, LEFT_PANEL_WIDTH, CONSOLE_Y_POSITION, MIN_CONSOLE_WIDTH, PANEL_HEIGHT)) {
-            LOG_INFO_C("Native Win32 Console Panel created", "EditorManager");
+        if (m_nativeConsole->create(hwnd, consoleX, bottomPanelY, consoleWidth, BOTTOM_PANEL_HEIGHT)) {
+            LOG_INFO_C("Native Win32 Console Panel created (bottom right)", "EditorManager");
             
             // Set up command callback for console command execution
             m_nativeConsole->setCommandCallback([this](const std::string& command) {
@@ -538,30 +602,7 @@ bool EditorManager::initialize(WindowType* window, IRenderContext* renderContext
         m_nativeSettingsDialog = std::make_unique<Win32SettingsDialog>();
         LOG_INFO_C("Native Win32 Settings Dialog created", "EditorManager");
         
-        // Create native Terraforming Panel
-        if (worldEditor) {
-            m_nativeTerraformingPanel = std::make_unique<Win32TerraformingPanel>();
-            if (m_nativeTerraformingPanel->initialize(hwnd, worldEditor)) {
-                LOG_INFO_C("Native Win32 Terraforming Panel created", "EditorManager");
-            }
-        }
-        
-        // Create native Viewport Panel (central 3D view)
-        // Position it to take most of the window, leaving space for UI panels
-        // Get window client area size
-        RECT clientRect;
-        GetClientRect(hwnd, &clientRect);
-        int clientWidth = clientRect.right - clientRect.left;
-        int clientHeight = clientRect.bottom - clientRect.top;
-        (void)clientHeight;  // Reserved for future dynamic layout adjustments
-        
-        // Position viewport in center-right area (leaving left for panels)
-        // Viewport fills space above the console panel
-        int viewportX = LEFT_PANEL_WIDTH;
-        int viewportY = TOOLBAR_HEIGHT;
-        int viewportWidth = clientWidth - LEFT_PANEL_WIDTH - PANEL_MARGIN;
-        int viewportHeight = CONSOLE_Y_POSITION - TOOLBAR_HEIGHT - PANEL_MARGIN;
-        
+        // Create native Viewport Panel (central 3D view) - positioned in center between left and right panels
         m_viewportPanel = std::make_unique<Win32ViewportPanel>();
         if (m_viewportPanel->create(hwnd, viewportX, viewportY, viewportWidth, viewportHeight)) {
             LOG_INFO_C("Native Win32 Viewport Panel created at (" + 
@@ -1699,10 +1740,8 @@ void EditorManager::setMemoryUsage(float usedMB, float totalMB)
 #ifdef _WIN32
 void EditorManager::onWindowResize(int clientWidth, int clientHeight)
 {
-    // Update panel layout when window is resized
+    // Update panel layout when window is resized - Unreal Engine style layout
     // This ensures panels maintain proper positions and sizes
-    
-    (void)clientHeight;  // Reserved for future dynamic layout adjustments
     
     if (!m_window) {
         return;
@@ -1718,36 +1757,61 @@ void EditorManager::onWindowResize(int clientWidth, int clientHeight)
         return;
     }
     
-    // Left column panels (fixed position and size)
-    if (m_nativeInspector) {
-        m_nativeInspector->setPosition(PANEL_MARGIN, TOOLBAR_HEIGHT);
-        // Keep fixed size: 350x500
+    // Recalculate panel positions based on new window size
+    // Layout: Left (tools) | Center (viewport) | Right (outliner + inspector) with Bottom (content + console)
+    
+    // Left panel - Terraforming tools (narrow vertical, full height minus bottom panel)
+    int leftPanelX = PANEL_MARGIN;
+    int leftPanelY = TOOLBAR_HEIGHT;
+    int leftPanelHeight = clientHeight - TOOLBAR_HEIGHT - BOTTOM_PANEL_HEIGHT - PANEL_MARGIN * 2;
+    
+    if (m_nativeTerraformingPanel) {
+        m_nativeTerraformingPanel->setPosition(leftPanelX, leftPanelY);
+        m_nativeTerraformingPanel->setSize(LEFT_PANEL_WIDTH, leftPanelHeight);
     }
+    
+    // Right panel - split vertically between Outliner (top) and Inspector (bottom)
+    int rightPanelX = clientWidth - RIGHT_PANEL_WIDTH - PANEL_MARGIN;
+    int rightPanelY = TOOLBAR_HEIGHT;
+    int rightPanelUsableHeight = clientHeight - TOOLBAR_HEIGHT - BOTTOM_PANEL_HEIGHT - PANEL_MARGIN * 2;
+    int outlinerHeight = static_cast<int>(rightPanelUsableHeight * OUTLINER_HEIGHT_RATIO);
+    // Inspector height is derived rather than calculated separately to ensure heights sum exactly
+    // to rightPanelUsableHeight (accounting for margin), avoiding pixel gaps from rounding errors
+    int inspectorHeight = rightPanelUsableHeight - outlinerHeight - PANEL_MARGIN;
     
     if (m_nativeSceneHierarchy) {
-        m_nativeSceneHierarchy->setPosition(SCENE_HIERARCHY_X, TOOLBAR_HEIGHT);
-        // Keep fixed size: 300x500
+        m_nativeSceneHierarchy->setPosition(rightPanelX, rightPanelY);
+        m_nativeSceneHierarchy->setSize(RIGHT_PANEL_WIDTH, outlinerHeight);
     }
     
-    // Bottom panels
+    int inspectorY = rightPanelY + outlinerHeight + PANEL_MARGIN;
+    if (m_nativeInspector) {
+        m_nativeInspector->setPosition(rightPanelX, inspectorY);
+        m_nativeInspector->setSize(RIGHT_PANEL_WIDTH, inspectorHeight);
+    }
+    
+    // Bottom panel - Content Browser + Console (horizontal strip)
+    int bottomPanelY = clientHeight - BOTTOM_PANEL_HEIGHT - PANEL_MARGIN;
+    
     if (m_nativeContentBrowser) {
-        m_nativeContentBrowser->setPosition(PANEL_MARGIN, CONSOLE_Y_POSITION);
-        m_nativeContentBrowser->setSize(CONTENT_BROWSER_WIDTH, PANEL_HEIGHT);  // Keep fixed size
+        m_nativeContentBrowser->setPosition(PANEL_MARGIN, bottomPanelY);
+        m_nativeContentBrowser->setSize(CONTENT_BROWSER_WIDTH, BOTTOM_PANEL_HEIGHT);
     }
     
+    int consoleX = PANEL_MARGIN + CONTENT_BROWSER_WIDTH + PANEL_MARGIN;
+    int consoleWidth = std::max(MIN_CONSOLE_WIDTH, clientWidth - consoleX - PANEL_MARGIN);
     if (m_nativeConsole) {
-        const int consoleWidth = std::max(MIN_CONSOLE_WIDTH, clientWidth - LEFT_PANEL_WIDTH - PANEL_MARGIN);
-        m_nativeConsole->setPosition(LEFT_PANEL_WIDTH, CONSOLE_Y_POSITION);
-        m_nativeConsole->setSize(consoleWidth, PANEL_HEIGHT);
+        m_nativeConsole->setPosition(consoleX, bottomPanelY);
+        m_nativeConsole->setSize(consoleWidth, BOTTOM_PANEL_HEIGHT);
     }
     
-    // Viewport - resize to fill available space
+    // Viewport - center area between left and right panels, above bottom panel
+    int viewportX = LEFT_PANEL_WIDTH + PANEL_MARGIN * 2;
+    int viewportY = TOOLBAR_HEIGHT;
+    int viewportWidth = std::max(MIN_VIEWPORT_WIDTH, rightPanelX - viewportX - PANEL_MARGIN);
+    int viewportHeight = std::max(MIN_VIEWPORT_HEIGHT, bottomPanelY - TOOLBAR_HEIGHT - PANEL_MARGIN);
+    
     if (m_viewportPanel) {
-        const int viewportX = LEFT_PANEL_WIDTH;
-        const int viewportY = TOOLBAR_HEIGHT;
-        const int viewportWidth = std::max(MIN_VIEWPORT_WIDTH, clientWidth - LEFT_PANEL_WIDTH - PANEL_MARGIN);
-        const int viewportHeight = std::max(MIN_VIEWPORT_HEIGHT, CONSOLE_Y_POSITION - TOOLBAR_HEIGHT - PANEL_MARGIN);
-        
         m_viewportPanel->setPosition(viewportX, viewportY);
         m_viewportPanel->setSize(viewportWidth, viewportHeight);
     }
