@@ -502,8 +502,13 @@ bool EditorManager::initialize(WindowType* window, IRenderContext* renderContext
         // - Center: Viewport (large central area)
         // - Right: World Outliner (top) + Inspector (bottom) stacked vertically
         // - Bottom: Content Browser + Console (horizontal strip below viewport)
-        // Note: Minimum recommended window size is ~1280x720 for proper layout
-        // Smaller sizes are handled with MIN_VIEWPORT_WIDTH/HEIGHT and MIN_CONSOLE_WIDTH
+        // 
+        // Window size requirements:
+        // - Minimum recommended: 1280x720 for comfortable editing
+        // - Absolute minimum: 800x600 (panels may overlap or become cramped)
+        // - Below 800x600: Layout degrades - viewport/console enforced to MIN sizes
+        // - Fixed-width panels (left 220px, right 350px) always maintain size
+        // - Dynamic panels (viewport, console) adjust to fill available space
         
         // Left panel - Asset/Terraforming tools (narrow vertical, full height minus bottom panel)
         int leftPanelX = PANEL_MARGIN;
@@ -515,7 +520,9 @@ bool EditorManager::initialize(WindowType* window, IRenderContext* renderContext
         int rightPanelY = TOOLBAR_HEIGHT;
         int rightPanelUsableHeight = clientHeight - TOOLBAR_HEIGHT - BOTTOM_PANEL_HEIGHT - PANEL_MARGIN * 2;
         int outlinerHeight = static_cast<int>(rightPanelUsableHeight * OUTLINER_HEIGHT_RATIO);
-        int inspectorHeight = rightPanelUsableHeight - outlinerHeight - PANEL_MARGIN;  // Derive to avoid rounding errors
+        // Inspector height is derived rather than calculated separately to ensure heights sum exactly
+        // to rightPanelUsableHeight (accounting for margin), avoiding pixel gaps from rounding errors
+        int inspectorHeight = rightPanelUsableHeight - outlinerHeight - PANEL_MARGIN;
         
         // Bottom panel - Content Browser + Console (horizontal strip)
         int bottomPanelY = clientHeight - BOTTOM_PANEL_HEIGHT - PANEL_MARGIN;
@@ -1768,7 +1775,9 @@ void EditorManager::onWindowResize(int clientWidth, int clientHeight)
     int rightPanelY = TOOLBAR_HEIGHT;
     int rightPanelUsableHeight = clientHeight - TOOLBAR_HEIGHT - BOTTOM_PANEL_HEIGHT - PANEL_MARGIN * 2;
     int outlinerHeight = static_cast<int>(rightPanelUsableHeight * OUTLINER_HEIGHT_RATIO);
-    int inspectorHeight = rightPanelUsableHeight - outlinerHeight - PANEL_MARGIN;  // Derive to avoid rounding errors
+    // Inspector height is derived rather than calculated separately to ensure heights sum exactly
+    // to rightPanelUsableHeight (accounting for margin), avoiding pixel gaps from rounding errors
+    int inspectorHeight = rightPanelUsableHeight - outlinerHeight - PANEL_MARGIN;
     
     if (m_nativeSceneHierarchy) {
         m_nativeSceneHierarchy->setPosition(rightPanelX, rightPanelY);
