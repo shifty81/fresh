@@ -159,8 +159,10 @@ MINIMUM SIZES (prevents unusable panels when window is small)
 
 MIN_VIEWPORT_WIDTH = 400px
 MIN_VIEWPORT_HEIGHT = 300px
+MIN_CONSOLE_WIDTH = 300px
 
-These ensure the viewport remains usable even at smaller window sizes.
+These ensure panels remain usable even at smaller window sizes.
+Recommended minimum window size: 1280x720 for optimal layout.
 
 ═══════════════════════════════════════════════════════════════════════════════
 RESIZE BEHAVIOR
