@@ -1,0 +1,245 @@
+═══════════════════════════════════════════════════════════════════════════════
+   FRESH VOXEL ENGINE - UNREAL ENGINE STYLE UI LAYOUT
+   Based on reference image: 1.png
+═══════════════════════════════════════════════════════════════════════════════
+
+LAYOUT DIMENSIONS (Example 1920x1080 window):
+═══════════════════════════════════════════════════════════════════════════════
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ MENU BAR + TOOLBAR                                                          │
+│ Height: 80px                                                   Width: 1920px│
+│ Position: (0, 0)                                                            │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+Working Area Height: 1080 - 80 (toolbar) = 1000px
+
+┌───────────┬─────────────────────────────────────────────┬───────────────────┐
+│           │                                             │                   │
+│  LEFT     │           CENTER                            │     RIGHT         │
+│  PANEL    │           VIEWPORT                          │     PANELS        │
+│           │                                             │                   │
+│ Tools/    │                                             │  ┌──────────────┐ │
+│ Terra-    │                                             │  │ OUTLINER     │ │
+│ forming   │                                             │  │ (Hierarchy)  │ │
+│           │                                             │  │              │ │
+│ Width:    │                                             │  │ Height: 40%  │ │
+│  220px    │       3D Scene View                         │  │  = 300px     │ │
+│           │                                             │  │              │ │
+│ Height:   │                                             │  │ Width: 350px │ │
+│  775px    │                                             │  └──────────────┘ │
+│           │       Position: (235, 80)                   │                   │
+│ Pos:      │       Width: 1330px                         │  ┌──────────────┐ │
+│ (5, 80)   │       Height: 775px                         │  │ INSPECTOR    │ │
+│           │                                             │  │ (Details)    │ │
+│           │                                             │  │              │ │
+│           │                                             │  │ Height: 60%  │ │
+│           │                                             │  │  = 465px     │ │
+│           │                                             │  │              │ │
+│           │                                             │  │ Width: 350px │ │
+│           │                                             │  └──────────────┘ │
+│           │                                             │ Position:         │
+│           │                                             │ (1565, 80)        │
+│           │                                             │ & (1565, 385)     │
+└───────────┴─────────────────────────────────────────────┴───────────────────┘
+
+┌───────────────────────────────┬─────────────────────────────────────────────┐
+│                               │                                             │
+│  CONTENT BROWSER              │         CONSOLE                             │
+│                               │                                             │
+│  Width: 700px                 │  Width: 1210px (fills remaining space)      │
+│  Height: 220px                │  Height: 220px                              │
+│  Position: (5, 860)           │  Position: (710, 860)                       │
+│                               │                                             │
+└───────────────────────────────┴─────────────────────────────────────────────┘
+
+═══════════════════════════════════════════════════════════════════════════════
+PANEL SPACING
+═══════════════════════════════════════════════════════════════════════════════
+
+PANEL_MARGIN = 5px (between panels)
+
+Horizontal Layout:
+  Left Panel: 5px margin | 220px width | 5px margin
+  Viewport:   5px margin | 1330px width (calculated) | 5px margin  
+  Right Panel: 5px margin | 350px width | 5px margin
+  
+  Total: 5 + 220 + 5 + 1330 + 5 + 350 + 5 = 1920px ✓
+
+Vertical Layout (main area):
+  Toolbar: 80px height
+  Main area: 775px height (1080 - 80 - 220 - 5) 
+  Bottom panel: 220px height
+  Bottom margin: 5px
+  
+  Total: 80 + 775 + 5 + 220 + 5 = 1085px (with status bar adjustment)
+
+Right Panel Split:
+  Outliner: 40% of 775px = 310px (rounded for display)
+  Gap: 5px margin
+  Inspector: 60% of 775px = 465px
+  
+  Total: 310 + 5 + 465 = 780px (approximately 775px with rounding)
+
+═══════════════════════════════════════════════════════════════════════════════
+DYNAMIC CALCULATIONS (for any window size)
+═══════════════════════════════════════════════════════════════════════════════
+
+Given: clientWidth (W), clientHeight (H)
+
+Left Panel:
+  X = PANEL_MARGIN (5)
+  Y = TOOLBAR_HEIGHT (80)
+  Width = LEFT_PANEL_WIDTH (220)
+  Height = H - TOOLBAR_HEIGHT - BOTTOM_PANEL_HEIGHT - (PANEL_MARGIN * 2)
+  
+Right Panel X Position:
+  X = W - RIGHT_PANEL_WIDTH - PANEL_MARGIN
+  
+Right Panel Heights:
+  usableHeight = H - TOOLBAR_HEIGHT - BOTTOM_PANEL_HEIGHT - (PANEL_MARGIN * 2)
+  outlinerHeight = usableHeight * OUTLINER_HEIGHT_RATIO (0.40)
+  inspectorHeight = usableHeight * INSPECTOR_HEIGHT_RATIO (0.60)
+  
+Outliner:
+  X = W - RIGHT_PANEL_WIDTH - PANEL_MARGIN
+  Y = TOOLBAR_HEIGHT
+  Width = RIGHT_PANEL_WIDTH (350)
+  Height = outlinerHeight
+  
+Inspector:
+  X = W - RIGHT_PANEL_WIDTH - PANEL_MARGIN  
+  Y = TOOLBAR_HEIGHT + outlinerHeight + PANEL_MARGIN
+  Width = RIGHT_PANEL_WIDTH (350)
+  Height = inspectorHeight
+  
+Bottom Panel Y:
+  Y = H - BOTTOM_PANEL_HEIGHT - PANEL_MARGIN
+  
+Content Browser:
+  X = PANEL_MARGIN
+  Y = bottomPanelY
+  Width = CONTENT_BROWSER_WIDTH (700)
+  Height = BOTTOM_PANEL_HEIGHT (220)
+  
+Console:
+  X = PANEL_MARGIN + CONTENT_BROWSER_WIDTH + PANEL_MARGIN
+  Y = bottomPanelY
+  Width = W - X - PANEL_MARGIN
+  Height = BOTTOM_PANEL_HEIGHT (220)
+  
+Viewport:
+  X = LEFT_PANEL_WIDTH + (PANEL_MARGIN * 2)
+  Y = TOOLBAR_HEIGHT
+  Width = max(MIN_VIEWPORT_WIDTH, rightPanelX - X - PANEL_MARGIN)
+  Height = max(MIN_VIEWPORT_HEIGHT, bottomPanelY - TOOLBAR_HEIGHT - PANEL_MARGIN)
+
+═══════════════════════════════════════════════════════════════════════════════
+COMPARISON: UNREAL ENGINE vs FRESH ENGINE
+═══════════════════════════════════════════════════════════════════════════════
+
+Feature                  Unreal Engine 5    Fresh Engine
+─────────────────────────────────────────────────────────────────────────────
+Left Panel Width         ~200px            220px ✓
+Left Panel Content       Place Actors      Terraforming Tools ✓
+Center Area              3D Viewport       3D Viewport ✓
+Right Panel Width        ~350-400px        350px ✓
+Right Top Panel          World Outliner    Scene Hierarchy ✓
+Right Bottom Panel       Details           Inspector ✓
+Right Split Ratio        ~40/60            40/60 ✓
+Bottom Left Panel        Content Browser   Content Browser ✓
+Bottom Right Panel       Sequencer         Console ✓
+Bottom Panel Height      ~200-250px        220px ✓
+Panel Margins            Tight (~5px)      5px ✓
+Overall Layout           4-quadrant+       4-quadrant+ ✓
+
+═══════════════════════════════════════════════════════════════════════════════
+MINIMUM SIZES (prevents unusable panels when window is small)
+═══════════════════════════════════════════════════════════════════════════════
+
+MIN_VIEWPORT_WIDTH = 400px
+MIN_VIEWPORT_HEIGHT = 300px
+
+These ensure the viewport remains usable even at smaller window sizes.
+
+═══════════════════════════════════════════════════════════════════════════════
+RESIZE BEHAVIOR
+═══════════════════════════════════════════════════════════════════════════════
+
+When window is resized:
+1. Fixed-width panels maintain width:
+   - Left Panel: 220px (fixed)
+   - Right Panel: 350px (fixed)
+   - Content Browser: 700px (fixed)
+
+2. Dynamic panels adjust:
+   - Viewport: Expands/contracts horizontally and vertically
+   - Console: Expands/contracts horizontally
+   
+3. Proportional panels maintain ratios:
+   - Outliner: Always 40% of available right panel height
+   - Inspector: Always 60% of available right panel height
+   
+4. All panels adjust vertically:
+   - Left panel height = available height
+   - Right panels split proportionally
+   - Viewport height = available height above bottom panel
+
+═══════════════════════════════════════════════════════════════════════════════
+VISUAL ASCII DIAGRAM (Proportional)
+═══════════════════════════════════════════════════════════════════════════════
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ ╔═══════════════════════════════════════════════════════════════════════╗   │
+│ ║                    MENU BAR + TOOLBAR (80px)                          ║   │
+│ ╚═══════════════════════════════════════════════════════════════════════╝   │
+├────────┬──────────────────────────────────────────────────┬───────────────┬─┤
+│┌──────┐│                                                  │┌─────────────┐│ │
+││      ││                                                  ││ OUTLINER    ││ │
+││TOOLS ││                                                  ││ (Hierarchy) ││ │
+││      ││                                                  ││             ││ │
+││ 220px││                VIEWPORT                          ││   40%       ││ │
+││      ││              (3D Scene)                          ││             ││ │
+││      ││                                                  ││   350px     ││ │
+││      ││            ~1330px width                         │└─────────────┘│ │
+││      ││                                                  │┌─────────────┐│ │
+││      ││                                                  ││ INSPECTOR   ││ │
+││      ││                                                  ││ (Details)   ││ │
+││      ││                                                  ││             ││ │
+││      ││                                                  ││   60%       ││ │
+││      ││                                                  ││             ││ │
+││      ││                                                  ││   350px     ││ │
+│└──────┘│                                                  │└─────────────┘│ │
+├────────┴────────────────────────────┬─────────────────────┴───────────────┴─┤
+│┌──────────────────────────────────┐│┌─────────────────────────────────────┐│
+││ CONTENT BROWSER                  │││ CONSOLE                             ││
+││                                  │││                                     ││
+││           700px                  │││         ~1210px (dynamic)           ││
+││                                  │││                                     ││
+││           220px height           │││         220px height                ││
+│└──────────────────────────────────┘│└─────────────────────────────────────┘│
+└─────────────────────────────────────┴───────────────────────────────────────┘
+
+═══════════════════════════════════════════════════════════════════════════════
+WORKFLOW ALIGNMENT
+═══════════════════════════════════════════════════════════════════════════════
+
+Natural Left-to-Right Workflow:
+
+1. [LEFT] Select tools from Terraforming Panel
+   ↓
+2. [CENTER] Use tools in 3D Viewport to edit world
+   ↓
+3. [RIGHT TOP] View/select objects in Outliner (hierarchy)
+   ↓
+4. [RIGHT BOTTOM] Edit object properties in Inspector
+   ↓
+5. [BOTTOM LEFT] Browse and import assets from Content Browser
+   ↓
+6. [BOTTOM RIGHT] Monitor output and run commands in Console
+
+This workflow matches Unreal Engine's design and is familiar to game developers.
+
+═══════════════════════════════════════════════════════════════════════════════
+END OF LAYOUT DIAGRAM
+═══════════════════════════════════════════════════════════════════════════════

@@ -112,6 +112,7 @@ namespace {
     // Minimum sizes
     constexpr int MIN_VIEWPORT_WIDTH = 400;
     constexpr int MIN_VIEWPORT_HEIGHT = 300;
+    constexpr int MIN_CONSOLE_WIDTH = 200;
 } // anonymous namespace
 
 EditorManager::EditorManager()
@@ -520,8 +521,8 @@ bool EditorManager::initialize(WindowType* window, IRenderContext* renderContext
         // Viewport - center area between left and right panels
         int viewportX = LEFT_PANEL_WIDTH + PANEL_MARGIN * 2;
         int viewportY = TOOLBAR_HEIGHT;
-        int viewportWidth = rightPanelX - viewportX - PANEL_MARGIN;
-        int viewportHeight = bottomPanelY - TOOLBAR_HEIGHT - PANEL_MARGIN;
+        int viewportWidth = std::max(MIN_VIEWPORT_WIDTH, rightPanelX - viewportX - PANEL_MARGIN);
+        int viewportHeight = std::max(MIN_VIEWPORT_HEIGHT, bottomPanelY - TOOLBAR_HEIGHT - PANEL_MARGIN);
         
         // Create native Terraforming Panel (left side, where asset browser would be in Unreal)
         // This serves as our "tools" panel similar to Unreal's left panel
@@ -562,7 +563,7 @@ bool EditorManager::initialize(WindowType* window, IRenderContext* renderContext
         
         // Create native Console panel (bottom right, next to content browser)
         int consoleX = PANEL_MARGIN + CONTENT_BROWSER_WIDTH + PANEL_MARGIN;
-        int consoleWidth = clientWidth - consoleX - PANEL_MARGIN;
+        int consoleWidth = std::max(MIN_CONSOLE_WIDTH, clientWidth - consoleX - PANEL_MARGIN);
         m_nativeConsole = std::make_unique<Win32ConsolePanel>();
         if (m_nativeConsole->create(hwnd, consoleX, bottomPanelY, consoleWidth, BOTTOM_PANEL_HEIGHT)) {
             LOG_INFO_C("Native Win32 Console Panel created (bottom right)", "EditorManager");
@@ -1787,7 +1788,7 @@ void EditorManager::onWindowResize(int clientWidth, int clientHeight)
     }
     
     int consoleX = PANEL_MARGIN + CONTENT_BROWSER_WIDTH + PANEL_MARGIN;
-    int consoleWidth = clientWidth - consoleX - PANEL_MARGIN;
+    int consoleWidth = std::max(MIN_CONSOLE_WIDTH, clientWidth - consoleX - PANEL_MARGIN);
     if (m_nativeConsole) {
         m_nativeConsole->setPosition(consoleX, bottomPanelY);
         m_nativeConsole->setSize(consoleWidth, BOTTOM_PANEL_HEIGHT);
