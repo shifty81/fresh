@@ -624,30 +624,7 @@ bool EditorManager::initialize(WindowType* window, IRenderContext* renderContext
         
         // Ensure proper Z-order: UI panels should be on top of the viewport
         // Since viewport was created first, explicitly bring UI panels to front
-        if (m_nativeTerraformingPanel && m_nativeTerraformingPanel->getHandle()) {
-            SetWindowPos(m_nativeTerraformingPanel->getHandle(), HWND_TOP, 0, 0, 0, 0, 
-                        SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
-        }
-        if (m_nativeSceneHierarchy && m_nativeSceneHierarchy->getHandle()) {
-            SetWindowPos(m_nativeSceneHierarchy->getHandle(), HWND_TOP, 0, 0, 0, 0, 
-                        SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
-        }
-        if (m_nativeInspector && m_nativeInspector->getHandle()) {
-            SetWindowPos(m_nativeInspector->getHandle(), HWND_TOP, 0, 0, 0, 0, 
-                        SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
-        }
-        if (m_nativeContentBrowser && m_nativeContentBrowser->getHandle()) {
-            SetWindowPos(m_nativeContentBrowser->getHandle(), HWND_TOP, 0, 0, 0, 0, 
-                        SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
-        }
-        if (m_nativeConsole && m_nativeConsole->getHandle()) {
-            SetWindowPos(m_nativeConsole->getHandle(), HWND_TOP, 0, 0, 0, 0, 
-                        SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
-        }
-        if (m_statusBar && m_statusBar->getHandle()) {
-            SetWindowPos(m_statusBar->getHandle(), HWND_TOP, 0, 0, 0, 0, 
-                        SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
-        }
+        ensurePanelsOnTop();
         
         // Force initial paint of all panels by invalidating their client areas
         // This ensures panels are visible immediately on startup
@@ -1073,31 +1050,7 @@ bool EditorManager::updateWorld(VoxelWorld* world, WorldEditor* worldEditor)
         }
         
         // Ensure proper Z-order: UI panels should be on top of the viewport
-        // Bring all UI panels to the front to ensure they're visible above the viewport
-        if (m_nativeTerraformingPanel && m_nativeTerraformingPanel->getHandle()) {
-            SetWindowPos(m_nativeTerraformingPanel->getHandle(), HWND_TOP, 0, 0, 0, 0, 
-                        SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
-        }
-        if (m_nativeSceneHierarchy && m_nativeSceneHierarchy->getHandle()) {
-            SetWindowPos(m_nativeSceneHierarchy->getHandle(), HWND_TOP, 0, 0, 0, 0, 
-                        SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
-        }
-        if (m_nativeInspector && m_nativeInspector->getHandle()) {
-            SetWindowPos(m_nativeInspector->getHandle(), HWND_TOP, 0, 0, 0, 0, 
-                        SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
-        }
-        if (m_nativeContentBrowser && m_nativeContentBrowser->getHandle()) {
-            SetWindowPos(m_nativeContentBrowser->getHandle(), HWND_TOP, 0, 0, 0, 0, 
-                        SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
-        }
-        if (m_nativeConsole && m_nativeConsole->getHandle()) {
-            SetWindowPos(m_nativeConsole->getHandle(), HWND_TOP, 0, 0, 0, 0, 
-                        SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
-        }
-        if (m_statusBar && m_statusBar->getHandle()) {
-            SetWindowPos(m_statusBar->getHandle(), HWND_TOP, 0, 0, 0, 0, 
-                        SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
-        }
+        ensurePanelsOnTop();
         
         // Force main window to redraw all children
         InvalidateRect(hwnd, nullptr, TRUE);
@@ -1980,8 +1933,15 @@ void EditorManager::onWindowResize(int clientWidth, int clientHeight)
         m_viewportPanel->setSize(viewportWidth, viewportHeight);
     }
     
-    // Ensure proper Z-order after resize: UI panels should be on top of the viewport
-    // This prevents viewport from covering panels after window resize
+    // Ensure proper Z-order after resize
+    ensurePanelsOnTop();
+}
+
+void EditorManager::ensurePanelsOnTop()
+{
+#ifdef _WIN32
+    // Ensure proper Z-order: UI panels should be on top of the viewport
+    // Bring all UI panels to the front to ensure they're visible above the viewport
     if (m_nativeTerraformingPanel && m_nativeTerraformingPanel->getHandle()) {
         SetWindowPos(m_nativeTerraformingPanel->getHandle(), HWND_TOP, 0, 0, 0, 0, 
                     SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
@@ -2006,6 +1966,7 @@ void EditorManager::onWindowResize(int clientWidth, int clientHeight)
         SetWindowPos(m_statusBar->getHandle(), HWND_TOP, 0, 0, 0, 0, 
                     SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
     }
+#endif
 }
 
 void EditorManager::handleConsoleCommand(const std::string& command)
