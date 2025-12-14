@@ -344,6 +344,7 @@ LRESULT CALLBACK Win32Window::WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LP
             // Properly handle paint message to validate window area
             PAINTSTRUCT ps;
             HDC hdc = BeginPaint(hwnd, &ps);
+            (void)hdc; // Suppress unreferenced local variable warning
             // DirectX/child windows handle their own rendering
             // Just validate the window to prevent continuous WM_PAINT messages
             EndPaint(hwnd, &ps);
