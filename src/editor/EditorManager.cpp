@@ -987,7 +987,7 @@ bool EditorManager::updateWorld(VoxelWorld* world, WorldEditor* worldEditor)
         }
         
         // Update Scene Hierarchy with new world data and refresh it
-        if (m_nativeSceneHierarchy) {
+        if (m_nativeSceneHierarchy && m_showSceneHierarchy) {
             // Update the world reference and refresh the tree view
             m_nativeSceneHierarchy->setWorld(world);
             m_nativeSceneHierarchy->refresh();
@@ -1009,6 +1009,7 @@ bool EditorManager::updateWorld(VoxelWorld* world, WorldEditor* worldEditor)
             if (inspectorHwnd) {
                 ShowWindow(inspectorHwnd, SW_SHOW);
                 InvalidateRect(inspectorHwnd, nullptr, TRUE);
+                UpdateWindow(inspectorHwnd);
             }
         }
         
@@ -1017,6 +1018,7 @@ bool EditorManager::updateWorld(VoxelWorld* world, WorldEditor* worldEditor)
             if (contentHwnd) {
                 ShowWindow(contentHwnd, SW_SHOW);
                 InvalidateRect(contentHwnd, nullptr, TRUE);
+                UpdateWindow(contentHwnd);
             }
         }
         
@@ -1025,14 +1027,17 @@ bool EditorManager::updateWorld(VoxelWorld* world, WorldEditor* worldEditor)
             if (consoleHwnd) {
                 ShowWindow(consoleHwnd, SW_SHOW);
                 InvalidateRect(consoleHwnd, nullptr, TRUE);
+                UpdateWindow(consoleHwnd);
             }
         }
         
+        // Viewport and Status Bar should always be visible (no visibility flags for these)
         if (m_viewportPanel) {
             HWND viewportHwnd = m_viewportPanel->getHandle();
             if (viewportHwnd) {
                 ShowWindow(viewportHwnd, SW_SHOW);
                 InvalidateRect(viewportHwnd, nullptr, TRUE);
+                UpdateWindow(viewportHwnd);
             }
         }
         
@@ -1041,6 +1046,7 @@ bool EditorManager::updateWorld(VoxelWorld* world, WorldEditor* worldEditor)
             if (statusHwnd) {
                 ShowWindow(statusHwnd, SW_SHOW);
                 InvalidateRect(statusHwnd, nullptr, TRUE);
+                UpdateWindow(statusHwnd);
             }
         }
         
