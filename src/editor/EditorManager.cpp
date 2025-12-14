@@ -16,6 +16,7 @@
 #include "gameplay/Camera.h"
 #ifdef _WIN32
     #include "core/Win32Window.h"
+    #include "ui/native/Win32Toolbar.h"
     #include "input/Win32InputManager.h"
     #include <windows.h>
     #include <filesystem>
