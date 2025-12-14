@@ -943,6 +943,121 @@ bool EditorManager::updateWorld(VoxelWorld* world, WorldEditor* worldEditor)
     // Windows native UI - update world reference
     m_world = world;
     m_worldEditor = worldEditor;
+    
+#ifdef _WIN32
+    // Create world-dependent panels if they don't exist yet
+    // This handles the case where EditorManager was initialized without a world
+    Win32Window* win32Window = dynamic_cast<Win32Window*>(m_window);
+    if (win32Window) {
+        HWND hwnd = win32Window->getHandle();
+        
+        // Create Terraforming Panel if it doesn't exist
+        if (!m_nativeTerraformingPanel && worldEditor) {
+            // Get window client area size for layout calculations
+            RECT clientRect;
+            GetClientRect(hwnd, &clientRect);
+            int clientWidth = clientRect.right - clientRect.left;
+            int clientHeight = clientRect.bottom - clientRect.top;
+            
+            // Calculate panel position (same as in initialize)
+            const int PANEL_MARGIN = 4;
+            const int TOOLBAR_HEIGHT = 50;
+            const int BOTTOM_PANEL_HEIGHT = 200;
+            const int LEFT_PANEL_WIDTH = 220;
+            
+            int leftPanelX = PANEL_MARGIN;
+            int leftPanelY = TOOLBAR_HEIGHT;
+            int leftPanelHeight = clientHeight - TOOLBAR_HEIGHT - BOTTOM_PANEL_HEIGHT - PANEL_MARGIN * 2;
+            
+            // Create native Terraforming Panel
+            m_nativeTerraformingPanel = std::make_unique<Win32TerraformingPanel>();
+            if (m_nativeTerraformingPanel->initialize(hwnd, worldEditor)) {
+                m_nativeTerraformingPanel->setPosition(leftPanelX, leftPanelY);
+                m_nativeTerraformingPanel->setSize(LEFT_PANEL_WIDTH, leftPanelHeight);
+                LOG_INFO_C("Native Win32 Terraforming Panel created after world update", "EditorManager");
+                
+                // Ensure panel is visible and painted
+                HWND panelHwnd = m_nativeTerraformingPanel->getHandle();
+                ShowWindow(panelHwnd, SW_SHOW);
+                InvalidateRect(panelHwnd, nullptr, TRUE);
+                UpdateWindow(panelHwnd);
+            } else {
+                LOG_ERROR_C("Failed to create Terraforming Panel after world update", "EditorManager");
+            }
+        }
+        
+        // Update Scene Hierarchy with new world data and refresh it
+        if (m_nativeSceneHierarchy && m_showSceneHierarchy) {
+            // Update the world reference and refresh the tree view
+            m_nativeSceneHierarchy->setWorld(world);
+            m_nativeSceneHierarchy->refresh();
+            
+            // Ensure panel is visible and updated
+            HWND hierarchyHwnd = m_nativeSceneHierarchy->getHandle();
+            if (hierarchyHwnd) {
+                ShowWindow(hierarchyHwnd, SW_SHOW);
+                InvalidateRect(hierarchyHwnd, nullptr, TRUE);
+                UpdateWindow(hierarchyHwnd);
+            }
+            LOG_INFO_C("Scene Hierarchy updated and refreshed with new world", "EditorManager");
+        }
+        
+        // Ensure all other panels are visible (they should have been created during initialize)
+        // but explicitly show them based on visibility flags
+        if (m_nativeInspector && m_showInspector) {
+            HWND inspectorHwnd = m_nativeInspector->getHandle();
+            if (inspectorHwnd) {
+                ShowWindow(inspectorHwnd, SW_SHOW);
+                InvalidateRect(inspectorHwnd, nullptr, TRUE);
+                UpdateWindow(inspectorHwnd);
+            }
+        }
+        
+        if (m_nativeContentBrowser && m_showContentBrowser) {
+            HWND contentHwnd = m_nativeContentBrowser->getHandle();
+            if (contentHwnd) {
+                ShowWindow(contentHwnd, SW_SHOW);
+                InvalidateRect(contentHwnd, nullptr, TRUE);
+                UpdateWindow(contentHwnd);
+            }
+        }
+        
+        if (m_nativeConsole && m_showConsole) {
+            HWND consoleHwnd = m_nativeConsole->getHandle();
+            if (consoleHwnd) {
+                ShowWindow(consoleHwnd, SW_SHOW);
+                InvalidateRect(consoleHwnd, nullptr, TRUE);
+                UpdateWindow(consoleHwnd);
+            }
+        }
+        
+        // Viewport and Status Bar should always be visible (no visibility flags for these)
+        if (m_viewportPanel) {
+            HWND viewportHwnd = m_viewportPanel->getHandle();
+            if (viewportHwnd) {
+                ShowWindow(viewportHwnd, SW_SHOW);
+                InvalidateRect(viewportHwnd, nullptr, TRUE);
+                UpdateWindow(viewportHwnd);
+            }
+        }
+        
+        if (m_statusBar) {
+            HWND statusHwnd = m_statusBar->getHandle();
+            if (statusHwnd) {
+                ShowWindow(statusHwnd, SW_SHOW);
+                InvalidateRect(statusHwnd, nullptr, TRUE);
+                UpdateWindow(statusHwnd);
+            }
+        }
+        
+        // Force main window to redraw all children
+        InvalidateRect(hwnd, nullptr, TRUE);
+        UpdateWindow(hwnd);
+        
+        LOG_INFO_C("All editor panels ensured visible after world update", "EditorManager");
+    }
+#endif
+    
     LOG_INFO_C("EditorManager updated with new world (Windows native UI)", "EditorManager");
     return true;
 }

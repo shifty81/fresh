@@ -78,6 +78,12 @@ public:
     bool create(HWND parent, int x, int y, int width, int height, VoxelWorld* world);
 
     /**
+     * @brief Set the world reference
+     * @param world New world pointer
+     */
+    void setWorld(VoxelWorld* world) { m_world = world; }
+
+    /**
      * @brief Refresh the hierarchy from world data
      */
     void refresh();
