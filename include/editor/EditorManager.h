@@ -183,10 +183,7 @@ public:
      * @brief Set editor visibility
      * @param visible true to show, false to hide
      */
-    void setVisible(bool visible)
-    {
-        m_visible = visible;
-    }
+    void setVisible(bool visible);
 
     /**
      * @brief Check if editor is visible
