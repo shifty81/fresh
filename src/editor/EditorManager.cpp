@@ -533,6 +533,17 @@ bool EditorManager::initialize(WindowType* window, IRenderContext* renderContext
         int viewportWidth = std::max(MIN_VIEWPORT_WIDTH, rightPanelX - viewportX - PANEL_MARGIN);
         int viewportHeight = std::max(MIN_VIEWPORT_HEIGHT, bottomPanelY - TOOLBAR_HEIGHT - PANEL_MARGIN);
         
+        // Create native Viewport Panel FIRST (central 3D view) - positioned in center between left and right panels
+        // IMPORTANT: Create viewport first so it's at the bottom of the Z-order, allowing UI panels to be visible on top
+        m_viewportPanel = std::make_unique<Win32ViewportPanel>();
+        if (m_viewportPanel->create(hwnd, viewportX, viewportY, viewportWidth, viewportHeight)) {
+            LOG_INFO_C("Native Win32 Viewport Panel created at (" + 
+                      std::to_string(viewportX) + ", " + std::to_string(viewportY) + ") " +
+                      "size " + std::to_string(viewportWidth) + "x" + std::to_string(viewportHeight), "EditorManager");
+        } else {
+            LOG_ERROR_C("Failed to create Native Win32 Viewport Panel", "EditorManager");
+        }
+        
         // Create native Terraforming Panel (left side, where asset browser would be in Unreal)
         // This serves as our "tools" panel similar to Unreal's left panel
         if (worldEditor) {
@@ -602,16 +613,6 @@ bool EditorManager::initialize(WindowType* window, IRenderContext* renderContext
         m_nativeSettingsDialog = std::make_unique<Win32SettingsDialog>();
         LOG_INFO_C("Native Win32 Settings Dialog created", "EditorManager");
         
-        // Create native Viewport Panel (central 3D view) - positioned in center between left and right panels
-        m_viewportPanel = std::make_unique<Win32ViewportPanel>();
-        if (m_viewportPanel->create(hwnd, viewportX, viewportY, viewportWidth, viewportHeight)) {
-            LOG_INFO_C("Native Win32 Viewport Panel created at (" + 
-                      std::to_string(viewportX) + ", " + std::to_string(viewportY) + ") " +
-                      "size " + std::to_string(viewportWidth) + "x" + std::to_string(viewportHeight), "EditorManager");
-        } else {
-            LOG_ERROR_C("Failed to create Native Win32 Viewport Panel", "EditorManager");
-        }
-        
         // Create native Status Bar at bottom of window
         m_statusBar = std::make_unique<Win32StatusBar>();
         if (m_statusBar->create(hwnd, 4)) {  // 4 panes: Status | Position | Selection | FPS
@@ -620,6 +621,10 @@ bool EditorManager::initialize(WindowType* window, IRenderContext* renderContext
         } else {
             LOG_ERROR_C("Failed to create Native Win32 Status Bar", "EditorManager");
         }
+        
+        // Ensure proper Z-order: UI panels should be on top of the viewport
+        // Since viewport was created first, explicitly bring UI panels to front
+        ensurePanelsOnTop();
         
         // Force initial paint of all panels by invalidating their client areas
         // This ensures panels are visible immediately on startup
@@ -1044,11 +1049,14 @@ bool EditorManager::updateWorld(VoxelWorld* world, WorldEditor* worldEditor)
             }
         }
         
+        // Ensure proper Z-order: UI panels should be on top of the viewport
+        ensurePanelsOnTop();
+        
         // Force main window to redraw all children
         InvalidateRect(hwnd, nullptr, TRUE);
         UpdateWindow(hwnd);
         
-        LOG_INFO_C("All editor panels ensured visible after world update", "EditorManager");
+        LOG_INFO_C("All editor panels ensured visible and brought to front after world update", "EditorManager");
     }
 #endif
     
@@ -1924,6 +1932,41 @@ void EditorManager::onWindowResize(int clientWidth, int clientHeight)
         m_viewportPanel->setPosition(viewportX, viewportY);
         m_viewportPanel->setSize(viewportWidth, viewportHeight);
     }
+    
+    // Ensure proper Z-order after resize
+    ensurePanelsOnTop();
+}
+
+void EditorManager::ensurePanelsOnTop()
+{
+#ifdef _WIN32
+    // Ensure proper Z-order: UI panels should be on top of the viewport
+    // Bring all UI panels to the front to ensure they're visible above the viewport
+    if (m_nativeTerraformingPanel && m_nativeTerraformingPanel->getHandle()) {
+        SetWindowPos(m_nativeTerraformingPanel->getHandle(), HWND_TOP, 0, 0, 0, 0, 
+                    SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
+    }
+    if (m_nativeSceneHierarchy && m_nativeSceneHierarchy->getHandle()) {
+        SetWindowPos(m_nativeSceneHierarchy->getHandle(), HWND_TOP, 0, 0, 0, 0, 
+                    SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
+    }
+    if (m_nativeInspector && m_nativeInspector->getHandle()) {
+        SetWindowPos(m_nativeInspector->getHandle(), HWND_TOP, 0, 0, 0, 0, 
+                    SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
+    }
+    if (m_nativeContentBrowser && m_nativeContentBrowser->getHandle()) {
+        SetWindowPos(m_nativeContentBrowser->getHandle(), HWND_TOP, 0, 0, 0, 0, 
+                    SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
+    }
+    if (m_nativeConsole && m_nativeConsole->getHandle()) {
+        SetWindowPos(m_nativeConsole->getHandle(), HWND_TOP, 0, 0, 0, 0, 
+                    SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
+    }
+    if (m_statusBar && m_statusBar->getHandle()) {
+        SetWindowPos(m_statusBar->getHandle(), HWND_TOP, 0, 0, 0, 0, 
+                    SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
+    }
+#endif
 }
 
 void EditorManager::handleConsoleCommand(const std::string& command)

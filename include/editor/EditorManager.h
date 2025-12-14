@@ -551,6 +551,17 @@ private:
      * @param command The command string entered by the user
      */
     void handleConsoleCommand(const std::string& command);
+    
+    /**
+     * @brief Ensure all UI panels are on top of the viewport in Z-order
+     * 
+     * This function brings all UI panels to the front using SetWindowPos with HWND_TOP,
+     * ensuring they remain visible above the viewport window. Should be called after:
+     * - Initial panel creation
+     * - World updates (when new panels might be created)
+     * - Window resizing (to maintain proper Z-order)
+     */
+    void ensurePanelsOnTop();
 #endif
 
     bool m_initialized;
