@@ -112,20 +112,28 @@ To verify the fix works correctly:
 When adding new UI panels to the editor:
 1. Create viewport panel **first** in the initialization sequence
 2. Create new UI panels **after** the viewport
-3. Add explicit `SetWindowPos(..., HWND_TOP, ...)` calls for the new panel in:
-   - Panel initialization code
-   - `updateWorld()` function
-   - `onWindowResize()` function
+3. Add the new panel to the `ensurePanelsOnTop()` helper function (only one location to update!)
 4. Ensure panels use appropriate window styles: `WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | WS_CLIPCHILDREN`
+
+### Refactoring Benefits
+By extracting the Z-order management into `ensurePanelsOnTop()`:
+- **Single source of truth**: All Z-order logic in one place
+- **Easy maintenance**: Adding a new panel requires updating only the helper function
+- **Reduced duplication**: From 18 `SetWindowPos` calls to 6
+- **Better readability**: Intent is clear with `ensurePanelsOnTop()` call
 
 ## Files Modified
 
 - `src/editor/EditorManager.cpp`:
   - Line 536-545: Moved viewport creation to be first
-  - Line 627-650: Added Z-order management after initialization
-  - Line 1077-1100: Added Z-order management in updateWorld()
-  - Line 1984-2008: Added Z-order management in onWindowResize()
+  - Line 627: Call to `ensurePanelsOnTop()` after initialization
+  - Line 1053: Call to `ensurePanelsOnTop()` in updateWorld()
+  - Line 1937: Call to `ensurePanelsOnTop()` in onWindowResize()
+  - Line 1940-1968: Implementation of `ensurePanelsOnTop()` helper function
   - Removed duplicate viewport creation code that was after all other panels
+
+- `include/editor/EditorManager.h`:
+  - Line 560-568: Added `ensurePanelsOnTop()` private method declaration with documentation
 
 ## Related Issues
 
