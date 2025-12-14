@@ -1004,10 +1004,19 @@ bool EditorManager::updateWorld(VoxelWorld* world, WorldEditor* worldEditor)
             GetClientRect(hwnd, &clientRect);
             int clientHeight = clientRect.bottom - clientRect.top;
             
+            // Get actual toolbar height
+            int actualToolbarHeight = 0;
+            auto* toolbar = win32Window->getToolbar();
+            if (toolbar && toolbar->getHandle()) {
+                actualToolbarHeight = toolbar->getHeight();
+            } else {
+                actualToolbarHeight = TOOLBAR_HEIGHT;  // Fallback to constant
+            }
+            
             // Calculate panel position (same as in initialize)
             int leftPanelX = PANEL_MARGIN;
-            int leftPanelY = TOOLBAR_HEIGHT;
-            int leftPanelHeight = clientHeight - TOOLBAR_HEIGHT - BOTTOM_PANEL_HEIGHT - PANEL_MARGIN * 2;
+            int leftPanelY = actualToolbarHeight;
+            int leftPanelHeight = clientHeight - actualToolbarHeight - BOTTOM_PANEL_HEIGHT - PANEL_MARGIN * 2;
             
             // Create native Terraforming Panel
             m_nativeTerraformingPanel = std::make_unique<Win32TerraformingPanel>();
