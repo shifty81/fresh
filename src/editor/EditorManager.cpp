@@ -1570,28 +1570,33 @@ void EditorManager::setVisible(bool visible)
     // Show or hide all Win32 native panels
     // These are the editor UI panels that should be visible in editor mode
     // and hidden in play mode
+    // 
+    // IMPORTANT: Respect individual panel visibility flags (m_showSceneHierarchy, etc.)
+    // Only show a panel if both the editor is visible AND the panel's individual flag is true
     
     if (m_nativeSceneHierarchy) {
-        m_nativeSceneHierarchy->setVisible(visible);
+        m_nativeSceneHierarchy->setVisible(visible && m_showSceneHierarchy);
     }
     
     if (m_nativeInspector) {
-        m_nativeInspector->setVisible(visible);
+        m_nativeInspector->setVisible(visible && m_showInspector);
     }
     
     if (m_nativeContentBrowser) {
-        m_nativeContentBrowser->setVisible(visible);
+        m_nativeContentBrowser->setVisible(visible && m_showContentBrowser);
     }
     
     if (m_nativeConsole) {
-        m_nativeConsole->setVisible(visible);
+        m_nativeConsole->setVisible(visible && m_showConsole);
     }
     
     if (m_nativeTerraformingPanel) {
+        // Terraforming panel doesn't have a visibility flag, so just use the editor visibility
         m_nativeTerraformingPanel->setVisible(visible);
     }
     
     if (m_statusBar) {
+        // Status bar should always be visible when editor is visible
         m_statusBar->setVisible(visible);
     }
     
