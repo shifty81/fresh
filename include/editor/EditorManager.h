@@ -562,6 +562,16 @@ private:
      * - Window resizing (to maintain proper Z-order)
      */
     void ensurePanelsOnTop();
+    
+    /**
+     * @brief Get the actual height of the Win32 toolbar
+     * 
+     * Queries the toolbar's actual height dynamically. If the toolbar is not available,
+     * returns the TOOLBAR_HEIGHT constant as a fallback.
+     * 
+     * @return Actual toolbar height in pixels
+     */
+    int getActualToolbarHeight() const;
 #endif
 
     bool m_initialized;

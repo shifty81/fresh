@@ -379,6 +379,23 @@ bool Engine::initialize()
     std::cout << "Editor manager initialized" << std::endl;
     LOG_INFO_C("Editor manager initialized", "Engine");
 
+#ifdef _WIN32
+    // Trigger initial panel layout after EditorManager initialization
+    // This ensures all panels are properly positioned based on the current window size
+    Win32Window* win32Window = dynamic_cast<Win32Window*>(m_window.get());
+    if (win32Window && m_editorManager) {
+        RECT clientRect;
+        HWND hwnd = win32Window->getHandle();
+        if (hwnd && GetClientRect(hwnd, &clientRect)) {
+            int clientWidth = clientRect.right - clientRect.left;
+            int clientHeight = clientRect.bottom - clientRect.top;
+            m_editorManager->onWindowResize(clientWidth, clientHeight);
+            LOG_INFO_C("Triggered initial panel layout update: " + 
+                      std::to_string(clientWidth) + "x" + std::to_string(clientHeight), "Engine");
+        }
+    }
+#endif
+
     m_running = true;
     m_inGame = false; // Start in menu mode
     return true;

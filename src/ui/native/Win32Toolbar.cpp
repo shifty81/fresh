@@ -178,6 +178,19 @@ void Win32Toolbar::autoSize()
     }
 }
 
+int Win32Toolbar::getHeight() const
+{
+    if (!m_hwnd) {
+        return 0;
+    }
+    
+    // Get the client rect of the toolbar to determine its usable interior height
+    // GetClientRect returns dimensions from (0,0) to (width, height) in client coordinates
+    RECT rect;
+    GetClientRect(m_hwnd, &rect);
+    return rect.bottom - rect.top;
+}
+
 } // namespace fresh
 
 #endif // _WIN32
