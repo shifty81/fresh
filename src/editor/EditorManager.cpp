@@ -956,15 +956,9 @@ bool EditorManager::updateWorld(VoxelWorld* world, WorldEditor* worldEditor)
             // Get window client area size for layout calculations
             RECT clientRect;
             GetClientRect(hwnd, &clientRect);
-            int clientWidth = clientRect.right - clientRect.left;
             int clientHeight = clientRect.bottom - clientRect.top;
             
             // Calculate panel position (same as in initialize)
-            const int PANEL_MARGIN = 4;
-            const int TOOLBAR_HEIGHT = 50;
-            const int BOTTOM_PANEL_HEIGHT = 200;
-            const int LEFT_PANEL_WIDTH = 220;
-            
             int leftPanelX = PANEL_MARGIN;
             int leftPanelY = TOOLBAR_HEIGHT;
             int leftPanelHeight = clientHeight - TOOLBAR_HEIGHT - BOTTOM_PANEL_HEIGHT - PANEL_MARGIN * 2;
