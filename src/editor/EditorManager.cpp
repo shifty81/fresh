@@ -2015,12 +2015,15 @@ int EditorManager::getActualToolbarHeight() const
     Win32Window* win32Window = dynamic_cast<Win32Window*>(m_window);
     if (win32Window) {
         auto* toolbar = win32Window->getToolbar();
-        if (toolbar && toolbar->getHandle()) {
-            return toolbar->getHeight();
+        if (toolbar) {
+            int height = toolbar->getHeight();
+            if (height > 0) {
+                return height;
+            }
         }
     }
 #endif
-    // Fallback to constant if toolbar not available
+    // Fallback to constant if toolbar not available or has zero height
     return TOOLBAR_HEIGHT;
 }
 

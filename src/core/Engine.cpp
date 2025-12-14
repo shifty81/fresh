@@ -390,7 +390,7 @@ bool Engine::initialize()
             int clientWidth = clientRect.right - clientRect.left;
             int clientHeight = clientRect.bottom - clientRect.top;
             m_editorManager->onWindowResize(clientWidth, clientHeight);
-            LOG_INFO_C("Initial panel layout set: " + 
+            LOG_INFO_C("Triggered initial panel layout update: " + 
                       std::to_string(clientWidth) + "x" + std::to_string(clientHeight), "Engine");
         }
     }
