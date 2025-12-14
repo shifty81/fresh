@@ -87,6 +87,12 @@ public:
      */
     void autoSize();
 
+    /**
+     * @brief Get toolbar height
+     * @return Height of toolbar in pixels
+     */
+    int getHeight() const;
+
 private:
     struct ButtonInfo {
         int id;

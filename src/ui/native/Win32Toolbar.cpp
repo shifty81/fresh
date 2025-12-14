@@ -178,6 +178,17 @@ void Win32Toolbar::autoSize()
     }
 }
 
+int Win32Toolbar::getHeight() const
+{
+    if (!m_hwnd) {
+        return 0;
+    }
+    
+    RECT rect;
+    GetWindowRect(m_hwnd, &rect);
+    return rect.bottom - rect.top;
+}
+
 } // namespace fresh
 
 #endif // _WIN32

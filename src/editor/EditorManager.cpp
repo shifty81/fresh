@@ -508,6 +508,9 @@ bool EditorManager::initialize(WindowType* window, IRenderContext* renderContext
         int clientWidth = clientRect.right - clientRect.left;
         int clientHeight = clientRect.bottom - clientRect.top;
         
+        LOG_INFO_C("Client area at initialization: " + std::to_string(clientWidth) + "x" + 
+                   std::to_string(clientHeight), "EditorManager");
+        
         // Calculate panel positions - Unreal Engine style layout:
         // - Left: Asset browser (narrow vertical panel)
         // - Center: Viewport (large central area)
