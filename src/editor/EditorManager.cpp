@@ -511,8 +511,8 @@ bool EditorManager::initialize(WindowType* window, IRenderContext* renderContext
         LOG_INFO_C("Client area at initialization: " + std::to_string(clientWidth) + "x" + 
                    std::to_string(clientHeight), "EditorManager");
         
-        // Get actual toolbar height (toolbar is positioned at top of client area)
-        // The toolbar is a child window that occupies space at the top
+        // Get actual toolbar height for layout calculations
+        // The toolbar is a child window that must be accounted for in panel positioning
         int actualToolbarHeight = getActualToolbarHeight();
         LOG_INFO_C("Actual toolbar height: " + std::to_string(actualToolbarHeight), "EditorManager");
         
