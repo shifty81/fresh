@@ -750,7 +750,8 @@ void Engine::initializeGameSystems()
     
     // Create demo entities for Inspector demonstration
     createDemoEntities();
-    m_inGame = true;
+    // Note: Do NOT set m_inGame = true here. The editor should remain visible.
+    // m_inGame should only be set when explicitly entering play mode via enterPlayMode().
 }
 
 void Engine::run()
@@ -776,8 +777,8 @@ void Engine::run()
             m_window->pollEvents();
         }
 
-        // If not in game yet, show GUI menu and handle world creation
-        if (!m_inGame) {
+        // If no world exists yet, show GUI menu only (main menu for world creation/loading)
+        if (!m_world) {
             // Set clear color and begin frame for menu rendering
             if (m_renderer) {
                 m_renderer->clearColor(0.53f, 0.81f, 0.92f, 1.0f);
@@ -802,7 +803,7 @@ void Engine::run()
                 m_renderer->endFrame();
             }
             
-            // Skip normal game loop when not in game
+            // Skip normal game loop when no world exists (main menu only)
             continue;
         }
 
