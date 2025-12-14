@@ -511,6 +511,18 @@ bool EditorManager::initialize(WindowType* window, IRenderContext* renderContext
         LOG_INFO_C("Client area at initialization: " + std::to_string(clientWidth) + "x" + 
                    std::to_string(clientHeight), "EditorManager");
         
+        // Get actual toolbar height (toolbar is positioned at top of client area)
+        // The toolbar is a child window that occupies space at the top
+        int actualToolbarHeight = 0;
+        auto* toolbar = win32Window->getToolbar();
+        if (toolbar && toolbar->getHandle()) {
+            actualToolbarHeight = toolbar->getHeight();
+            LOG_INFO_C("Actual toolbar height: " + std::to_string(actualToolbarHeight), "EditorManager");
+        } else {
+            LOG_WARNING_C("Toolbar not available, using default height", "EditorManager");
+            actualToolbarHeight = TOOLBAR_HEIGHT;
+        }
+        
         // Calculate panel positions - Unreal Engine style layout:
         // - Left: Asset browser (narrow vertical panel)
         // - Center: Viewport (large central area)
@@ -526,13 +538,13 @@ bool EditorManager::initialize(WindowType* window, IRenderContext* renderContext
         
         // Left panel - Asset/Terraforming tools (narrow vertical, full height minus bottom panel)
         int leftPanelX = PANEL_MARGIN;
-        int leftPanelY = TOOLBAR_HEIGHT;
-        int leftPanelHeight = clientHeight - TOOLBAR_HEIGHT - BOTTOM_PANEL_HEIGHT - PANEL_MARGIN * 2;
+        int leftPanelY = actualToolbarHeight;
+        int leftPanelHeight = clientHeight - actualToolbarHeight - BOTTOM_PANEL_HEIGHT - PANEL_MARGIN * 2;
         
         // Right panel - split vertically between Outliner (top) and Inspector (bottom)
         int rightPanelX = clientWidth - RIGHT_PANEL_WIDTH - PANEL_MARGIN;
-        int rightPanelY = TOOLBAR_HEIGHT;
-        int rightPanelUsableHeight = clientHeight - TOOLBAR_HEIGHT - BOTTOM_PANEL_HEIGHT - PANEL_MARGIN * 2;
+        int rightPanelY = actualToolbarHeight;
+        int rightPanelUsableHeight = clientHeight - actualToolbarHeight - BOTTOM_PANEL_HEIGHT - PANEL_MARGIN * 2;
         int outlinerHeight = static_cast<int>(rightPanelUsableHeight * OUTLINER_HEIGHT_RATIO);
         // Inspector height is derived rather than calculated separately to ensure heights sum exactly
         // to rightPanelUsableHeight (accounting for margin), avoiding pixel gaps from rounding errors
@@ -543,9 +555,9 @@ bool EditorManager::initialize(WindowType* window, IRenderContext* renderContext
         
         // Viewport - center area between left and right panels
         int viewportX = LEFT_PANEL_WIDTH + PANEL_MARGIN * 2;
-        int viewportY = TOOLBAR_HEIGHT;
+        int viewportY = actualToolbarHeight;
         int viewportWidth = std::max(MIN_VIEWPORT_WIDTH, rightPanelX - viewportX - PANEL_MARGIN);
-        int viewportHeight = std::max(MIN_VIEWPORT_HEIGHT, bottomPanelY - TOOLBAR_HEIGHT - PANEL_MARGIN);
+        int viewportHeight = std::max(MIN_VIEWPORT_HEIGHT, bottomPanelY - actualToolbarHeight - PANEL_MARGIN);
         
         // Create native Viewport Panel FIRST (central 3D view) - positioned in center between left and right panels
         // IMPORTANT: Create viewport first so it's at the bottom of the Z-order, allowing UI panels to be visible on top
@@ -1906,10 +1918,19 @@ void EditorManager::onWindowResize(int clientWidth, int clientHeight)
     // Recalculate panel positions based on new window size
     // Layout: Left (tools) | Center (viewport) | Right (outliner + inspector) with Bottom (content + console)
     
+    // Get actual toolbar height dynamically
+    int actualToolbarHeight = 0;
+    auto* toolbar = win32Window->getToolbar();
+    if (toolbar && toolbar->getHandle()) {
+        actualToolbarHeight = toolbar->getHeight();
+    } else {
+        actualToolbarHeight = TOOLBAR_HEIGHT;  // Fallback to constant
+    }
+    
     // Left panel - Terraforming tools (narrow vertical, full height minus bottom panel)
     int leftPanelX = PANEL_MARGIN;
-    int leftPanelY = TOOLBAR_HEIGHT;
-    int leftPanelHeight = clientHeight - TOOLBAR_HEIGHT - BOTTOM_PANEL_HEIGHT - PANEL_MARGIN * 2;
+    int leftPanelY = actualToolbarHeight;
+    int leftPanelHeight = clientHeight - actualToolbarHeight - BOTTOM_PANEL_HEIGHT - PANEL_MARGIN * 2;
     
     if (m_nativeTerraformingPanel) {
         m_nativeTerraformingPanel->setPosition(leftPanelX, leftPanelY);
@@ -1918,8 +1939,8 @@ void EditorManager::onWindowResize(int clientWidth, int clientHeight)
     
     // Right panel - split vertically between Outliner (top) and Inspector (bottom)
     int rightPanelX = clientWidth - RIGHT_PANEL_WIDTH - PANEL_MARGIN;
-    int rightPanelY = TOOLBAR_HEIGHT;
-    int rightPanelUsableHeight = clientHeight - TOOLBAR_HEIGHT - BOTTOM_PANEL_HEIGHT - PANEL_MARGIN * 2;
+    int rightPanelY = actualToolbarHeight;
+    int rightPanelUsableHeight = clientHeight - actualToolbarHeight - BOTTOM_PANEL_HEIGHT - PANEL_MARGIN * 2;
     int outlinerHeight = static_cast<int>(rightPanelUsableHeight * OUTLINER_HEIGHT_RATIO);
     // Inspector height is derived rather than calculated separately to ensure heights sum exactly
     // to rightPanelUsableHeight (accounting for margin), avoiding pixel gaps from rounding errors
@@ -1953,9 +1974,9 @@ void EditorManager::onWindowResize(int clientWidth, int clientHeight)
     
     // Viewport - center area between left and right panels, above bottom panel
     int viewportX = LEFT_PANEL_WIDTH + PANEL_MARGIN * 2;
-    int viewportY = TOOLBAR_HEIGHT;
+    int viewportY = actualToolbarHeight;
     int viewportWidth = std::max(MIN_VIEWPORT_WIDTH, rightPanelX - viewportX - PANEL_MARGIN);
-    int viewportHeight = std::max(MIN_VIEWPORT_HEIGHT, bottomPanelY - TOOLBAR_HEIGHT - PANEL_MARGIN);
+    int viewportHeight = std::max(MIN_VIEWPORT_HEIGHT, bottomPanelY - actualToolbarHeight - PANEL_MARGIN);
     
     if (m_viewportPanel) {
         m_viewportPanel->setPosition(viewportX, viewportY);
