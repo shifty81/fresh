@@ -184,8 +184,10 @@ int Win32Toolbar::getHeight() const
         return 0;
     }
     
+    // Get the client rect of the toolbar to determine its height
+    // For a toolbar, client rect height = window rect height since it has no borders
     RECT rect;
-    GetWindowRect(m_hwnd, &rect);
+    GetClientRect(m_hwnd, &rect);
     return rect.bottom - rect.top;
 }
 

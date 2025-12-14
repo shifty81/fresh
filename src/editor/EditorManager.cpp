@@ -513,15 +513,8 @@ bool EditorManager::initialize(WindowType* window, IRenderContext* renderContext
         
         // Get actual toolbar height (toolbar is positioned at top of client area)
         // The toolbar is a child window that occupies space at the top
-        int actualToolbarHeight = 0;
-        auto* toolbar = win32Window->getToolbar();
-        if (toolbar && toolbar->getHandle()) {
-            actualToolbarHeight = toolbar->getHeight();
-            LOG_INFO_C("Actual toolbar height: " + std::to_string(actualToolbarHeight), "EditorManager");
-        } else {
-            LOG_WARNING_C("Toolbar not available, using default height", "EditorManager");
-            actualToolbarHeight = TOOLBAR_HEIGHT;
-        }
+        int actualToolbarHeight = getActualToolbarHeight();
+        LOG_INFO_C("Actual toolbar height: " + std::to_string(actualToolbarHeight), "EditorManager");
         
         // Calculate panel positions - Unreal Engine style layout:
         // - Left: Asset browser (narrow vertical panel)
@@ -1005,13 +998,7 @@ bool EditorManager::updateWorld(VoxelWorld* world, WorldEditor* worldEditor)
             int clientHeight = clientRect.bottom - clientRect.top;
             
             // Get actual toolbar height
-            int actualToolbarHeight = 0;
-            auto* toolbar = win32Window->getToolbar();
-            if (toolbar && toolbar->getHandle()) {
-                actualToolbarHeight = toolbar->getHeight();
-            } else {
-                actualToolbarHeight = TOOLBAR_HEIGHT;  // Fallback to constant
-            }
+            int actualToolbarHeight = getActualToolbarHeight();
             
             // Calculate panel position (same as in initialize)
             int leftPanelX = PANEL_MARGIN;
@@ -1928,13 +1915,7 @@ void EditorManager::onWindowResize(int clientWidth, int clientHeight)
     // Layout: Left (tools) | Center (viewport) | Right (outliner + inspector) with Bottom (content + console)
     
     // Get actual toolbar height dynamically
-    int actualToolbarHeight = 0;
-    auto* toolbar = win32Window->getToolbar();
-    if (toolbar && toolbar->getHandle()) {
-        actualToolbarHeight = toolbar->getHeight();
-    } else {
-        actualToolbarHeight = TOOLBAR_HEIGHT;  // Fallback to constant
-    }
+    int actualToolbarHeight = getActualToolbarHeight();
     
     // Left panel - Terraforming tools (narrow vertical, full height minus bottom panel)
     int leftPanelX = PANEL_MARGIN;
@@ -2026,6 +2007,21 @@ void EditorManager::ensurePanelsOnTop()
                     SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
     }
 #endif
+}
+
+int EditorManager::getActualToolbarHeight() const
+{
+#ifdef _WIN32
+    Win32Window* win32Window = dynamic_cast<Win32Window*>(m_window);
+    if (win32Window) {
+        auto* toolbar = win32Window->getToolbar();
+        if (toolbar && toolbar->getHandle()) {
+            return toolbar->getHeight();
+        }
+    }
+#endif
+    // Fallback to constant if toolbar not available
+    return TOOLBAR_HEIGHT;
 }
 
 void EditorManager::handleConsoleCommand(const std::string& command)
