@@ -1562,6 +1562,48 @@ void EditorManager::toggleToolPalette()
     LOG_INFO_C("Tool Palette toggled: " + std::string(m_showToolPalette ? "shown" : "hidden"), "EditorManager");
 }
 
+void EditorManager::setVisible(bool visible)
+{
+    m_visible = visible;
+    
+#ifdef _WIN32
+    // Show or hide all Win32 native panels
+    // These are the editor UI panels that should be visible in editor mode
+    // and hidden in play mode
+    
+    if (m_nativeSceneHierarchy) {
+        m_nativeSceneHierarchy->setVisible(visible);
+    }
+    
+    if (m_nativeInspector) {
+        m_nativeInspector->setVisible(visible);
+    }
+    
+    if (m_nativeContentBrowser) {
+        m_nativeContentBrowser->setVisible(visible);
+    }
+    
+    if (m_nativeConsole) {
+        m_nativeConsole->setVisible(visible);
+    }
+    
+    if (m_nativeTerraformingPanel) {
+        m_nativeTerraformingPanel->setVisible(visible);
+    }
+    
+    if (m_statusBar) {
+        m_statusBar->setVisible(visible);
+    }
+    
+    // Note: Viewport panel should always be visible (it shows the 3D world)
+    // The viewport is visible in both editor mode and play mode
+    // In editor mode, it's a panel among other panels
+    // In play mode, it's the main window for gameplay
+    
+    LOG_INFO_C(visible ? "Editor panels shown" : "Editor panels hidden", "EditorManager");
+#endif
+}
+
 void EditorManager::enterPlayMode()
 {
     if (m_enterPlayModeCallback) {
