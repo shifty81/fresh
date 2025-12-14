@@ -113,6 +113,17 @@ namespace {
     constexpr int MIN_VIEWPORT_WIDTH = 400;
     constexpr int MIN_VIEWPORT_HEIGHT = 300;
     constexpr int MIN_CONSOLE_WIDTH = 300;  // Console needs reasonable width for command input/output
+    
+    /**
+     * @brief Helper function to show and update a Win32 panel window
+     * @param hwnd Window handle to show and update
+     */
+    inline void showPanelWindow(HWND hwnd) {
+        if (hwnd) {
+            ShowWindow(hwnd, SW_SHOW);
+            UpdateWindow(hwnd);
+        }
+    }
 } // anonymous namespace
 
 EditorManager::EditorManager()
@@ -541,11 +552,7 @@ bool EditorManager::initialize(WindowType* window, IRenderContext* renderContext
                       std::to_string(viewportX) + ", " + std::to_string(viewportY) + ") " +
                       "size " + std::to_string(viewportWidth) + "x" + std::to_string(viewportHeight), "EditorManager");
             // Explicitly show viewport panel from startup
-            HWND viewportHwnd = m_viewportPanel->getHandle();
-            if (viewportHwnd) {
-                ShowWindow(viewportHwnd, SW_SHOW);
-                UpdateWindow(viewportHwnd);
-            }
+            showPanelWindow(m_viewportPanel->getHandle());
         } else {
             LOG_ERROR_C("Failed to create Native Win32 Viewport Panel", "EditorManager");
         }
@@ -560,11 +567,7 @@ bool EditorManager::initialize(WindowType* window, IRenderContext* renderContext
                 m_nativeTerraformingPanel->setSize(LEFT_PANEL_WIDTH, leftPanelHeight);
                 LOG_INFO_C("Native Win32 Terraforming Panel created (left side)", "EditorManager");
                 // Explicitly show terraforming panel from startup
-                HWND panelHwnd = m_nativeTerraformingPanel->getHandle();
-                if (panelHwnd) {
-                    ShowWindow(panelHwnd, SW_SHOW);
-                    UpdateWindow(panelHwnd);
-                }
+                showPanelWindow(m_nativeTerraformingPanel->getHandle());
             }
         }
         
@@ -579,11 +582,7 @@ bool EditorManager::initialize(WindowType* window, IRenderContext* renderContext
             });
             LOG_INFO_C("Native Win32 Scene Hierarchy Panel created (right top)", "EditorManager");
             // Explicitly show scene hierarchy panel from startup
-            HWND hierarchyHwnd = m_nativeSceneHierarchy->getHandle();
-            if (hierarchyHwnd) {
-                ShowWindow(hierarchyHwnd, SW_SHOW);
-                UpdateWindow(hierarchyHwnd);
-            }
+            showPanelWindow(m_nativeSceneHierarchy->getHandle());
         }
         
         // Create native Inspector panel (right side, bottom position - Details panel)
@@ -592,11 +591,7 @@ bool EditorManager::initialize(WindowType* window, IRenderContext* renderContext
         if (m_nativeInspector->create(hwnd, rightPanelX, inspectorY, RIGHT_PANEL_WIDTH, inspectorHeight, m_entityManager)) {
             LOG_INFO_C("Native Win32 Inspector Panel created (right bottom)", "EditorManager");
             // Explicitly show inspector panel from startup
-            HWND inspectorHwnd = m_nativeInspector->getHandle();
-            if (inspectorHwnd) {
-                ShowWindow(inspectorHwnd, SW_SHOW);
-                UpdateWindow(inspectorHwnd);
-            }
+            showPanelWindow(m_nativeInspector->getHandle());
         }
         
         // Create native Content Browser panel (bottom left)
@@ -604,11 +599,7 @@ bool EditorManager::initialize(WindowType* window, IRenderContext* renderContext
         if (m_nativeContentBrowser->create(hwnd, PANEL_MARGIN, bottomPanelY, CONTENT_BROWSER_WIDTH, BOTTOM_PANEL_HEIGHT, "assets")) {
             LOG_INFO_C("Native Win32 Content Browser Panel created (bottom left)", "EditorManager");
             // Explicitly show content browser panel from startup
-            HWND contentHwnd = m_nativeContentBrowser->getHandle();
-            if (contentHwnd) {
-                ShowWindow(contentHwnd, SW_SHOW);
-                UpdateWindow(contentHwnd);
-            }
+            showPanelWindow(m_nativeContentBrowser->getHandle());
         }
         
         // Create native Console panel (bottom right, next to content browser)
@@ -624,11 +615,7 @@ bool EditorManager::initialize(WindowType* window, IRenderContext* renderContext
             });
             
             // Explicitly show console panel from startup
-            HWND consoleHwnd = m_nativeConsole->getHandle();
-            if (consoleHwnd) {
-                ShowWindow(consoleHwnd, SW_SHOW);
-                UpdateWindow(consoleHwnd);
-            }
+            showPanelWindow(m_nativeConsole->getHandle());
         }
         
         // Create native HUD (for play mode)
@@ -656,11 +643,7 @@ bool EditorManager::initialize(WindowType* window, IRenderContext* renderContext
             m_statusBar->setStatusText(L"Ready");
             LOG_INFO_C("Native Win32 Status Bar created", "EditorManager");
             // Explicitly show status bar from startup
-            HWND statusHwnd = m_statusBar->getHandle();
-            if (statusHwnd) {
-                ShowWindow(statusHwnd, SW_SHOW);
-                UpdateWindow(statusHwnd);
-            }
+            showPanelWindow(m_statusBar->getHandle());
         } else {
             LOG_ERROR_C("Failed to create Native Win32 Status Bar", "EditorManager");
         }
