@@ -139,8 +139,8 @@ bool NativeMainMenu::showCreateWorldDialog()
     // Reset state
     m_createNewWorld = false;
     
-    // Show create world dialog directly using in-memory template
-    auto dialogTemplate = createDialogTemplate(370, 290, L"Create New World");
+    // Show create project dialog directly using in-memory template
+    auto dialogTemplate = createDialogTemplate(370, 290, L"Create New Project");
     INT_PTR result = DialogBoxIndirectParam(GetModuleHandle(nullptr), 
                                     reinterpret_cast<LPCDLGTEMPLATE>(dialogTemplate.data()), 
                                     m_parentWindow, createWorldDialogProc, reinterpret_cast<LPARAM>(this));
@@ -263,8 +263,8 @@ INT_PTR CALLBACK NativeMainMenu::mainMenuDialogProc(HWND hwnd, UINT msg, WPARAM 
     case WM_COMMAND: {
         switch (LOWORD(wParam)) {
         case ID_BTN_CREATE_WORLD: {
-            // Show create world dialog using in-memory template
-            auto dialogTemplate = createDialogTemplate(370, 290, L"Create New World");
+            // Show create project dialog using in-memory template
+            auto dialogTemplate = createDialogTemplate(370, 290, L"Create New Project");
             INT_PTR result = DialogBoxIndirectParam(GetModuleHandle(nullptr), 
                                             reinterpret_cast<LPCDLGTEMPLATE>(dialogTemplate.data()), 
                                             hwnd, createWorldDialogProc, reinterpret_cast<LPARAM>(menu));
@@ -334,15 +334,15 @@ void NativeMainMenu::createMainMenuDialog(HWND hwnd)
     int spacing = 20;
     int centerX = (600 - buttonWidth) / 2;
 
-    // Create New World button
-    CreateWindowEx(0, L"BUTTON", L"Create New World", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,
+    // Create New Project button
+    CreateWindowEx(0, L"BUTTON", L"Create New Project", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,
                    centerX, buttonY, buttonWidth, buttonHeight, hwnd, (HMENU)ID_BTN_CREATE_WORLD,
                    GetModuleHandle(nullptr), nullptr);
 
     buttonY += buttonHeight + spacing;
 
-    // Load World button
-    CreateWindowEx(0, L"BUTTON", L"Load Existing World", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,
+    // Load Project button
+    CreateWindowEx(0, L"BUTTON", L"Load Existing Project", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,
                    centerX, buttonY, buttonWidth, buttonHeight, hwnd, (HMENU)ID_BTN_LOAD_WORLD,
                    GetModuleHandle(nullptr), nullptr);
 
@@ -387,7 +387,7 @@ INT_PTR CALLBACK NativeMainMenu::createWorldDialogProc(HWND hwnd, UINT msg, WPAR
                      height, SWP_NOZORDER);
 
         menu->applyDarkTheme(hwnd);
-        SetWindowText(hwnd, L"Create New World");
+        SetWindowText(hwnd, L"Create New Project");
         menu->createWorldCreationDialog(hwnd);
         return TRUE;
     }
@@ -457,11 +457,11 @@ void NativeMainMenu::createWorldCreationDialog(HWND hwnd)
     int controlWidth = 360;
 
     // World Name label
-    CreateWindowEx(0, L"STATIC", L"World Name:", WS_CHILD | WS_VISIBLE, labelX, y, 120, 20, hwnd,
+    CreateWindowEx(0, L"STATIC", L"Project Name:", WS_CHILD | WS_VISIBLE, labelX, y, 120, 20, hwnd,
                    nullptr, GetModuleHandle(nullptr), nullptr);
 
-    // World Name input
-    CreateWindowEx(WS_EX_CLIENTEDGE, L"EDIT", L"New World", WS_CHILD | WS_VISIBLE | ES_AUTOHSCROLL,
+    // Project Name input
+    CreateWindowEx(WS_EX_CLIENTEDGE, L"EDIT", L"New Project", WS_CHILD | WS_VISIBLE | ES_AUTOHSCROLL,
                    controlX, y, controlWidth, 24, hwnd, (HMENU)ID_EDIT_WORLD_NAME,
                    GetModuleHandle(nullptr), nullptr);
 

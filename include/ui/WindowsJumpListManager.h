@@ -68,7 +68,7 @@ public:
 
     /**
      * @brief Add a custom task to the jump list
-     * @param title Task title (e.g., "Create New World")
+     * @param title Task title (e.g., "Create New Project")
      * @param arguments Command-line arguments
      * @param description Optional description
      * @return true if successful

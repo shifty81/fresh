@@ -1496,7 +1496,7 @@ void EditorManager::newWorld()
         }
     }
 #else
-    LOG_INFO_C("New World not implemented on this platform", "EditorManager");
+    LOG_INFO_C("New Project not implemented on this platform", "EditorManager");
 #endif
 }
 
