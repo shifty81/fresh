@@ -297,6 +297,7 @@ set(ENGINE_SOURCES
     src/generation/NoiseGenerator.cpp
     src/generation/TerrainGenerator.cpp
     src/generation/World2DGenerator.cpp
+    src/generation/WorldGeneratorFactory.cpp
     src/physics/PhysicsSystem.cpp
     src/physics/CollisionDetection.cpp
     src/physics/PhysicsComponent.cpp
@@ -460,6 +461,7 @@ set(ENGINE_HEADERS
     include/voxel/ChunkStreamer.h
     include/generation/NoiseGenerator.h
     include/generation/TerrainGenerator.h
+    include/generation/IWorldGenerator.h
     include/physics/PhysicsSystem.h
     include/physics/CollisionDetection.h
     include/physics/PhysicsComponent.h
@@ -910,6 +912,12 @@ if(BUILD_TESTS)
     # Link GLM if found
     if(glm_FOUND)
         target_link_libraries(${PROJECT_NAME}Tests PRIVATE glm::glm)
+    endif()
+    
+    # Link Native File Dialog Extended if found (required for FileDialogManager)
+    if(nfd_FOUND)
+        target_link_libraries(${PROJECT_NAME}Tests PRIVATE nfd::nfd)
+        message(STATUS "Native File Dialog Extended linked to test executable")
     endif()
     
     # Compiler settings for tests (Windows/MSVC)

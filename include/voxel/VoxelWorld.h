@@ -12,8 +12,12 @@ namespace fresh
 class TerrainGenerator;
 
 /**
- * @brief Manages the entire voxel world
+ * @brief Manages the entire voxel world (scene data layer)
  *
+ * In the editor-first architecture, a VoxelWorld represents the data layer
+ * of a scene. The editor manages scenes (via File > New Scene / Open Scene),
+ * and each scene contains a VoxelWorld for its voxel-based environment.
+ * 
  * Handles chunk loading/unloading, world updates, and provides
  * interface for voxel manipulation.
  */

@@ -8,8 +8,9 @@
 [![Graphics](https://img.shields.io/badge/Graphics-DirectX%2012%2F11-00B2FF.svg)](https://github.com/shifty81/fresh)
 [![Editor](https://img.shields.io/badge/Editor-Unreal--like-orange.svg)](https://github.com/shifty81/fresh)
 
-A professional **Windows-exclusive** voxel game development platform built with **C++20**, featuring **DirectX 12/11** rendering, an **Unreal Engine-like editor**, **.NET 9 bindings**, **Lua scripting**, procedural terrain generation, and comprehensive Windows-native integration for game development.
+A professional **Windows-exclusive** game editor and development platform built with **C++20**, featuring an **Unreal Engine-like editor-first workflow**, **DirectX 12/11** rendering, voxel worlds with **pluggable generation**, **.NET 9 bindings**, **Lua scripting**, and comprehensive Windows-native integration.
 
+> 🎨 **Editor-First Design** - Fresh is a game editor that happens to support voxel worlds, not just a voxel engine. Start with the editor, create scenes, and use world generation as a plugin.
 > 📚 **New to Fresh?** See [DOCUMENTATION.md](DOCUMENTATION.md) for complete documentation guide.
 > 🎮 **Windows Gaming Platform** - Exclusive focus on Windows 10/11 with DirectX and professional game development tools.
 
@@ -17,17 +18,16 @@ A professional **Windows-exclusive** voxel game development platform built with 
 
 ## ✨ Features
 
-### Professional Game Development Platform
-- **Unreal Engine-Like Editor** - Professional Windows editor with comprehensive game development tools
-- **Windows-Native Windowing** - Native Win32 window management and input handling
-- **Windows-Native UI** - Professional native Windows UI with menus, toolbars, and panels
-- **Windows-Native Integration** - Full Windows 10/11 themes, native dialogs, jump lists, toast notifications, and taskbar features
-- **High DPI Support** - Per-monitor DPI awareness for crisp rendering on 4K/5K displays
-- **AVX2 Optimized** - SIMD instructions for 15-30% performance improvement on modern CPUs
-- **DirectX 12 Primary Renderer** - Cutting-edge graphics with DirectX 12 (Windows 10/11)
-- **DirectX 11 Fallback** - Excellent compatibility for wider hardware support
-- **Visual Studio 2022 Optimized** - Seamless integration with Microsoft's flagship IDE
-- **OpenGL Optional Support** - For compatibility and testing purposes
+### Editor-First Game Development Platform
+- **🎨 Editor-First Workflow** - Start with editor, create/open scenes, not a traditional "game with menu"
+- **🎬 Scene-Based Development** - Unreal-style scenes, not just "worlds" - edit, save, test cycle
+- **🔌 Pluggable World Generation** - World generators are plugins, not the main feature
+- **🎮 Multiple Scene Types** - 3D voxel, 2D platformer, 2D top-down, empty/manual scenes
+- **🪟 Windows-Native Editor** - Professional Win32 UI with menus, toolbars, panels, and dialogs
+- **⚡ DirectX 12/11 Rendering** - Modern graphics API with hardware acceleration
+- **🎯 Visual Studio 2022 Optimized** - Seamless integration with Microsoft's flagship IDE
+- **💻 High DPI Support** - Per-monitor DPI awareness for crisp rendering on 4K/5K displays
+- **🚀 AVX2 Optimized** - SIMD instructions for 15-30% performance improvement
 
 ### Core Engine
 - **C++20** - Modern C++ with strong type safety and performance
@@ -37,9 +37,11 @@ A professional **Windows-exclusive** voxel game development platform built with 
 - **Windows SDK Integration** - Full access to Windows platform capabilities
 - **Compiler Optimizations** - Whole program optimization, link-time code generation, fast floating-point
 
-### Voxel World
+### Voxel World System (Pluggable)
+- **Plugin-Based Generation** - World generators are optional plugins, not core features
+- **Built-In Generators** - 3D Terrain, 2D Platformer, 2D Top-Down, Empty/Manual
+- **Custom Generators** - Create your own world generators via plugin interface
 - **Chunk-Based World** - Efficient 16×256×16 chunk system
-- **Procedural Generation** - Perlin noise terrain with biomes and caves
 - **13+ Voxel Types** - Stone, Dirt, Grass, Sand, Water, Wood, and more
 - **Dynamic Streaming** - World loads around player as they explore
 - **Greedy Meshing** - Optimized rendering with face culling
@@ -148,9 +150,53 @@ Release\FreshVoxelEngine.exe
 
 ---
 
-## 🎮 How to Play
+## 🎨 Editor-First Workflow
 
-### Controls
+Fresh uses an **Unreal Engine-style editor-first workflow**. You start with the editor, not a game menu:
+
+### Creating Your First Scene
+
+1. **Launch the Editor**
+   ```bash
+   Release\FreshVoxelEngine.exe
+   ```
+   The editor opens immediately with full UI
+
+2. **Create a New Scene**
+   - Click `File > New Scene` (or press `Ctrl+N`)
+   - Choose scene type:
+     - **3D Voxel** - Minecraft-style 3D world
+     - **2D Platformer** - Terraria-style side-scroller
+     - **2D Top-Down** - Zelda-style top-down world
+     - **Empty** - Blank canvas for manual building
+   - Select world generator (if not empty)
+   - Configure seed and click "Create"
+
+3. **Edit Your Scene**
+   - Use terraforming tools (Brush, Sphere, Flatten, Paint)
+   - Place NPCs and entities
+   - Build structures with Construction Hammer
+   - Arrange objects with Transform Gizmo
+
+4. **Test Your Scene**
+   - Click the **Play** button (or press `F5`)
+   - Editor hides, gameplay starts
+   - Test your creation
+   - Press `ESC` to return to editor
+
+5. **Save Your Scene**
+   - `File > Save Scene` (or `Ctrl+S`)
+   - Scene saved for later editing
+
+**See [docs/architecture/SCENE_MANAGEMENT.md](docs/architecture/SCENE_MANAGEMENT.md) for complete scene workflow.**
+
+---
+
+## 🎮 Controls
+
+### Editor Mode (Default)
+
+**Camera Controls:**
 
 **Mouse Controls:**
 - **Mouse Movement** - Look around (first-person camera with improved sensitivity)
@@ -158,21 +204,34 @@ Release\FreshVoxelEngine.exe
 - **Right Click** - Place blocks
 - **Editor UI** - Click, drag, and interact with all editor panels
 
-**Editor Mode (Default - Free-Flying Camera):**
+- **Mouse Movement** - Look around (free-look camera)
+- **Right Mouse + Drag** - Rotate camera (Unreal-style)
 - **WASD** - Move in camera direction
 - **Space** - Fly up (ascend)
 - **Ctrl** - Fly down (descend)
 - **Shift** - Move faster
-- **No gravity or collision** - Full 3D freedom
-- **Click NPCs** - Select and edit NPC properties in inspector
+- **F5** - Enter Play Mode
 
-**Play Mode (Via Editor Toolbar):**
+**Editor Tools:**
+- **Left Click** - Select objects
+- **Right Click** - Place blocks / Context menu
+- **Click Panels** - Interact with Scene Hierarchy, Inspector, Content Browser
+- **Transform Gizmo** - Move/rotate/scale selected objects
+- **Terraforming Tools** - Brush, Sphere, Flatten, Paint from toolbar
+
+### Play Mode (Testing)
+
+**Movement:**
 - **WASD** - Move (FPS-style)
 - **Space** - Jump
 - **Shift** - Sprint
-- **Ctrl** - Crouch (prevents falling off edges!)
+- **Ctrl** - Crouch
+- **ESC** - Exit Play Mode (return to editor)
+
+**Interaction:**
+- **Left Click** - Break blocks
+- **Right Click** - Place blocks
 - **Physics enabled** - Gravity and collision active
-- **Interact with NPCs** - Talk to villagers, trade with merchants, combat enemies
 
 **See [docs/guides/CONTROLS.md](docs/guides/CONTROLS.md) for complete controls reference.**
 
