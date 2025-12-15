@@ -195,9 +195,6 @@ public:
     
     bool is3DGenerator() const override { return true; }
     bool is2DGenerator() const override { return true; } // Works for both
-
-private:
-    int m_seed = 0;
 };
 
 void WorldGeneratorFactory::registerBuiltInGenerators()
