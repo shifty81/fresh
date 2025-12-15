@@ -404,6 +404,10 @@ bool Engine::initialize()
             // Refresh all panels to ensure they are visible after positioning
             m_editorManager->refreshAllPanels();
             LOG_INFO_C("Refreshed all panels for initial visibility", "Engine");
+            
+            // Process any pending Windows messages to ensure panels are painted
+            m_window->pollEvents();
+            LOG_INFO_C("Processed initial window messages", "Engine");
         }
     }
 #endif
