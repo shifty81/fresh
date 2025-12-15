@@ -400,6 +400,10 @@ bool Engine::initialize()
             m_editorManager->onWindowResize(clientWidth, clientHeight);
             LOG_INFO_C("Triggered initial panel layout update: " + 
                       std::to_string(clientWidth) + "x" + std::to_string(clientHeight), "Engine");
+            
+            // Refresh all panels to ensure they are visible after positioning
+            m_editorManager->refreshAllPanels();
+            LOG_INFO_C("Refreshed all panels for initial visibility", "Engine");
         }
     }
 #endif
@@ -785,6 +789,10 @@ void Engine::initializeGameSystems()
                 LOG_INFO_C("Main window refreshed after world creation", "Engine");
             }
         }
+        
+        // Refresh all panels to ensure they are visible after world creation
+        m_editorManager->refreshAllPanels();
+        LOG_INFO_C("Refreshed all panels after world creation", "Engine");
         #endif
     }
     

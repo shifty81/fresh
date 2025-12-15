@@ -2075,6 +2075,61 @@ int EditorManager::getActualToolbarHeight() const
     return TOOLBAR_HEIGHT;
 }
 
+void EditorManager::refreshAllPanels()
+{
+#ifdef _WIN32
+    // Invalidate and update all panel windows to ensure they are visible
+    // This triggers WM_PAINT messages for all panels, forcing them to redraw
+    
+    if (m_viewportPanel && m_viewportPanel->getHandle()) {
+        InvalidateRect(m_viewportPanel->getHandle(), nullptr, TRUE);
+        UpdateWindow(m_viewportPanel->getHandle());
+    }
+    
+    if (m_nativeTerraformingPanel && m_nativeTerraformingPanel->getHandle()) {
+        InvalidateRect(m_nativeTerraformingPanel->getHandle(), nullptr, TRUE);
+        UpdateWindow(m_nativeTerraformingPanel->getHandle());
+    }
+    
+    if (m_nativeSceneHierarchy && m_nativeSceneHierarchy->getHandle()) {
+        InvalidateRect(m_nativeSceneHierarchy->getHandle(), nullptr, TRUE);
+        UpdateWindow(m_nativeSceneHierarchy->getHandle());
+    }
+    
+    if (m_nativeInspector && m_nativeInspector->getHandle()) {
+        InvalidateRect(m_nativeInspector->getHandle(), nullptr, TRUE);
+        UpdateWindow(m_nativeInspector->getHandle());
+    }
+    
+    if (m_nativeContentBrowser && m_nativeContentBrowser->getHandle()) {
+        InvalidateRect(m_nativeContentBrowser->getHandle(), nullptr, TRUE);
+        UpdateWindow(m_nativeContentBrowser->getHandle());
+    }
+    
+    if (m_nativeConsole && m_nativeConsole->getHandle()) {
+        InvalidateRect(m_nativeConsole->getHandle(), nullptr, TRUE);
+        UpdateWindow(m_nativeConsole->getHandle());
+    }
+    
+    if (m_statusBar && m_statusBar->getHandle()) {
+        InvalidateRect(m_statusBar->getHandle(), nullptr, TRUE);
+        UpdateWindow(m_statusBar->getHandle());
+    }
+    
+    // Also refresh the main window to ensure proper painting
+    Win32Window* win32Window = dynamic_cast<Win32Window*>(m_window);
+    if (win32Window) {
+        HWND hwnd = win32Window->getHandle();
+        if (hwnd) {
+            InvalidateRect(hwnd, nullptr, TRUE);
+            UpdateWindow(hwnd);
+        }
+    }
+    
+    LOG_INFO_C("All panels refreshed", "EditorManager");
+#endif
+}
+
 void EditorManager::handleConsoleCommand(const std::string& command)
 {
     // Trim whitespace
