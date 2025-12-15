@@ -25,9 +25,9 @@ MainMenu::MainMenu()
     // Default world name
 #ifdef _WIN32
     // Use strncpy_s on Windows to avoid C4996 warning
-    strncpy_s(m_worldNameBuffer, sizeof(m_worldNameBuffer), "New World", _TRUNCATE);
+    strncpy_s(m_worldNameBuffer, sizeof(m_worldNameBuffer), "New Project", _TRUNCATE);
 #else
-    std::strncpy(m_worldNameBuffer, "New World", sizeof(m_worldNameBuffer) - 1);
+    std::strncpy(m_worldNameBuffer, "New Project", sizeof(m_worldNameBuffer) - 1);
 #endif
     m_worldNameBuffer[sizeof(m_worldNameBuffer) - 1] = '\0'; // Ensure null termination
 
@@ -85,8 +85,8 @@ void MainMenu::renderMainMenu()
     std::cout << "       FRESH VOXEL ENGINE\n";
     std::cout << "========================================\n";
     std::cout << "\n";
-    std::cout << "  1. Create New World\n";
-    std::cout << "  2. Load Existing World\n";
+    std::cout << "  1. Create New Project\n";
+    std::cout << "  2. Load Existing Project\n";
     std::cout << "  3. Settings\n";
     std::cout << "  4. Exit\n";
     std::cout << "\n";

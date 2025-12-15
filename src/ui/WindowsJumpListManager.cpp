@@ -63,7 +63,7 @@ bool WindowsJumpListManager::initialize(const std::string& appUserModelId)
               "WindowsJumpListManager");
     
     // Add default tasks
-    addTask("Create New World", "--new-world", "Create a new voxel world");
+    addTask("Create New Project", "--new-world", "Create a new voxel project");
     addTask("Open Recent", "--open-recent", "Open recently used world");
     updateJumpList();
 

@@ -48,14 +48,14 @@ public:
     bool show();
 
     /**
-     * @brief Show the world creation dialog directly (for File → New World menu)
-     * @return true if user confirmed world creation
+     * @brief Show the project creation dialog directly (for File → New Project menu)
+     * @return true if user confirmed project creation
      */
     bool showCreateWorldDialog();
 
     /**
-     * @brief Show the load world dialog directly (for File → Open World menu)
-     * @return true if user selected a world to load
+     * @brief Show the load project dialog directly (for File → Open Project menu)
+     * @return true if user selected a project to load
      */
     bool showLoadWorldDialog();
 

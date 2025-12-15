@@ -1496,7 +1496,7 @@ void EditorManager::newWorld()
         }
     }
 #else
-    LOG_INFO_C("New World not implemented on this platform", "EditorManager");
+    LOG_INFO_C("New Project not implemented on this platform", "EditorManager");
 #endif
 }
 
@@ -2023,6 +2023,10 @@ void EditorManager::onWindowResize(int clientWidth, int clientHeight)
     
     // Ensure proper Z-order after resize
     ensurePanelsOnTop();
+    
+    // Refresh all panels to ensure they're properly painted after resize
+    // This is especially important during maximize/restore operations
+    refreshAllPanels();
 }
 
 void EditorManager::ensurePanelsOnTop()
