@@ -83,6 +83,7 @@ void Win32ConsolePanel::createControls()
         x, y, BUTTON_WIDTH, TOOLBAR_HEIGHT - 2 * MARGIN,
         m_hwnd, (HMENU)1001, nullptr, nullptr
     );
+    SendMessageW(m_clearButton, WM_SETFONT, (WPARAM)UnrealStyleTheme::GetFont(), TRUE);
     x += BUTTON_WIDTH + MARGIN;
 
     m_autoScrollCheck = CreateWindowExW(
@@ -92,6 +93,7 @@ void Win32ConsolePanel::createControls()
         m_hwnd, (HMENU)1002, nullptr, nullptr
     );
     SendMessage(m_autoScrollCheck, BM_SETCHECK, BST_CHECKED, 0);
+    SendMessageW(m_autoScrollCheck, WM_SETFONT, (WPARAM)UnrealStyleTheme::GetFont(), TRUE);
     x += CHECKBOX_WIDTH + MARGIN;
 
     // Filter checkboxes
@@ -102,6 +104,7 @@ void Win32ConsolePanel::createControls()
         m_hwnd, (HMENU)1003, nullptr, nullptr
     );
     SendMessage(m_filterInfoCheck, BM_SETCHECK, BST_CHECKED, 0);
+    SendMessageW(m_filterInfoCheck, WM_SETFONT, (WPARAM)UnrealStyleTheme::GetFont(), TRUE);
     x += CHECKBOX_WIDTH + MARGIN;
 
     m_filterWarningCheck = CreateWindowExW(
@@ -111,6 +114,7 @@ void Win32ConsolePanel::createControls()
         m_hwnd, (HMENU)1004, nullptr, nullptr
     );
     SendMessage(m_filterWarningCheck, BM_SETCHECK, BST_CHECKED, 0);
+    SendMessageW(m_filterWarningCheck, WM_SETFONT, (WPARAM)UnrealStyleTheme::GetFont(), TRUE);
     x += CHECKBOX_WIDTH + MARGIN;
 
     m_filterErrorCheck = CreateWindowExW(
@@ -120,6 +124,7 @@ void Win32ConsolePanel::createControls()
         m_hwnd, (HMENU)1005, nullptr, nullptr
     );
     SendMessage(m_filterErrorCheck, BM_SETCHECK, BST_CHECKED, 0);
+    SendMessageW(m_filterErrorCheck, WM_SETFONT, (WPARAM)UnrealStyleTheme::GetFont(), TRUE);
 
     y += TOOLBAR_HEIGHT;
 
@@ -157,6 +162,8 @@ void Win32ConsolePanel::createControls()
     if (m_commandEdit) {
         // Set placeholder text (requires Windows Vista+)
         SendMessage(m_commandEdit, EM_SETCUEBANNER, TRUE, (LPARAM)L"Enter command...");
+        // Set font for better readability
+        SendMessageW(m_commandEdit, WM_SETFONT, (WPARAM)UnrealStyleTheme::GetFont(), TRUE);
     }
 }
 

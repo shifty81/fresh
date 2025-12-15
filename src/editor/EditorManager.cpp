@@ -2021,6 +2021,11 @@ void EditorManager::onWindowResize(int clientWidth, int clientHeight)
         m_viewportPanel->setSize(viewportWidth, viewportHeight);
     }
     
+    // Update status bar layout - critical for proper repositioning during maximize/restore
+    if (m_statusBar) {
+        m_statusBar->updateLayout();
+    }
+    
     // Ensure proper Z-order after resize
     ensurePanelsOnTop();
     
