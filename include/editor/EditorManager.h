@@ -541,6 +541,18 @@ public:
      */
     void setMemoryUsage(float usedMB, float totalMB);
 
+#ifdef _WIN32
+    /**
+     * @brief Refresh all panel windows to ensure they are visible
+     * 
+     * Invalidates and updates all panel windows to trigger WM_PAINT messages,
+     * ensuring they are properly displayed on screen. Should be called after:
+     * - Initial panel creation and positioning
+     * - Layout changes that might affect visibility
+     */
+    void refreshAllPanels();
+#endif
+
 private:
 #ifdef _WIN32
     /**
@@ -569,16 +581,6 @@ private:
      * @return Actual toolbar height in pixels
      */
     int getActualToolbarHeight() const;
-    
-    /**
-     * @brief Refresh all panel windows to ensure they are visible
-     * 
-     * Invalidates and updates all panel windows to trigger WM_PAINT messages,
-     * ensuring they are properly displayed on screen. Should be called after:
-     * - Initial panel creation and positioning
-     * - Layout changes that might affect visibility
-     */
-    void refreshAllPanels();
 #endif
 
     bool m_initialized;

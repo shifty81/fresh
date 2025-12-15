@@ -912,6 +912,12 @@ if(BUILD_TESTS)
         target_link_libraries(${PROJECT_NAME}Tests PRIVATE glm::glm)
     endif()
     
+    # Link Native File Dialog Extended if found (required for FileDialogManager)
+    if(nfd_FOUND)
+        target_link_libraries(${PROJECT_NAME}Tests PRIVATE nfd::nfd)
+        message(STATUS "Native File Dialog Extended linked to test executable")
+    endif()
+    
     # Compiler settings for tests (Windows/MSVC)
     target_compile_features(${PROJECT_NAME}Tests PRIVATE cxx_std_20)
     
