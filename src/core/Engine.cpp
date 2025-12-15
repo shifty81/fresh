@@ -500,7 +500,9 @@ void Engine::createNewWorld(const std::string& name, int seed, bool is3D, int ga
                 std::cerr << "WARNING: Could not set viewport handle - viewport may not render correctly" << std::endl;
             }
         } else {
-            LOG_WARNING_C("Skipping swap chain configuration before world creation - invalid viewport state", "Engine");
+            LOG_WARNING_C("Skipping swap chain configuration before world creation - invalid viewport state. " +
+                         std::string("viewportHwnd: ") + (viewportHwnd ? "valid" : "null") + 
+                         ", dimensions: " + std::to_string(vpWidth) + "x" + std::to_string(vpHeight), "Engine");
         }
     }
 #endif
