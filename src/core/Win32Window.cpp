@@ -96,7 +96,8 @@ bool Win32Window::createWindow()
 {
     // Calculate window size to get desired client area
     RECT rect = {0, 0, static_cast<LONG>(m_width), static_cast<LONG>(m_height)};
-    DWORD style = WS_OVERLAPPEDWINDOW;
+    // Add WS_CLIPCHILDREN to prevent main window from painting over child panels
+    DWORD style = WS_OVERLAPPEDWINDOW | WS_CLIPCHILDREN;
     DWORD exStyle = WS_EX_APPWINDOW;
 
     AdjustWindowRectEx(&rect, style, FALSE, exStyle);
