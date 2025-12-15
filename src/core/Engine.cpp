@@ -773,6 +773,19 @@ void Engine::initializeGameSystems()
     if (m_editorManager) {
         m_editorManager->setVisible(true);
         LOG_INFO_C("Editor manager set visible after viewport swap chain configuration", "Engine");
+        
+        // Force window refresh to ensure all panels are properly displayed
+        #ifdef _WIN32
+        Win32Window* win32Window = dynamic_cast<Win32Window*>(m_window.get());
+        if (win32Window) {
+            HWND hwnd = win32Window->getHandle();
+            if (hwnd) {
+                InvalidateRect(hwnd, nullptr, TRUE);
+                UpdateWindow(hwnd);
+                LOG_INFO_C("Main window refreshed after world creation", "Engine");
+            }
+        }
+        #endif
     }
     
     // Create demo entities for Inspector demonstration
