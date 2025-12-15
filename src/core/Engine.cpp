@@ -63,6 +63,7 @@
 #include "editor/WorldEditor.h"
 #include "gameplay/Player.h"
 #include "generation/TerrainGenerator.h"
+#include "generation/IWorldGenerator.h"
 #include "interaction/VoxelInteraction.h"
 #include "physics/PhysicsComponent.h"
 #include "physics/PhysicsSystem.h"
@@ -217,6 +218,10 @@ bool Engine::initialize()
 {
     std::cout << "Initializing Fresh Voxel Engine..." << std::endl;
     LOG_INFO_C("Initializing Fresh Voxel Engine...", "Engine");
+
+    // Initialize world generator plugin system
+    WorldGeneratorFactory::registerBuiltInGenerators();
+    LOG_INFO_C("World generator plugin system initialized", "Engine");
 
     // Create renderer using the abstraction layer first to determine API
     // Auto-select best graphics API for the platform
