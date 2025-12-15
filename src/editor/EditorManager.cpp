@@ -1436,8 +1436,8 @@ void EditorManager::newWorld()
     if (m_windowsDialogManager) {
         // Show confirmation dialog if there's unsaved work
         auto result = m_windowsDialogManager->showMessageBox(
-            "New World",
-            "Create a new world? Any unsaved changes will be lost.",
+            "New Scene",
+            "Create a new scene? Any unsaved changes will be lost.",
             MessageBoxButtons::YesNo,
             MessageBoxIcon::Question
         );
@@ -1462,37 +1462,37 @@ void EditorManager::newWorld()
                     WorldStyle2D style2D = mainMenu.get2DWorldStyle();
                     int gameStyle2D = static_cast<int>(style2D);
                     
-                    LOG_INFO_C("World creation confirmed: " + worldName + 
-                               ", seed=" + std::to_string(seed) + 
+                    LOG_INFO_C("Scene creation confirmed: " + worldName + 
+                               " (seed=" + std::to_string(seed) + 
                                ", 3D=" + std::to_string(is3D) +
-                               ", 2D style=" + std::to_string(gameStyle2D), "EditorManager");
+                               ", 2D style=" + std::to_string(gameStyle2D) + ")", "EditorManager");
                     
-                    // Call the callback to notify Engine to create the world
+                    // Call the callback to notify Engine to create the scene/world
                     if (m_worldCreationCallback) {
                         m_worldCreationCallback(worldName, seed, is3D, gameStyle2D);
                     } else {
-                        LOG_WARNING_C("World creation callback not set!", "EditorManager");
+                        LOG_WARNING_C("Scene creation callback not set!", "EditorManager");
                         m_windowsDialogManager->showMessageBox(
-                            "World Creation Error",
-                            "Cannot create world: callback not configured.",
+                            "Scene Creation Error",
+                            "Cannot create scene: callback not configured.",
                             MessageBoxButtons::OK,
                             MessageBoxIcon::Error
                         );
                     }
                 } else {
-                    LOG_INFO_C("World creation cancelled by user", "EditorManager");
+                    LOG_INFO_C("Scene creation cancelled by user", "EditorManager");
                 }
             } else {
-                LOG_ERROR_C("Failed to initialize native main menu", "EditorManager");
+                LOG_ERROR_C("Failed to initialize native scene creation dialog", "EditorManager");
                 m_windowsDialogManager->showMessageBox(
-                    "World Creation Error",
-                    "Failed to initialize world creation dialog.",
+                    "Scene Creation Error",
+                    "Failed to initialize scene creation dialog.",
                     MessageBoxButtons::OK,
                     MessageBoxIcon::Error
                 );
             }
         } else {
-            LOG_INFO_C("New world cancelled by user", "EditorManager");
+            LOG_INFO_C("New scene cancelled by user", "EditorManager");
         }
     }
 #else

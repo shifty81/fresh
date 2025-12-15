@@ -286,15 +286,22 @@ bool Engine::initialize()
     std::cout << "Input manager initialized" << std::endl;
     LOG_INFO_C("Input manager initialized", "Engine");
 
-    // Create console-based main menu for backward compatibility
+    // EDITOR-FIRST DESIGN: Console main menu deprecated
+    // The editor handles scene/world creation through native Win32 dialogs
+    // Use File > New Scene or File > Open Scene from the menu bar
+    std::cout << "\n========================================" << std::endl;
+    std::cout << "  Fresh Voxel Engine - Game Editor" << std::endl;
+    std::cout << "========================================" << std::endl;
+    std::cout << "Editor-First Workflow:" << std::endl;
+    std::cout << "  - Create scenes via File > New Scene" << std::endl;
+    std::cout << "  - Open scenes via File > Open Scene" << std::endl;
+    std::cout << "  - All tools accessible in editor" << std::endl;
+    std::cout << "========================================\n" << std::endl;
+    
+    // Keep main menu instance for backward compatibility (not actively used)
     m_mainMenu = std::make_unique<MainMenu>();
-    if (!m_mainMenu->initialize()) {
-        std::cerr << "Failed to initialize main menu" << std::endl;
-        LOG_ERROR_C("Failed to initialize main menu", "Engine");
-        return false;
-    }
-    std::cout << "Main menu initialized" << std::endl;
-    LOG_INFO_C("Main menu initialized", "Engine");
+    // Skip main menu initialization - editor handles everything now
+    LOG_INFO_C("Editor-first mode: Using native Win32 editor for scene management", "Engine");
 
     // Create entity manager for ECS
     m_entityManager = std::make_unique<ecs::EntityManager>();
@@ -1810,16 +1817,16 @@ void Engine::setupNativeMenuBar()
 
     // ========== FILE MENU (Unreal-style) ==========
     int fileMenu = menuBar->addMenu("File");
-    menuBar->addMenuItem(fileMenu, "New World...\tCtrl+N", [this]() {
-        LOG_INFO_C("New World menu item clicked", "Engine");
+    menuBar->addMenuItem(fileMenu, "New Scene...\tCtrl+N", [this]() {
+        LOG_INFO_C("New Scene menu item clicked (creates new world)", "Engine");
         if (m_editorManager) {
-            m_editorManager->newWorld();
+            m_editorManager->newWorld(); // Creates new scene/world
         }
     });
-    menuBar->addMenuItem(fileMenu, "Open World...\tCtrl+O", [this]() {
-        LOG_INFO_C("Open World menu item clicked", "Engine");
+    menuBar->addMenuItem(fileMenu, "Open Scene...\tCtrl+O", [this]() {
+        LOG_INFO_C("Open Scene menu item clicked (loads world)", "Engine");
         if (m_editorManager) {
-            m_editorManager->loadWorld();
+            m_editorManager->loadWorld(); // Loads existing scene/world
         }
     });
     menuBar->addSeparator(fileMenu);
@@ -2034,8 +2041,8 @@ void Engine::setupNativeMenuBar()
         LOG_INFO_C("Generate Terrain selected", "Engine");
         // TODO: Show terrain generation dialog
     });
-    menuBar->addMenuItem(worldMenu, "Clear World", [this]() {
-        LOG_INFO_C("Clear World selected", "Engine");
+    menuBar->addMenuItem(worldMenu, "Clear Scene", [this]() {
+        LOG_INFO_C("Clear Scene selected (clears world)", "Engine");
         // TODO: Clear world confirmation
     });
     menuBar->addMenuItem(worldMenu, "Regenerate Chunks", [this]() {
@@ -2043,8 +2050,8 @@ void Engine::setupNativeMenuBar()
         // TODO: Regenerate visible chunks
     });
     menuBar->addSeparator(worldMenu);
-    menuBar->addMenuItem(worldMenu, "World Settings...", [this]() {
-        LOG_INFO_C("World Settings selected", "Engine");
+    menuBar->addMenuItem(worldMenu, "Scene Settings...", [this]() {
+        LOG_INFO_C("Scene Settings selected (world settings)", "Engine");
         // TODO: Show world settings dialog
     });
 
