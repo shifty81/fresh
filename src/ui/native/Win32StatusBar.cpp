@@ -81,6 +81,9 @@ bool Win32StatusBar::create(HWND parent, int numPanes, const PaneConfig* paneCon
 
     // Apply dark theme
     applyDarkTheme();
+    
+    // Set font for better readability - use the same font as other UI elements
+    SendMessageW(m_hwnd, WM_SETFONT, (WPARAM)UnrealStyleTheme::GetFont(), TRUE);
 
     // Set initial text for all panes
     for (int i = 0; i < numPanes; ++i) {
