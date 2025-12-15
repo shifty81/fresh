@@ -2032,8 +2032,14 @@ void EditorManager::onWindowResize(int clientWidth, int clientHeight)
 void EditorManager::ensurePanelsOnTop()
 {
 #ifdef _WIN32
-    // Ensure proper Z-order: UI panels should be on top of the viewport
-    // Bring all UI panels to the front to ensure they're visible above the viewport
+    // Ensure proper Z-order: Viewport at bottom, UI panels on top
+    // First, explicitly position viewport at the bottom of Z-order
+    if (m_viewportPanel && m_viewportPanel->getHandle()) {
+        SetWindowPos(m_viewportPanel->getHandle(), HWND_BOTTOM, 0, 0, 0, 0, 
+                    SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
+    }
+    
+    // Then bring all UI panels to the front to ensure they're visible above the viewport
     if (m_nativeTerraformingPanel && m_nativeTerraformingPanel->getHandle()) {
         SetWindowPos(m_nativeTerraformingPanel->getHandle(), HWND_TOP, 0, 0, 0, 0, 
                     SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);

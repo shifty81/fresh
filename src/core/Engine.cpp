@@ -438,6 +438,48 @@ void Engine::createNewWorld(const std::string& name, int seed, bool is3D, int ga
     }
     std::cout << " (seed: " << seed << ")" << std::endl;
 
+#ifdef _WIN32
+    // CRITICAL FIX: Ensure viewport panel has valid dimensions BEFORE creating world
+    // This prevents full-screen rendering when the swap chain is later recreated
+    if (m_editorManager && m_editorManager->getViewportPanel() && m_renderer) {
+        auto* viewportPanel = m_editorManager->getViewportPanel();
+        int vpWidth = viewportPanel->getWidth();
+        int vpHeight = viewportPanel->getHeight();
+        
+        LOG_INFO_C("Pre-world-creation viewport check: " + std::to_string(vpWidth) + "x" + std::to_string(vpHeight), "Engine");
+        
+        // Validate viewport dimensions before proceeding with world creation
+        if (vpWidth <= 0 || vpHeight <= 0) {
+            LOG_ERROR_C("CRITICAL: Viewport has invalid dimensions before world creation: " + 
+                       std::to_string(vpWidth) + "x" + std::to_string(vpHeight) + 
+                       ". Forcing viewport resize to ensure proper rendering.", "Engine");
+            std::cerr << "ERROR: Invalid viewport dimensions detected! Attempting to fix..." << std::endl;
+            
+            // Try to fix by triggering a window resize event
+            Win32Window* win32Window = dynamic_cast<Win32Window*>(m_window.get());
+            if (win32Window && m_editorManager) {
+                RECT clientRect;
+                HWND hwnd = win32Window->getHandle();
+                if (hwnd && GetClientRect(hwnd, &clientRect)) {
+                    int clientWidth = clientRect.right - clientRect.left;
+                    int clientHeight = clientRect.bottom - clientRect.top;
+                    m_editorManager->onWindowResize(clientWidth, clientHeight);
+                    
+                    // Re-check viewport dimensions after resize
+                    vpWidth = viewportPanel->getWidth();
+                    vpHeight = viewportPanel->getHeight();
+                    LOG_INFO_C("After resize fix, viewport is now: " + std::to_string(vpWidth) + "x" + std::to_string(vpHeight), "Engine");
+                    
+                    if (vpWidth <= 0 || vpHeight <= 0) {
+                        LOG_ERROR_C("CRITICAL: Failed to fix viewport dimensions. World will render incorrectly!", "Engine");
+                        std::cerr << "ERROR: Could not establish valid viewport dimensions!" << std::endl;
+                    }
+                }
+            }
+        }
+    }
+#endif
+
     // Store world type and style for camera setup
     m_isWorld3D = is3D;
     m_world2DStyle = gameStyle2D;
@@ -739,12 +781,15 @@ void Engine::initializeGameSystems()
         auto* viewportPanel = m_editorManager->getViewportPanel();
         HWND viewportHwnd = viewportPanel->getHandle();
         
+        LOG_INFO_C("Viewport panel handle: " + std::to_string(reinterpret_cast<uintptr_t>(viewportHwnd)), "Engine");
+        
         if (viewportHwnd) {
             int vpWidth = viewportPanel->getWidth();
             int vpHeight = viewportPanel->getHeight();
             
-            LOG_INFO_C("Updating renderer for world creation - viewport size: " + 
+            LOG_INFO_C("Configuring viewport swap chain after world creation - viewport size: " + 
                        std::to_string(vpWidth) + "x" + std::to_string(vpHeight), "Engine");
+            std::cout << "Setting up viewport rendering: " << vpWidth << "x" << vpHeight << std::endl;
             
             // Validate viewport dimensions
             if (vpWidth <= 0 || vpHeight <= 0) {
@@ -753,17 +798,26 @@ void Engine::initializeGameSystems()
                            ". World will render full screen instead of in viewport. GUI will not be visible.", "Engine");
                 std::cerr << "ERROR: Invalid viewport dimensions - GUI will not display correctly!" << std::endl;
             } else {
-                // Set viewport window handle in renderer
+                // Set viewport window handle in renderer (this should already be set from initialization, 
+                // but we do it again to be safe)
+                LOG_INFO_C("Setting viewport window handle in renderer...", "Engine");
                 if (m_renderer->setViewportWindow(viewportHwnd)) {
+                    LOG_INFO_C("Viewport window handle set successfully. Recreating swap chain...", "Engine");
                     // Recreate swap chain for viewport
                     if (m_renderer->recreateSwapChain(vpWidth, vpHeight)) {
                         LOG_INFO_C("DirectX swap chain successfully recreated for viewport after world creation", "Engine");
-                        std::cout << "Viewport swap chain created: " << vpWidth << "x" << vpHeight << std::endl;
+                        std::cout << "✓ Viewport swap chain configured: " << vpWidth << "x" << vpHeight << std::endl;
                         
                         // Update camera aspect ratio
                         if (m_player) {
                             float aspectRatio = static_cast<float>(vpWidth) / static_cast<float>(vpHeight);
                             m_player->getCamera().setAspectRatio(aspectRatio);
+                        }
+                        
+                        // Ensure viewport panel is visible and at correct Z-order
+                        if (m_editorManager) {
+                            m_editorManager->ensurePanelsOnTop();
+                            LOG_INFO_C("Ensured proper panel Z-order after viewport swap chain creation", "Engine");
                         }
                     } else {
                         LOG_ERROR_C("CRITICAL: Failed to recreate DirectX swap chain for viewport after world creation. "
