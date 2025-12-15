@@ -551,15 +551,6 @@ public:
      * - Layout changes that might affect visibility
      */
     void refreshAllPanels();
-#endif
-
-private:
-#ifdef _WIN32
-    /**
-     * @brief Handle console command execution
-     * @param command The command string entered by the user
-     */
-    void handleConsoleCommand(const std::string& command);
     
     /**
      * @brief Ensure all UI panels are on top of the viewport in Z-order
@@ -571,6 +562,15 @@ private:
      * - Window resizing (to maintain proper Z-order)
      */
     void ensurePanelsOnTop();
+#endif
+
+private:
+#ifdef _WIN32
+    /**
+     * @brief Handle console command execution
+     * @param command The command string entered by the user
+     */
+    void handleConsoleCommand(const std::string& command);
     
     /**
      * @brief Get the actual height of the Win32 toolbar
