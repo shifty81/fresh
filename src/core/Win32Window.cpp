@@ -272,12 +272,16 @@ LRESULT CALLBACK Win32Window::WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LP
             return 0;
 
         case WM_SIZE: {
-            UINT width = LOWORD(lParam);
-            UINT height = HIWORD(lParam);
-            if (width != window->m_width || height != window->m_height) {
-                window->m_width = width;
-                window->m_height = height;
-                window->m_framebufferResized = true;
+            // Get accurate client rect dimensions, especially important during maximize/restore
+            RECT clientRect;
+            if (GetClientRect(hwnd, &clientRect)) {
+                UINT width = clientRect.right - clientRect.left;
+                UINT height = clientRect.bottom - clientRect.top;
+                if (width != window->m_width || height != window->m_height) {
+                    window->m_width = width;
+                    window->m_height = height;
+                    window->m_framebufferResized = true;
+                }
             }
             return 0;
         }
