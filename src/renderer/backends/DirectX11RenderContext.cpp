@@ -290,6 +290,13 @@ void DirectX11RenderContext::shutdown()
 
 bool DirectX11RenderContext::beginFrame()
 {
+    // CRITICAL: Bind render targets to output merger stage at the start of each frame
+    // DirectX 11 best practice - ensures rendering always targets the correct surface
+    // This is essential for proper viewport rendering (viewport child window vs main window)
+    if (renderTargetView && depthStencilView && deviceContext) {
+        deviceContext->OMSetRenderTargets(1, renderTargetView.GetAddressOf(), depthStencilView.Get());
+    }
+    
     // Clear render target and depth stencil using the stored clear color
     if (renderTargetView && deviceContext) {
         deviceContext->ClearRenderTargetView(renderTargetView.Get(), clearColorValue);
