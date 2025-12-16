@@ -324,9 +324,9 @@ bool Engine::initialize()
     }
     
     // Set callbacks for world operations so EditorManager can trigger them
-    m_editorManager->setWorldCreationCallback([this](const std::string& name, int seed, bool is3D, int gameStyle2D) {
-        LOG_INFO_C("World creation callback triggered: " + name, "Engine");
-        this->createNewWorld(name, seed, is3D, gameStyle2D);
+    m_editorManager->setWorldCreationCallback([this](const WorldCreationParams& params) {
+        LOG_INFO_C("World creation callback triggered: " + params.name, "Engine");
+        this->createNewWorld(params);
     });
     
     m_editorManager->setWorldLoadCallback([this](const std::string& name) {
@@ -429,10 +429,30 @@ bool Engine::initialize()
     return true;
 }
 
+void Engine::createNewWorld(const WorldCreationParams& params)
+{
+    const char* styleNames[] = {"Platformer/Terraria", "Top-down/Zelda"};
+    const char* sizeNames[] = {"Small", "Medium", "Large", "Huge"};
+    const char* terrainNames[] = {"Flat", "Hills", "Mountains", "Islands"};
+    const char* biomeNames[] = {"Forest", "Desert", "Snow", "Jungle", "Mixed"};
+    
+    std::cout << "\nCreating new " << (params.is3D ? "3D" : "2D") << " world: " << params.name;
+    if (!params.is3D) {
+        std::cout << " (Style: " << styleNames[params.gameStyle2D] << ")";
+    }
+    std::cout << " (seed: " << params.seed << ")" << std::endl;
+    std::cout << "  Size: " << sizeNames[static_cast<int>(params.worldSize)] << std::endl;
+    std::cout << "  Terrain: " << terrainNames[static_cast<int>(params.terrainType)] << std::endl;
+    std::cout << "  Biome: " << biomeNames[static_cast<int>(params.biomeType)] << std::endl;
+    
+    // Delegate to old implementation for now (will be enhanced later)
+    createNewWorld(params.name, params.seed, params.is3D, params.gameStyle2D);
+}
+
 void Engine::createNewWorld(const std::string& name, int seed, bool is3D, int gameStyle2D)
 {
     const char* styleNames[] = {"Platformer/Terraria", "Top-down/Zelda"};
-    std::cout << "\nCreating new " << (is3D ? "3D" : "2D") << " world: " << name;
+    std::cout << "\n[Legacy method] Creating new " << (is3D ? "3D" : "2D") << " world: " << name;
     if (!is3D) {
         std::cout << " (Style: " << styleNames[gameStyle2D] << ")";
     }

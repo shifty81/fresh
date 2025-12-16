@@ -13,6 +13,9 @@
 namespace fresh
 {
 
+// Forward declare WorldCreationParams
+struct WorldCreationParams;
+
 #ifdef _WIN32
 class Win32Window;
 class Win32InputManager;
@@ -154,7 +157,8 @@ private:
     std::unordered_map<ChunkPos, size_t> m_chunkIndexCounts;
 #endif
 
-    void createNewWorld(const std::string& name, int seed, bool is3D = true, int gameStyle2D = 0);
+    void createNewWorld(const WorldCreationParams& params);
+    void createNewWorld(const std::string& name, int seed, bool is3D = true, int gameStyle2D = 0); // Deprecated, for backward compatibility
     void loadWorld(const std::string& name);
     void setupInputCallbacks();
     void initializeGameSystems(); // Helper for common initialization

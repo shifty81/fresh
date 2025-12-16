@@ -49,6 +49,29 @@ enum class BiomeType {
 };
 
 /**
+ * @brief World creation parameters structure
+ */
+struct WorldCreationParams {
+    std::string name;
+    int seed;
+    bool is3D;
+    int gameStyle2D; // WorldStyle2D cast to int for backward compatibility
+    WorldSize worldSize;
+    TerrainType terrainType;
+    BiomeType biomeType;
+
+    WorldCreationParams()
+        : name("New Project")
+        , seed(0)
+        , is3D(true)
+        , gameStyle2D(0)
+        , worldSize(WorldSize::Medium)
+        , terrainType(TerrainType::Hills)
+        , biomeType(BiomeType::Mixed)
+    {}
+};
+
+/**
  * @brief Native Windows Main Menu using Win32 API
  *
  * This is a proof-of-concept replacement for MainMenuPanel that uses

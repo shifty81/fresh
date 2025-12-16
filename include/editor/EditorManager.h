@@ -12,6 +12,7 @@
 #include "ui/ContentBrowserPanel.h"
 #include "ui/ConsolePanel.h"
 #include "ui/EditorMenuBar.h"
+#include "ui/NativeMainMenu.h"  // For WorldCreationParams
 #endif
 
 namespace fresh
@@ -210,7 +211,7 @@ public:
      * @brief Set callback for world creation
      * @param callback Function to call when a new world should be created (worldName, seed, is3D, gameStyle2D)
      */
-    void setWorldCreationCallback(std::function<void(const std::string&, int, bool, int)> callback)
+    void setWorldCreationCallback(std::function<void(const WorldCreationParams&)> callback)
     {
         m_worldCreationCallback = callback;
     }
@@ -648,7 +649,7 @@ private:
     std::string m_currentWorldPath;
 
     // Callbacks for world operations (set by Engine)
-    std::function<void(const std::string&, int, bool, int)> m_worldCreationCallback;
+    std::function<void(const WorldCreationParams&)> m_worldCreationCallback;
     std::function<void(const std::string&)> m_worldLoadCallback;
     std::function<void()> m_enterPlayModeCallback;
     std::function<void()> m_exitPlayModeCallback;
