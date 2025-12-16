@@ -491,6 +491,24 @@ void Engine::createNewWorld(const std::string& name, int seed, bool is3D, int ga
                     LOG_INFO_C("✓ Viewport swap chain configured before world creation: " + 
                                std::to_string(vpWidth) + "x" + std::to_string(vpHeight), "Engine");
                     std::cout << "✓ Viewport ready for rendering: " << vpWidth << "x" << vpHeight << std::endl;
+                    
+                    // CRITICAL FIX: Explicitly clear and repaint the main window to black
+                    // This prevents the old DirectX rendering (sky blue) from showing through panel gaps
+                    Win32Window* win32Window = dynamic_cast<Win32Window*>(m_window.get());
+                    if (win32Window) {
+                        HWND mainHwnd = win32Window->getHandle();
+                        if (mainHwnd) {
+                            // Fill main window client area with black to cover any previous DirectX rendering
+                            HDC hdc = GetDC(mainHwnd);
+                            if (hdc) {
+                                RECT clientRect;
+                                GetClientRect(mainHwnd, &clientRect);
+                                FillRect(hdc, &clientRect, (HBRUSH)GetStockObject(BLACK_BRUSH));
+                                ReleaseDC(mainHwnd, hdc);
+                                LOG_INFO_C("Main window cleared to black after viewport swap chain setup", "Engine");
+                            }
+                        }
+                    }
                 } else {
                     LOG_ERROR_C("Failed to recreate swap chain before world creation. Rendering may be incorrect.", "Engine");
                     std::cerr << "WARNING: Swap chain recreation failed - viewport may not render correctly" << std::endl;
@@ -845,6 +863,22 @@ void Engine::initializeGameSystems()
                         if (m_editorManager) {
                             m_editorManager->ensurePanelsOnTop();
                             LOG_INFO_C("Ensured proper panel Z-order after viewport swap chain creation", "Engine");
+                        }
+                        
+                        // CRITICAL FIX: Clear main window again to ensure no stray DirectX rendering shows through gaps
+                        Win32Window* win32Window = dynamic_cast<Win32Window*>(m_window.get());
+                        if (win32Window) {
+                            HWND mainHwnd = win32Window->getHandle();
+                            if (mainHwnd) {
+                                HDC hdc = GetDC(mainHwnd);
+                                if (hdc) {
+                                    RECT clientRect;
+                                    GetClientRect(mainHwnd, &clientRect);
+                                    FillRect(hdc, &clientRect, (HBRUSH)GetStockObject(BLACK_BRUSH));
+                                    ReleaseDC(mainHwnd, hdc);
+                                    LOG_INFO_C("Main window cleared to black after world creation", "Engine");
+                                }
+                            }
                         }
                     } else {
                         LOG_ERROR_C("CRITICAL: Failed to recreate DirectX swap chain for viewport after world creation. "
