@@ -222,18 +222,38 @@ private:
 // Common event types
 namespace Events
 {
+// Player events
 constexpr const char* PLAYER_SPAWNED = "player_spawned";
 constexpr const char* PLAYER_DIED = "player_died";
+
+// World events
 constexpr const char* CHUNK_LOADED = "chunk_loaded";
 constexpr const char* CHUNK_UNLOADED = "chunk_unloaded";
 constexpr const char* BLOCK_PLACED = "block_placed";
 constexpr const char* BLOCK_BROKEN = "block_broken";
+
+// Item events
 constexpr const char* ITEM_PICKED_UP = "item_picked_up";
 constexpr const char* ITEM_USED = "item_used";
+
+// Game state events
 constexpr const char* GAME_PAUSED = "game_paused";
 constexpr const char* GAME_RESUMED = "game_resumed";
 constexpr const char* SCENE_LOADED = "scene_loaded";
 constexpr const char* RESOURCE_LOADED = "resource_loaded";
+
+// Entity/Combat events (for event-driven gameplay)
+constexpr const char* ENTITY_DAMAGED = "entity_damaged";
+constexpr const char* ENTITY_HEALED = "entity_healed";
+constexpr const char* ENTITY_DIED = "entity_died";
+constexpr const char* ENTITY_REVIVED = "entity_revived";
+
+// Environmental events (for emergent gameplay)
+constexpr const char* DOOR_OPENED = "door_opened";
+constexpr const char* DOOR_CLOSED = "door_closed";
+constexpr const char* ENEMY_SPOTTED = "enemy_spotted";
+constexpr const char* NOISE_MADE = "noise_made";
+constexpr const char* TRAP_TRIGGERED = "trap_triggered";
 } // namespace Events
 
 } // namespace fresh

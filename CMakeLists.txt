@@ -842,6 +842,9 @@ if(BUILD_TESTS)
         tests/ecs/Transform2DTests.cpp            # Tests for 2D transform component
         tests/ecs/Collider2DTests.cpp             # Tests for 2D collider component
         tests/ecs/RigidBody2DTests.cpp            # Tests for 2D rigidbody component
+        tests/ecs/HealthComponentTests.cpp        # Tests for health component
+        tests/ecs/MovementComponentTests.cpp      # Tests for movement component
+        tests/ecs/CombatSystemTests.cpp           # Tests for combat system
         tests/voxelship/VoxelBlockStretchTest.cpp # Tests for voxel block stretching
     )
     
