@@ -1463,23 +1463,28 @@ void EditorManager::newWorld()
             if (mainMenu.initialize(parentHwnd)) {
                 // Show the create world dialog directly (skips main menu)
                 if (mainMenu.showCreateWorldDialog()) {
-                    // Get world parameters from dialog
+                    // Get world parameters from dialog and create WorldCreationParams struct
+                    WorldCreationParams params;
                     std::wstring wWorldName = mainMenu.getNewWorldName();
-                    // Convert wide string to narrow string using Windows API
-                    std::string worldName = toNarrowString(wWorldName);
-                    int seed = mainMenu.getWorldSeed();
-                    bool is3D = mainMenu.isWorld3D();
-                    WorldStyle2D style2D = mainMenu.get2DWorldStyle();
-                    int gameStyle2D = static_cast<int>(style2D);
+                    params.name = toNarrowString(wWorldName);
+                    params.seed = mainMenu.getWorldSeed();
+                    params.is3D = mainMenu.isWorld3D();
+                    params.gameStyle2D = static_cast<int>(mainMenu.get2DWorldStyle());
+                    params.worldSize = mainMenu.getWorldSize();
+                    params.terrainType = mainMenu.getTerrainType();
+                    params.biomeType = mainMenu.getBiomeType();
                     
-                    LOG_INFO_C("Scene creation confirmed: " + worldName + 
-                               " (seed=" + std::to_string(seed) + 
-                               ", 3D=" + std::to_string(is3D) +
-                               ", 2D style=" + std::to_string(gameStyle2D) + ")", "EditorManager");
+                    LOG_INFO_C("Scene creation confirmed: " + params.name + 
+                               " (seed=" + std::to_string(params.seed) + 
+                               ", 3D=" + std::to_string(params.is3D) +
+                               ", 2D style=" + std::to_string(params.gameStyle2D) +
+                               ", size=" + std::to_string(static_cast<int>(params.worldSize)) +
+                               ", terrain=" + std::to_string(static_cast<int>(params.terrainType)) +
+                               ", biome=" + std::to_string(static_cast<int>(params.biomeType)) + ")", "EditorManager");
                     
                     // Call the callback to notify Engine to create the scene/world
                     if (m_worldCreationCallback) {
-                        m_worldCreationCallback(worldName, seed, is3D, gameStyle2D);
+                        m_worldCreationCallback(params);
                     } else {
                         LOG_WARNING_C("Scene creation callback not set!", "EditorManager");
                         m_windowsDialogManager->showMessageBox(

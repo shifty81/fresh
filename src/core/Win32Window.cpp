@@ -347,12 +347,15 @@ LRESULT CALLBACK Win32Window::WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LP
         }
 
         case WM_PAINT: {
-            // Properly handle paint message to validate window area
+            // Properly handle paint message and fill with black
+            // This ensures the main window never shows DirectX rendering (sky blue) through panel gaps
             PAINTSTRUCT ps;
             HDC hdc = BeginPaint(hwnd, &ps);
-            (void)hdc; // Suppress unreferenced local variable warning
-            // DirectX/child windows handle their own rendering
-            // Just validate the window to prevent continuous WM_PAINT messages
+            if (hdc) {
+                // Fill the paint area with black to prevent any stray rendering from showing through
+                FillRect(hdc, &ps.rcPaint, (HBRUSH)GetStockObject(BLACK_BRUSH));
+            }
+            // Validate the window to prevent continuous WM_PAINT messages
             EndPaint(hwnd, &ps);
             return 0;
         }

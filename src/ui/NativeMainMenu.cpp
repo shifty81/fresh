@@ -105,6 +105,9 @@ NativeMainMenu::NativeMainMenu()
       m_loadWorld(false),
       m_isWorld3D(true),
       m_world2DStyle(WorldStyle2D::Platformer),
+      m_worldSize(WorldSize::Medium),
+      m_terrainType(TerrainType::Hills),
+      m_biomeType(BiomeType::Mixed),
       m_worldSeed(0)
 {
 }
@@ -418,6 +421,21 @@ INT_PTR CALLBACK NativeMainMenu::createWorldDialogProc(HWND hwnd, UINT msg, WPAR
                 menu->m_world2DStyle = isPlatformer ? WorldStyle2D::Platformer : WorldStyle2D::TopDown;
             }
 
+            // Get world size
+            HWND sizeCombo = GetDlgItem(hwnd, ID_COMBO_WORLD_SIZE);
+            int sizeIndex = (int)SendMessage(sizeCombo, CB_GETCURSEL, 0, 0);
+            menu->m_worldSize = static_cast<WorldSize>(sizeIndex);
+
+            // Get terrain type
+            HWND terrainCombo = GetDlgItem(hwnd, ID_COMBO_TERRAIN_TYPE);
+            int terrainIndex = (int)SendMessage(terrainCombo, CB_GETCURSEL, 0, 0);
+            menu->m_terrainType = static_cast<TerrainType>(terrainIndex);
+
+            // Get biome type
+            HWND biomeCombo = GetDlgItem(hwnd, ID_COMBO_BIOME_TYPE);
+            int biomeIndex = (int)SendMessage(biomeCombo, CB_GETCURSEL, 0, 0);
+            menu->m_biomeType = static_cast<BiomeType>(biomeIndex);
+
             LOG_INFO_C("Creating new world: " + toNarrowString(menu->m_newWorldName),
                        "NativeMainMenu");
 
@@ -449,7 +467,8 @@ INT_PTR CALLBACK NativeMainMenu::createWorldDialogProc(HWND hwnd, UINT msg, WPAR
 
 void NativeMainMenu::createWorldCreationDialog(HWND hwnd)
 {
-    SetWindowPos(hwnd, nullptr, 0, 0, 550, 480, SWP_NOMOVE | SWP_NOZORDER);
+    // Make dialog larger to accommodate new controls
+    SetWindowPos(hwnd, nullptr, 0, 0, 550, 650, SWP_NOMOVE | SWP_NOZORDER);
 
     int y = 20;
     int labelX = 20;
@@ -522,7 +541,59 @@ void NativeMainMenu::createWorldCreationDialog(HWND hwnd)
                    WS_CHILD | WS_VISIBLE | BS_AUTORADIOBUTTON, controlX + 40, y, 300, 20,
                    hwnd, (HMENU)ID_RADIO_2D_TOPDOWN, GetModuleHandle(nullptr), nullptr);
 
-    y = 400;
+    y += 40;
+
+    // World Size label
+    CreateWindowEx(0, L"STATIC", L"World Size:", WS_CHILD | WS_VISIBLE, labelX, y, 120, 20, hwnd,
+                   nullptr, GetModuleHandle(nullptr), nullptr);
+
+    // World Size combo box
+    HWND sizeCombo = CreateWindowEx(WS_EX_CLIENTEDGE, L"COMBOBOX", nullptr,
+                   WS_CHILD | WS_VISIBLE | CBS_DROPDOWNLIST | WS_VSCROLL,
+                   controlX, y, controlWidth, 200, hwnd, (HMENU)ID_COMBO_WORLD_SIZE,
+                   GetModuleHandle(nullptr), nullptr);
+    SendMessage(sizeCombo, CB_ADDSTRING, 0, (LPARAM)L"Small (8 chunk radius)");
+    SendMessage(sizeCombo, CB_ADDSTRING, 0, (LPARAM)L"Medium (16 chunk radius)");
+    SendMessage(sizeCombo, CB_ADDSTRING, 0, (LPARAM)L"Large (24 chunk radius)");
+    SendMessage(sizeCombo, CB_ADDSTRING, 0, (LPARAM)L"Huge (32 chunk radius)");
+    SendMessage(sizeCombo, CB_SETCURSEL, 1, 0); // Default to Medium
+
+    y += 35;
+
+    // Terrain Type label
+    CreateWindowEx(0, L"STATIC", L"Terrain Type:", WS_CHILD | WS_VISIBLE, labelX, y, 120, 20, hwnd,
+                   nullptr, GetModuleHandle(nullptr), nullptr);
+
+    // Terrain Type combo box
+    HWND terrainCombo = CreateWindowEx(WS_EX_CLIENTEDGE, L"COMBOBOX", nullptr,
+                   WS_CHILD | WS_VISIBLE | CBS_DROPDOWNLIST | WS_VSCROLL,
+                   controlX, y, controlWidth, 200, hwnd, (HMENU)ID_COMBO_TERRAIN_TYPE,
+                   GetModuleHandle(nullptr), nullptr);
+    SendMessage(terrainCombo, CB_ADDSTRING, 0, (LPARAM)L"Flat");
+    SendMessage(terrainCombo, CB_ADDSTRING, 0, (LPARAM)L"Hills");
+    SendMessage(terrainCombo, CB_ADDSTRING, 0, (LPARAM)L"Mountains");
+    SendMessage(terrainCombo, CB_ADDSTRING, 0, (LPARAM)L"Islands");
+    SendMessage(terrainCombo, CB_SETCURSEL, 1, 0); // Default to Hills
+
+    y += 35;
+
+    // Biome Type label
+    CreateWindowEx(0, L"STATIC", L"Biome:", WS_CHILD | WS_VISIBLE, labelX, y, 120, 20, hwnd,
+                   nullptr, GetModuleHandle(nullptr), nullptr);
+
+    // Biome Type combo box
+    HWND biomeCombo = CreateWindowEx(WS_EX_CLIENTEDGE, L"COMBOBOX", nullptr,
+                   WS_CHILD | WS_VISIBLE | CBS_DROPDOWNLIST | WS_VSCROLL,
+                   controlX, y, controlWidth, 200, hwnd, (HMENU)ID_COMBO_BIOME_TYPE,
+                   GetModuleHandle(nullptr), nullptr);
+    SendMessage(biomeCombo, CB_ADDSTRING, 0, (LPARAM)L"Forest");
+    SendMessage(biomeCombo, CB_ADDSTRING, 0, (LPARAM)L"Desert");
+    SendMessage(biomeCombo, CB_ADDSTRING, 0, (LPARAM)L"Snow");
+    SendMessage(biomeCombo, CB_ADDSTRING, 0, (LPARAM)L"Jungle");
+    SendMessage(biomeCombo, CB_ADDSTRING, 0, (LPARAM)L"Mixed");
+    SendMessage(biomeCombo, CB_SETCURSEL, 4, 0); // Default to Mixed
+
+    y = 570;
 
     // Buttons
     int buttonWidth = 150;
