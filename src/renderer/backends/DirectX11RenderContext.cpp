@@ -247,25 +247,19 @@ bool DirectX11RenderContext::initialize(void* win)
         return false;
     }
 
-    // NOTE: We create an initial swap chain for the main window here, but this will be
-    // replaced with a viewport swap chain later when setViewportWindow() + recreateSwapChain() are called.
-    // The main window swap chain should never be presented to after viewport is set up.
-    if (!createSwapchain()) {
-        LOG_ERROR_C("Failed to create swapchain", "DirectX11");
-        return false;
-    }
+    // CRITICAL FIX FOR VIEWPORT-ONLY RENDERING:
+    // DO NOT create a swap chain for the main window during initialization.
+    // The swap chain will ONLY be created for the viewport child window when
+    // setViewportWindow() + recreateSwapChain() are called.
+    // This prevents any rendering to the main window that could show through panel gaps.
+    LOG_INFO_C("Skipping main window swap chain creation - will only use viewport swap chain", "DirectX11");
+    LOG_INFO_C("Swap chain will be created when viewport is ready via setViewportWindow() + recreateSwapChain()", "DirectX11");
 
-    if (!createRenderTargetView()) {
-        LOG_ERROR_C("Failed to create render target view", "DirectX11");
-        return false;
-    }
+    // NOTE: We skip creating swap chain, render target view, and depth stencil view here.
+    // These will be created later when the viewport is set up.
+    // This ensures the main window is NEVER a DirectX rendering target.
 
-    if (!createDepthStencilView()) {
-        LOG_ERROR_C("Failed to create depth stencil view", "DirectX11");
-        return false;
-    }
-
-    // Initialize voxel rendering system
+    // Initialize voxel rendering system (doesn't require swap chain)
     if (!initializeVoxelRendering()) {
         LOG_ERROR_C("Failed to initialize voxel rendering", "DirectX11");
         return false;
@@ -293,6 +287,13 @@ void DirectX11RenderContext::shutdown()
 
 bool DirectX11RenderContext::beginFrame()
 {
+    // CRITICAL: Only render if we have a valid swap chain (i.e., viewport is set up)
+    // This prevents any rendering to the main window
+    if (!swapchain) {
+        // No swap chain yet - viewport not set up, skip rendering
+        return false;
+    }
+
     // CRITICAL: Bind render targets to output merger stage at the start of each frame
     // DirectX 11 best practice - ensures rendering always targets the correct surface
     // This is essential for proper viewport rendering (viewport child window vs main window)
