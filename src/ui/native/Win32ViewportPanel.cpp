@@ -35,7 +35,8 @@ bool Win32ViewportPanel::registerWindowClass()
     wc.lpfnWndProc = WindowProc;
     wc.hInstance = GetModuleHandle(nullptr);
     wc.hCursor = LoadCursor(nullptr, IDC_ARROW);
-    wc.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
+    // Use black background to prevent blue showing through and match dark theme
+    wc.hbrBackground = (HBRUSH)GetStockObject(BLACK_BRUSH);
     wc.lpszClassName = WINDOW_CLASS_NAME;
 
     if (!RegisterClassExW(&wc)) {
@@ -72,11 +73,12 @@ bool Win32ViewportPanel::create(HWND parent, int x, int y, int width, int height
     // WS_CHILD makes it a child window
     // WS_VISIBLE makes it initially visible
     // WS_CLIPSIBLINGS and WS_CLIPCHILDREN are important for DirectX rendering
+    // WS_EX_CLIENTEDGE adds a sunken border to prevent gaps
     m_hwnd = CreateWindowExW(
-        0,                          // Extended style
+        WS_EX_CLIENTEDGE,           // Add sunken border to prevent gaps
         WINDOW_CLASS_NAME,          // Class name
         L"Viewport",                // Window title (not visible for child windows)
-        WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | WS_CLIPCHILDREN,
+        WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | WS_CLIPCHILDREN | WS_BORDER,
         x, y,                       // Position
         width, height,              // Size
         parent,                     // Parent window

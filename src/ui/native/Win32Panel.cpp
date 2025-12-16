@@ -77,10 +77,10 @@ bool Win32Panel::create(HWND parent, int x, int y, int width, int height, const 
     m_title = title ? title : L"Panel";
 
     m_hwnd = CreateWindowExW(
-        0,
+        WS_EX_CLIENTEDGE,  // Add sunken border to prevent gaps and improve visual separation
         WINDOW_CLASS_NAME,
         title,
-        WS_CHILD | WS_VISIBLE | WS_CLIPCHILDREN | WS_CLIPSIBLINGS,
+        WS_CHILD | WS_VISIBLE | WS_CLIPCHILDREN | WS_CLIPSIBLINGS | WS_BORDER,
         x, y, width, height,
         parent,
         nullptr,
