@@ -1037,6 +1037,15 @@ bool EditorManager::updateWorld(VoxelWorld* world, WorldEditor* worldEditor)
                 UpdateWindow(hierarchyHwnd);
             }
             LOG_INFO_C("Scene Hierarchy updated and refreshed with new world", "EditorManager");
+            std::cout << "✓ Scene Hierarchy populated with world data" << std::endl;
+        } else {
+            if (!m_nativeSceneHierarchy) {
+                LOG_WARNING_C("Scene Hierarchy panel not created - cannot update with world", "EditorManager");
+                std::cerr << "WARNING: Scene Hierarchy panel is missing!" << std::endl;
+            }
+            if (!m_showSceneHierarchy) {
+                LOG_INFO_C("Scene Hierarchy is hidden - skipping update", "EditorManager");
+            }
         }
         
         // Ensure all other panels are visible (they should have been created during initialize)
