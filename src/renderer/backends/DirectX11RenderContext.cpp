@@ -760,11 +760,16 @@ bool DirectX11RenderContext::recreateSwapChain(int newWidth, int newHeight)
     renderTargetView.Reset();
     swapchain.Reset();
 
-    // Get the target window handle (use viewport HWND if set, otherwise main window)
-    HWND mainWindowHwnd = static_cast<HWND>(WindowAdapter::getNativeHandle(window));
-    HWND targetHwnd = viewportHwnd ? static_cast<HWND>(viewportHwnd) : mainWindowHwnd;
+    // CRITICAL: ONLY use viewport window handle for swap chain creation
+    // NEVER fall back to main window - viewport is the ONLY DirectX rendering target
+    if (!viewportHwnd) {
+        LOG_ERROR_C("Cannot recreate swap chain - viewport window handle not set. Swap chain requires viewport.", "DirectX11");
+        return false;
+    }
+    
+    HWND targetHwnd = static_cast<HWND>(viewportHwnd);
     if (!targetHwnd) {
-        LOG_ERROR_C("No valid window handle for swap chain", "DirectX11");
+        LOG_ERROR_C("Invalid viewport window handle for swap chain", "DirectX11");
         return false;
     }
 
