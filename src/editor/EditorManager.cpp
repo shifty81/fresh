@@ -10,6 +10,7 @@
 #include <algorithm>
 #include <climits>
 #include <cmath>
+#include <iostream>
 #include "core/Logger.h"
 #include "ecs/EntityManager.h"
 #include "gameplay/Player.h"
