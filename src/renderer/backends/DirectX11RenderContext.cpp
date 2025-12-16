@@ -247,6 +247,9 @@ bool DirectX11RenderContext::initialize(void* win)
         return false;
     }
 
+    // NOTE: We create an initial swap chain for the main window here, but this will be
+    // replaced with a viewport swap chain later when setViewportWindow() + recreateSwapChain() are called.
+    // The main window swap chain should never be presented to after viewport is set up.
     if (!createSwapchain()) {
         LOG_ERROR_C("Failed to create swapchain", "DirectX11");
         return false;
@@ -313,6 +316,8 @@ bool DirectX11RenderContext::beginFrame()
 void DirectX11RenderContext::endFrame()
 {
     // Present the frame
+    // Only present if we have a valid swap chain
+    // When using viewport, only present after viewport swap chain is created
     if (swapchain) {
         swapchain->Present(1, 0); // VSync enabled
     }
@@ -724,7 +729,8 @@ bool DirectX11RenderContext::setViewportWindow(void* viewportHandle)
     }
 
     viewportHwnd = viewportHandle;
-    LOG_INFO_C("Viewport window handle set", "DirectX11");
+    useViewportSwapChain = true;  // Mark that we're now using viewport swap chain
+    LOG_INFO_C("Viewport window handle set - will use viewport swap chain", "DirectX11");
     
     return true;
 }

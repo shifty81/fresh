@@ -78,7 +78,8 @@ bool Win32Window::registerWindowClass()
     wc.lpfnWndProc = WindowProc;
     wc.hInstance = m_hinstance;
     wc.hCursor = LoadCursor(nullptr, IDC_ARROW);
-    wc.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
+    // Use black background to match dark theme and prevent blue showing through
+    wc.hbrBackground = (HBRUSH)GetStockObject(BLACK_BRUSH);
     wc.lpszClassName = WINDOW_CLASS_NAME;
     wc.hIcon = LoadIcon(nullptr, IDI_APPLICATION);
     wc.hIconSm = LoadIcon(nullptr, IDI_APPLICATION);
