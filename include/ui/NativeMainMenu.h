@@ -18,6 +18,37 @@ enum class WorldStyle2D {
 };
 
 /**
+ * @brief World size enumeration
+ */
+enum class WorldSize {
+    Small = 0,    // 8 chunks radius
+    Medium = 1,   // 16 chunks radius
+    Large = 2,    // 24 chunks radius
+    Huge = 3      // 32 chunks radius
+};
+
+/**
+ * @brief Terrain type enumeration
+ */
+enum class TerrainType {
+    Flat = 0,
+    Hills = 1,
+    Mountains = 2,
+    Islands = 3
+};
+
+/**
+ * @brief Biome type enumeration
+ */
+enum class BiomeType {
+    Forest = 0,
+    Desert = 1,
+    Snow = 2,
+    Jungle = 3,
+    Mixed = 4
+};
+
+/**
  * @brief Native Windows Main Menu using Win32 API
  *
  * This is a proof-of-concept replacement for MainMenuPanel that uses
@@ -108,6 +139,30 @@ public:
     }
 
     /**
+     * @brief Get the world size
+     */
+    WorldSize getWorldSize() const
+    {
+        return m_worldSize;
+    }
+
+    /**
+     * @brief Get the terrain type
+     */
+    TerrainType getTerrainType() const
+    {
+        return m_terrainType;
+    }
+
+    /**
+     * @brief Get the biome type
+     */
+    BiomeType getBiomeType() const
+    {
+        return m_biomeType;
+    }
+
+    /**
      * @brief Get the world to load
      */
     const std::wstring& getLoadWorldName() const
@@ -153,6 +208,9 @@ private:
     bool m_loadWorld;
     bool m_isWorld3D;
     WorldStyle2D m_world2DStyle;
+    WorldSize m_worldSize;
+    TerrainType m_terrainType;
+    BiomeType m_biomeType;
 
     // World data
     std::wstring m_newWorldName;
@@ -177,6 +235,9 @@ private:
         ID_RADIO_2D_PLATFORMER = 1013,
         ID_RADIO_2D_TOPDOWN = 1014,
         ID_STATIC_2D_STYLE = 1015,
+        ID_COMBO_WORLD_SIZE = 1016,
+        ID_COMBO_TERRAIN_TYPE = 1017,
+        ID_COMBO_BIOME_TYPE = 1018,
     };
 
     // Unreal Engine dark theme colors
