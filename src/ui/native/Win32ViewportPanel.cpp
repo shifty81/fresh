@@ -31,11 +31,13 @@ bool Win32ViewportPanel::registerWindowClass()
 
     WNDCLASSEXW wc = {};
     wc.cbSize = sizeof(WNDCLASSEXW);
-    wc.style = CS_HREDRAW | CS_VREDRAW | CS_OWNDC; // CS_OWNDC important for DirectX
+    // CS_OWNDC important for DirectX, CS_HREDRAW/CS_VREDRAW for proper repainting
+    // Removed any transparency-related class styles to ensure fully opaque rendering
+    wc.style = CS_HREDRAW | CS_VREDRAW | CS_OWNDC;
     wc.lpfnWndProc = WindowProc;
     wc.hInstance = GetModuleHandle(nullptr);
     wc.hCursor = LoadCursor(nullptr, IDC_ARROW);
-    // Use black background to prevent blue showing through and match dark theme
+    // Use black background to prevent any gaps or transparency showing through
     wc.hbrBackground = (HBRUSH)GetStockObject(BLACK_BRUSH);
     wc.lpszClassName = WINDOW_CLASS_NAME;
 
@@ -73,9 +75,10 @@ bool Win32ViewportPanel::create(HWND parent, int x, int y, int width, int height
     // WS_CHILD makes it a child window
     // WS_VISIBLE makes it initially visible
     // WS_CLIPSIBLINGS and WS_CLIPCHILDREN are important for DirectX rendering
-    // WS_EX_CLIENTEDGE adds a sunken border to prevent gaps
+    // Using simple WS_BORDER instead of WS_EX_CLIENTEDGE to avoid transparent/sunken edge effect
+    // No extended styles to ensure fully opaque window with no gaps or transparency
     m_hwnd = CreateWindowExW(
-        WS_EX_CLIENTEDGE,           // Add sunken border to prevent gaps
+        0,                          // No extended styles - ensures fully opaque window
         WINDOW_CLASS_NAME,          // Class name
         L"Viewport",                // Window title (not visible for child windows)
         WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | WS_CLIPCHILDREN | WS_BORDER,
@@ -92,6 +95,12 @@ bool Win32ViewportPanel::create(HWND parent, int x, int y, int width, int height
         LOG_ERROR_C("Failed to create viewport window. Error code: " + std::to_string(error), "Win32ViewportPanel");
         return false;
     }
+
+    // Ensure viewport window is properly shown and positioned
+    // Using HWND_NOTOPMOST keeps it visible without forcing it on top of unrelated windows
+    // SWP_NOACTIVATE prevents stealing focus from other windows
+    SetWindowPos(m_hwnd, HWND_NOTOPMOST, 0, 0, 0, 0, 
+                 SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE | SWP_SHOWWINDOW);
 
     LOG_INFO_C("Viewport panel created successfully", "Win32ViewportPanel");
     return true;
@@ -204,17 +213,18 @@ LRESULT CALLBACK Win32ViewportPanel::WindowProc(HWND hwnd, UINT msg, WPARAM wPar
 
         case WM_PAINT: {
             // Validate the window to prevent continuous WM_PAINT messages
-            // DirectX will handle actual rendering
+            // DirectX handles all rendering, but we need to validate the region
             PAINTSTRUCT ps;
             HDC hdc = BeginPaint(hwnd, &ps);
-            // Draw black background (will be overdrawn by DirectX)
-            FillRect(hdc, &ps.rcPaint, (HBRUSH)GetStockObject(BLACK_BRUSH));
+            // Don't draw anything - DirectX will handle all rendering
+            // Just validate the paint region and return
             EndPaint(hwnd, &ps);
             return 0;
         }
 
         case WM_ERASEBKGND:
             // Don't erase background - DirectX will draw everything
+            // Returning 1 tells Windows we handled the erase (even though we didn't)
             return 1;
 
         case WM_DESTROY:
