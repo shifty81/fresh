@@ -96,9 +96,10 @@ bool Win32ViewportPanel::create(HWND parent, int x, int y, int width, int height
         return false;
     }
 
-    // Ensure viewport window is properly positioned in z-order
-    // SetWindowPos with HWND_TOP ensures it's visible and not obscured
-    SetWindowPos(m_hwnd, HWND_TOP, 0, 0, 0, 0, 
+    // Ensure viewport window is properly shown and positioned
+    // Using HWND_NOTOPMOST keeps it visible without forcing it on top of unrelated windows
+    // SWP_NOACTIVATE prevents stealing focus from other windows
+    SetWindowPos(m_hwnd, HWND_NOTOPMOST, 0, 0, 0, 0, 
                  SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE | SWP_SHOWWINDOW);
 
     LOG_INFO_C("Viewport panel created successfully", "Win32ViewportPanel");
