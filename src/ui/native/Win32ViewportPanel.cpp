@@ -215,7 +215,7 @@ LRESULT CALLBACK Win32ViewportPanel::WindowProc(HWND hwnd, UINT msg, WPARAM wPar
             // Validate the window to prevent continuous WM_PAINT messages
             // DirectX handles all rendering, but we need to validate the region
             PAINTSTRUCT ps;
-            HDC hdc = BeginPaint(hwnd, &ps);
+            (void)BeginPaint(hwnd, &ps);
             // Don't draw anything - DirectX will handle all rendering
             // Just validate the paint region and return
             EndPaint(hwnd, &ps);
