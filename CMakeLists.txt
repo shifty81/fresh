@@ -298,6 +298,7 @@ set(ENGINE_SOURCES
     src/generation/TerrainGenerator.cpp
     src/generation/World2DGenerator.cpp
     src/generation/WorldGeneratorFactory.cpp
+    src/generation/WorldGenerationTask.cpp
     src/physics/PhysicsSystem.cpp
     src/physics/CollisionDetection.cpp
     src/physics/PhysicsComponent.cpp
@@ -462,6 +463,7 @@ set(ENGINE_HEADERS
     include/generation/NoiseGenerator.h
     include/generation/TerrainGenerator.h
     include/generation/IWorldGenerator.h
+    include/generation/WorldGenerationTask.h
     include/physics/PhysicsSystem.h
     include/physics/CollisionDetection.h
     include/physics/PhysicsComponent.h
