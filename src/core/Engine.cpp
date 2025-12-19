@@ -2391,12 +2391,22 @@ void Engine::setupNativeToolbar()
     // Add toolbar buttons in Unreal-style grouping with icons
     // Using Windows shell icons for a professional look
     
-    // Helper lambda to load shell32 icons
-    auto loadShellIcon = [](int iconIndex) -> HICON {
-        wchar_t shellPath[MAX_PATH];
-        GetSystemDirectoryW(shellPath, MAX_PATH);
-        wcscat_s(shellPath, L"\\shell32.dll");
-        return ExtractIconW(GetModuleHandle(nullptr), shellPath, iconIndex);
+    // Build shell32.dll path once for efficiency and safety
+    wchar_t shell32Path[MAX_PATH];
+    UINT pathLen = GetSystemDirectoryW(shell32Path, MAX_PATH - 20);  // Reserve space for concat
+    if (pathLen == 0 || pathLen >= MAX_PATH - 20) {
+        LOG_ERROR_C("Failed to get system directory for toolbar icons", "Engine");
+        // Fallback: buttons will work but without icons
+    } else {
+        wcscat_s(shell32Path, MAX_PATH, L"\\shell32.dll");
+    }
+    
+    // Helper lambda to load shell32 icons (path already constructed)
+    auto loadShellIcon = [&shell32Path, pathLen](int iconIndex) -> HICON {
+        if (pathLen == 0 || pathLen >= MAX_PATH - 20) {
+            return nullptr;  // Path construction failed, return no icon
+        }
+        return ExtractIconW(GetModuleHandle(nullptr), shell32Path, iconIndex);
     };
     
     // ========== FILE OPERATIONS GROUP ==========
