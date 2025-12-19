@@ -77,10 +77,10 @@ bool Win32Panel::create(HWND parent, int x, int y, int width, int height, const 
     m_title = title ? title : L"Panel";
 
     m_hwnd = CreateWindowExW(
-        WS_EX_CLIENTEDGE,  // Add sunken border to prevent gaps and improve visual separation
+        0,  // No extended styles - prevents gaps caused by 3D sunken border effect
         WINDOW_CLASS_NAME,
         title,
-        WS_CHILD | WS_VISIBLE | WS_CLIPCHILDREN | WS_CLIPSIBLINGS | WS_BORDER,
+        WS_CHILD | WS_VISIBLE | WS_CLIPCHILDREN | WS_CLIPSIBLINGS,
         x, y, width, height,
         parent,
         nullptr,
@@ -164,7 +164,8 @@ void Win32Panel::paintBackground(HDC hdc)
     // Use cached brush from theme for better performance
     FillRect(hdc, &clientRect, UnrealStyleTheme::GetPanelBackgroundBrush());
     
-    // Draw border using theme's cached pen
+    // Draw simple single-pixel border using theme's cached pen
+    // This provides visual separation without the gaps caused by WS_EX_CLIENTEDGE
     HPEN oldPen = (HPEN)SelectObject(hdc, UnrealStyleTheme::GetBorderDarkPen());
     HBRUSH oldBrush = (HBRUSH)SelectObject(hdc, GetStockObject(NULL_BRUSH));
     Rectangle(hdc, clientRect.left, clientRect.top, clientRect.right, clientRect.bottom);

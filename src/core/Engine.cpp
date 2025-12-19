@@ -2388,26 +2388,36 @@ void Engine::setupNativeToolbar()
         return;
     }
 
-    // Add toolbar buttons in Unreal-style grouping
-    // Note: For actual icons, you would load them from resources
-    // For now, using nullptr for icons - buttons will show as text
+    // Add toolbar buttons in Unreal-style grouping with icons
+    // Using Windows shell icons for a professional look
+    
+    // Helper lambda to load shell32 icons
+    auto loadShellIcon = [](int iconIndex) -> HICON {
+        wchar_t shellPath[MAX_PATH];
+        GetSystemDirectoryW(shellPath, MAX_PATH);
+        wcscat_s(shellPath, L"\\shell32.dll");
+        return ExtractIconW(GetModuleHandle(nullptr), shellPath, iconIndex);
+    };
     
     // ========== FILE OPERATIONS GROUP ==========
-    toolbar->addButton(5001, "New", nullptr, [this]() {
+    HICON newIcon = loadShellIcon(0);  // New document icon
+    toolbar->addButton(5001, "New", newIcon, [this]() {
         LOG_INFO_C("New button clicked", "Engine");
         if (m_editorManager) {
             m_editorManager->newWorld();
         }
     });
     
-    toolbar->addButton(5002, "Open", nullptr, [this]() {
+    HICON openIcon = loadShellIcon(4);  // Open folder icon
+    toolbar->addButton(5002, "Open", openIcon, [this]() {
         LOG_INFO_C("Open button clicked", "Engine");
         if (m_editorManager) {
             m_editorManager->loadWorld();
         }
     });
     
-    toolbar->addButton(5003, "Save", nullptr, [this]() {
+    HICON saveIcon = loadShellIcon(259);  // Save/floppy disk icon
+    toolbar->addButton(5003, "Save", saveIcon, [this]() {
         LOG_INFO_C("Save button clicked", "Engine");
         if (m_editorManager) {
             m_editorManager->saveWorld();
@@ -2417,14 +2427,16 @@ void Engine::setupNativeToolbar()
     toolbar->addSeparator();
     
     // ========== EDIT OPERATIONS GROUP ==========
-    toolbar->addButton(5004, "Undo", nullptr, [this]() {
+    HICON undoIcon = loadShellIcon(240);  // Undo/back arrow
+    toolbar->addButton(5004, "Undo", undoIcon, [this]() {
         LOG_INFO_C("Undo button clicked", "Engine");
         if (m_editorManager) {
             m_editorManager->undo();
         }
     });
     
-    toolbar->addButton(5005, "Redo", nullptr, [this]() {
+    HICON redoIcon = loadShellIcon(241);  // Redo/forward arrow
+    toolbar->addButton(5005, "Redo", redoIcon, [this]() {
         LOG_INFO_C("Redo button clicked", "Engine");
         if (m_editorManager) {
             m_editorManager->redo();
@@ -2434,17 +2446,20 @@ void Engine::setupNativeToolbar()
     toolbar->addSeparator();
     
     // ========== PLAY CONTROLS GROUP (Unreal-style) ==========
-    toolbar->addButton(5010, "Play", nullptr, [this]() {
+    HICON playIcon = loadShellIcon(137);  // Play/right arrow icon
+    toolbar->addButton(5010, "Play", playIcon, [this]() {
         LOG_INFO_C("Play button clicked - entering play mode", "Engine");
         enterPlayMode();
     });
     
-    toolbar->addButton(5011, "Pause", nullptr, [this]() {
+    HICON pauseIcon = loadShellIcon(138);  // Pause icon
+    toolbar->addButton(5011, "Pause", pauseIcon, [this]() {
         LOG_INFO_C("Pause button clicked", "Engine");
         // TODO: Pause game (freeze time, stop physics)
     });
     
-    toolbar->addButton(5012, "Stop", nullptr, [this]() {
+    HICON stopIcon = loadShellIcon(131);  // Stop icon
+    toolbar->addButton(5012, "Stop", stopIcon, [this]() {
         LOG_INFO_C("Stop button clicked - exiting play mode", "Engine");
         exitPlayMode();
     });
@@ -2452,22 +2467,26 @@ void Engine::setupNativeToolbar()
     toolbar->addSeparator();
     
     // ========== VIEW CONTROLS GROUP ==========
-    toolbar->addButton(5020, "Perspective", nullptr, [this]() {
+    HICON perspectiveIcon = loadShellIcon(165);  // 3D perspective icon
+    toolbar->addButton(5020, "Perspective", perspectiveIcon, [this]() {
         LOG_INFO_C("Perspective view selected", "Engine");
         // TODO: Switch to perspective view
     });
     
-    toolbar->addButton(5021, "Top", nullptr, [this]() {
+    HICON topIcon = loadShellIcon(24);  // Grid/top view icon
+    toolbar->addButton(5021, "Top", topIcon, [this]() {
         LOG_INFO_C("Top view selected", "Engine");
         // TODO: Switch to top view
     });
     
-    toolbar->addButton(5006, "Camera", nullptr, [this]() {
+    HICON cameraIcon = loadShellIcon(176);  // Camera icon
+    toolbar->addButton(5006, "Camera", cameraIcon, [this]() {
         LOG_INFO_C("Camera button clicked", "Engine");
         // TODO: Reset camera
     });
     
-    toolbar->addButton(5007, "Fullscreen", nullptr, [this]() {
+    HICON fullscreenIcon = loadShellIcon(238);  // Fullscreen/maximize icon
+    toolbar->addButton(5007, "Fullscreen", fullscreenIcon, [this]() {
         LOG_INFO_C("Fullscreen button clicked", "Engine");
         // TODO: Toggle fullscreen
     });
@@ -2475,22 +2494,26 @@ void Engine::setupNativeToolbar()
     toolbar->addSeparator();
     
     // ========== TRANSFORMATION TOOLS GROUP (Unreal-style) ==========
-    toolbar->addButton(5030, "Select", nullptr, [this]() {
+    HICON selectIcon = loadShellIcon(210);  // Cursor/select icon
+    toolbar->addButton(5030, "Select", selectIcon, [this]() {
         LOG_INFO_C("Select tool activated", "Engine");
         // TODO: Activate selection tool
     });
     
-    toolbar->addButton(5031, "Move", nullptr, [this]() {
+    HICON moveIcon = loadShellIcon(143);  // Move/arrows icon
+    toolbar->addButton(5031, "Move", moveIcon, [this]() {
         LOG_INFO_C("Move tool activated", "Engine");
         // TODO: Activate move tool
     });
     
-    toolbar->addButton(5032, "Rotate", nullptr, [this]() {
+    HICON rotateIcon = loadShellIcon(239);  // Rotate/circular arrows icon
+    toolbar->addButton(5032, "Rotate", rotateIcon, [this]() {
         LOG_INFO_C("Rotate tool activated", "Engine");
         // TODO: Activate rotate tool
     });
     
-    toolbar->addButton(5033, "Scale", nullptr, [this]() {
+    HICON scaleIcon = loadShellIcon(166);  // Scale/resize icon
+    toolbar->addButton(5033, "Scale", scaleIcon, [this]() {
         LOG_INFO_C("Scale tool activated", "Engine");
         // TODO: Activate scale tool
     });
@@ -2498,22 +2521,26 @@ void Engine::setupNativeToolbar()
     toolbar->addSeparator();
     
     // ========== VOXEL TOOLS GROUP ==========
-    toolbar->addButton(5040, "Brush", nullptr, [this]() {
+    HICON brushIcon = loadShellIcon(22);  // Paintbrush icon
+    toolbar->addButton(5040, "Brush", brushIcon, [this]() {
         LOG_INFO_C("Brush tool activated", "Engine");
         // TODO: Activate brush tool
     });
     
-    toolbar->addButton(5041, "Paint", nullptr, [this]() {
+    HICON paintIcon = loadShellIcon(269);  // Paint/color icon
+    toolbar->addButton(5041, "Paint", paintIcon, [this]() {
         LOG_INFO_C("Paint tool activated", "Engine");
         // TODO: Activate paint tool
     });
     
-    toolbar->addButton(5042, "Sculpt", nullptr, [this]() {
+    HICON sculptIcon = loadShellIcon(135);  // Sculpt/tool icon
+    toolbar->addButton(5042, "Sculpt", sculptIcon, [this]() {
         LOG_INFO_C("Sculpt tool activated", "Engine");
         // TODO: Activate sculpt tool
     });
     
-    toolbar->addButton(5043, "Smooth", nullptr, [this]() {
+    HICON smoothIcon = loadShellIcon(133);  // Smooth/gradient icon
+    toolbar->addButton(5043, "Smooth", smoothIcon, [this]() {
         LOG_INFO_C("Smooth tool activated", "Engine");
         // TODO: Activate smooth tool
     });
