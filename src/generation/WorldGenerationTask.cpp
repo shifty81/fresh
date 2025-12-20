@@ -2,7 +2,6 @@
 
 #include <iostream>
 #include "core/Logger.h"
-#include "ui/NativeMainMenu.h"  // For WorldCreationParams
 #include "voxel/VoxelWorld.h"
 #include "voxel/VoxelTypes.h"
 
