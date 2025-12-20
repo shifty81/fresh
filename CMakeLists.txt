@@ -335,6 +335,9 @@ set(ENGINE_SOURCES
     src/gameplay/Camera.cpp
     src/gameplay/Player.cpp
     src/gameplay/TimeManager.cpp
+    src/gameplay/SeasonManager.cpp
+    src/gameplay/WeatherManager.cpp
+    src/gameplay/Raft.cpp
     src/assets/ModularAssetSystem.cpp
     src/assets/VoxelMaterialPack.cpp
     src/assets/AssetManager.cpp

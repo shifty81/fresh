@@ -120,6 +120,56 @@ VoxelType TerrainGenerator::getBlockType(int x, int y, int z, int surfaceHeight)
     }
 }
 
+bool TerrainGenerator::isWaterway(int x, int z, int height) const
+{
+    // Generate rivers using noise-based path following
+    // Rivers follow low-lying areas and create natural waterways
+    
+    // River noise - creates winding paths
+    float riverNoise = m_noiseGenerator.perlin2D(x * 0.02f, z * 0.02f);
+    
+    // Lakes in low areas
+    float lakeNoise = m_noiseGenerator.perlin2D(x * 0.005f + 1000.0f, z * 0.005f + 1000.0f);
+    
+    // Rivers form in narrow bands where noise is close to 0
+    bool isRiver = (std::abs(riverNoise) < 0.08f && height < 65);
+    
+    // Lakes form in low, flat areas
+    bool isLake = (lakeNoise > 0.6f && height < 63);
+    
+    return isRiver || isLake;
+}
+
+void TerrainGenerator::generateWaterways(Chunk* chunk)
+{
+    if (!chunk) {
+        return;
+    }
+    
+    const ChunkPos& chunkPos = chunk->getPosition();
+    const int waterLevel = 62; // Sea level
+    
+    // Pass through chunk and add water where appropriate
+    for (int localX = 0; localX < CHUNK_SIZE; ++localX) {
+        for (int localZ = 0; localZ < CHUNK_SIZE; ++localZ) {
+            int worldX = chunkPos.x * CHUNK_SIZE + localX;
+            int worldZ = chunkPos.z * CHUNK_SIZE + localZ;
+            
+            int surfaceHeight = getHeight(worldX, worldZ);
+            
+            // Check if this should be a waterway
+            if (isWaterway(worldX, worldZ, surfaceHeight)) {
+                // Fill from surface to water level with water
+                for (int y = surfaceHeight + 1; y <= waterLevel; ++y) {
+                    if (y < CHUNK_HEIGHT) {
+                        chunk->setVoxel(localX, y, localZ, Voxel(VoxelType::Water));
+                    }
+                }
+            }
+        }
+    }
+}
+
 void TerrainGenerator::generateChunk(Chunk* chunk)
 {
     if (!chunk) {
@@ -153,6 +203,9 @@ void TerrainGenerator::generateChunk(Chunk* chunk)
             }
         }
     }
+    
+    // Generate waterways (rivers and lakes)
+    generateWaterways(chunk);
 
     chunk->markDirty();
 }

@@ -82,10 +82,20 @@ public:
      * @return Height value
      */
     [[nodiscard]] int getHeight(int x, int z) const;
+    
+    /**
+     * @brief Check if position should be water (river or lake)
+     * @param x World X coordinate
+     * @param z World Z coordinate
+     * @param height Terrain height at this position
+     * @return True if this should be a water block
+     */
+    [[nodiscard]] bool isWaterway(int x, int z, int height) const;
 
 private:
     VoxelType getBlockType(int x, int y, int z, int surfaceHeight) const;
     void generateTreesAndFoliage(Chunk* chunk, VoxelWorld* world);
+    void generateWaterways(Chunk* chunk);
 
 private:
     NoiseGenerator m_noiseGenerator;
