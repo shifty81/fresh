@@ -830,6 +830,21 @@ bool DirectX11RenderContext::recreateSwapChain(int newWidth, int newHeight)
         return false;
     }
 
+    // CRITICAL FIX: Immediately clear the new render target to prevent artifacts
+    // When resizing, the old swap chain content can show through if we don't clear immediately
+    if (renderTargetView && depthStencilView && deviceContext) {
+        // Bind the new render targets
+        deviceContext->OMSetRenderTargets(1, renderTargetView.GetAddressOf(), depthStencilView.Get());
+        
+        // Clear to black to prevent any artifacts from old swap chain
+        float clearColor[4] = {0.0f, 0.0f, 0.0f, 1.0f};  // Black
+        deviceContext->ClearRenderTargetView(renderTargetView.Get(), clearColor);
+        deviceContext->ClearDepthStencilView(depthStencilView.Get(), 
+                                            D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
+        
+        LOG_INFO_C("Cleared new render target to prevent artifacts", "DirectX11");
+    }
+
     LOG_INFO_C("Swap chain recreated successfully for viewport: " + std::to_string(width) + "x" + std::to_string(height), "DirectX11");
     return true;
 }

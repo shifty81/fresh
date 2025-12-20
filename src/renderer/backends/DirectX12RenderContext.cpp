@@ -878,6 +878,50 @@ bool DirectX12RenderContext::recreateSwapChain(int newWidth, int newHeight)
         return false;
     }
 
+    // CRITICAL FIX: Immediately clear the new render targets to prevent artifacts
+    // When resizing, old swap chain content can show through if we don't clear immediately
+    // Wait for command allocator to be ready
+    UINT frameIndex = swapchain->GetCurrentBackBufferIndex();
+    if (commandAllocators[frameIndex]) {
+        commandAllocators[frameIndex]->Reset();
+        commandList->Reset(commandAllocators[frameIndex].Get(), nullptr);
+        
+        // Transition render target to render target state
+        D3D12_RESOURCE_BARRIER barrier = {};
+        barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+        barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
+        barrier.Transition.pResource = renderTargets[frameIndex].Get();
+        barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_PRESENT;
+        barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_RENDER_TARGET;
+        barrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
+        commandList->ResourceBarrier(1, &barrier);
+        
+        // Clear render target to black
+        D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle = rtvHeap->GetCPUDescriptorHandleForHeapStart();
+        rtvHandle.ptr += frameIndex * rtvDescriptorSize;
+        float clearColor[4] = {0.0f, 0.0f, 0.0f, 1.0f};  // Black
+        commandList->ClearRenderTargetView(rtvHandle, clearColor, 0, nullptr);
+        
+        // Clear depth stencil
+        if (dsvHeap) {
+            D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle = dsvHeap->GetCPUDescriptorHandleForHeapStart();
+            commandList->ClearDepthStencilView(dsvHandle, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
+        }
+        
+        // Transition back to present state
+        barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
+        barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_PRESENT;
+        commandList->ResourceBarrier(1, &barrier);
+        
+        // Execute and wait
+        commandList->Close();
+        ID3D12CommandList* cmdLists[] = {commandList.Get()};
+        commandQueue->ExecuteCommandLists(1, cmdLists);
+        waitForGPU();
+        
+        LOG_INFO_C("Cleared new render targets to prevent artifacts", "DirectX12");
+    }
+
     LOG_INFO_C("DirectX 12 swap chain recreated successfully for viewport: " + std::to_string(width) + "x" + std::to_string(height), "DirectX12");
     return true;
 }

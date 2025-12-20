@@ -369,6 +369,32 @@ bool Engine::initialize()
                            std::to_string(vpWidth) + "x" + std::to_string(vpHeight) + 
                            ". Cannot create swap chain. GUI may not display correctly.", "Engine");
             } else {
+                // CRITICAL FIX: Ensure viewport window is actually visible before creating swap chain
+                // Check if viewport is actually visible
+                if (!IsWindowVisible(viewportHwnd)) {
+                    LOG_WARNING_C("Viewport window is not visible during initialization! Showing it now.", "Engine");
+                    ShowWindow(viewportHwnd, SW_SHOW);
+                    UpdateWindow(viewportHwnd);
+                    // Process pending messages to ensure window is shown
+                    MSG msg;
+                    while (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE)) {
+                        TranslateMessage(&msg);
+                        DispatchMessage(&msg);
+                    }
+                }
+                
+                // Verify viewport window has valid client area
+                RECT vpRect;
+                if (GetClientRect(viewportHwnd, &vpRect)) {
+                    int actualWidth = vpRect.right - vpRect.left;
+                    int actualHeight = vpRect.bottom - vpRect.top;
+                    LOG_INFO_C("Viewport actual client rect: " + std::to_string(actualWidth) + "x" + std::to_string(actualHeight), "Engine");
+                    if (actualWidth > 0 && actualHeight > 0) {
+                        vpWidth = actualWidth;
+                        vpHeight = actualHeight;
+                    }
+                }
+                
                 // Set viewport window handle in renderer
                 if (m_renderer->setViewportWindow(viewportHwnd)) {
                     // Recreate swap chain for viewport
@@ -507,6 +533,36 @@ void Engine::createNewWorld(const std::string& name, int seed, bool is3D, int ga
         // This must happen BEFORE world creation so rendering during chunk generation uses the viewport
         HWND viewportHwnd = viewportPanel->getHandle();
         if (viewportHwnd && vpWidth > 0 && vpHeight > 0) {
+            // CRITICAL FIX: Ensure viewport window is actually visible and ready for DirectX rendering
+            // Check if viewport is actually visible before trying to create swap chain
+            if (!IsWindowVisible(viewportHwnd)) {
+                LOG_WARNING_C("Viewport window is not visible! Showing it now before swap chain creation.", "Engine");
+                ShowWindow(viewportHwnd, SW_SHOW);
+                UpdateWindow(viewportHwnd);
+                // Give Windows time to process the show command
+                MSG msg;
+                while (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE)) {
+                    TranslateMessage(&msg);
+                    DispatchMessage(&msg);
+                }
+            }
+            
+            // Verify viewport window is actually shown and has valid client area
+            RECT vpRect;
+            if (!GetClientRect(viewportHwnd, &vpRect)) {
+                LOG_ERROR_C("Failed to get viewport client rect! Cannot create swap chain.", "Engine");
+            } else {
+                int actualWidth = vpRect.right - vpRect.left;
+                int actualHeight = vpRect.bottom - vpRect.top;
+                LOG_INFO_C("Viewport actual client size: " + std::to_string(actualWidth) + "x" + std::to_string(actualHeight), "Engine");
+                
+                // Use actual dimensions from window, not panel's stored dimensions
+                if (actualWidth > 0 && actualHeight > 0) {
+                    vpWidth = actualWidth;
+                    vpHeight = actualHeight;
+                }
+            }
+            
             LOG_INFO_C("Configuring viewport swap chain BEFORE world creation - viewport size: " + 
                        std::to_string(vpWidth) + "x" + std::to_string(vpHeight), "Engine");
             
@@ -904,6 +960,25 @@ void Engine::initializeGameSystems()
                            ". World will render full screen instead of in viewport. GUI will not be visible.", "Engine");
                 std::cerr << "ERROR: Invalid viewport dimensions - GUI will not display correctly!" << std::endl;
             } else {
+                // CRITICAL FIX: Ensure viewport window is actually visible before revalidating swap chain
+                if (!IsWindowVisible(viewportHwnd)) {
+                    LOG_WARNING_C("Viewport window is not visible after world creation! Showing it now.", "Engine");
+                    ShowWindow(viewportHwnd, SW_SHOW);
+                    UpdateWindow(viewportHwnd);
+                }
+                
+                // Verify viewport window has valid client area
+                RECT vpRect;
+                if (GetClientRect(viewportHwnd, &vpRect)) {
+                    int actualWidth = vpRect.right - vpRect.left;
+                    int actualHeight = vpRect.bottom - vpRect.top;
+                    if (actualWidth > 0 && actualHeight > 0) {
+                        vpWidth = actualWidth;
+                        vpHeight = actualHeight;
+                        LOG_INFO_C("Using actual viewport client size: " + std::to_string(vpWidth) + "x" + std::to_string(vpHeight), "Engine");
+                    }
+                }
+                
                 // Re-confirm viewport window handle in renderer (should already be set from pre-world-creation)
                 // but we do it again to be absolutely safe in case anything changed
                 LOG_INFO_C("Re-confirming viewport window handle in renderer...", "Engine");
@@ -1378,8 +1453,25 @@ void Engine::update(float deltaTime)
         auto* viewportPanel = m_editorManager->getViewportPanel();
         
         if (viewportPanel->wasResized()) {
+            HWND viewportHwnd = viewportPanel->getHandle();
             int vpWidth = viewportPanel->getWidth();
             int vpHeight = viewportPanel->getHeight();
+            
+            // CRITICAL FIX: Query actual client rect from Windows to get true viewport dimensions
+            // The panel's stored dimensions might not match the actual window size during resize
+            if (viewportHwnd) {
+                RECT vpRect;
+                if (GetClientRect(viewportHwnd, &vpRect)) {
+                    int actualWidth = vpRect.right - vpRect.left;
+                    int actualHeight = vpRect.bottom - vpRect.top;
+                    if (actualWidth > 0 && actualHeight > 0) {
+                        vpWidth = actualWidth;
+                        vpHeight = actualHeight;
+                        LOG_INFO_C("Using actual viewport client rect for resize: " + 
+                                   std::to_string(vpWidth) + "x" + std::to_string(vpHeight), "Engine");
+                    }
+                }
+            }
             
             LOG_INFO_C("Viewport resized, recreating swap chain: " + 
                        std::to_string(vpWidth) + "x" + std::to_string(vpHeight), "Engine");
@@ -1387,12 +1479,21 @@ void Engine::update(float deltaTime)
             // Recreate swap chain with new viewport dimensions
             if (vpWidth > 0 && vpHeight > 0) {
                 if (m_renderer->recreateSwapChain(vpWidth, vpHeight)) {
+                    LOG_INFO_C("✓ Swap chain recreated successfully for new viewport size", "Engine");
+                    std::cout << "✓ Viewport swap chain resized: " << vpWidth << "x" << vpHeight << std::endl;
+                    
                     // Update camera aspect ratio
                     if (m_player) {
                         float aspectRatio = static_cast<float>(vpWidth) / static_cast<float>(vpHeight);
                         m_player->getCamera().setAspectRatio(aspectRatio);
                     }
+                } else {
+                    LOG_ERROR_C("FAILED to recreate swap chain during viewport resize! This will cause black boxes and artifacts.", "Engine");
+                    std::cerr << "ERROR: Swap chain resize failed - you may see black boxes or artifacts!" << std::endl;
                 }
+            } else {
+                LOG_ERROR_C("Invalid viewport dimensions during resize: " + 
+                           std::to_string(vpWidth) + "x" + std::to_string(vpHeight), "Engine");
             }
             
             viewportPanel->clearResizedFlag();
