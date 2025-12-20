@@ -6,11 +6,12 @@
 #include <string>
 #include <thread>
 
+#include "ui/NativeMainMenu.h"  // For WorldCreationParams
+
 namespace fresh
 {
 
 class VoxelWorld;
-struct WorldCreationParams;
 
 /**
  * @brief Asynchronous world generation task (Unreal Editor style)
