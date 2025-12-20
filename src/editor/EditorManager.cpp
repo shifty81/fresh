@@ -2052,11 +2052,35 @@ void EditorManager::onWindowResize(int clientWidth, int clientHeight)
 void EditorManager::ensurePanelsOnTop()
 {
 #ifdef _WIN32
-    // Ensure proper Z-order: Viewport at bottom, UI panels on top
-    // First, explicitly position viewport at the bottom of Z-order
+    // Ensure proper Z-order within parent window's child windows:
+    // All child windows should be visible, with viewport at back and UI panels in front
+    
+    // Strategy: Order child windows from back to front
+    // 1. First, ensure viewport is at the back of sibling child windows
+    // 2. Then place all UI panels in front
+    
+    // CRITICAL FIX: For child windows, we need to arrange them relative to each other
+    // We'll place viewport at the bottom of the child window stack, then UI panels on top
+    
+    // Start by getting the first UI panel handle to use as reference
+    HWND firstPanelHwnd = nullptr;
+    if (m_nativeTerraformingPanel && m_nativeTerraformingPanel->getHandle()) {
+        firstPanelHwnd = m_nativeTerraformingPanel->getHandle();
+    } else if (m_nativeSceneHierarchy && m_nativeSceneHierarchy->getHandle()) {
+        firstPanelHwnd = m_nativeSceneHierarchy->getHandle();
+    }
+    
+    // Place viewport behind the first panel (or at bottom if no panels)
     if (m_viewportPanel && m_viewportPanel->getHandle()) {
-        SetWindowPos(m_viewportPanel->getHandle(), HWND_BOTTOM, 0, 0, 0, 0, 
-                    SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
+        if (firstPanelHwnd) {
+            // Place viewport behind first panel - this makes it at the back
+            SetWindowPos(m_viewportPanel->getHandle(), firstPanelHwnd, 0, 0, 0, 0, 
+                        SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
+        } else {
+            // No panels yet, just ensure it's visible
+            SetWindowPos(m_viewportPanel->getHandle(), HWND_TOP, 0, 0, 0, 0, 
+                        SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
+        }
     }
     
     // Then bring all UI panels to the front to ensure they're visible above the viewport
