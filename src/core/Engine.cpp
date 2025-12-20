@@ -62,6 +62,9 @@
 #include "editor/TransformGizmo.h"
 #include "editor/WorldEditor.h"
 #include "gameplay/Player.h"
+#include "gameplay/SeasonManager.h"
+#include "gameplay/WeatherManager.h"
+#include "gameplay/Raft.h"
 #include "generation/TerrainGenerator.h"
 #include "generation/IWorldGenerator.h"
 #include "interaction/VoxelInteraction.h"
@@ -108,6 +111,7 @@ namespace fresh
     constexpr int KEY_E = 'E';
     constexpr int KEY_F = 'F';
     constexpr int KEY_R = 'R';
+    constexpr int KEY_B = 'B';  // Boat/raft interaction
     constexpr int KEY_W = 'W';
     constexpr int KEY_Y = 'Y';
     constexpr int KEY_Z = 'Z';
@@ -133,6 +137,7 @@ namespace fresh
     constexpr int KEY_E = GLFW_KEY_E;
     constexpr int KEY_F = GLFW_KEY_F;
     constexpr int KEY_R = GLFW_KEY_R;
+    constexpr int KEY_B = GLFW_KEY_B;  // Boat/raft interaction
     constexpr int KEY_W = GLFW_KEY_W;
     constexpr int KEY_Y = GLFW_KEY_Y;
     constexpr int KEY_Z = GLFW_KEY_Z;
@@ -776,6 +781,23 @@ void Engine::initializeGameSystems()
     m_player->setPosition(glm::vec3(0.0f, 80.0f, 0.0f));
     std::cout << "Player initialized" << std::endl;
     
+    // Create season manager
+    if (!m_seasonManager) {
+        m_seasonManager = std::make_unique<SeasonManager>();
+    }
+    m_seasonManager->setSeason(Season::Spring);  // Start with spring
+    std::cout << "Season manager initialized" << std::endl;
+    LOG_INFO_C("Season manager initialized with Spring season", "Engine");
+    
+    // Create weather manager
+    if (!m_weatherManager) {
+        m_weatherManager = std::make_unique<WeatherManager>();
+    }
+    m_weatherManager->setWeather(WeatherType::Clear);  // Start with clear weather
+    m_weatherManager->setCurrentSeason(0);  // Spring = 0
+    std::cout << "Weather manager initialized" << std::endl;
+    LOG_INFO_C("Weather manager initialized with Clear weather", "Engine");
+    
     // Set player reference in editor manager for camera-based operations like paste
     if (m_editorManager) {
         m_editorManager->setPlayer(m_player.get());
@@ -1243,6 +1265,61 @@ void Engine::processInput()
                 exitPlayMode();
             }
         }
+        
+        // B key - Raft/Boat interaction (place or mount/dismount)
+        if (!guiCapturesKeyboard && m_inputManager->isKeyJustPressed(KEY_B)) {
+            if (m_raft && m_raft->isMounted()) {
+                // Dismount from raft
+                m_raft->dismount();
+                if (m_player) {
+                    m_player->setFreeFlightMode(false);  // Return to normal walking mode
+                }
+                LOG_INFO_C("Dismounted from raft (B key)", "Engine");
+            } else if (m_raft && !m_raft->isMounted() && m_player) {
+                // Try to mount raft if player is near it
+                glm::vec3 playerPos = m_player->getPosition();
+                glm::vec3 raftPos = m_raft->getPosition();
+                float distance = glm::length(playerPos - raftPos);
+                
+                if (distance < 3.0f) {  // Within 3 blocks
+                    m_raft->mount(m_player.get());
+                    LOG_INFO_C("Mounted raft (B key)", "Engine");
+                } else {
+                    LOG_INFO_C("Too far from raft to mount", "Engine");
+                }
+            } else if (!m_raft && m_player && m_world) {
+                // Place a new raft at player's position
+                glm::vec3 playerPos = m_player->getPosition();
+                glm::vec3 raftPlacePos = playerPos;
+                raftPlacePos.y -= 1.5f;  // Place below player's feet
+                
+                if (Raft::canPlaceAt(raftPlacePos, m_world.get())) {
+                    m_raft = std::make_unique<Raft>();
+                    m_raft->initialize(raftPlacePos, m_world.get());
+                    LOG_INFO_C("Placed raft in water (B key)", "Engine");
+                } else {
+                    LOG_INFO_C("Cannot place raft here - must be over water", "Engine");
+                }
+            }
+        }
+        
+        // Handle raft movement input if mounted
+        if (m_raft && m_raft->isMounted() && m_player && !guiCapturesKeyboard) {
+            float forward = 0.0f;
+            float strafe = 0.0f;
+            float turn = 0.0f;
+            
+            if (m_inputManager->isActionActive(InputAction::MoveForward)) forward = 1.0f;
+            if (m_inputManager->isActionActive(InputAction::MoveBackward)) forward = -1.0f;
+            if (m_inputManager->isActionActive(InputAction::MoveRight)) strafe = 1.0f;
+            if (m_inputManager->isActionActive(InputAction::MoveLeft)) strafe = -1.0f;
+            
+            // Use A/D or arrow keys for turning the raft
+            if (m_inputManager->isActionActive(InputAction::MoveLeft)) turn = -1.0f;
+            if (m_inputManager->isActionActive(InputAction::MoveRight)) turn = 1.0f;
+            
+            m_raft->handleInput(forward, strafe, turn, deltaTime);
+        }
 
         // T key disabled - editor is always visible in new editor-first mode
         // Keeping this code commented out for reference
@@ -1465,6 +1542,21 @@ void Engine::update(float deltaTime)
     // Update player (physics, collision)
     if (m_player) {
         m_player->update(deltaTime);
+    }
+    
+    // Update season manager
+    if (m_seasonManager) {
+        m_seasonManager->update(deltaTime);
+    }
+    
+    // Update weather manager
+    if (m_weatherManager) {
+        m_weatherManager->update(deltaTime);
+    }
+    
+    // Update raft if it exists
+    if (m_raft) {
+        m_raft->update(deltaTime);
     }
 
     // Update world with actual player position for chunk streaming

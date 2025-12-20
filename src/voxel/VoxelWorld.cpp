@@ -7,7 +7,7 @@
 namespace fresh
 {
 
-VoxelWorld::VoxelWorld() : m_renderDistance(8) {}
+VoxelWorld::VoxelWorld() : m_renderDistance(16) {}  // Increased from 8 to 16 for larger worlds
 
 VoxelWorld::~VoxelWorld() {}
 

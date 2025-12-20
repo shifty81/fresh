@@ -44,7 +44,8 @@ void ChunkStreamer::update(const glm::vec3& playerPosition)
 void ChunkStreamer::setViewDistance(int chunks)
 {
     // Clamp view distance to prevent excessive memory usage or too small range
-    viewDistance = std::max(1, std::min(chunks, 32)); // Clamp to reasonable range
+    // Increased max to 64 for larger worlds (5K x 5K maps)
+    viewDistance = std::max(1, std::min(chunks, 64)); // Increased from 32 to 64
 }
 
 void ChunkStreamer::shutdown()
