@@ -144,6 +144,9 @@ private:
     
     // Unreal-style mouse control: track if right mouse button is held for free look
     bool m_rightMouseHeldForCamera = false;
+    
+    // World generation state tracking
+    bool m_isGeneratingWorld = false;
 
 #if defined(FRESH_OPENGL_SUPPORT) && defined(FRESH_GLEW_AVAILABLE)
     // OpenGL rendering state

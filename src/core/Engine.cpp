@@ -567,6 +567,11 @@ void Engine::createNewWorld(const std::string& name, int seed, bool is3D, int ga
 
     // Generate initial chunks around spawn
     std::cout << "Generating initial terrain..." << std::endl;
+    LOG_INFO_C("Starting world generation - entering generation mode", "Engine");
+    
+    // Set world generation flag to prevent world rendering during generation
+    m_isGeneratingWorld = true;
+    
     int chunkRadius = 3;
     int totalChunks = (2 * chunkRadius + 1) * (2 * chunkRadius + 1);
     int chunksGenerated = 0;
@@ -579,9 +584,23 @@ void Engine::createNewWorld(const std::string& name, int seed, bool is3D, int ga
             if (chunksGenerated % 10 == 0 || chunksGenerated == totalChunks) {
                 std::cout << "  Generated " << chunksGenerated << "/" << totalChunks << " chunks..."
                           << std::endl;
+                LOG_INFO_C("World generation progress: " + std::to_string(chunksGenerated) + "/" + 
+                          std::to_string(totalChunks) + " chunks", "Engine");
+                
+                // Process Windows messages periodically during generation to keep UI responsive
+                // This prevents "Not Responding" and allows cancel operations
+#ifdef _WIN32
+                if (m_window) {
+                    m_window->pollEvents();
+                }
+#endif
             }
         }
     }
+    
+    // Clear world generation flag - world is now ready to render
+    m_isGeneratingWorld = false;
+    LOG_INFO_C("World generation complete - exiting generation mode", "Engine");
 
     std::cout << "World '" << name << "' created successfully!" << std::endl;
     std::cout << "Total chunks: " << m_world->getChunks().size() << std::endl;
@@ -1504,8 +1523,8 @@ void Engine::render()
     if (m_renderer->getAPI() == GraphicsAPI::OpenGL) {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        // Render voxel world
-        if (m_world) {
+        // Render voxel world (skip during world generation to prevent rendering issues)
+        if (m_world && !m_isGeneratingWorld) {
             renderVoxelWorld();
         }
 
@@ -1515,8 +1534,8 @@ void Engine::render()
 #endif // DirectX 11 rendering path
 #ifdef _WIN32
     if (m_renderer->getAPI() == GraphicsAPI::DirectX11) {
-        // Render voxel world using DirectX 11
-        if (m_world && m_player) {
+        // Render voxel world using DirectX 11 (skip during world generation)
+        if (m_world && m_player && !m_isGeneratingWorld) {
             auto* dx11Context = dynamic_cast<DirectX11RenderContext*>(m_renderer.get());
             if (dx11Context) {
                 dx11Context->renderVoxelWorld(m_world.get(), m_player.get());
@@ -1526,8 +1545,8 @@ void Engine::render()
 
     // DirectX 12 rendering path
     if (m_renderer->getAPI() == GraphicsAPI::DirectX12) {
-        // Render voxel world using DirectX 12
-        if (m_world && m_player) {
+        // Render voxel world using DirectX 12 (skip during world generation)
+        if (m_world && m_player && !m_isGeneratingWorld) {
             auto* dx12Context = dynamic_cast<DirectX12RenderContext*>(m_renderer.get());
             if (dx12Context) {
                 dx12Context->renderVoxelWorld(m_world.get(), m_player.get());
