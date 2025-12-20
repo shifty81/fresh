@@ -258,18 +258,28 @@ void TerrainGenerator::generateTreesAndFoliage(Chunk* chunk, VoxelWorld* world)
             int worldZ = chunkPos.z * CHUNK_SIZE + localZ;
             
             // Use noise to determine if a tree should spawn here
-            // Scale of 0.1 creates clusters of trees
-            float treeNoise = m_noiseGenerator.perlin2D(worldX * 0.1f, worldZ * 0.1f);
+            // Scale of 0.08 creates better clusters of trees (increased density)
+            float treeNoise = m_noiseGenerator.perlin2D(worldX * 0.08f, worldZ * 0.08f);
+            
+            // Get secondary noise for tree variety
+            float varietyNoise = m_noiseGenerator.perlin2D(worldX * 0.15f + 100.0f, worldZ * 0.15f + 100.0f);
             
             // Only spawn trees on elevated terrain (grass blocks) with certain noise values
             int surfaceHeight = getHeight(worldX, worldZ);
             
             // Check if surface is grass (good for trees)
-            if (surfaceHeight > 62 && surfaceHeight < 75) {
-                // Spawn trees with higher probability
-                if (treeNoise > 0.3f && treeNoise < 0.8f) {
-                    // Generate a tree at this position
-                    int treeHeight = 5 + static_cast<int>((treeNoise + 1.0f) * 2.0f); // 5-9 blocks tall
+            if (surfaceHeight > 62 && surfaceHeight < 78) {  // Increased upper bound for more coverage
+                // Spawn trees with higher probability (lowered threshold from 0.3 to 0.2)
+                if (treeNoise > 0.2f && treeNoise < 0.85f) {  // Increased range for more trees
+                    // Generate a tree at this position with variety based on noise
+                    int baseHeight = 5;
+                    if (varietyNoise > 0.5f) {
+                        baseHeight = 7;  // Taller trees
+                    } else if (varietyNoise < -0.3f) {
+                        baseHeight = 4;  // Shorter trees
+                    }
+                    
+                    int treeHeight = baseHeight + static_cast<int>((treeNoise + 1.0f) * 2.0f); // Variable height
                     int trunkHeight = treeHeight - 3; // Leaves start 3 blocks from top
                     
                     // Place tree trunk (Wood blocks) - directly in chunk
@@ -282,7 +292,12 @@ void TerrainGenerator::generateTreesAndFoliage(Chunk* chunk, VoxelWorld* world)
                     
                     // Place leaves (foliage) in a spherical pattern around the top
                     int leavesStartY = surfaceHeight + trunkHeight - 1;
-                    int leavesRadius = 2; // Leaves spread 2 blocks in each direction
+                    
+                    // Vary leaf radius based on tree size
+                    int leavesRadius = 2;
+                    if (baseHeight >= 7) {
+                        leavesRadius = 3;  // Larger canopy for tall trees
+                    }
                     
                     for (int dy = 0; dy <= 4; ++dy) {
                         int worldY = leavesStartY + dy;
@@ -292,6 +307,8 @@ void TerrainGenerator::generateTreesAndFoliage(Chunk* chunk, VoxelWorld* world)
                         int currentRadius = leavesRadius;
                         if (dy == 0 || dy == 4) {
                             currentRadius = 1;
+                        } else if (dy == 1 || dy == 3) {
+                            currentRadius = leavesRadius - 1;
                         }
                         
                         for (int dx = -currentRadius; dx <= currentRadius; ++dx) {
