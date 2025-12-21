@@ -1377,24 +1377,6 @@ void Engine::processInput()
                 }
             }
         }
-        
-        // Handle raft movement input if mounted
-        if (m_raft && m_raft->isMounted() && m_player && !guiCapturesKeyboard) {
-            float forward = 0.0f;
-            float strafe = 0.0f;
-            float turn = 0.0f;
-            
-            if (m_inputManager->isActionActive(InputAction::MoveForward)) forward = 1.0f;
-            if (m_inputManager->isActionActive(InputAction::MoveBackward)) forward = -1.0f;
-            if (m_inputManager->isActionActive(InputAction::MoveRight)) strafe = 1.0f;
-            if (m_inputManager->isActionActive(InputAction::MoveLeft)) strafe = -1.0f;
-            
-            // Use A/D or arrow keys for turning the raft
-            if (m_inputManager->isActionActive(InputAction::MoveLeft)) turn = -1.0f;
-            if (m_inputManager->isActionActive(InputAction::MoveRight)) turn = 1.0f;
-            
-            m_raft->handleInput(forward, strafe, turn, deltaTime);
-        }
 
         // T key disabled - editor is always visible in new editor-first mode
         // Keeping this code commented out for reference
@@ -1657,6 +1639,24 @@ void Engine::update(float deltaTime)
     
     // Update raft if it exists
     if (m_raft) {
+        // Handle raft movement input if mounted
+        if (m_raft->isMounted() && m_player && !guiCapturesKeyboard) {
+            float forward = 0.0f;
+            float strafe = 0.0f;
+            float turn = 0.0f;
+            
+            if (m_inputManager->isActionActive(InputAction::MoveForward)) forward = 1.0f;
+            if (m_inputManager->isActionActive(InputAction::MoveBackward)) forward = -1.0f;
+            if (m_inputManager->isActionActive(InputAction::MoveRight)) strafe = 1.0f;
+            if (m_inputManager->isActionActive(InputAction::MoveLeft)) strafe = -1.0f;
+            
+            // Use A/D or arrow keys for turning the raft
+            if (m_inputManager->isActionActive(InputAction::MoveLeft)) turn = -1.0f;
+            if (m_inputManager->isActionActive(InputAction::MoveRight)) turn = 1.0f;
+            
+            m_raft->handleInput(forward, strafe, turn, deltaTime);
+        }
+        
         m_raft->update(deltaTime);
     }
 

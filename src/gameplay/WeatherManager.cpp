@@ -320,7 +320,7 @@ float WeatherManager::getCloudCoverage() const
     return coverage * m_transitionProgress;
 }
 
-bool WeatherManager::shouldTriggerLightning(float deltaTime)
+bool WeatherManager::shouldTriggerLightning(float /*deltaTime*/)
 {
     if (m_currentWeather != WeatherType::Storm) {
         return false;
