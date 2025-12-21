@@ -249,25 +249,28 @@ bool DirectX12RenderContext::initialize(void* win)
         return false;
     }
 
-    if (!createSwapchain()) {
-        std::cerr << "[DirectX 12] Failed to create swapchain" << std::endl;
-        return false;
-    }
+    // CRITICAL FIX FOR VIEWPORT-ONLY RENDERING:
+    // DO NOT create a swap chain for the main window during initialization.
+    // The swap chain will ONLY be created for the viewport child window when
+    // setViewportWindow() + recreateSwapChain() are called.
+    // This prevents any rendering to the main window that could show through panel gaps.
+    std::cout << "[DirectX 12] Skipping main window swap chain creation - will only use viewport swap chain" << std::endl;
+    std::cout << "[DirectX 12] Swap chain will be created when viewport is ready via setViewportWindow() + recreateSwapChain()" << std::endl;
 
+    // NOTE: We skip creating swap chain during initialization.
+    // However, we MUST create descriptor heaps as they are needed for rendering and don't depend on swap chain.
+    // Descriptor heaps will be used when the viewport swap chain is created later.
+
+    // Create descriptor heaps (needed for rendering, independent of swap chain)
     if (!createDescriptorHeaps()) {
         std::cerr << "[DirectX 12] Failed to create descriptor heaps" << std::endl;
         return false;
     }
 
-    if (!createRenderTargets()) {
-        std::cerr << "[DirectX 12] Failed to create render targets" << std::endl;
-        return false;
-    }
-
-    if (!createDepthStencil()) {
-        std::cerr << "[DirectX 12] Failed to create depth stencil" << std::endl;
-        return false;
-    }
+    // Skip these calls that depend on swap chain existing:
+    // - createSwapchain() - will be called via recreateSwapChain() when viewport is ready
+    // - createRenderTargets() - depends on swap chain
+    // - createDepthStencil() - depends on swap chain dimensions
 
     if (!createCommandAllocators()) {
         std::cerr << "[DirectX 12] Failed to create command allocators" << std::endl;
@@ -330,6 +333,13 @@ void DirectX12RenderContext::shutdown()
 
 bool DirectX12RenderContext::beginFrame()
 {
+    // CRITICAL: Only render if we have a valid swap chain (i.e., viewport is set up)
+    // This prevents any rendering to the main window
+    if (!swapchain) {
+        // No swap chain yet - viewport not set up, skip rendering
+        return false;
+    }
+
     // Reset command allocator for current frame
     if (commandAllocators[currentFrame]) {
         HRESULT hr = commandAllocators[currentFrame]->Reset();
@@ -814,11 +824,16 @@ bool DirectX12RenderContext::recreateSwapChain(int newWidth, int newHeight)
     depthStencil.Reset();
     swapchain.Reset();
 
-    // Get the target window handle (use viewport HWND if set, otherwise main window)
-    HWND mainWindowHwnd = static_cast<HWND>(WindowAdapter::getNativeHandle(window));
-    HWND targetHwnd = viewportHwnd ? static_cast<HWND>(viewportHwnd) : mainWindowHwnd;
+    // CRITICAL: ONLY use viewport window handle for swap chain creation
+    // NEVER fall back to main window - viewport is the ONLY DirectX rendering target
+    if (!viewportHwnd) {
+        LOG_ERROR_C("Cannot recreate swap chain - viewport window handle not set. Swap chain requires viewport.", "DirectX12");
+        return false;
+    }
+    
+    HWND targetHwnd = static_cast<HWND>(viewportHwnd);
     if (!targetHwnd) {
-        LOG_ERROR_C("No valid window handle for swap chain", "DirectX12");
+        LOG_ERROR_C("Invalid viewport window handle for swap chain", "DirectX12");
         return false;
     }
 
