@@ -1179,50 +1179,28 @@ void Engine::update(float deltaTime)
         auto* viewportPanel = m_editorManager->getViewportPanel();
         
         if (viewportPanel->wasResized()) {
-            HWND viewportHwnd = viewportPanel->getHandle();
             int vpWidth = viewportPanel->getWidth();
             int vpHeight = viewportPanel->getHeight();
             
-            // CRITICAL FIX: Query actual client rect from Windows to get true viewport dimensions
-            // The panel's stored dimensions might not match the actual window size during resize
-            if (viewportHwnd) {
-                RECT vpRect;
-                if (GetClientRect(viewportHwnd, &vpRect)) {
-                    int actualWidth = vpRect.right - vpRect.left;
-                    int actualHeight = vpRect.bottom - vpRect.top;
-                    if (actualWidth > 0 && actualHeight > 0) {
-                        vpWidth = actualWidth;
-                        vpHeight = actualHeight;
-                        LOG_INFO_C("Using actual viewport client rect for resize: " + 
-                                   std::to_string(vpWidth) + "x" + std::to_string(vpHeight), "Engine");
-                    }
-                }
-            }
+            viewportPanel->clearResizedFlag(); // Clear flag first to prevent infinite loops
             
-            LOG_INFO_C("Viewport resized, recreating swap chain: " + 
-                       std::to_string(vpWidth) + "x" + std::to_string(vpHeight), "Engine");
+            LOG_INFO_C("Viewport resized: " + std::to_string(vpWidth) + "x" + std::to_string(vpHeight), "Engine");
             
             // Recreate swap chain with new viewport dimensions
             if (vpWidth > 0 && vpHeight > 0) {
                 if (m_renderer->recreateSwapChain(vpWidth, vpHeight)) {
-                    LOG_INFO_C("✓ Swap chain recreated successfully for new viewport size", "Engine");
-                    std::cout << "✓ Viewport swap chain resized: " << vpWidth << "x" << vpHeight << std::endl;
-                    
                     // Update camera aspect ratio
                     if (m_player) {
                         float aspectRatio = static_cast<float>(vpWidth) / static_cast<float>(vpHeight);
                         m_player->getCamera().setAspectRatio(aspectRatio);
                     }
                 } else {
-                    LOG_ERROR_C("FAILED to recreate swap chain during viewport resize! This will cause black boxes and artifacts.", "Engine");
-                    std::cerr << "ERROR: Swap chain resize failed - you may see black boxes or artifacts!" << std::endl;
+                    LOG_ERROR_C("Failed to recreate swap chain during viewport resize", "Engine");
                 }
             } else {
                 LOG_ERROR_C("Invalid viewport dimensions during resize: " + 
                            std::to_string(vpWidth) + "x" + std::to_string(vpHeight), "Engine");
             }
-            
-            viewportPanel->clearResizedFlag();
         }
     }
 #endif
