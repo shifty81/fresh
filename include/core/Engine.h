@@ -47,6 +47,11 @@ namespace ecs
 class EntityManager;
 }
 
+namespace scripting
+{
+class LuaScriptingEngine;
+}
+
 /**
  * @brief Main engine class that orchestrates all subsystems
  *
@@ -135,6 +140,7 @@ private:
     std::unique_ptr<SeasonManager> m_seasonManager;
     std::unique_ptr<WeatherManager> m_weatherManager;
     std::unique_ptr<Raft> m_raft;
+    std::unique_ptr<scripting::LuaScriptingEngine> m_scriptingEngine;
     VoxelType m_selectedBlockType;
     // Track world type for camera setup
     bool m_isWorld3D = true;

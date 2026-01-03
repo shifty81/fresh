@@ -390,6 +390,7 @@ set(ENGINE_SOURCES
     src/devtools/DevToolsManager.cpp
     src/scripting/lua/ScriptingEngine.cpp
     src/scripting/lua/LuaScriptingEngine.cpp
+    src/scripting/lua/LuaECSBindings.cpp
 )
 
 # Add platform-specific rendering backends
@@ -530,6 +531,7 @@ set(ENGINE_HEADERS
     include/devtools/DevToolsManager.h
     include/scripting/lua/ScriptingEngine.h
     include/scripting/lua/LuaScriptingEngine.h
+    include/scripting/lua/LuaECSBindings.h
     include/character/VoxelCharacter.h
 )
 

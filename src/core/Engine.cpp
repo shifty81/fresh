@@ -72,6 +72,8 @@
 #include "physics/PhysicsSystem.h"
 #include "renderer/GraphicsAPI.h"
 #include "renderer/RenderContext.h"
+#include "scripting/lua/LuaScriptingEngine.h"
+#include "scripting/lua/LuaECSBindings.h"
 #include "serialization/WorldSerializer.h"
 #include "ui/EditorToolbar.h"
 #include "ui/HotbarPanel.h"
@@ -317,6 +319,22 @@ bool Engine::initialize()
     m_entityManager = std::make_unique<ecs::EntityManager>();
     std::cout << "Entity manager initialized" << std::endl;
     LOG_INFO_C("Entity manager initialized", "Engine");
+
+    // Initialize scripting engine with hot-reload support
+    m_scriptingEngine = std::make_unique<scripting::LuaScriptingEngine>();
+    if (m_scriptingEngine->initialize()) {
+        // Enable hot-reload for development builds
+        m_scriptingEngine->enableHotReload(true);
+        std::cout << "Lua scripting engine initialized (hot-reload enabled)" << std::endl;
+        LOG_INFO_C("Lua scripting engine initialized with hot-reload support", "Engine");
+        
+        // Register ECS bindings with the scripting engine
+        scripting::LuaECSBindings::registerBindings(m_scriptingEngine.get(), m_entityManager.get());
+        LOG_INFO_C("ECS bindings registered with Lua", "Engine");
+    } else {
+        std::cerr << "Warning: Failed to initialize Lua scripting engine" << std::endl;
+        LOG_WARNING_C("Failed to initialize Lua scripting engine", "Engine");
+    }
 
     // Create comprehensive editor manager (uses Windows Native Win32 UI) - show immediately
     m_editorManager = std::make_unique<EditorManager>();
@@ -943,6 +961,12 @@ void Engine::shutdown()
         m_editorManager.reset();
     }
 
+    // Shutdown scripting engine
+    if (m_scriptingEngine) {
+        m_scriptingEngine->shutdown();
+        m_scriptingEngine.reset();
+    }
+
     m_player.reset();
     m_inputManager.reset();
     m_editor.reset();
@@ -1400,6 +1424,11 @@ void Engine::update(float deltaTime)
     // Update AI
     if (m_aiSystem) {
         m_aiSystem->update(deltaTime);
+    }
+
+    // Check for script changes (hot-reload)
+    if (m_scriptingEngine && m_scriptingEngine->isHotReloadEnabled()) {
+        m_scriptingEngine->checkForScriptChanges();
     }
 
     // Update world editor
