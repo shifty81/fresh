@@ -248,12 +248,14 @@ TEST_F(ResourceManagerTest, AudioClipResourceMemoryUsage)
 // ResourceManager Operations Tests
 // ============================================================================
 
-TEST_F(ResourceManagerTest, DetectResourceType)
+TEST_F(ResourceManagerTest, ExistsReturnsFalseForMissingResource)
 {
     auto& rm = ResourceManager::getInstance();
     
-    // Check texture extensions
-    EXPECT_TRUE(rm.exists("") == false); // This tests file existence, not type detection
+    // Check that exists() returns false for non-existent resources
+    EXPECT_FALSE(rm.exists(""));
+    EXPECT_FALSE(rm.exists("nonexistent/texture.png"));
+    EXPECT_FALSE(rm.exists("missing_model.obj"));
 }
 
 TEST_F(ResourceManagerTest, ScanDirectory)

@@ -316,6 +316,7 @@ void TextureResource::load()
         height = 2;
         channels = 4;
         data = new unsigned char[16]; // 2x2 RGBA
+        usedStbiAlloc = false; // Allocated with new[]
         // Magenta color for visibility
         for (int i = 0; i < 4; ++i) {
             data[i * 4 + 0] = 255; // R
@@ -354,6 +355,7 @@ void TextureResource::load()
     height = imgHeight;
     channels = 4; // We requested RGBA
     data = imageData; // stbi_load allocates with malloc
+    usedStbiAlloc = true; // Allocated with stb_image
     loaded = true;
     
     std::cout << "Texture loaded successfully: " << path 
@@ -363,13 +365,18 @@ void TextureResource::load()
 void TextureResource::unload()
 {
     if (data) {
-        // stb_image uses malloc, so we need stbi_image_free
-        stbi_image_free(data);
+        // Use correct deallocation based on allocation type
+        if (usedStbiAlloc) {
+            stbi_image_free(data);
+        } else {
+            delete[] data;
+        }
         data = nullptr;
     }
     width = 0;
     height = 0;
     channels = 0;
+    usedStbiAlloc = false;
     loaded = false;
 }
 

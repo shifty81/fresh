@@ -290,6 +290,7 @@ private:
     int height = 0;
     int channels = 0;
     unsigned char* data = nullptr;
+    bool usedStbiAlloc = false; // Track allocation type for proper deallocation
 };
 
 /**
