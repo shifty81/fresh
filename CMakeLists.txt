@@ -401,6 +401,7 @@ set(ENGINE_SOURCES
     src/scripting/lua/ScriptingEngine.cpp
     src/scripting/lua/LuaScriptingEngine.cpp
     src/scripting/lua/LuaECSBindings.cpp
+    src/scripting/lua/LuaTimeBindings.cpp
 )
 
 # Add platform-specific rendering backends
@@ -542,6 +543,7 @@ set(ENGINE_HEADERS
     include/scripting/lua/ScriptingEngine.h
     include/scripting/lua/LuaScriptingEngine.h
     include/scripting/lua/LuaECSBindings.h
+    include/scripting/lua/LuaTimeBindings.h
     include/character/VoxelCharacter.h
 )
 
