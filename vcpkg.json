@@ -12,6 +12,7 @@
     "openal-soft",
     "libvorbis",
     "luajit",
+    "sol2",
     "gtest",
     "nlohmann-json",
     "tinyobjloader",
