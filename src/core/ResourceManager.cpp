@@ -1,8 +1,28 @@
 #include "core/ResourceManager.h"
 
 #include <algorithm>
+#include <cstring>
 #include <filesystem>
+#include <fstream>
 #include <iostream>
+#include <unordered_map>
+
+// Forward declare stb_image functions (implementation is in stb_image_impl.cpp)
+extern "C" {
+    unsigned char* stbi_load(char const* filename, int* x, int* y, int* channels_in_file, int desired_channels);
+    void stbi_image_free(void* retval_from_stbi_load);
+    const char* stbi_failure_reason(void);
+}
+
+// Include tinyobjloader for mesh loading
+#ifdef FRESH_TINYOBJLOADER_AVAILABLE
+#include <tiny_obj_loader.h>
+#endif
+
+// Include vorbis for OGG audio loading
+#ifdef FRESH_VORBIS_AVAILABLE
+#include <vorbis/vorbisfile.h>
+#endif
 
 namespace fresh
 {
@@ -278,10 +298,10 @@ ResourceType ResourceManager::detectResourceType(const std::string& path) const
 }
 
 // TextureResource implementation
-TextureResource::TextureResource(const std::string& path)
+TextureResource::TextureResource(const std::string& filePath)
 {
-    this->path = path;
-    this->name = std::filesystem::path(path).stem().string();
+    this->path = filePath;
+    this->name = std::filesystem::path(filePath).stem().string();
     this->type = ResourceType::Texture;
 }
 
@@ -289,31 +309,74 @@ void TextureResource::load()
 {
     std::cout << "Loading texture: " << path << std::endl;
     
+    // Check if this is a placeholder resource
+    if (path.find("__placeholder") != std::string::npos) {
+        // Create a 2x2 magenta placeholder texture (for visibility)
+        width = 2;
+        height = 2;
+        channels = 4;
+        data = new unsigned char[16]; // 2x2 RGBA
+        usedStbiAlloc = false; // Allocated with new[]
+        // Magenta color for visibility
+        for (int i = 0; i < 4; ++i) {
+            data[i * 4 + 0] = 255; // R
+            data[i * 4 + 1] = 0;   // G
+            data[i * 4 + 2] = 255; // B
+            data[i * 4 + 3] = 255; // A
+        }
+        loaded = true;
+        std::cout << "Placeholder texture created" << std::endl;
+        return;
+    }
+    
     // Check if file exists
     if (!std::filesystem::exists(path)) {
         std::cerr << "ERROR: Texture file not found: " << path << std::endl;
         std::cerr << "Using placeholder texture instead" << std::endl;
-        // Will be handled by ResourceManager fallback
         return;
     }
     
-    try {
-        // TODO: Implement actual texture loading (using stb_image)
-        // For now, just mark as loaded
-        loaded = true;
-        std::cout << "Texture loaded successfully: " << path << std::endl;
-    } catch (const std::exception& e) {
-        std::cerr << "ERROR loading texture " << path << ": " << e.what() << std::endl;
-        loaded = false;
+    // Load image using stb_image
+    int imgWidth = 0;
+    int imgHeight = 0;
+    int imgChannels = 0;
+    
+    // Request 4 channels (RGBA) for consistency
+    unsigned char* imageData = stbi_load(path.c_str(), &imgWidth, &imgHeight, &imgChannels, 4);
+    
+    if (!imageData) {
+        std::cerr << "ERROR: Failed to load texture: " << path << std::endl;
+        std::cerr << "  Reason: " << stbi_failure_reason() << std::endl;
+        return;
     }
+    
+    // Store the loaded data
+    width = imgWidth;
+    height = imgHeight;
+    channels = 4; // We requested RGBA
+    data = imageData; // stbi_load allocates with malloc
+    usedStbiAlloc = true; // Allocated with stb_image
+    loaded = true;
+    
+    std::cout << "Texture loaded successfully: " << path 
+              << " (" << width << "x" << height << ", " << imgChannels << " original channels)" << std::endl;
 }
 
 void TextureResource::unload()
 {
     if (data) {
-        delete[] data;
+        // Use correct deallocation based on allocation type
+        if (usedStbiAlloc) {
+            stbi_image_free(data);
+        } else {
+            delete[] data;
+        }
         data = nullptr;
     }
+    width = 0;
+    height = 0;
+    channels = 0;
+    usedStbiAlloc = false;
     loaded = false;
 }
 
@@ -323,10 +386,10 @@ size_t TextureResource::getMemoryUsage() const
 }
 
 // MeshResource implementation
-MeshResource::MeshResource(const std::string& path)
+MeshResource::MeshResource(const std::string& filePath)
 {
-    this->path = path;
-    this->name = std::filesystem::path(path).stem().string();
+    this->path = filePath;
+    this->name = std::filesystem::path(filePath).stem().string();
     this->type = ResourceType::Mesh;
 }
 
@@ -334,22 +397,130 @@ void MeshResource::load()
 {
     std::cout << "Loading mesh: " << path << std::endl;
     
+    // Check if this is a placeholder resource
+    if (path.find("__placeholder") != std::string::npos) {
+        // Create a simple cube placeholder (8 vertices, 36 indices for 12 triangles)
+        // Vertices: position (x, y, z) + normal (nx, ny, nz) + texcoord (u, v) = 8 floats per vertex
+        vertices = {
+            // Front face
+            -0.5f, -0.5f,  0.5f,  0.0f, 0.0f, 1.0f,  0.0f, 0.0f,
+             0.5f, -0.5f,  0.5f,  0.0f, 0.0f, 1.0f,  1.0f, 0.0f,
+             0.5f,  0.5f,  0.5f,  0.0f, 0.0f, 1.0f,  1.0f, 1.0f,
+            -0.5f,  0.5f,  0.5f,  0.0f, 0.0f, 1.0f,  0.0f, 1.0f,
+            // Back face
+             0.5f, -0.5f, -0.5f,  0.0f, 0.0f, -1.0f,  0.0f, 0.0f,
+            -0.5f, -0.5f, -0.5f,  0.0f, 0.0f, -1.0f,  1.0f, 0.0f,
+            -0.5f,  0.5f, -0.5f,  0.0f, 0.0f, -1.0f,  1.0f, 1.0f,
+             0.5f,  0.5f, -0.5f,  0.0f, 0.0f, -1.0f,  0.0f, 1.0f,
+        };
+        indices = {
+            0, 1, 2, 2, 3, 0,   // Front
+            4, 5, 6, 6, 7, 4,   // Back
+        };
+        loaded = true;
+        std::cout << "Placeholder mesh created" << std::endl;
+        return;
+    }
+    
     // Check if file exists
     if (!std::filesystem::exists(path)) {
         std::cerr << "ERROR: Mesh file not found: " << path << std::endl;
         std::cerr << "Using placeholder mesh instead" << std::endl;
         return;
     }
-    
-    try {
-        // TODO: Implement actual mesh loading (using tinyobjloader)
-        // For now, just mark as loaded
-        loaded = true;
-        std::cout << "Mesh loaded successfully: " << path << std::endl;
-    } catch (const std::exception& e) {
-        std::cerr << "ERROR loading mesh " << path << ": " << e.what() << std::endl;
-        loaded = false;
+
+#ifdef FRESH_TINYOBJLOADER_AVAILABLE
+    // Load OBJ file using tinyobjloader
+    tinyobj::attrib_t attrib;
+    std::vector<tinyobj::shape_t> shapes;
+    std::vector<tinyobj::material_t> materials;
+    std::string warn, err;
+
+    bool ret = tinyobj::LoadObj(&attrib, &shapes, &materials, &warn, &err, path.c_str());
+
+    if (!warn.empty()) {
+        std::cout << "Warning loading mesh " << path << ": " << warn << std::endl;
     }
+
+    if (!err.empty()) {
+        std::cerr << "Error loading mesh " << path << ": " << err << std::endl;
+    }
+
+    if (!ret) {
+        std::cerr << "ERROR: Failed to load mesh: " << path << std::endl;
+        return;
+    }
+
+    // Process all shapes into a single vertex/index list
+    // Each vertex has 8 floats: position (3) + normal (3) + texcoord (2)
+    std::unordered_map<std::string, uint32_t> uniqueVertices;
+    
+    for (const auto& shape : shapes) {
+        size_t indexOffset = 0;
+        for (size_t f = 0; f < shape.mesh.num_face_vertices.size(); f++) {
+            int fv = shape.mesh.num_face_vertices[f];
+            
+            for (int v = 0; v < fv; v++) {
+                tinyobj::index_t idx = shape.mesh.indices[indexOffset + v];
+                
+                // Position
+                float px = attrib.vertices[3 * idx.vertex_index + 0];
+                float py = attrib.vertices[3 * idx.vertex_index + 1];
+                float pz = attrib.vertices[3 * idx.vertex_index + 2];
+                
+                // Normal
+                float nx = 0.0f, ny = 1.0f, nz = 0.0f;
+                if (idx.normal_index >= 0 && !attrib.normals.empty()) {
+                    nx = attrib.normals[3 * idx.normal_index + 0];
+                    ny = attrib.normals[3 * idx.normal_index + 1];
+                    nz = attrib.normals[3 * idx.normal_index + 2];
+                }
+                
+                // Texture coordinates
+                float u = 0.0f, vt = 0.0f;
+                if (idx.texcoord_index >= 0 && !attrib.texcoords.empty()) {
+                    u = attrib.texcoords[2 * idx.texcoord_index + 0];
+                    vt = attrib.texcoords[2 * idx.texcoord_index + 1];
+                }
+                
+                // Create unique vertex key using original indices (more reliable than float comparison)
+                // This uses a packed format: vertex_index|normal_index|texcoord_index
+                size_t vertKey = static_cast<size_t>(idx.vertex_index);
+                size_t normKey = idx.normal_index >= 0 ? static_cast<size_t>(idx.normal_index) : 0xFFFFFFFF;
+                size_t texKey = idx.texcoord_index >= 0 ? static_cast<size_t>(idx.texcoord_index) : 0xFFFFFFFF;
+                std::string key = std::to_string(vertKey) + "|" + 
+                                  std::to_string(normKey) + "|" + 
+                                  std::to_string(texKey);
+                
+                if (uniqueVertices.count(key) > 0) {
+                    indices.push_back(uniqueVertices[key]);
+                } else {
+                    uint32_t index = static_cast<uint32_t>(vertices.size() / 8);
+                    vertices.push_back(px);
+                    vertices.push_back(py);
+                    vertices.push_back(pz);
+                    vertices.push_back(nx);
+                    vertices.push_back(ny);
+                    vertices.push_back(nz);
+                    vertices.push_back(u);
+                    vertices.push_back(vt);
+                    indices.push_back(index);
+                    uniqueVertices[key] = index;
+                }
+            }
+            
+            indexOffset += fv;
+        }
+    }
+    
+    loaded = true;
+    std::cout << "Mesh loaded successfully: " << path 
+              << " (" << (vertices.size() / 8) << " vertices, " 
+              << indices.size() << " indices)" << std::endl;
+#else
+    std::cerr << "ERROR: tinyobjloader not available. Cannot load mesh: " << path << std::endl;
+    std::cerr << "Mesh loading requires FRESH_TINYOBJLOADER_AVAILABLE to be defined." << std::endl;
+#endif
 }
 
 void MeshResource::unload()
@@ -365,16 +536,124 @@ size_t MeshResource::getMemoryUsage() const
 }
 
 // AudioClipResource implementation
-AudioClipResource::AudioClipResource(const std::string& path)
+AudioClipResource::AudioClipResource(const std::string& filePath)
 {
-    this->path = path;
-    this->name = std::filesystem::path(path).stem().string();
+    this->path = filePath;
+    this->name = std::filesystem::path(filePath).stem().string();
     this->type = ResourceType::Audio;
+}
+
+// Helper function to read WAV file header
+static bool loadWAVFile(const std::string& filepath, std::vector<int16_t>& outSamples, 
+                        int& outSampleRate, int& outChannels)
+{
+    std::ifstream file(filepath, std::ios::binary);
+    if (!file.is_open()) {
+        return false;
+    }
+    
+    // Read RIFF header
+    char riffHeader[4];
+    file.read(riffHeader, 4);
+    if (std::strncmp(riffHeader, "RIFF", 4) != 0) {
+        std::cerr << "Invalid WAV file: missing RIFF header" << std::endl;
+        return false;
+    }
+    
+    uint32_t chunkSize;
+    file.read(reinterpret_cast<char*>(&chunkSize), 4);
+    
+    char waveHeader[4];
+    file.read(waveHeader, 4);
+    if (std::strncmp(waveHeader, "WAVE", 4) != 0) {
+        std::cerr << "Invalid WAV file: missing WAVE header" << std::endl;
+        return false;
+    }
+    
+    // Read fmt chunk
+    char fmtHeader[4];
+    file.read(fmtHeader, 4);
+    if (std::strncmp(fmtHeader, "fmt ", 4) != 0) {
+        std::cerr << "Invalid WAV file: missing fmt chunk" << std::endl;
+        return false;
+    }
+    
+    uint32_t fmtChunkSize;
+    file.read(reinterpret_cast<char*>(&fmtChunkSize), 4);
+    
+    uint16_t audioFormat;
+    file.read(reinterpret_cast<char*>(&audioFormat), 2);
+    if (audioFormat != 1) { // PCM = 1
+        std::cerr << "Unsupported WAV format: only PCM is supported" << std::endl;
+        return false;
+    }
+    
+    uint16_t numChannels;
+    file.read(reinterpret_cast<char*>(&numChannels), 2);
+    outChannels = numChannels;
+    
+    uint32_t wavSampleRate;
+    file.read(reinterpret_cast<char*>(&wavSampleRate), 4);
+    outSampleRate = static_cast<int>(wavSampleRate);
+    
+    uint32_t byteRate;
+    file.read(reinterpret_cast<char*>(&byteRate), 4);
+    
+    uint16_t blockAlign;
+    file.read(reinterpret_cast<char*>(&blockAlign), 2);
+    
+    uint16_t bitsPerSample;
+    file.read(reinterpret_cast<char*>(&bitsPerSample), 2);
+    
+    if (bitsPerSample != 16) {
+        std::cerr << "Unsupported WAV bits per sample: " << bitsPerSample << " (only 16-bit supported)" << std::endl;
+        return false;
+    }
+    
+    // Skip any extra fmt bytes
+    if (fmtChunkSize > 16) {
+        file.seekg(fmtChunkSize - 16, std::ios::cur);
+    }
+    
+    // Find data chunk
+    char dataHeader[4];
+    uint32_t dataSize;
+    while (file.read(dataHeader, 4)) {
+        file.read(reinterpret_cast<char*>(&dataSize), 4);
+        if (std::strncmp(dataHeader, "data", 4) == 0) {
+            break;
+        }
+        // Skip unknown chunk
+        file.seekg(dataSize, std::ios::cur);
+    }
+    
+    if (std::strncmp(dataHeader, "data", 4) != 0) {
+        std::cerr << "Invalid WAV file: missing data chunk" << std::endl;
+        return false;
+    }
+    
+    // Read sample data
+    size_t numSamples = dataSize / 2; // 16-bit samples = 2 bytes each
+    outSamples.resize(numSamples);
+    file.read(reinterpret_cast<char*>(outSamples.data()), dataSize);
+    
+    return true;
 }
 
 void AudioClipResource::load()
 {
     std::cout << "Loading audio: " << path << std::endl;
+    
+    // Check if this is a placeholder resource
+    if (path.find("__placeholder") != std::string::npos) {
+        // Create a short silent audio sample (1 second at 44100 Hz, mono)
+        sampleRate = 44100;
+        channels = 1;
+        samples.resize(44100, 0); // 1 second of silence
+        loaded = true;
+        std::cout << "Placeholder audio created" << std::endl;
+        return;
+    }
     
     // Check if file exists
     if (!std::filesystem::exists(path)) {
@@ -387,19 +666,64 @@ void AudioClipResource::load()
     std::string ext = std::filesystem::path(path).extension().string();
     std::transform(ext.begin(), ext.end(), ext.begin(), ::tolower);
     
-    if (ext != ".wav" && ext != ".ogg" && ext != ".mp3") {
-        std::cerr << "WARNING: Unsupported audio format: " << ext << std::endl;
-        std::cerr << "Supported formats: .wav, .ogg, .mp3" << std::endl;
+    if (ext == ".wav") {
+        // Load WAV file
+        if (loadWAVFile(path, samples, sampleRate, channels)) {
+            loaded = true;
+            std::cout << "Audio loaded successfully: " << path 
+                      << " (" << sampleRate << " Hz, " << channels << " channels, "
+                      << samples.size() << " samples)" << std::endl;
+        } else {
+            std::cerr << "ERROR: Failed to load WAV file: " << path << std::endl;
+        }
     }
-    
-    try {
-        // TODO: Implement actual audio loading (integrate with AudioEngine)
-        // For now, just mark as loaded
+#ifdef FRESH_VORBIS_AVAILABLE
+    else if (ext == ".ogg") {
+        // Load OGG file using libvorbis
+        OggVorbis_File vf;
+        if (ov_fopen(path.c_str(), &vf) != 0) {
+            std::cerr << "ERROR: Failed to open OGG file: " << path << std::endl;
+            return;
+        }
+        
+        vorbis_info* vi = ov_info(&vf, -1);
+        sampleRate = static_cast<int>(vi->rate);
+        channels = vi->channels;
+        
+        // Pre-allocate samples vector using total PCM length
+        ogg_int64_t totalSamples = ov_pcm_total(&vf, -1);
+        if (totalSamples > 0) {
+            samples.reserve(static_cast<size_t>(totalSamples * channels));
+        }
+        
+        // Read all samples
+        const int bufferSize = 4096;
+        char buffer[bufferSize];
+        int bitstream;
+        long bytesRead;
+        
+        while ((bytesRead = ov_read(&vf, buffer, bufferSize, 0, 2, 1, &bitstream)) > 0) {
+            size_t samplesRead = static_cast<size_t>(bytesRead) / 2; // 16-bit samples
+            size_t oldSize = samples.size();
+            samples.resize(oldSize + samplesRead);
+            std::memcpy(samples.data() + oldSize, buffer, static_cast<size_t>(bytesRead));
+        }
+        
+        ov_clear(&vf);
+        
         loaded = true;
-        std::cout << "Audio loaded successfully: " << path << std::endl;
-    } catch (const std::exception& e) {
-        std::cerr << "ERROR loading audio " << path << ": " << e.what() << std::endl;
-        loaded = false;
+        std::cout << "Audio loaded successfully: " << path 
+                  << " (" << sampleRate << " Hz, " << channels << " channels, "
+                  << samples.size() << " samples)" << std::endl;
+    }
+#endif
+    else {
+        std::cerr << "WARNING: Unsupported audio format: " << ext << std::endl;
+        std::cerr << "Supported formats: .wav";
+#ifdef FRESH_VORBIS_AVAILABLE
+        std::cerr << ", .ogg";
+#endif
+        std::cerr << std::endl;
     }
 }
 
