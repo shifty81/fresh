@@ -202,6 +202,16 @@ else()
     message(STATUS "Native File Dialog Extended found successfully")
 endif()
 
+# tinyobjloader for OBJ model loading
+find_package(tinyobjloader QUIET CONFIG)
+if(NOT tinyobjloader_FOUND)
+    message(WARNING "tinyobjloader not found. OBJ model loading will be disabled.")
+    message(WARNING "  vcpkg install tinyobjloader:x64-windows")
+else()
+    message(STATUS "tinyobjloader found successfully")
+    set(TINYOBJLOADER_AVAILABLE TRUE)
+endif()
+
 message(STATUS "All find_package calls completed")
 
 # ==============================================================================
@@ -697,6 +707,13 @@ if(nfd_FOUND)
     message(STATUS "Native File Dialog Extended enabled for file operations")
 endif()
 
+# Link tinyobjloader (OBJ model loading)
+if(TINYOBJLOADER_AVAILABLE)
+    target_link_libraries(${PROJECT_NAME} PRIVATE tinyobjloader::tinyobjloader)
+    add_definitions(-DFRESH_TINYOBJLOADER_AVAILABLE)
+    message(STATUS "tinyobjloader enabled for OBJ model loading")
+endif()
+
 # Link DirectX (Windows only)
 if(WIN32 AND ENABLE_DIRECTX)
     target_link_libraries(${PROJECT_NAME} PRIVATE 
@@ -853,6 +870,7 @@ if(BUILD_TESTS)
         tests/input/InputManagerTests.cpp
         tests/core/EngineInitializationTests.cpp  # Tests for engine initialization sequence
         tests/core/ReflectionTests.cpp            # Tests for reflection system
+        tests/core/ResourceManagerTests.cpp       # Tests for resource loading system
         # tests/core/MemoryManagerTests.cpp  # Disabled - tests don't match implementation
         tests/scripting/EventSystemTests.cpp
         tests/rpg/InventoryTests.cpp
@@ -882,6 +900,8 @@ if(BUILD_TESTS)
         src/core/MemoryManager.cpp
         src/core/Logger.cpp
         src/core/Reflection.cpp
+        src/core/ResourceManager.cpp
+        src/renderer/stb_image_impl.cpp
         src/scripting/EventSystem.cpp
         src/input/InputManager.cpp
         src/gameplay/TimeManager.cpp
