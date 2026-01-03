@@ -62,6 +62,7 @@
 #include "editor/TransformGizmo.h"
 #include "editor/WorldEditor.h"
 #include "gameplay/Player.h"
+#include "gameplay/TimeManager.h"
 #include "gameplay/SeasonManager.h"
 #include "gameplay/WeatherManager.h"
 #include "gameplay/Raft.h"
@@ -74,6 +75,7 @@
 #include "renderer/RenderContext.h"
 #include "scripting/lua/LuaScriptingEngine.h"
 #include "scripting/lua/LuaECSBindings.h"
+#include "scripting/lua/LuaTimeBindings.h"
 #include "serialization/WorldSerializer.h"
 #include "ui/EditorToolbar.h"
 #include "ui/HotbarPanel.h"
@@ -331,6 +333,10 @@ bool Engine::initialize()
         // Register ECS bindings with the scripting engine
         scripting::LuaECSBindings::registerBindings(m_scriptingEngine.get(), m_entityManager.get());
         LOG_INFO_C("ECS bindings registered with Lua", "Engine");
+        
+        // Register Time bindings with the scripting engine
+        scripting::LuaTimeBindings::registerBindings(m_scriptingEngine.get(), m_timeManager.get());
+        LOG_INFO_C("Time bindings registered with Lua", "Engine");
     } else {
         std::cerr << "Warning: Failed to initialize Lua scripting engine" << std::endl;
         LOG_WARNING_C("Failed to initialize Lua scripting engine", "Engine");
@@ -703,6 +709,12 @@ void Engine::initializeGameSystems()
     m_player->setWorld(m_world.get());
     m_player->setPosition(glm::vec3(0.0f, 80.0f, 0.0f));
     std::cout << "Player initialized" << std::endl;
+    
+    // Create time manager
+    if (!m_timeManager) {
+        m_timeManager = std::make_unique<TimeManager>();
+    }
+    std::cout << "Time manager initialized" << std::endl;
     
     // Create season manager
     if (!m_seasonManager) {
@@ -1371,6 +1383,11 @@ void Engine::update(float deltaTime)
     // Update player (physics, collision)
     if (m_player) {
         m_player->update(deltaTime);
+    }
+    
+    // Update time manager (day/night cycle)
+    if (m_timeManager) {
+        m_timeManager->update(deltaTime);
     }
     
     // Update season manager

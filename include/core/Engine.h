@@ -38,6 +38,7 @@ class MainMenu;
 class WorldEditor;
 class Player;
 class VoxelInteraction;
+class TimeManager;
 class SeasonManager;
 class WeatherManager;
 class Raft;
@@ -137,6 +138,7 @@ private:
     std::unique_ptr<Player> m_player;
     std::unique_ptr<InputManagerType> m_inputManager;
     std::unique_ptr<VoxelInteraction> m_voxelInteraction;
+    std::unique_ptr<TimeManager> m_timeManager;
     std::unique_ptr<SeasonManager> m_seasonManager;
     std::unique_ptr<WeatherManager> m_weatherManager;
     std::unique_ptr<Raft> m_raft;
