@@ -1,8 +1,14 @@
 #include "core/SceneManager.h"
 
 #include <iostream>
+#include <fstream>
 
 #include <glm/gtc/matrix_transform.hpp>
+
+#ifdef FRESH_JSON_AVAILABLE
+#include <nlohmann/json.hpp>
+using json = nlohmann::json;
+#endif
 
 namespace fresh
 {
@@ -155,9 +161,50 @@ Scene* SceneManager::createScene(const std::string& name)
 
 Scene* SceneManager::loadScene(const std::string& path)
 {
-    // TODO: Implement scene loading from file
-    std::cout << "Loading scene from: " << path << std::endl;
+#ifdef FRESH_JSON_AVAILABLE
+    try {
+        std::ifstream file(path);
+        if (!file.is_open()) {
+            std::cerr << "Failed to open scene file: " << path << std::endl;
+            return nullptr;
+        }
+
+        json sceneData;
+        file >> sceneData;
+        file.close();
+
+        // Get scene name
+        std::string sceneName = sceneData.value("name", "Unnamed Scene");
+        
+        // Create new scene
+        Scene* scene = createScene(sceneName);
+        if (!scene) {
+            std::cerr << "Failed to create scene: " << sceneName << std::endl;
+            return nullptr;
+        }
+
+        // Load metadata
+        if (sceneData.contains("metadata")) {
+            auto& metadata = sceneData["metadata"];
+            // Future: load scene-specific metadata
+        }
+
+        // Load scene nodes recursively
+        if (sceneData.contains("root")) {
+            loadSceneNode(scene->getRoot(), sceneData["root"]);
+        }
+
+        std::cout << "Successfully loaded scene from: " << path << std::endl;
+        return scene;
+    }
+    catch (const std::exception& e) {
+        std::cerr << "Error loading scene: " << e.what() << std::endl;
+        return nullptr;
+    }
+#else
+    std::cout << "Scene loading requires nlohmann-json library. Path: " << path << std::endl;
     return nullptr;
+#endif
 }
 
 bool SceneManager::saveScene(const std::string& path, Scene* scene)
@@ -165,9 +212,41 @@ bool SceneManager::saveScene(const std::string& path, Scene* scene)
     if (!scene)
         return false;
 
-    // TODO: Implement scene saving to file
-    std::cout << "Saving scene to: " << path << std::endl;
-    return true;
+#ifdef FRESH_JSON_AVAILABLE
+    try {
+        json sceneData;
+        
+        // Save scene metadata
+        sceneData["name"] = scene->getName();
+        sceneData["version"] = "1.0";
+        sceneData["metadata"] = json::object();
+
+        // Save scene graph starting from root
+        if (scene->getRoot()) {
+            sceneData["root"] = saveSceneNode(scene->getRoot());
+        }
+
+        // Write to file with pretty printing
+        std::ofstream file(path);
+        if (!file.is_open()) {
+            std::cerr << "Failed to open file for writing: " << path << std::endl;
+            return false;
+        }
+
+        file << sceneData.dump(2); // 2-space indentation
+        file.close();
+
+        std::cout << "Successfully saved scene to: " << path << std::endl;
+        return true;
+    }
+    catch (const std::exception& e) {
+        std::cerr << "Error saving scene: " << e.what() << std::endl;
+        return false;
+    }
+#else
+    std::cout << "Scene saving requires nlohmann-json library. Path: " << path << std::endl;
+    return false;
+#endif
 }
 
 void SceneManager::setActiveScene(const std::string& name)
@@ -234,5 +313,110 @@ void SceneManager::transitionTo(const std::string& sceneName, float fadeTime)
 
     std::cout << "Transitioning to scene: " << sceneName << std::endl;
 }
+
+#ifdef FRESH_JSON_AVAILABLE
+json SceneManager::saveSceneNode(SceneNode* node)
+{
+    if (!node) {
+        return json::object();
+    }
+
+    json nodeData;
+    
+    // Basic properties
+    nodeData["name"] = node->getName();
+    nodeData["active"] = node->isActive();
+
+    // Transform
+    glm::vec3 pos = node->getPosition();
+    glm::quat rot = node->getRotation();
+    glm::vec3 scl = node->getScale();
+
+    nodeData["position"] = {pos.x, pos.y, pos.z};
+    nodeData["rotation"] = {rot.x, rot.y, rot.z, rot.w};
+    nodeData["scale"] = {scl.x, scl.y, scl.z};
+
+    // Children
+    auto& children = node->getChildren();
+    if (!children.empty()) {
+        json childrenArray = json::array();
+        for (const auto& child : children) {
+            if (child) {
+                childrenArray.push_back(saveSceneNode(child.get()));
+            }
+        }
+        nodeData["children"] = childrenArray;
+    }
+
+    // Component data (if any)
+    // Future enhancement: serialize attached components
+
+    return nodeData;
+}
+
+void SceneManager::loadSceneNode(SceneNode* parent, const json& nodeData)
+{
+    if (!parent || nodeData.is_null()) {
+        return;
+    }
+
+    // Load node properties
+    if (nodeData.contains("active")) {
+        parent->setActive(nodeData["active"].get<bool>());
+    }
+
+    // Load transform
+    if (nodeData.contains("position")) {
+        auto pos = nodeData["position"];
+        if (pos.is_array() && pos.size() == 3) {
+            parent->setPosition(glm::vec3(
+                pos[0].get<float>(),
+                pos[1].get<float>(),
+                pos[2].get<float>()
+            ));
+        }
+    }
+
+    if (nodeData.contains("rotation")) {
+        auto rot = nodeData["rotation"];
+        if (rot.is_array() && rot.size() == 4) {
+            parent->setRotation(glm::quat(
+                rot[3].get<float>(),  // w
+                rot[0].get<float>(),  // x
+                rot[1].get<float>(),  // y
+                rot[2].get<float>()   // z
+            ));
+        }
+    }
+
+    if (nodeData.contains("scale")) {
+        auto scl = nodeData["scale"];
+        if (scl.is_array() && scl.size() == 3) {
+            parent->setScale(glm::vec3(
+                scl[0].get<float>(),
+                scl[1].get<float>(),
+                scl[2].get<float>()
+            ));
+        }
+    }
+
+    // Load children recursively
+    if (nodeData.contains("children")) {
+        const auto& childrenArray = nodeData["children"];
+        if (childrenArray.is_array()) {
+            for (const auto& childData : childrenArray) {
+                if (childData.contains("name")) {
+                    std::string childName = childData["name"].get<std::string>();
+                    auto child = std::make_shared<SceneNode>(childName);
+                    parent->addChild(child);
+                    loadSceneNode(child.get(), childData);
+                }
+            }
+        }
+    }
+
+    // Component loading (future enhancement)
+}
+#endif
 
 } // namespace fresh

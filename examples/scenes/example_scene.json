@@ -1,0 +1,56 @@
+{
+  "name": "Example Scene",
+  "version": "1.0",
+  "metadata": {},
+  "root": {
+    "name": "Root",
+    "active": true,
+    "position": [0, 0, 0],
+    "rotation": [0, 0, 0, 1],
+    "scale": [1, 1, 1],
+    "children": [
+      {
+        "name": "Ground",
+        "active": true,
+        "position": [0, -1, 0],
+        "rotation": [0, 0, 0, 1],
+        "scale": [10, 0.1, 10],
+        "children": []
+      },
+      {
+        "name": "Player",
+        "active": true,
+        "position": [0, 1, 0],
+        "rotation": [0, 0, 0, 1],
+        "scale": [1, 1, 1],
+        "children": [
+          {
+            "name": "Camera",
+            "active": true,
+            "position": [0, 0.5, 0],
+            "rotation": [0, 0, 0, 1],
+            "scale": [1, 1, 1],
+            "children": []
+          }
+        ]
+      },
+      {
+        "name": "Lights",
+        "active": true,
+        "position": [0, 0, 0],
+        "rotation": [0, 0, 0, 1],
+        "scale": [1, 1, 1],
+        "children": [
+          {
+            "name": "DirectionalLight",
+            "active": true,
+            "position": [0, 10, 0],
+            "rotation": [0.7071068, 0, 0, 0.7071068],
+            "scale": [1, 1, 1],
+            "children": []
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -172,6 +172,18 @@ if(NOT Lua_FOUND)
     message(WARNING "  or vcpkg install lua:x64-windows")
 endif()
 
+# Sol2 for modern C++ Lua bindings
+if(Lua_FOUND)
+    find_package(sol2 QUIET CONFIG)
+    if(NOT sol2_FOUND)
+        message(WARNING "Sol2 not found. Lua scripting will use basic interface only.")
+        message(WARNING "  vcpkg install sol2:x64-windows")
+    else()
+        message(STATUS "Sol2 found successfully")
+        set(SOL2_AVAILABLE TRUE)
+    endif()
+endif()
+
 # nlohmann-json for JSON parsing
 find_package(nlohmann_json QUIET CONFIG)
 if(NOT nlohmann_json_FOUND)
@@ -647,16 +659,20 @@ if(Lua_FOUND)
         endif()
     endif()
     
-    # Add Sol2 header-only library for modern C++ Lua binding
-    if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/external/sol2/include")
+    # Add Sol2 for modern C++ Lua binding
+    if(SOL2_AVAILABLE)
+        # Sol2 is header-only, so we just need to link it
+        target_link_libraries(${PROJECT_NAME} PRIVATE sol2::sol2)
+        add_definitions(-DFRESH_SOL2_AVAILABLE)
+        message(STATUS "Sol2 enabled - using production Lua integration")
+    elseif(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/external/sol2/include")
         target_include_directories(${PROJECT_NAME} PRIVATE 
             ${CMAKE_CURRENT_SOURCE_DIR}/external/sol2/include)
-        message(STATUS "Sol2 found - using production Lua integration")
-        set(LUA_IMPLEMENTATION_FILE src/scripting/lua/ScriptingEngineImpl.cpp)
+        add_definitions(-DFRESH_SOL2_AVAILABLE)
+        message(STATUS "Sol2 found (local) - using production Lua integration")
     else()
-        message(STATUS "Sol2 not found - using stub Lua implementation")
-        message(STATUS "  To enable full Lua support: git clone https://github.com/ThePhD/sol2.git external/sol2")
-        set(LUA_IMPLEMENTATION_FILE src/scripting/lua/ScriptingEngine.cpp)
+        message(STATUS "Sol2 not found - Lua scripting features will be limited")
+        message(STATUS "  To enable full Lua support: vcpkg install sol2")
     endif()
     
     message(STATUS "Lua enabled for scripting and modding")

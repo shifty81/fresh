@@ -5,23 +5,21 @@
 #include <string>
 #include <vector>
 
+// Forward declare sol types
+namespace sol {
+    class state;
+}
+
 namespace fresh
 {
 namespace scripting
 {
 
 /**
- * @brief Scripting engine for Lua integration
+ * @brief Scripting engine for Lua integration using Sol2
  *
- * NOTE: This is a stub implementation. To complete this system:
- * 1. Add Lua library dependency (lua5.3 or lua5.4)
- * 2. Integrate LuaBridge or sol2 for C++ binding
- * 3. Implement the actual Lua state management
- *
- * Required libraries (choose one):
- * - LuaBridge3: https://github.com/kunitoki/LuaBridge3
- * - sol2: https://github.com/ThePhD/sol2
- * - Plain Lua C API with manual bindings
+ * This implementation uses Sol2 for modern C++ Lua bindings.
+ * Sol2 provides type-safe, easy-to-use C++ to Lua binding.
  */
 class ScriptingEngine
 {
@@ -63,6 +61,9 @@ public:
     // Input system registration
     void registerInputManager(void* inputManager);
 
+    // Get the underlying sol::state for advanced usage
+    sol::state* getState();
+
     // Error handling
     std::string getLastError() const
     {
@@ -70,35 +71,21 @@ public:
     }
 
 private:
-    // Lua state (would be lua_State* with actual Lua)
-    void* luaState;
+    // Lua state using sol2
+    std::unique_ptr<sol::state> lua;
 
     std::string lastError;
     std::vector<std::string> loadedMods;
 
     void reportError(const std::string& error);
+    void setupStandardLibraries();
 };
 
-// Template implementations (would use Lua binding library)
-template <typename T>
-void ScriptingEngine::registerClass(const std::string& className)
-{
-    // TODO: Implement with LuaBridge or sol2
-    // Example with LuaBridge:
-    // luabridge::getGlobalNamespace(L)
-    //     .beginClass<T>(className.c_str())
-    //     .addConstructor<void(*)(void)>()
-    //     // ... add methods ...
-    //     .endClass();
-}
+// Template implementations are in a separate header to avoid circular dependencies
+// Include ScriptingEngineImpl.h after defining types you want to register
 
-template <typename T>
-void ScriptingEngine::registerObject(const std::string& name, T* object)
-{
-    // TODO: Implement with LuaBridge or sol2
-    // Example with LuaBridge:
-    // luabridge::setGlobal(L, object, name.c_str());
-}
+} // namespace scripting
+} // namespace fresh
 
 } // namespace scripting
 } // namespace fresh

@@ -9,6 +9,10 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/quaternion.hpp>
 
+#ifdef FRESH_JSON_AVAILABLE
+#include <nlohmann/json_fwd.hpp>
+#endif
+
 namespace fresh
 {
 
@@ -215,6 +219,12 @@ private:
     std::string targetScene;
     float transitionTime = 0.0f;
     float transitionDuration = 0.5f;
+
+#ifdef FRESH_JSON_AVAILABLE
+    // Serialization helpers (implementation in .cpp file)
+    nlohmann::json saveSceneNode(SceneNode* node);
+    void loadSceneNode(SceneNode* parent, const nlohmann::json& nodeData);
+#endif
 };
 
 } // namespace fresh
