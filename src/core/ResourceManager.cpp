@@ -476,9 +476,14 @@ void MeshResource::load()
                     vt = attrib.texcoords[2 * idx.texcoord_index + 1];
                 }
                 
-                // Create unique vertex key
-                std::string key = std::to_string(px) + "_" + std::to_string(py) + "_" + 
-                                  std::to_string(pz) + "_" + std::to_string(u) + "_" + std::to_string(vt);
+                // Create unique vertex key using original indices (more reliable than float comparison)
+                // This uses a packed format: vertex_index|normal_index|texcoord_index
+                size_t vertKey = static_cast<size_t>(idx.vertex_index);
+                size_t normKey = idx.normal_index >= 0 ? static_cast<size_t>(idx.normal_index) : 0xFFFFFFFF;
+                size_t texKey = idx.texcoord_index >= 0 ? static_cast<size_t>(idx.texcoord_index) : 0xFFFFFFFF;
+                std::string key = std::to_string(vertKey) + "|" + 
+                                  std::to_string(normKey) + "|" + 
+                                  std::to_string(texKey);
                 
                 if (uniqueVertices.count(key) > 0) {
                     indices.push_back(uniqueVertices[key]);
@@ -678,6 +683,12 @@ void AudioClipResource::load()
         sampleRate = static_cast<int>(vi->rate);
         channels = vi->channels;
         
+        // Pre-allocate samples vector using total PCM length
+        ogg_int64_t totalSamples = ov_pcm_total(&vf, -1);
+        if (totalSamples > 0) {
+            samples.reserve(static_cast<size_t>(totalSamples * channels));
+        }
+        
         // Read all samples
         const int bufferSize = 4096;
         char buffer[bufferSize];
@@ -685,10 +696,10 @@ void AudioClipResource::load()
         long bytesRead;
         
         while ((bytesRead = ov_read(&vf, buffer, bufferSize, 0, 2, 1, &bitstream)) > 0) {
-            size_t samplesRead = bytesRead / 2; // 16-bit samples
+            size_t samplesRead = static_cast<size_t>(bytesRead) / 2; // 16-bit samples
             size_t oldSize = samples.size();
             samples.resize(oldSize + samplesRead);
-            std::memcpy(samples.data() + oldSize, buffer, bytesRead);
+            std::memcpy(samples.data() + oldSize, buffer, static_cast<size_t>(bytesRead));
         }
         
         ov_clear(&vf);
