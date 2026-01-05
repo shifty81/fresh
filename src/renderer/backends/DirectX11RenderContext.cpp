@@ -725,13 +725,17 @@ bool DirectX11RenderContext::createDepthStencilView()
 bool DirectX11RenderContext::setViewportWindow(void* viewportHandle)
 {
     if (!viewportHandle) {
-        LOG_ERROR_C("Invalid viewport window handle", "DirectX11");
+        LOG_ERROR_C("Invalid viewport window handle (null)", "DirectX11");
         return false;
     }
 
     viewportHwnd = viewportHandle;
     useViewportSwapChain = true;  // Mark that we're now using viewport swap chain
-    LOG_INFO_C("Viewport window handle set - will use viewport swap chain", "DirectX11");
+    
+    HWND hwnd = static_cast<HWND>(viewportHandle);
+    LOG_INFO_C("✓ Viewport window handle set successfully (HWND: " + 
+              std::to_string(reinterpret_cast<uintptr_t>(hwnd)) + ")", "DirectX11");
+    LOG_INFO_C("✓ Viewport swap chain mode enabled", "DirectX11");
     
     return true;
 }
@@ -739,11 +743,12 @@ bool DirectX11RenderContext::setViewportWindow(void* viewportHandle)
 bool DirectX11RenderContext::recreateSwapChain(int newWidth, int newHeight)
 {
     if (newWidth <= 0 || newHeight <= 0) {
-        LOG_ERROR_C("Invalid swap chain dimensions: " + std::to_string(newWidth) + "x" + std::to_string(newHeight), "DirectX11");
+        LOG_ERROR_C("✗ Invalid swap chain dimensions: " + std::to_string(newWidth) + "x" + std::to_string(newHeight), "DirectX11");
         return false;
     }
 
-    LOG_INFO_C("Recreating swap chain for viewport: " + std::to_string(newWidth) + "x" + std::to_string(newHeight), "DirectX11");
+    LOG_INFO_C("═══ RECREATING SWAP CHAIN FOR VIEWPORT ═══", "DirectX11");
+    LOG_INFO_C("Target dimensions: " + std::to_string(newWidth) + "x" + std::to_string(newHeight), "DirectX11");
 
     // Update dimensions
     width = newWidth;
@@ -753,49 +758,60 @@ bool DirectX11RenderContext::recreateSwapChain(int newWidth, int newHeight)
     if (deviceContext) {
         deviceContext->OMSetRenderTargets(0, nullptr, nullptr);
         deviceContext->Flush();
+        LOG_INFO_C("✓ Unbound render targets and flushed device context", "DirectX11");
     }
 
     depthStencilView.Reset();
     depthStencilBuffer.Reset();
     renderTargetView.Reset();
     swapchain.Reset();
+    LOG_INFO_C("✓ Released existing swap chain resources", "DirectX11");
 
     // CRITICAL: ONLY use viewport window handle for swap chain creation
     // NEVER fall back to main window - viewport is the ONLY DirectX rendering target
     if (!viewportHwnd) {
-        LOG_ERROR_C("Cannot recreate swap chain - viewport window handle not set. Swap chain requires viewport.", "DirectX11");
+        LOG_ERROR_C("✗ Cannot recreate swap chain - viewport window handle not set. Call setViewportWindow() first.", "DirectX11");
         return false;
     }
     
     HWND targetHwnd = static_cast<HWND>(viewportHwnd);
     if (!targetHwnd) {
-        LOG_ERROR_C("Invalid viewport window handle for swap chain", "DirectX11");
+        LOG_ERROR_C("✗ Invalid viewport window handle for swap chain", "DirectX11");
         return false;
     }
+    
+    LOG_INFO_C("✓ Using viewport HWND: " + std::to_string(reinterpret_cast<uintptr_t>(targetHwnd)), "DirectX11");
 
     // Get DXGI factory from device
     ComPtr<IDXGIDevice> dxgiDevice;
     HRESULT hr = device.As(&dxgiDevice);
     if (FAILED(hr)) {
-        LOG_ERROR_C("Failed to get DXGI device", "DirectX11");
+        LOG_ERROR_C("✗ Failed to get DXGI device (HRESULT: 0x" + 
+                   std::to_string(hr) + ")", "DirectX11");
         return false;
     }
+    LOG_INFO_C("✓ Got DXGI device", "DirectX11");
 
     ComPtr<IDXGIAdapter> adapter;
     hr = dxgiDevice->GetAdapter(&adapter);
     if (FAILED(hr)) {
-        LOG_ERROR_C("Failed to get DXGI adapter", "DirectX11");
+        LOG_ERROR_C("✗ Failed to get DXGI adapter (HRESULT: 0x" + 
+                   std::to_string(hr) + ")", "DirectX11");
         return false;
     }
+    LOG_INFO_C("✓ Got DXGI adapter", "DirectX11");
 
     ComPtr<IDXGIFactory> factory;
     hr = adapter->GetParent(__uuidof(IDXGIFactory), &factory);
     if (FAILED(hr)) {
-        LOG_ERROR_C("Failed to get DXGI factory", "DirectX11");
+        LOG_ERROR_C("✗ Failed to get DXGI factory (HRESULT: 0x" + 
+                   std::to_string(hr) + ")", "DirectX11");
         return false;
     }
+    LOG_INFO_C("✓ Got DXGI factory", "DirectX11");
 
     // Create new swap chain description for viewport
+    // Using FLIP_SEQUENTIAL for smoother presentation (Unreal Engine approach)
     DXGI_SWAP_CHAIN_DESC swapchainDesc = {};
     swapchainDesc.BufferCount = 2;
     swapchainDesc.BufferDesc.Width = width;
@@ -808,27 +824,32 @@ bool DirectX11RenderContext::recreateSwapChain(int newWidth, int newHeight)
     swapchainDesc.SampleDesc.Count = 1;
     swapchainDesc.SampleDesc.Quality = 0;
     swapchainDesc.Windowed = TRUE;
-    swapchainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
+    // FLIP_SEQUENTIAL provides smoother presentation with better frame pacing (Unreal Engine best practice)
+    swapchainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_SEQUENTIAL;
     swapchainDesc.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
 
     // Create the new swapchain
     hr = factory->CreateSwapChain(device.Get(), &swapchainDesc, &swapchain);
     if (FAILED(hr)) {
-        LOG_ERROR_C("Failed to create new swapchain for viewport", "DirectX11");
+        LOG_ERROR_C("✗ Failed to create new swapchain for viewport (HRESULT: 0x" + 
+                   std::to_string(hr) + ")", "DirectX11");
         return false;
     }
+    LOG_INFO_C("✓ Swap chain created successfully", "DirectX11");
 
     // Recreate render target view
     if (!createRenderTargetView()) {
-        LOG_ERROR_C("Failed to recreate render target view", "DirectX11");
+        LOG_ERROR_C("✗ Failed to recreate render target view", "DirectX11");
         return false;
     }
+    LOG_INFO_C("✓ Render target view created", "DirectX11");
 
     // Recreate depth stencil view
     if (!createDepthStencilView()) {
-        LOG_ERROR_C("Failed to recreate depth stencil view", "DirectX11");
+        LOG_ERROR_C("✗ Failed to recreate depth stencil view", "DirectX11");
         return false;
     }
+    LOG_INFO_C("✓ Depth stencil view created", "DirectX11");
 
     // CRITICAL FIX: Immediately clear the new render target to prevent artifacts
     // When resizing, the old swap chain content can show through if we don't clear immediately

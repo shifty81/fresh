@@ -99,6 +99,9 @@ private:
     void update(float deltaTime);
     void render();
 
+    // Viewport validation helper
+    bool validateViewportState();
+
     // Rendering helpers (private implementation details)
     void initializeRendering();
     void shutdownRendering();

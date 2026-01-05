@@ -375,7 +375,7 @@ bool Engine::initialize()
     
 #ifdef _WIN32
     // VIEWPORT INTEGRATION - Set up viewport rendering after EditorManager creation
-    // This is the ONLY place we configure the viewport for rendering
+    // This is the ONLY place we configure the viewport for rendering during initialization
     if (m_editorManager && m_editorManager->getViewportPanel() && m_renderer) {
         auto* viewportPanel = m_editorManager->getViewportPanel();
         HWND viewportHwnd = viewportPanel->getHandle();
@@ -384,14 +384,42 @@ bool Engine::initialize()
             int vpWidth = viewportPanel->getWidth();
             int vpHeight = viewportPanel->getHeight();
             
-            LOG_INFO_C("Configuring viewport for rendering: " + 
+            LOG_INFO_C("Initial viewport configuration: " + 
                        std::to_string(vpWidth) + "x" + std::to_string(vpHeight), "Engine");
+            
+            // CRITICAL FIX: Validate dimensions before attempting swap chain creation
+            if (vpWidth <= 0 || vpHeight <= 0) {
+                LOG_WARNING_C("Viewport has invalid dimensions at initialization, forcing window resize event", "Engine");
+                
+                // Force a window resize event to recalculate panel dimensions
+                Win32Window* win32Window = dynamic_cast<Win32Window*>(m_window.get());
+                if (win32Window) {
+                    RECT clientRect;
+                    HWND hwnd = win32Window->getHandle();
+                    if (hwnd && GetClientRect(hwnd, &clientRect)) {
+                        int clientWidth = clientRect.right - clientRect.left;
+                        int clientHeight = clientRect.bottom - clientRect.top;
+                        m_editorManager->onWindowResize(clientWidth, clientHeight);
+                        
+                        // Re-read viewport dimensions after resize
+                        vpWidth = viewportPanel->getWidth();
+                        vpHeight = viewportPanel->getHeight();
+                        LOG_INFO_C("Viewport dimensions after resize: " + 
+                                  std::to_string(vpWidth) + "x" + std::to_string(vpHeight), "Engine");
+                    }
+                }
+            }
             
             if (vpWidth > 0 && vpHeight > 0) {
                 // Set viewport window handle and create swap chain
+                LOG_INFO_C("Setting viewport window handle and creating swap chain...", "Engine");
+                
                 if (m_renderer->setViewportWindow(viewportHwnd)) {
+                    LOG_INFO_C("Viewport window handle set successfully", "Engine");
+                    
                     if (m_renderer->recreateSwapChain(vpWidth, vpHeight)) {
-                        LOG_INFO_C("Viewport swap chain created successfully", "Engine");
+                        LOG_INFO_C("✓ Viewport swap chain created successfully: " + 
+                                  std::to_string(vpWidth) + "x" + std::to_string(vpHeight), "Engine");
                         
                         // Update camera aspect ratio if player exists
                         if (m_player) {
@@ -399,20 +427,20 @@ bool Engine::initialize()
                             m_player->getCamera().setAspectRatio(aspectRatio);
                         }
                     } else {
-                        LOG_ERROR_C("Failed to create viewport swap chain", "Engine");
+                        LOG_ERROR_C("✗ Failed to create viewport swap chain", "Engine");
                     }
                 } else {
-                    LOG_ERROR_C("Failed to set viewport window handle", "Engine");
+                    LOG_ERROR_C("✗ Failed to set viewport window handle", "Engine");
                 }
             } else {
-                LOG_ERROR_C("Invalid viewport dimensions: " + 
+                LOG_ERROR_C("✗ Invalid viewport dimensions after retry: " + 
                            std::to_string(vpWidth) + "x" + std::to_string(vpHeight), "Engine");
             }
         } else {
-            LOG_ERROR_C("Viewport has no window handle", "Engine");
+            LOG_ERROR_C("✗ Viewport has no window handle", "Engine");
         }
     } else {
-        LOG_ERROR_C("Viewport panel or renderer not available", "Engine");
+        LOG_ERROR_C("✗ Viewport panel or renderer not available", "Engine");
     }
 #endif
     
@@ -866,67 +894,36 @@ void Engine::run()
             m_window->pollEvents();
         }
 
-        // If no world exists yet, show GUI menu only (main menu for world creation/loading)
-        if (!m_world) {
-            // Set clear color and begin frame for menu rendering
-            if (m_renderer) {
-                m_renderer->clearColor(0.53f, 0.81f, 0.92f, 1.0f);
-                m_renderer->beginFrame();
-                m_renderer->setViewport(0, 0, m_renderer->getSwapchainWidth(),
-                                        m_renderer->getSwapchainHeight());
-            }
-
-            // Render the editor with main menu panel
-            if (m_editorManager && m_editorManager->isInitialized()) {
-                m_editorManager->beginFrame();
-                m_editorManager->render();
-
-                // MainMenuPanel removed (ImGui-based) - world creation/loading now handled
-                // through native Win32 dialogs triggered from the menu bar
-                
-                m_editorManager->endFrame();
-            }
-
-            // End frame
-            if (m_renderer) {
-                m_renderer->endFrame();
-            }
-            
-            // Skip normal game loop when no world exists (main menu only)
-            continue;
-        }
-
-        // Normal game loop
-
+        // Calculate delta time
         auto currentTime = std::chrono::high_resolution_clock::now();
         float deltaTime = std::chrono::duration<float>(currentTime - lastTime).count();
+        deltaTime = std::min(deltaTime, MAX_DELTA_TIME); // Clamp to prevent physics explosions
         lastTime = currentTime;
-
-        // Cap deltaTime to prevent huge jumps
-        deltaTime = std::min(deltaTime, MAX_DELTA_TIME);
 
         // FPS counter
         frameCount++;
         fpsTimer += deltaTime;
         if (fpsTimer >= 1.0f) {
-            std::cout << "FPS: " << frameCount;
-            if (m_world) {
-                std::cout << " | Chunks: " << m_world->getChunks().size();
-            }
-            if (m_player) {
-                glm::vec3 pos = m_player->getPosition();
-                std::cout << " | Pos: (" << static_cast<int>(pos.x) << ", "
-                          << static_cast<int>(pos.y) << ", " << static_cast<int>(pos.z) << ")";
-            }
-            std::cout << std::endl;
-            frameCount = 0;
+            // Update FPS in window title or status bar
             fpsTimer = 0.0f;
+            frameCount = 0;
         }
 
+        // UNREAL ENGINE WORKFLOW: Always update and render editor, regardless of world state
+        // The viewport should show an empty scene with grid when no world exists
+        // This allows immediate editor interaction and world creation from within the viewport
+        
+        // Update input
         processInput();
-        update(deltaTime);
+        
+        // Update game systems (physics, AI, etc.) only if world exists
+        if (m_world) {
+            update(deltaTime);
+        }
+        
+        // Always render editor and viewport
         render();
-
+        
         // Frame rate limiting - hybrid sleep approach for better accuracy
         auto frameEndTime = std::chrono::high_resolution_clock::now();
         float frameTime = std::chrono::duration<float>(frameEndTime - currentTime).count();
@@ -1459,6 +1456,46 @@ void Engine::update(float deltaTime)
     }
 }
 
+bool Engine::validateViewportState()
+{
+#ifdef _WIN32
+    // Validate viewport panel exists and is properly configured
+    if (!m_editorManager || !m_editorManager->getViewportPanel()) {
+        return false;
+    }
+    
+    auto* viewportPanel = m_editorManager->getViewportPanel();
+    
+    // Check if viewport has valid window handle
+    HWND viewportHwnd = viewportPanel->getHandle();
+    if (!viewportHwnd || !IsWindow(viewportHwnd)) {
+        LOG_WARNING_C("Viewport window handle invalid", "Engine");
+        return false;
+    }
+    
+    // Check if viewport is visible
+    if (!IsWindowVisible(viewportHwnd)) {
+        LOG_WARNING_C("Viewport window not visible", "Engine");
+        return false;
+    }
+    
+    // Check if viewport has valid dimensions
+    int vpWidth = viewportPanel->getWidth();
+    int vpHeight = viewportPanel->getHeight();
+    if (vpWidth <= 0 || vpHeight <= 0) {
+        LOG_WARNING_C("Viewport has invalid dimensions: " + 
+                     std::to_string(vpWidth) + "x" + std::to_string(vpHeight), "Engine");
+        return false;
+    }
+    
+    // All checks passed
+    return true;
+#else
+    // Non-Windows platforms don't have viewport panel
+    return true;
+#endif
+}
+
 void Engine::render()
 {
     if (!m_renderer) {
@@ -1468,10 +1505,12 @@ void Engine::render()
     // VIEWPORT INTEGRATION - Viewport size is now controlled by the viewport panel
     // The swap chain is created for the viewport child window, so we just use its dimensions
 
-    // Set clear color (sky blue) before beginning frame
+    // Set clear color (sky blue for editor viewport, even when no world exists)
     m_renderer->clearColor(0.53f, 0.81f, 0.92f, 1.0f);
 
     if (!m_renderer->beginFrame()) {
+        // Swap chain not ready yet (viewport not initialized)
+        // This is normal during startup, just skip this frame
         return;
     }
 
@@ -1484,47 +1523,59 @@ void Engine::render()
     if (m_renderer->getAPI() == GraphicsAPI::OpenGL) {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        // Render voxel world (skip during world generation to prevent rendering issues)
+        // Render voxel world ONLY if world exists (skip during world generation)
         if (m_world && !m_isGeneratingWorld) {
             renderVoxelWorld();
         }
+        // Note: If no world exists, viewport shows clear color (empty scene)
+        // TODO: Add grid rendering for empty viewport
 
-        // Render crosshair overlay
-        renderCrosshair();
+        // Render crosshair overlay (only if world exists)
+        if (m_world) {
+            renderCrosshair();
+        }
     }
-#endif // DirectX 11 rendering path
+#endif 
+    // DirectX 11 rendering path
 #ifdef _WIN32
     if (m_renderer->getAPI() == GraphicsAPI::DirectX11) {
-        // Render voxel world using DirectX 11 (skip during world generation)
+        // Render voxel world using DirectX 11 ONLY if world exists (skip during world generation)
         if (m_world && m_player && !m_isGeneratingWorld) {
             auto* dx11Context = dynamic_cast<DirectX11RenderContext*>(m_renderer.get());
             if (dx11Context) {
                 dx11Context->renderVoxelWorld(m_world.get(), m_player.get());
             }
         }
+        // Note: If no world exists, viewport shows clear color (empty scene with DirectX)
+        // The beginFrame() already cleared to sky blue, so empty viewport is visible
+        // TODO: Add grid rendering for empty DirectX viewport
     }
 
     // DirectX 12 rendering path
     if (m_renderer->getAPI() == GraphicsAPI::DirectX12) {
-        // Render voxel world using DirectX 12 (skip during world generation)
+        // Render voxel world using DirectX 12 ONLY if world exists (skip during world generation)
         if (m_world && m_player && !m_isGeneratingWorld) {
             auto* dx12Context = dynamic_cast<DirectX12RenderContext*>(m_renderer.get());
             if (dx12Context) {
                 dx12Context->renderVoxelWorld(m_world.get(), m_player.get());
             }
         }
+        // Note: If no world exists, viewport shows clear color (empty scene)
+        // TODO: Add grid rendering for empty DirectX12 viewport
     }
-#endif // Begin editor frame (ImGui) before rendering editor UI
+#endif 
+    
+    // Begin editor frame (ImGui/Win32 UI) before rendering editor UI
     if (m_editorManager && m_editorManager->isInitialized()) {
         m_editorManager->beginFrame();
     }
 
-    // Render comprehensive editor UI
+    // Render comprehensive editor UI (always visible, whether world exists or not)
     if (m_editorManager && m_editorManager->isInitialized() && m_editorManager->isVisible()) {
         m_editorManager->render();
     }
 
-    // End editor frame (render ImGui)
+    // End editor frame (render ImGui/Win32 UI)
     if (m_editorManager && m_editorManager->isInitialized()) {
         m_editorManager->endFrame();
     }
