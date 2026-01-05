@@ -214,18 +214,21 @@ LRESULT CALLBACK Win32ViewportPanel::WindowProc(HWND hwnd, UINT msg, WPARAM wPar
         case WM_PAINT: {
             // Validate the window to prevent continuous WM_PAINT messages
             // DirectX handles all rendering, but we need to validate the region
-            PAINTSTRUCT ps;
-            (void)BeginPaint(hwnd, &ps);
-            // Don't draw anything - DirectX will handle all rendering
-            // Just validate the paint region and return
-            EndPaint(hwnd, &ps);
+            // This is critical for proper DirectX rendering in child windows
+            ValidateRect(hwnd, nullptr);
             return 0;
         }
 
         case WM_ERASEBKGND:
             // Don't erase background - DirectX will draw everything
             // Returning 1 tells Windows we handled the erase (even though we didn't)
+            // This prevents flicker and improves performance
             return 1;
+        
+        case WM_NCPAINT:
+            // Don't allow non-client area painting to interfere with DirectX rendering
+            // This is important for child window viewport rendering
+            return 0;
 
         case WM_DESTROY:
             panel->m_hwnd = nullptr;

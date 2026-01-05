@@ -796,6 +796,7 @@ bool DirectX11RenderContext::recreateSwapChain(int newWidth, int newHeight)
     }
 
     // Create new swap chain description for viewport
+    // Using FLIP_SEQUENTIAL for smoother presentation (Unreal Engine approach)
     DXGI_SWAP_CHAIN_DESC swapchainDesc = {};
     swapchainDesc.BufferCount = 2;
     swapchainDesc.BufferDesc.Width = width;
@@ -808,7 +809,8 @@ bool DirectX11RenderContext::recreateSwapChain(int newWidth, int newHeight)
     swapchainDesc.SampleDesc.Count = 1;
     swapchainDesc.SampleDesc.Quality = 0;
     swapchainDesc.Windowed = TRUE;
-    swapchainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
+    // FLIP_SEQUENTIAL provides smoother presentation with better frame pacing (Unreal Engine best practice)
+    swapchainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_SEQUENTIAL;
     swapchainDesc.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
 
     // Create the new swapchain
