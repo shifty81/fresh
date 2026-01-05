@@ -75,13 +75,12 @@ bool Win32ViewportPanel::create(HWND parent, int x, int y, int width, int height
     // WS_CHILD makes it a child window
     // WS_VISIBLE makes it initially visible
     // WS_CLIPSIBLINGS and WS_CLIPCHILDREN are important for DirectX rendering
-    // Using simple WS_BORDER instead of WS_EX_CLIENTEDGE to avoid transparent/sunken edge effect
-    // No extended styles to ensure fully opaque window with no gaps or transparency
+    // NO BORDER - borders create gaps between panels and interfere with seamless Unreal-style layout
     m_hwnd = CreateWindowExW(
         0,                          // No extended styles - ensures fully opaque window
         WINDOW_CLASS_NAME,          // Class name
         L"Viewport",                // Window title (not visible for child windows)
-        WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | WS_CLIPCHILDREN | WS_BORDER,
+        WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | WS_CLIPCHILDREN,  // No WS_BORDER for seamless layout
         x, y,                       // Position
         width, height,              // Size
         parent,                     // Parent window

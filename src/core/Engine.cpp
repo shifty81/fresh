@@ -375,7 +375,7 @@ bool Engine::initialize()
     
 #ifdef _WIN32
     // VIEWPORT INTEGRATION - Set up viewport rendering after EditorManager creation
-    // This is the ONLY place we configure the viewport for rendering
+    // This is the ONLY place we configure the viewport for rendering during initialization
     if (m_editorManager && m_editorManager->getViewportPanel() && m_renderer) {
         auto* viewportPanel = m_editorManager->getViewportPanel();
         HWND viewportHwnd = viewportPanel->getHandle();
@@ -384,14 +384,42 @@ bool Engine::initialize()
             int vpWidth = viewportPanel->getWidth();
             int vpHeight = viewportPanel->getHeight();
             
-            LOG_INFO_C("Configuring viewport for rendering: " + 
+            LOG_INFO_C("Initial viewport configuration: " + 
                        std::to_string(vpWidth) + "x" + std::to_string(vpHeight), "Engine");
+            
+            // CRITICAL FIX: Validate dimensions before attempting swap chain creation
+            if (vpWidth <= 0 || vpHeight <= 0) {
+                LOG_WARNING_C("Viewport has invalid dimensions at initialization, forcing window resize event", "Engine");
+                
+                // Force a window resize event to recalculate panel dimensions
+                Win32Window* win32Window = dynamic_cast<Win32Window*>(m_window.get());
+                if (win32Window) {
+                    RECT clientRect;
+                    HWND hwnd = win32Window->getHandle();
+                    if (hwnd && GetClientRect(hwnd, &clientRect)) {
+                        int clientWidth = clientRect.right - clientRect.left;
+                        int clientHeight = clientRect.bottom - clientRect.top;
+                        m_editorManager->onWindowResize(clientWidth, clientHeight);
+                        
+                        // Re-read viewport dimensions after resize
+                        vpWidth = viewportPanel->getWidth();
+                        vpHeight = viewportPanel->getHeight();
+                        LOG_INFO_C("Viewport dimensions after resize: " + 
+                                  std::to_string(vpWidth) + "x" + std::to_string(vpHeight), "Engine");
+                    }
+                }
+            }
             
             if (vpWidth > 0 && vpHeight > 0) {
                 // Set viewport window handle and create swap chain
+                LOG_INFO_C("Setting viewport window handle and creating swap chain...", "Engine");
+                
                 if (m_renderer->setViewportWindow(viewportHwnd)) {
+                    LOG_INFO_C("Viewport window handle set successfully", "Engine");
+                    
                     if (m_renderer->recreateSwapChain(vpWidth, vpHeight)) {
-                        LOG_INFO_C("Viewport swap chain created successfully", "Engine");
+                        LOG_INFO_C("✓ Viewport swap chain created successfully: " + 
+                                  std::to_string(vpWidth) + "x" + std::to_string(vpHeight), "Engine");
                         
                         // Update camera aspect ratio if player exists
                         if (m_player) {
@@ -399,20 +427,20 @@ bool Engine::initialize()
                             m_player->getCamera().setAspectRatio(aspectRatio);
                         }
                     } else {
-                        LOG_ERROR_C("Failed to create viewport swap chain", "Engine");
+                        LOG_ERROR_C("✗ Failed to create viewport swap chain", "Engine");
                     }
                 } else {
-                    LOG_ERROR_C("Failed to set viewport window handle", "Engine");
+                    LOG_ERROR_C("✗ Failed to set viewport window handle", "Engine");
                 }
             } else {
-                LOG_ERROR_C("Invalid viewport dimensions: " + 
+                LOG_ERROR_C("✗ Invalid viewport dimensions after retry: " + 
                            std::to_string(vpWidth) + "x" + std::to_string(vpHeight), "Engine");
             }
         } else {
-            LOG_ERROR_C("Viewport has no window handle", "Engine");
+            LOG_ERROR_C("✗ Viewport has no window handle", "Engine");
         }
     } else {
-        LOG_ERROR_C("Viewport panel or renderer not available", "Engine");
+        LOG_ERROR_C("✗ Viewport panel or renderer not available", "Engine");
     }
 #endif
     
@@ -1457,6 +1485,46 @@ void Engine::update(float deltaTime)
     if (m_editorManager) {
         m_editorManager->update(deltaTime);
     }
+}
+
+bool Engine::validateViewportState()
+{
+#ifdef _WIN32
+    // Validate viewport panel exists and is properly configured
+    if (!m_editorManager || !m_editorManager->getViewportPanel()) {
+        return false;
+    }
+    
+    auto* viewportPanel = m_editorManager->getViewportPanel();
+    
+    // Check if viewport has valid window handle
+    HWND viewportHwnd = viewportPanel->getHandle();
+    if (!viewportHwnd || !IsWindow(viewportHwnd)) {
+        LOG_WARNING_C("Viewport window handle invalid", "Engine");
+        return false;
+    }
+    
+    // Check if viewport is visible
+    if (!IsWindowVisible(viewportHwnd)) {
+        LOG_WARNING_C("Viewport window not visible", "Engine");
+        return false;
+    }
+    
+    // Check if viewport has valid dimensions
+    int vpWidth = viewportPanel->getWidth();
+    int vpHeight = viewportPanel->getHeight();
+    if (vpWidth <= 0 || vpHeight <= 0) {
+        LOG_WARNING_C("Viewport has invalid dimensions: " + 
+                     std::to_string(vpWidth) + "x" + std::to_string(vpHeight), "Engine");
+        return false;
+    }
+    
+    // All checks passed
+    return true;
+#else
+    // Non-Windows platforms don't have viewport panel
+    return true;
+#endif
 }
 
 void Engine::render()
