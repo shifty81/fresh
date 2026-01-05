@@ -191,7 +191,7 @@ Scene* SceneManager::loadScene(const std::string& path)
 
         // Load scene nodes recursively
         if (sceneData.contains("root")) {
-            loadSceneNode(scene->getRoot(), sceneData["root"]);
+            loadSceneNode(scene->getRoot().get(), sceneData["root"]);
         }
 
         std::cout << "Successfully loaded scene from: " << path << std::endl;
@@ -223,7 +223,7 @@ bool SceneManager::saveScene(const std::string& path, Scene* scene)
 
         // Save scene graph starting from root
         if (scene->getRoot()) {
-            sceneData["root"] = saveSceneNode(scene->getRoot());
+            sceneData["root"] = saveSceneNode(scene->getRoot().get());
         }
 
         // Write to file with pretty printing

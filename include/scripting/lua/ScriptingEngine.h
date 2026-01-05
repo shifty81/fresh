@@ -86,6 +86,3 @@ private:
 
 } // namespace scripting
 } // namespace fresh
-
-} // namespace scripting
-} // namespace fresh
