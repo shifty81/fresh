@@ -138,6 +138,38 @@ if(USING_VCPKG)
         elseif(NOT DEFINED LUA_LIBRARIES AND DEFINED luajit_LIBRARIES)
             set(LUA_LIBRARIES ${luajit_LIBRARIES})
         endif()
+        
+        # Try to extract include directory from target properties if not already set
+        if(NOT DEFINED LUA_INCLUDE_DIR)
+            if(TARGET luajit)
+                get_target_property(LUAJIT_INCLUDE_DIRS luajit INTERFACE_INCLUDE_DIRECTORIES)
+                if(LUAJIT_INCLUDE_DIRS)
+                    set(LUA_INCLUDE_DIR ${LUAJIT_INCLUDE_DIRS})
+                endif()
+            elseif(TARGET luajit::luajit)
+                get_target_property(LUAJIT_INCLUDE_DIRS luajit::luajit INTERFACE_INCLUDE_DIRECTORIES)
+                if(LUAJIT_INCLUDE_DIRS)
+                    set(LUA_INCLUDE_DIR ${LUAJIT_INCLUDE_DIRS})
+                endif()
+            endif()
+        endif()
+        
+        # Final fallback: try to find lua.h in vcpkg installed directory
+        if(NOT DEFINED LUA_INCLUDE_DIR AND DEFINED CMAKE_TOOLCHAIN_FILE)
+            # Extract vcpkg installed path from toolchain file
+            get_filename_component(VCPKG_ROOT "${CMAKE_TOOLCHAIN_FILE}" DIRECTORY)
+            get_filename_component(VCPKG_ROOT "${VCPKG_ROOT}" DIRECTORY)
+            get_filename_component(VCPKG_ROOT "${VCPKG_ROOT}" DIRECTORY)
+            
+            # Check common vcpkg installed paths
+            if(EXISTS "${VCPKG_ROOT}/installed/${VCPKG_TARGET_TRIPLET}/include/luajit.h")
+                set(LUA_INCLUDE_DIR "${VCPKG_ROOT}/installed/${VCPKG_TARGET_TRIPLET}/include")
+                message(STATUS "  Found LuaJIT headers in vcpkg: ${LUA_INCLUDE_DIR}")
+            elseif(EXISTS "${CMAKE_BINARY_DIR}/vcpkg_installed/${VCPKG_TARGET_TRIPLET}/include/luajit.h")
+                set(LUA_INCLUDE_DIR "${CMAKE_BINARY_DIR}/vcpkg_installed/${VCPKG_TARGET_TRIPLET}/include")
+                message(STATUS "  Found LuaJIT headers in build vcpkg: ${LUA_INCLUDE_DIR}")
+            endif()
+        endif()
     else()
         # Fall back to standard Lua
         find_package(lua CONFIG QUIET)
@@ -153,6 +185,38 @@ if(USING_VCPKG)
             endif()
             if(NOT DEFINED LUA_LIBRARIES AND DEFINED lua_LIBRARIES)
                 set(LUA_LIBRARIES ${lua_LIBRARIES})
+            endif()
+            
+            # Try to extract include directory from target properties if not already set
+            if(NOT DEFINED LUA_INCLUDE_DIR)
+                if(TARGET lua)
+                    get_target_property(LUA_INCLUDE_DIRS lua INTERFACE_INCLUDE_DIRECTORIES)
+                    if(LUA_INCLUDE_DIRS)
+                        set(LUA_INCLUDE_DIR ${LUA_INCLUDE_DIRS})
+                    endif()
+                elseif(TARGET lua::lua)
+                    get_target_property(LUA_INCLUDE_DIRS lua::lua INTERFACE_INCLUDE_DIRECTORIES)
+                    if(LUA_INCLUDE_DIRS)
+                        set(LUA_INCLUDE_DIR ${LUA_INCLUDE_DIRS})
+                    endif()
+                endif()
+            endif()
+            
+            # Final fallback: try to find lua.h in vcpkg installed directory
+            if(NOT DEFINED LUA_INCLUDE_DIR AND DEFINED CMAKE_TOOLCHAIN_FILE)
+                # Extract vcpkg installed path from toolchain file
+                get_filename_component(VCPKG_ROOT "${CMAKE_TOOLCHAIN_FILE}" DIRECTORY)
+                get_filename_component(VCPKG_ROOT "${VCPKG_ROOT}" DIRECTORY)
+                get_filename_component(VCPKG_ROOT "${VCPKG_ROOT}" DIRECTORY)
+                
+                # Check common vcpkg installed paths
+                if(EXISTS "${VCPKG_ROOT}/installed/${VCPKG_TARGET_TRIPLET}/include/lua.h")
+                    set(LUA_INCLUDE_DIR "${VCPKG_ROOT}/installed/${VCPKG_TARGET_TRIPLET}/include")
+                    message(STATUS "  Found Lua headers in vcpkg: ${LUA_INCLUDE_DIR}")
+                elseif(EXISTS "${CMAKE_BINARY_DIR}/vcpkg_installed/${VCPKG_TARGET_TRIPLET}/include/lua.h")
+                    set(LUA_INCLUDE_DIR "${CMAKE_BINARY_DIR}/vcpkg_installed/${VCPKG_TARGET_TRIPLET}/include")
+                    message(STATUS "  Found Lua headers in build vcpkg: ${LUA_INCLUDE_DIR}")
+                endif()
             endif()
         endif()
     endif()
