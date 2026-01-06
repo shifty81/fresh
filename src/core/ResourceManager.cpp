@@ -617,7 +617,7 @@ static bool loadWAVFile(const std::string& filepath, std::vector<int16_t>& outSa
     
     // Find data chunk
     char dataHeader[4];
-    uint32_t dataSize;
+    uint32_t dataSize = 0;
     while (file.read(dataHeader, 4)) {
         file.read(reinterpret_cast<char*>(&dataSize), 4);
         if (std::strncmp(dataHeader, "data", 4) == 0) {
