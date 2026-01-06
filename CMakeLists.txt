@@ -766,11 +766,14 @@ if(Lua_FOUND)
         target_link_libraries(${PROJECT_NAME} PRIVATE sol2::sol2)
         add_definitions(-DFRESH_SOL2_AVAILABLE)
         
-        # Sol2 needs Lua headers - ensure they're available
+        # Sol2 needs Lua headers - explicitly ensure they're available
+        # This is intentionally added even though Lua includes were added earlier,
+        # because Sol2 is a header-only wrapper that requires Lua headers at compile time,
+        # and the Lua target's INTERFACE_INCLUDE_DIRECTORIES may not always be sufficient.
         if(DEFINED LUA_INCLUDE_DIR)
             target_include_directories(${PROJECT_NAME} PRIVATE ${LUA_INCLUDE_DIR})
             message(STATUS "Sol2 enabled - using production Lua integration")
-            message(STATUS "  Lua include directories added for Sol2: ${LUA_INCLUDE_DIR}")
+            message(STATUS "  Lua include directories explicitly added for Sol2: ${LUA_INCLUDE_DIR}")
         else()
             message(WARNING "Sol2 enabled but LUA_INCLUDE_DIR not set - may cause build errors")
         endif()
@@ -779,11 +782,14 @@ if(Lua_FOUND)
             ${CMAKE_CURRENT_SOURCE_DIR}/external/sol2/include)
         add_definitions(-DFRESH_SOL2_AVAILABLE)
         
-        # Sol2 needs Lua headers - ensure they're available
+        # Sol2 needs Lua headers - explicitly ensure they're available
+        # This is intentionally added even though Lua includes were added earlier,
+        # because Sol2 is a header-only wrapper that requires Lua headers at compile time,
+        # and we need to ensure they're in the include path when Sol2 headers are compiled.
         if(DEFINED LUA_INCLUDE_DIR)
             target_include_directories(${PROJECT_NAME} PRIVATE ${LUA_INCLUDE_DIR})
             message(STATUS "Sol2 found (local) - using production Lua integration")
-            message(STATUS "  Lua include directories added for Sol2: ${LUA_INCLUDE_DIR}")
+            message(STATUS "  Lua include directories explicitly added for Sol2: ${LUA_INCLUDE_DIR}")
         else()
             message(WARNING "Sol2 enabled but LUA_INCLUDE_DIR not set - may cause build errors")
         endif()
