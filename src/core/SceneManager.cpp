@@ -185,7 +185,7 @@ Scene* SceneManager::loadScene(const std::string& path)
 
         // Load metadata
         if (sceneData.contains("metadata")) {
-            auto& metadata = sceneData["metadata"];
+            [[maybe_unused]] auto& metadata = sceneData["metadata"];
             // Future: load scene-specific metadata
         }
 
