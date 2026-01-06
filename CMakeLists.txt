@@ -118,6 +118,13 @@ endif()
 # Lua for scripting
 # On Windows with vcpkg, prefer CONFIG mode to get proper target
 if(USING_VCPKG)
+    # Extract vcpkg root path once for reuse in fallback logic
+    if(DEFINED CMAKE_TOOLCHAIN_FILE AND NOT DEFINED VCPKG_ROOT)
+        get_filename_component(VCPKG_ROOT "${CMAKE_TOOLCHAIN_FILE}" DIRECTORY)
+        get_filename_component(VCPKG_ROOT "${VCPKG_ROOT}" DIRECTORY)
+        get_filename_component(VCPKG_ROOT "${VCPKG_ROOT}" DIRECTORY)
+    endif()
+    
     # Try vcpkg's CONFIG mode first on Windows
     # Try LuaJIT first (has better C linkage support on Windows)
     find_package(luajit CONFIG QUIET)
@@ -155,12 +162,7 @@ if(USING_VCPKG)
         endif()
         
         # Final fallback: try to find lua.h in vcpkg installed directory
-        if(NOT DEFINED LUA_INCLUDE_DIR AND DEFINED CMAKE_TOOLCHAIN_FILE)
-            # Extract vcpkg installed path from toolchain file
-            get_filename_component(VCPKG_ROOT "${CMAKE_TOOLCHAIN_FILE}" DIRECTORY)
-            get_filename_component(VCPKG_ROOT "${VCPKG_ROOT}" DIRECTORY)
-            get_filename_component(VCPKG_ROOT "${VCPKG_ROOT}" DIRECTORY)
-            
+        if(NOT DEFINED LUA_INCLUDE_DIR)
             # Try with VCPKG_TARGET_TRIPLET if defined
             if(DEFINED VCPKG_TARGET_TRIPLET)
                 if(EXISTS "${VCPKG_ROOT}/installed/${VCPKG_TARGET_TRIPLET}/include/luajit.h")
@@ -216,12 +218,7 @@ if(USING_VCPKG)
             endif()
             
             # Final fallback: try to find lua.h in vcpkg installed directory
-            if(NOT DEFINED LUA_INCLUDE_DIR AND DEFINED CMAKE_TOOLCHAIN_FILE)
-                # Extract vcpkg installed path from toolchain file
-                get_filename_component(VCPKG_ROOT "${CMAKE_TOOLCHAIN_FILE}" DIRECTORY)
-                get_filename_component(VCPKG_ROOT "${VCPKG_ROOT}" DIRECTORY)
-                get_filename_component(VCPKG_ROOT "${VCPKG_ROOT}" DIRECTORY)
-                
+            if(NOT DEFINED LUA_INCLUDE_DIR)
                 # Try with VCPKG_TARGET_TRIPLET if defined
                 if(DEFINED VCPKG_TARGET_TRIPLET)
                     if(EXISTS "${VCPKG_ROOT}/installed/${VCPKG_TARGET_TRIPLET}/include/lua.h")
