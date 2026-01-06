@@ -765,12 +765,28 @@ if(Lua_FOUND)
         # Sol2 is header-only, so we just need to link it
         target_link_libraries(${PROJECT_NAME} PRIVATE sol2::sol2)
         add_definitions(-DFRESH_SOL2_AVAILABLE)
-        message(STATUS "Sol2 enabled - using production Lua integration")
+        
+        # Sol2 needs Lua headers - ensure they're available
+        if(DEFINED LUA_INCLUDE_DIR)
+            target_include_directories(${PROJECT_NAME} PRIVATE ${LUA_INCLUDE_DIR})
+            message(STATUS "Sol2 enabled - using production Lua integration")
+            message(STATUS "  Lua include directories added for Sol2: ${LUA_INCLUDE_DIR}")
+        else()
+            message(WARNING "Sol2 enabled but LUA_INCLUDE_DIR not set - may cause build errors")
+        endif()
     elseif(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/external/sol2/include")
         target_include_directories(${PROJECT_NAME} PRIVATE 
             ${CMAKE_CURRENT_SOURCE_DIR}/external/sol2/include)
         add_definitions(-DFRESH_SOL2_AVAILABLE)
-        message(STATUS "Sol2 found (local) - using production Lua integration")
+        
+        # Sol2 needs Lua headers - ensure they're available
+        if(DEFINED LUA_INCLUDE_DIR)
+            target_include_directories(${PROJECT_NAME} PRIVATE ${LUA_INCLUDE_DIR})
+            message(STATUS "Sol2 found (local) - using production Lua integration")
+            message(STATUS "  Lua include directories added for Sol2: ${LUA_INCLUDE_DIR}")
+        else()
+            message(WARNING "Sol2 enabled but LUA_INCLUDE_DIR not set - may cause build errors")
+        endif()
     else()
         message(STATUS "Sol2 not found - Lua scripting features will be limited")
         message(STATUS "  To enable full Lua support: vcpkg install sol2")
