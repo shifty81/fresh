@@ -164,7 +164,8 @@ if(USING_VCPKG)
         # Final fallback: try to find lua.h in vcpkg installed directory
         if(NOT DEFINED LUA_INCLUDE_DIR)
             # Try with VCPKG_TARGET_TRIPLET if defined
-            # Check CMAKE_BINARY_DIR first (build-specific), then VCPKG_ROOT (global)
+            # Check CMAKE_BINARY_DIR first (build-specific vcpkg installation),
+            # then VCPKG_ROOT (global vcpkg installation)
             if(DEFINED VCPKG_TARGET_TRIPLET)
                 if(EXISTS "${CMAKE_BINARY_DIR}/vcpkg_installed/${VCPKG_TARGET_TRIPLET}/include/luajit.h")
                     set(LUA_INCLUDE_DIR "${CMAKE_BINARY_DIR}/vcpkg_installed/${VCPKG_TARGET_TRIPLET}/include")
@@ -707,11 +708,11 @@ if(Lua_FOUND)
     # can find lua.h when its headers are processed during compilation.
     # Sol2's cmake config may not properly propagate Lua's include directories,
     # so we explicitly add them here as early as possible.
-    if(DEFINED LUA_INCLUDE_DIR)
+    if(LUA_INCLUDE_DIR)
         target_include_directories(${PROJECT_NAME} PRIVATE ${LUA_INCLUDE_DIR})
         message(STATUS "Lua include directories added: ${LUA_INCLUDE_DIR}")
     else()
-        message(WARNING "LUA_INCLUDE_DIR not defined - this may cause compilation errors with Sol2")
+        message(WARNING "LUA_INCLUDE_DIR not set - this may cause compilation errors with Sol2")
     endif()
     
     if(LUA_FOUND_VIA_CONFIG)
