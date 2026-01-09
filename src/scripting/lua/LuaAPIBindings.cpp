@@ -6,6 +6,7 @@
 #include "scripting/lua/LuaAPIBindings.h"
 #include "core/Logger.h"
 
+#ifdef FRESH_LUA_AVAILABLE
 #define SOL_ALL_SAFETIES_ON 1
 #include <sol/sol.hpp>
 
@@ -223,3 +224,33 @@ void LuaAPIBindings::registerUtilities(ScriptingEngine& engine)
 
 } // namespace scripting
 } // namespace fresh
+
+#else // FRESH_LUA_AVAILABLE not defined
+
+// Stub implementation when Lua is not available
+#include "scripting/lua/LuaAPIBindings.h"
+#include "core/Logger.h"
+
+namespace fresh
+{
+namespace scripting
+{
+
+void LuaAPIBindings::registerAll(ScriptingEngine& engine)
+{
+    (void)engine;
+    LOG_INFO_C("Lua API bindings not available (Lua support not compiled in)", "LuaAPI");
+}
+
+void LuaAPIBindings::registerMath(ScriptingEngine& engine) { (void)engine; }
+void LuaAPIBindings::registerVoxelTypes(ScriptingEngine& engine) { (void)engine; }
+void LuaAPIBindings::registerVoxelWorld(ScriptingEngine& engine) { (void)engine; }
+void LuaAPIBindings::registerCamera(ScriptingEngine& engine) { (void)engine; }
+void LuaAPIBindings::registerPlayer(ScriptingEngine& engine) { (void)engine; }
+void LuaAPIBindings::registerInput(ScriptingEngine& engine) { (void)engine; }
+void LuaAPIBindings::registerUtilities(ScriptingEngine& engine) { (void)engine; }
+
+} // namespace scripting
+} // namespace fresh
+
+#endif // FRESH_LUA_AVAILABLE
