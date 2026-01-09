@@ -1616,10 +1616,18 @@ void EditorManager::setVisible(bool visible)
         m_statusBar->setVisible(visible);
     }
     
-    // Note: Viewport panel should always be visible (it shows the 3D world)
+    // CRITICAL FIX: Viewport panel should ALWAYS be visible (it shows the 3D world)
     // The viewport is visible in both editor mode and play mode
-    // In editor mode, it's a panel among other panels
-    // In play mode, it's the main window for gameplay
+    // In editor mode, it's a panel among other panels showing the world
+    // In play mode, it continues showing the world while other UI panels are hidden
+    if (m_viewportPanel) {
+        m_viewportPanel->setVisible(true);  // Always visible regardless of editor visibility
+        LOG_INFO_C("Viewport panel kept visible (always visible for rendering)", "EditorManager");
+    }
+    
+    // CRITICAL FIX: Ensure proper Z-order after visibility changes
+    // This prevents viewport from appearing on top of UI panels
+    ensurePanelsOnTop();
     
     LOG_INFO_C(visible ? "Editor panels shown" : "Editor panels hidden", "EditorManager");
 #endif
