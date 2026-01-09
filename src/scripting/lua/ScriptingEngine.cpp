@@ -9,6 +9,7 @@
 
 #include "scripting/lua/ScriptingEngine.h"
 
+#ifdef FRESH_LUA_AVAILABLE
 #define SOL_ALL_SAFETIES_ON 1
 #include <sol/sol.hpp>
 
@@ -313,5 +314,51 @@ void ScriptingEngine::reportError(const std::string& error)
 } // namespace scripting
 } // namespace fresh
 
+#else // FRESH_LUA_AVAILABLE not defined
+
+// Stub implementation when Lua is not available
+#include <iostream>
+
+namespace fresh
+{
+namespace scripting
+{
+
+ScriptingEngine::ScriptingEngine() {}
+ScriptingEngine::~ScriptingEngine() {}
+
+bool ScriptingEngine::initialize() {
+    std::cout << "[ScriptingEngine] Lua support not compiled in (stub implementation)" << std::endl;
+    return false;
+}
+
+void ScriptingEngine::shutdown() {}
+void ScriptingEngine::setupStandardLibraries() {}
+bool ScriptingEngine::loadScript(const std::string&) { return false; }
+bool ScriptingEngine::executeScript(const std::string&) { return false; }
+bool ScriptingEngine::loadMod(const std::string&) { return false; }
+
+void ScriptingEngine::registerFunction(const std::string&, std::function<void()>) {}
+
+void ScriptingEngine::setGlobal(const std::string&, int) {}
+void ScriptingEngine::setGlobal(const std::string&, float) {}
+void ScriptingEngine::setGlobal(const std::string&, const std::string&) {}
+
+int ScriptingEngine::getGlobalInt(const std::string&) { return 0; }
+float ScriptingEngine::getGlobalFloat(const std::string&) { return 0.0f; }
+std::string ScriptingEngine::getGlobalString(const std::string&) { return ""; }
+
+std::vector<std::string> ScriptingEngine::getLoadedMods() const { return {}; }
+void ScriptingEngine::registerInputManager(void*) {}
+
+void ScriptingEngine::reportError(const std::string& error) {
+    lastError = error;
+    std::cerr << "[ScriptingEngine Error] " << error << std::endl;
+}
+
+sol::state* ScriptingEngine::getState() { return nullptr; }
+
 } // namespace scripting
 } // namespace fresh
+
+#endif // FRESH_LUA_AVAILABLE

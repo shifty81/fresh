@@ -668,6 +668,14 @@ target_include_directories(${PROJECT_NAME}
         ${CMAKE_CURRENT_SOURCE_DIR}/include
 )
 
+# CRITICAL: Add Lua include directories immediately after target creation
+# This must come BEFORE linking Sol2 or any other library that depends on Lua headers
+# Sol2 is a header-only library that includes lua.h, so Lua headers must be in the include path
+if(Lua_FOUND AND DEFINED LUA_INCLUDE_DIR)
+    target_include_directories(${PROJECT_NAME} PRIVATE ${LUA_INCLUDE_DIR})
+    message(STATUS "Lua include directories added early: ${LUA_INCLUDE_DIR}")
+endif()
+
 # ==============================================================================
 # Link Libraries
 # ==============================================================================
@@ -703,15 +711,9 @@ endif()
 if(Lua_FOUND)
     add_definitions(-DFRESH_LUA_AVAILABLE)
     
-    # CRITICAL FIX: Add Lua include directories FIRST, before linking Lua target
-    # This ensures that Sol2 (which is header-only and depends on Lua headers)
-    # can find lua.h when its headers are processed during compilation.
-    # Sol2's cmake config may not properly propagate Lua's include directories,
-    # so we explicitly add them here as early as possible.
-    if(LUA_INCLUDE_DIR)
-        target_include_directories(${PROJECT_NAME} PRIVATE ${LUA_INCLUDE_DIR})
-        message(STATUS "Lua include directories added: ${LUA_INCLUDE_DIR}")
-    else()
+    # Note: Lua include directories were already added immediately after target creation
+    # This ensures Sol2 (header-only library) can find lua.h during compilation
+    if(NOT DEFINED LUA_INCLUDE_DIR)
         message(WARNING "LUA_INCLUDE_DIR not set - this may cause compilation errors with Sol2")
     endif()
     

@@ -3,6 +3,7 @@
 #include "gameplay/TimeManager.h"
 #include "core/Logger.h"
 
+#ifdef FRESH_LUA_AVAILABLE
 #define SOL_ALL_SAFETIES_ON 1
 #include <sol/sol.hpp>
 
@@ -307,3 +308,78 @@ int LuaTimeBindings::getCurrentDay(TimeManager* tm)
 
 } // namespace scripting
 } // namespace fresh
+
+#else // FRESH_LUA_AVAILABLE not defined
+
+// Stub implementation when Lua is not available
+#include "scripting/lua/LuaTimeBindings.h"
+#include "core/Logger.h"
+
+namespace fresh
+{
+namespace scripting
+{
+
+void LuaTimeBindings::registerBindings(LuaScriptingEngine* engine, TimeManager* timeManager)
+{
+    (void)engine;
+    (void)timeManager;
+    LOG_INFO_C("Lua time bindings not available (Lua support not compiled in)", "LuaTimeBindings");
+}
+
+// Stub implementations for all helper functions
+void LuaTimeBindings::setTime(TimeManager* tm, int ticks) { (void)tm; (void)ticks; }
+void LuaTimeBindings::setTimeOfDay(TimeManager* tm, int preset) { (void)tm; (void)preset; }
+int LuaTimeBindings::getTime(TimeManager* tm) { (void)tm; return 0; }
+float LuaTimeBindings::getTimeInHours(TimeManager* tm) { (void)tm; return 0.0f; }
+const char* LuaTimeBindings::getFormattedTime(TimeManager* tm) { (void)tm; return "00:00"; }
+void LuaTimeBindings::pause(TimeManager* tm) { (void)tm; }
+void LuaTimeBindings::resume(TimeManager* tm) { (void)tm; }
+void LuaTimeBindings::togglePause(TimeManager* tm) { (void)tm; }
+bool LuaTimeBindings::isPaused(TimeManager* tm) { (void)tm; return false; }
+void LuaTimeBindings::setTimeRate(TimeManager* tm, float rate) { (void)tm; (void)rate; }
+float LuaTimeBindings::getTimeRate(TimeManager* tm) { (void)tm; return 1.0f; }
+
+LuaTimeBindings::Vec3Result LuaTimeBindings::getSunDirection(TimeManager* tm) { 
+    (void)tm; 
+    return Vec3Result(0.0f, 1.0f, 0.0f); 
+}
+
+LuaTimeBindings::Vec3Result LuaTimeBindings::getMoonDirection(TimeManager* tm) { 
+    (void)tm; 
+    return Vec3Result(0.0f, -1.0f, 0.0f); 
+}
+
+float LuaTimeBindings::getSunElevation(TimeManager* tm) { (void)tm; return 0.0f; }
+bool LuaTimeBindings::isDaytime(TimeManager* tm) { (void)tm; return true; }
+bool LuaTimeBindings::isNighttime(TimeManager* tm) { (void)tm; return false; }
+bool LuaTimeBindings::isSunrise(TimeManager* tm) { (void)tm; return false; }
+bool LuaTimeBindings::isSunset(TimeManager* tm) { (void)tm; return false; }
+float LuaTimeBindings::getAmbientLightIntensity(TimeManager* tm) { (void)tm; return 1.0f; }
+
+LuaTimeBindings::Vec3Result LuaTimeBindings::getSkyColor(TimeManager* tm) { 
+    (void)tm; 
+    return Vec3Result(0.5f, 0.7f, 1.0f); 
+}
+
+LuaTimeBindings::Vec3Result LuaTimeBindings::getHorizonColor(TimeManager* tm) { 
+    (void)tm; 
+    return Vec3Result(0.8f, 0.9f, 1.0f); 
+}
+
+LuaTimeBindings::Vec3Result LuaTimeBindings::getSunLightColor(TimeManager* tm) { 
+    (void)tm; 
+    return Vec3Result(1.0f, 1.0f, 0.9f); 
+}
+
+LuaTimeBindings::Vec3Result LuaTimeBindings::getMoonLightColor(TimeManager* tm) { 
+    (void)tm; 
+    return Vec3Result(0.6f, 0.6f, 0.8f); 
+}
+
+int LuaTimeBindings::getCurrentDay(TimeManager* tm) { (void)tm; return 1; }
+
+} // namespace scripting
+} // namespace fresh
+
+#endif // FRESH_LUA_AVAILABLE
