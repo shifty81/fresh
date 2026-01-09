@@ -12,6 +12,7 @@
 #include <cmath>
 #include <iostream>
 #include "core/Logger.h"
+#include "core/Project.h"
 #include "ecs/EntityManager.h"
 #include "gameplay/Player.h"
 #include "gameplay/Camera.h"
