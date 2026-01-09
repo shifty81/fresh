@@ -325,7 +325,7 @@ namespace fresh
 namespace scripting
 {
 
-ScriptingEngine::ScriptingEngine() {}
+ScriptingEngine::ScriptingEngine() : lua(nullptr) {}
 ScriptingEngine::~ScriptingEngine() {}
 
 bool ScriptingEngine::initialize() {

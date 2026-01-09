@@ -315,7 +315,7 @@ std::time_t LuaScriptingEngine::getFileModificationTime(const std::string& filep
 namespace fresh {
 namespace scripting {
 
-LuaScriptingEngine::LuaScriptingEngine() : m_initialized(false) {}
+LuaScriptingEngine::LuaScriptingEngine() : m_lua(nullptr), m_initialized(false) {}
 LuaScriptingEngine::~LuaScriptingEngine() {}
 
 bool LuaScriptingEngine::initialize() {
