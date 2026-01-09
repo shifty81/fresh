@@ -150,11 +150,11 @@ Release\FreshVoxelEngine.exe
 
 ---
 
-## 🎨 Editor-First Workflow
+## 🎨 Editor-First Workflow (Project-Based)
 
-Fresh uses an **Unreal Engine-style editor-first workflow**. You start with the editor, not a game menu:
+Fresh uses an **Unreal Engine-style project-based workflow**. You start by creating a project, then add content:
 
-### Creating Your First Scene
+### Creating Your First Project
 
 1. **Launch the Editor**
    ```bash
@@ -162,33 +162,43 @@ Fresh uses an **Unreal Engine-style editor-first workflow**. You start with the 
    ```
    The editor opens immediately with full UI
 
-2. **Create a New Scene**
-   - Click `File > New Scene` (or press `Ctrl+N`)
-   - Choose scene type:
-     - **3D Voxel** - Minecraft-style 3D world
+2. **Create a New Project**
+   - Click `File > New Project` (or press `Ctrl+N`)
+   - Enter project name (e.g., "MyGame")
+   - Choose template:
+     - **Blank** - Empty project, build from scratch
+     - **3D Voxel** - Minecraft-style game ready
      - **2D Platformer** - Terraria-style side-scroller
-     - **2D Top-Down** - Zelda-style top-down world
+     - **2D Top-Down** - Zelda-style overhead view
+   - Click "Create"
+
+3. **Add a Level (Optional)**
+   - For Blank projects, add content manually or create a level:
+   - Click `File > New Level` (or press `Ctrl+Shift+N`)
+   - Choose world generator:
+     - **3D Terrain** - Procedural terrain with biomes
+     - **2D Platformer** - Side-scrolling world
+     - **2D Top-Down** - Overhead world
      - **Empty** - Blank canvas for manual building
-   - Select world generator (if not empty)
    - Configure seed and click "Create"
 
-3. **Edit Your Scene**
+4. **Edit Your Content**
    - Use terraforming tools (Brush, Sphere, Flatten, Paint)
    - Place NPCs and entities
    - Build structures with Construction Hammer
    - Arrange objects with Transform Gizmo
 
-4. **Test Your Scene**
+5. **Test Your Project**
    - Click the **Play** button (or press `F5`)
    - Editor hides, gameplay starts
    - Test your creation
    - Press `ESC` to return to editor
 
-5. **Save Your Scene**
-   - `File > Save Scene` (or `Ctrl+S`)
-   - Scene saved for later editing
+6. **Save Your Project**
+   - `File > Save All` (or `Ctrl+Shift+A`)
+   - Project and all content saved
 
-**See [docs/architecture/SCENE_MANAGEMENT.md](docs/architecture/SCENE_MANAGEMENT.md) for complete scene workflow.**
+**See [docs/architecture/PROJECT_WORKFLOW.md](docs/architecture/PROJECT_WORKFLOW.md) for complete project guide.**
 
 ---
 
