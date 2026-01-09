@@ -42,6 +42,7 @@ class TimeManager;
 class SeasonManager;
 class WeatherManager;
 class Raft;
+class ProjectManager;
 
 namespace ecs
 {
@@ -93,6 +94,12 @@ public:
     {
         return m_running;
     }
+
+    /**
+     * @brief Get the project manager
+     * @return Pointer to project manager
+     */
+    ProjectManager* getProjectManager() const { return m_projectManager.get(); }
 
 private:
     void processInput();
@@ -146,6 +153,7 @@ private:
     std::unique_ptr<WeatherManager> m_weatherManager;
     std::unique_ptr<Raft> m_raft;
     std::unique_ptr<scripting::LuaScriptingEngine> m_scriptingEngine;
+    std::unique_ptr<ProjectManager> m_projectManager;
     VoxelType m_selectedBlockType;
     // Track world type for camera setup
     bool m_isWorld3D = true;

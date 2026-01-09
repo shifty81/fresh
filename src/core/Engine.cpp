@@ -52,6 +52,7 @@
 
 #include "ai/AISystem.h"
 #include "core/Logger.h"
+#include "core/Project.h"
 #include "ecs/EntityManager.h"
 #include "ecs/TransformComponent.h"
 #include "ecs/RendererComponent.h"
@@ -216,7 +217,10 @@ std::string getExecutableDirectory()
 } // namespace
 
 Engine::Engine() : m_running(false), m_inGame(false), m_selectedBlockType(VoxelType::Stone), 
-                   m_lastCursorCaptured(false), m_rightMouseHeldForCamera(false) {}
+                   m_lastCursorCaptured(false), m_rightMouseHeldForCamera(false) 
+{
+    LOG_INFO("Engine constructor called");
+}
 
 Engine::~Engine()
 {
@@ -227,6 +231,10 @@ bool Engine::initialize()
 {
     std::cout << "Initializing Fresh Voxel Engine..." << std::endl;
     LOG_INFO_C("Initializing Fresh Voxel Engine...", "Engine");
+
+    // Initialize project manager
+    m_projectManager = std::make_unique<ProjectManager>();
+    LOG_INFO_C("Project manager initialized", "Engine");
 
     // Initialize world generator plugin system
     WorldGeneratorFactory::registerBuiltInGenerators();

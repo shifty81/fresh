@@ -401,6 +401,7 @@ message(STATUS "Preparing to define source files...")
 set(ENGINE_SOURCES
     src/main.cpp
     src/core/Engine.cpp
+    src/core/Project.cpp
     src/core/Window.cpp
     src/core/Logger.cpp
     src/core/MemoryManager.cpp
