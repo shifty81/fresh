@@ -72,7 +72,9 @@ public:
 
 private:
     // Lua state using sol2
-    std::unique_ptr<sol::state> lua;
+    // Note: Raw pointer used instead of std::unique_ptr to avoid requiring
+    // complete type definition of sol::state in the header file
+    sol::state* lua;
 
     std::string lastError;
     std::vector<std::string> loadedMods;

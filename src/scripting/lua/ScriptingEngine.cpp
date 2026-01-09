@@ -34,7 +34,7 @@ bool ScriptingEngine::initialize()
 {
     try {
         // Create new Lua state
-        lua = std::make_unique<sol::state>();
+        lua = new sol::state();
         
         // Open standard Lua libraries
         setupStandardLibraries();
@@ -71,7 +71,8 @@ void ScriptingEngine::setupStandardLibraries()
 void ScriptingEngine::shutdown()
 {
     if (lua) {
-        lua.reset();
+        delete lua;
+        lua = nullptr;
         std::cout << "[ScriptingEngine] Shutdown complete" << std::endl;
     }
 }
@@ -302,7 +303,7 @@ void ScriptingEngine::registerInputManager(void* inputManager)
 
 sol::state* ScriptingEngine::getState()
 {
-    return lua.get();
+    return lua;
 }
 
 void ScriptingEngine::reportError(const std::string& error)
@@ -324,7 +325,9 @@ namespace fresh
 namespace scripting
 {
 
-ScriptingEngine::ScriptingEngine() {}
+ScriptingEngine::ScriptingEngine() : lua(nullptr) {}
+// Note: Destructor doesn't delete lua pointer because sol::state is incomplete type in stub build
+// The pointer is never allocated in stub implementation (initialize() always returns false)
 ScriptingEngine::~ScriptingEngine() {}
 
 bool ScriptingEngine::initialize() {
