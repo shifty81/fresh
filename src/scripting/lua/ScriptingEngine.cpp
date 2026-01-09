@@ -34,7 +34,7 @@ bool ScriptingEngine::initialize()
 {
     try {
         // Create new Lua state
-        lua = std::make_unique<sol::state>();
+        lua = new sol::state();
         
         // Open standard Lua libraries
         setupStandardLibraries();
@@ -71,7 +71,8 @@ void ScriptingEngine::setupStandardLibraries()
 void ScriptingEngine::shutdown()
 {
     if (lua) {
-        lua.reset();
+        delete lua;
+        lua = nullptr;
         std::cout << "[ScriptingEngine] Shutdown complete" << std::endl;
     }
 }
@@ -302,7 +303,7 @@ void ScriptingEngine::registerInputManager(void* inputManager)
 
 sol::state* ScriptingEngine::getState()
 {
-    return lua.get();
+    return lua;
 }
 
 void ScriptingEngine::reportError(const std::string& error)
