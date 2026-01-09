@@ -52,6 +52,7 @@
 
 #include "ai/AISystem.h"
 #include "core/Logger.h"
+#include "core/Project.h"
 #include "ecs/EntityManager.h"
 #include "ecs/TransformComponent.h"
 #include "ecs/RendererComponent.h"
@@ -216,7 +217,10 @@ std::string getExecutableDirectory()
 } // namespace
 
 Engine::Engine() : m_running(false), m_inGame(false), m_selectedBlockType(VoxelType::Stone), 
-                   m_lastCursorCaptured(false), m_rightMouseHeldForCamera(false) {}
+                   m_lastCursorCaptured(false), m_rightMouseHeldForCamera(false) 
+{
+    LOG_INFO("Engine constructor called");
+}
 
 Engine::~Engine()
 {
@@ -227,6 +231,10 @@ bool Engine::initialize()
 {
     std::cout << "Initializing Fresh Voxel Engine..." << std::endl;
     LOG_INFO_C("Initializing Fresh Voxel Engine...", "Engine");
+
+    // Initialize project manager
+    m_projectManager = std::make_unique<ProjectManager>();
+    LOG_INFO_C("Project manager initialized", "Engine");
 
     // Initialize world generator plugin system
     WorldGeneratorFactory::registerBuiltInGenerators();
@@ -344,6 +352,10 @@ bool Engine::initialize()
 
     // Create comprehensive editor manager (uses Windows Native Win32 UI) - show immediately
     m_editorManager = std::make_unique<EditorManager>();
+    
+    // Set project manager reference in editor manager
+    m_editorManager->setProjectManager(m_projectManager.get());
+    
     // Initialize with nullptr for world and worldEditor initially
     if (!m_editorManager->initialize(m_window.get(), m_renderer.get(), nullptr, nullptr,
                                      m_inputManager.get(), m_entityManager.get())) {
@@ -1506,6 +1518,8 @@ void Engine::render()
     // The swap chain is created for the viewport child window, so we just use its dimensions
 
     // Set clear color (sky blue for editor viewport, even when no world exists)
+    // PROJECT-BASED WORKFLOW: Blank projects show empty viewport (sky blue)
+    // This is intentional and correct - worlds are created later via File > New Level
     m_renderer->clearColor(0.53f, 0.81f, 0.92f, 1.0f);
 
     if (!m_renderer->beginFrame()) {
@@ -1524,10 +1538,12 @@ void Engine::render()
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         // Render voxel world ONLY if world exists (skip during world generation)
+        // PROJECT-BASED WORKFLOW: Blank projects have no world, viewport shows empty scene
         if (m_world && !m_isGeneratingWorld) {
             renderVoxelWorld();
         }
         // Note: If no world exists, viewport shows clear color (empty scene)
+        // This is correct behavior for blank projects - use File > New Level to add content
         // TODO: Add grid rendering for empty viewport
 
         // Render crosshair overlay (only if world exists)
@@ -1986,18 +2002,31 @@ void Engine::setupNativeMenuBar()
         return;
     }
 
-    // ========== FILE MENU (Unreal-style) ==========
+    // ========== FILE MENU (Unreal-style Project Workflow) ==========
     int fileMenu = menuBar->addMenu("File");
-    menuBar->addMenuItem(fileMenu, "New Scene...\tCtrl+N", [this]() {
-        LOG_INFO_C("New Scene menu item clicked (creates new world)", "Engine");
+    menuBar->addMenuItem(fileMenu, "New Project...\tCtrl+N", [this]() {
+        LOG_INFO_C("New Project menu item clicked", "Engine");
         if (m_editorManager) {
-            m_editorManager->newWorld(); // Creates new scene/world
+            m_editorManager->newProject(); // Creates new project
         }
     });
-    menuBar->addMenuItem(fileMenu, "Open Scene...\tCtrl+O", [this]() {
-        LOG_INFO_C("Open Scene menu item clicked (loads world)", "Engine");
+    menuBar->addMenuItem(fileMenu, "Open Project...\tCtrl+O", [this]() {
+        LOG_INFO_C("Open Project menu item clicked", "Engine");
         if (m_editorManager) {
-            m_editorManager->loadWorld(); // Loads existing scene/world
+            m_editorManager->openProject(); // Opens existing project
+        }
+    });
+    menuBar->addSeparator(fileMenu);
+    menuBar->addMenuItem(fileMenu, "New Level...\tCtrl+Shift+N", [this]() {
+        LOG_INFO_C("New Level menu item clicked (creates new world in project)", "Engine");
+        if (m_editorManager) {
+            m_editorManager->newWorld(); // Creates new level/world within project
+        }
+    });
+    menuBar->addMenuItem(fileMenu, "Open Level...\tCtrl+Shift+O", [this]() {
+        LOG_INFO_C("Open Level menu item clicked (loads world in project)", "Engine");
+        if (m_editorManager) {
+            m_editorManager->loadWorld(); // Loads existing level/world within project
         }
     });
     menuBar->addSeparator(fileMenu);
@@ -2015,9 +2044,12 @@ void Engine::setupNativeMenuBar()
     });
     menuBar->addMenuItem(fileMenu, "Save All\tCtrl+Shift+A", [this]() {
         LOG_INFO_C("Save All menu item clicked", "Engine");
-        // TODO: Implement save all assets (not just world)
+        // Save all assets and project settings
+        if (m_projectManager && m_projectManager->isProjectOpen()) {
+            m_projectManager->saveProject();
+        }
         if (m_editorManager) {
-            m_editorManager->saveWorld();  // For now, just save world
+            m_editorManager->saveWorld();  // Also save current world if exists
         }
     });
     menuBar->addSeparator(fileMenu);

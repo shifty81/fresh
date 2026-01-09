@@ -137,6 +137,7 @@ EditorManager::EditorManager()
       m_worldEditor(nullptr),
       m_entityManager(nullptr),
       m_player(nullptr),
+      m_projectManager(nullptr),
       m_showSceneHierarchy(true),
       m_showInspector(true),
       m_showContentBrowser(true),
@@ -969,6 +970,12 @@ void EditorManager::setPlayer(Player* player)
     }
 }
 
+void EditorManager::setProjectManager(ProjectManager* projectManager)
+{
+    m_projectManager = projectManager;
+    LOG_INFO_C("Project manager reference set in EditorManager", "EditorManager");
+}
+
 bool EditorManager::updateWorld(VoxelWorld* world, WorldEditor* worldEditor)
 {
     if (!m_initialized) {
@@ -1512,6 +1519,111 @@ void EditorManager::newWorld()
     }
 #else
     LOG_INFO_C("New Project not implemented on this platform", "EditorManager");
+#endif
+}
+
+void EditorManager::newProject()
+{
+#ifdef _WIN32
+    if (!m_windowsDialogManager || !m_projectManager) {
+        LOG_ERROR_C("Cannot create project: required components not initialized", "EditorManager");
+        return;
+    }
+    
+    // Show confirmation if there's an open project
+    if (m_projectManager->isProjectOpen()) {
+        auto result = m_windowsDialogManager->showMessageBox(
+            "New Project",
+            "Close current project? Any unsaved changes will be lost.",
+            MessageBoxButtons::YesNo,
+            MessageBoxIcon::Question
+        );
+        
+        if (result != MessageBoxResult::Yes) {
+            LOG_INFO_C("New project cancelled by user", "EditorManager");
+            return;
+        }
+    }
+    
+    // TODO: Create a native Win32 dialog for project creation
+    // For now, use a simple input dialog
+    LOG_INFO_C("Creating new project (placeholder implementation)", "EditorManager");
+    
+    // Placeholder: Create a blank project in a default location
+    std::string projectName = "UntitledProject";
+    std::string projectPath = "./Projects/" + projectName;
+    std::string templateType = "Blank";
+    
+    if (m_projectManager->createNewProject(projectName, projectPath, templateType)) {
+        LOG_INFO_C("Project created successfully: " + projectName, "EditorManager");
+        m_windowsDialogManager->showMessageBox(
+            "Project Created",
+            "New project created successfully: " + projectName,
+            MessageBoxButtons::OK,
+            MessageBoxIcon::Information
+        );
+    } else {
+        LOG_ERROR_C("Failed to create project: " + projectName, "EditorManager");
+        m_windowsDialogManager->showMessageBox(
+            "Project Creation Error",
+            "Failed to create project. Check logs for details.",
+            MessageBoxButtons::OK,
+            MessageBoxIcon::Error
+        );
+    }
+#else
+    LOG_INFO_C("New Project not implemented on this platform", "EditorManager");
+#endif
+}
+
+void EditorManager::openProject()
+{
+#ifdef _WIN32
+    if (!m_windowsDialogManager || !m_projectManager) {
+        LOG_ERROR_C("Cannot open project: required components not initialized", "EditorManager");
+        return;
+    }
+    
+    // Show confirmation if there's an open project
+    if (m_projectManager->isProjectOpen()) {
+        auto result = m_windowsDialogManager->showMessageBox(
+            "Open Project",
+            "Close current project? Any unsaved changes will be lost.",
+            MessageBoxButtons::YesNo,
+            MessageBoxIcon::Question
+        );
+        
+        if (result != MessageBoxResult::Yes) {
+            LOG_INFO_C("Open project cancelled by user", "EditorManager");
+            return;
+        }
+    }
+    
+    // TODO: Show file dialog to select .freshproj file
+    LOG_INFO_C("Opening project (placeholder implementation)", "EditorManager");
+    
+    // Placeholder: Try to open a test project
+    std::string projectPath = "./Projects/UntitledProject/UntitledProject.freshproj";
+    
+    if (m_projectManager->openProject(projectPath)) {
+        LOG_INFO_C("Project opened successfully: " + m_projectManager->getProjectName(), "EditorManager");
+        m_windowsDialogManager->showMessageBox(
+            "Project Opened",
+            "Project opened successfully: " + m_projectManager->getProjectName(),
+            MessageBoxButtons::OK,
+            MessageBoxIcon::Information
+        );
+    } else {
+        LOG_ERROR_C("Failed to open project: " + projectPath, "EditorManager");
+        m_windowsDialogManager->showMessageBox(
+            "Project Open Error",
+            "Failed to open project. File may not exist or is corrupted.",
+            MessageBoxButtons::OK,
+            MessageBoxIcon::Error
+        );
+    }
+#else
+    LOG_INFO_C("Open Project not implemented on this platform", "EditorManager");
 #endif
 }
 

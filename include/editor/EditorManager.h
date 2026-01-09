@@ -47,6 +47,7 @@ class TransformGizmo;
 class LayoutManager;
 class EditorSettingsDialog;
 class CameraController;
+class ProjectManager;
 
 namespace ecs
 {
@@ -153,6 +154,12 @@ public:
      * @param player Player instance
      */
     void setPlayer(class Player* player);
+
+    /**
+     * @brief Set project manager reference
+     * @param projectManager Project manager instance
+     */
+    void setProjectManager(class ProjectManager* projectManager);
 
 #ifdef _WIN32
     /**
@@ -407,6 +414,16 @@ public:
     void newWorld();
     
     /**
+     * @brief Create new project
+     */
+    void newProject();
+    
+    /**
+     * @brief Open existing project
+     */
+    void openProject();
+    
+    /**
      * @brief Toggle scene hierarchy panel visibility
      */
     void toggleSceneHierarchy();
@@ -636,6 +653,7 @@ private:
     WorldEditor* m_worldEditor;
     ecs::EntityManager* m_entityManager;
     class Player* m_player;
+    class ProjectManager* m_projectManager;
 
     // Panel visibility flags
     bool m_showSceneHierarchy;
