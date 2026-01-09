@@ -326,6 +326,8 @@ namespace scripting
 {
 
 ScriptingEngine::ScriptingEngine() : lua(nullptr) {}
+// Note: Destructor doesn't delete lua pointer because sol::state is incomplete type in stub build
+// The pointer is never allocated in stub implementation (initialize() always returns false)
 ScriptingEngine::~ScriptingEngine() {}
 
 bool ScriptingEngine::initialize() {

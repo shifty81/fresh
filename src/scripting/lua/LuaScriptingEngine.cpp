@@ -316,6 +316,8 @@ namespace fresh {
 namespace scripting {
 
 LuaScriptingEngine::LuaScriptingEngine() : m_lua(nullptr), m_initialized(false) {}
+// Note: Destructor doesn't delete m_lua pointer because sol::state is incomplete type in stub build
+// The pointer is never allocated in stub implementation (initialize() always returns false)
 LuaScriptingEngine::~LuaScriptingEngine() {}
 
 bool LuaScriptingEngine::initialize() {
