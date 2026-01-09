@@ -1518,6 +1518,8 @@ void Engine::render()
     // The swap chain is created for the viewport child window, so we just use its dimensions
 
     // Set clear color (sky blue for editor viewport, even when no world exists)
+    // PROJECT-BASED WORKFLOW: Blank projects show empty viewport (sky blue)
+    // This is intentional and correct - worlds are created later via File > New Level
     m_renderer->clearColor(0.53f, 0.81f, 0.92f, 1.0f);
 
     if (!m_renderer->beginFrame()) {
@@ -1536,10 +1538,12 @@ void Engine::render()
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         // Render voxel world ONLY if world exists (skip during world generation)
+        // PROJECT-BASED WORKFLOW: Blank projects have no world, viewport shows empty scene
         if (m_world && !m_isGeneratingWorld) {
             renderVoxelWorld();
         }
         // Note: If no world exists, viewport shows clear color (empty scene)
+        // This is correct behavior for blank projects - use File > New Level to add content
         // TODO: Add grid rendering for empty viewport
 
         // Render crosshair overlay (only if world exists)
