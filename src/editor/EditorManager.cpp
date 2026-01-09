@@ -1625,6 +1625,10 @@ void EditorManager::setVisible(bool visible)
         LOG_INFO_C("Viewport panel kept visible (always visible for rendering)", "EditorManager");
     }
     
+    // CRITICAL FIX: Ensure proper Z-order after visibility changes
+    // This prevents viewport from appearing on top of UI panels
+    ensurePanelsOnTop();
+    
     LOG_INFO_C(visible ? "Editor panels shown" : "Editor panels hidden", "EditorManager");
 #endif
 }
