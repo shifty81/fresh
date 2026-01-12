@@ -31,6 +31,36 @@ enum class VoxelType : uint8_t {
     Gold,
     Diamond,
     Obsidian,
+    // Natural blocks
+    Clay,
+    Mud,
+    SandStone,
+    RedSand,
+    RedSandStone,
+    // Ore blocks
+    CoalOre,
+    IronOre,
+    GoldOre,
+    DiamondOre,
+    EmeraldOre,
+    // Crafted blocks
+    StoneBrick,
+    MossyStoneBrick,
+    CrackedStoneBrick,
+    ChiseledStoneBrick,
+    // Wood variations
+    OakWood,
+    BirchWood,
+    SpruceWood,
+    JungleWood,
+    // Decorative
+    Wool,
+    Concrete,
+    Terracotta,
+    // Functional blocks
+    Torch,
+    Ladder,
+    Door,
     // Add more types as needed
     Count
 };
