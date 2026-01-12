@@ -12,6 +12,23 @@ class Chunk;
 class VoxelWorld;
 
 /**
+ * @brief Plugin metadata for world generators
+ * 
+ * Contains information about the generator plugin.
+ */
+struct WorldGeneratorMetadata
+{
+    std::string name;           // Display name
+    std::string id;             // Unique identifier (e.g., "terrain3d")
+    std::string description;    // User-facing description
+    std::string version;        // Plugin version (e.g., "1.0.0")
+    std::string author;         // Plugin author
+    bool is2D;                  // True if 2D generator
+    bool is3D;                  // True if 3D generator
+    std::vector<std::string> tags; // Tags for categorization (e.g., "terrain", "procedural")
+};
+
+/**
  * @brief Interface for world generation plugins
  * 
  * In the editor-first architecture, world generators are treated as plugins.
@@ -28,8 +45,18 @@ class VoxelWorld;
  * @code
  * class CustomTerrainGenerator : public IWorldGenerator {
  * public:
- *     std::string getName() const override { return "Custom Terrain"; }
- *     std::string getDescription() const override { return "My custom generator"; }
+ *     WorldGeneratorMetadata getMetadata() const override {
+ *         return {
+ *             "Custom Terrain",  // name
+ *             "custom_terrain",  // id
+ *             "My custom terrain generator", // description
+ *             "1.0.0",          // version
+ *             "Author Name",     // author
+ *             false,             // is2D
+ *             true,              // is3D
+ *             {"terrain", "custom"} // tags
+ *         };
+ *     }
  *     
  *     void generateChunk(Chunk* chunk) override {
  *         // Custom generation logic
@@ -47,16 +74,26 @@ public:
     virtual ~IWorldGenerator() = default;
     
     /**
-     * @brief Get the name of this generator
-     * @return Human-readable generator name (e.g., "3D Terrain", "2D Platformer")
+     * @brief Get plugin metadata
+     * @return Metadata structure with plugin information
      */
-    virtual std::string getName() const = 0;
+    virtual WorldGeneratorMetadata getMetadata() const = 0;
     
     /**
-     * @brief Get a description of this generator
+     * @brief Get the name of this generator (deprecated, use getMetadata())
+     * @return Human-readable generator name (e.g., "3D Terrain", "2D Platformer")
+     */
+    virtual std::string getName() const {
+        return getMetadata().name;
+    }
+    
+    /**
+     * @brief Get a description of this generator (deprecated, use getMetadata())
      * @return Human-readable description of what this generator creates
      */
-    virtual std::string getDescription() const = 0;
+    virtual std::string getDescription() const {
+        return getMetadata().description;
+    }
     
     /**
      * @brief Generate terrain for a single chunk
@@ -98,16 +135,20 @@ public:
     }
     
     /**
-     * @brief Check if this generator supports 2D worlds
+     * @brief Check if this generator supports 2D worlds (deprecated, use getMetadata())
      * @return true if this is a 2D generator
      */
-    virtual bool is2DGenerator() const { return false; }
+    virtual bool is2DGenerator() const { 
+        return getMetadata().is2D; 
+    }
     
     /**
-     * @brief Check if this generator supports 3D worlds
+     * @brief Check if this generator supports 3D worlds (deprecated, use getMetadata())
      * @return true if this is a 3D generator
      */
-    virtual bool is3DGenerator() const { return true; }
+    virtual bool is3DGenerator() const { 
+        return getMetadata().is3D; 
+    }
 };
 
 /**
