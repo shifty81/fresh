@@ -52,11 +52,18 @@ public:
     TerrainGeneratorAdapter() : m_generator(std::make_unique<TerrainGenerator>()) {}
     explicit TerrainGeneratorAdapter(int seed) : m_generator(std::make_unique<TerrainGenerator>(seed)) {}
     
-    std::string getName() const override { return "3D Terrain"; }
-    
-    std::string getDescription() const override 
-    { 
-        return "Procedural 3D terrain using Perlin noise with biomes, caves, and natural features"; 
+    WorldGeneratorMetadata getMetadata() const override
+    {
+        return {
+            "3D Terrain",                       // name
+            "terrain3d",                        // id
+            "Procedural 3D terrain using Perlin noise with biomes, caves, and natural features",  // description
+            "1.0.0",                            // version
+            "Fresh Engine",                     // author
+            false,                              // is2D
+            true,                               // is3D
+            {"terrain", "3d", "procedural"}    // tags
+        };
     }
     
     void generateChunk(Chunk* chunk) override
@@ -78,9 +85,6 @@ public:
     {
         return m_generator->getHeight(x, z);
     }
-    
-    bool is3DGenerator() const override { return true; }
-    bool is2DGenerator() const override { return false; }
 
 private:
     std::unique_ptr<TerrainGenerator> m_generator;
@@ -95,11 +99,18 @@ public:
         m_generator->set2DStyle(0); // 0 = Platformer
     }
     
-    std::string getName() const override { return "2D Platformer"; }
-    
-    std::string getDescription() const override 
-    { 
-        return "Side-scrolling 2D terrain (Terraria-style) with layers and caves"; 
+    WorldGeneratorMetadata getMetadata() const override
+    {
+        return {
+            "2D Platformer",                    // name
+            "platformer2d",                     // id
+            "Side-scrolling 2D terrain (Terraria-style) with layers and caves",  // description
+            "1.0.0",                            // version
+            "Fresh Engine",                     // author
+            true,                               // is2D
+            false,                              // is3D
+            {"2d", "platformer", "side-scrolling"}  // tags
+        };
     }
     
     void generateChunk(Chunk* chunk) override
@@ -121,9 +132,6 @@ public:
     {
         return m_generator->getHeight(x, z);
     }
-    
-    bool is3DGenerator() const override { return false; }
-    bool is2DGenerator() const override { return true; }
 
 private:
     std::unique_ptr<TerrainGenerator> m_generator;
@@ -138,11 +146,18 @@ public:
         m_generator->set2DStyle(1); // 1 = Top-down
     }
     
-    std::string getName() const override { return "2D Top-Down"; }
-    
-    std::string getDescription() const override 
-    { 
-        return "Top-down 2D world (Zelda-style) with terrain and obstacles"; 
+    WorldGeneratorMetadata getMetadata() const override
+    {
+        return {
+            "2D Top-Down",                      // name
+            "topdown2d",                        // id
+            "Top-down 2D world (Zelda-style) with terrain and obstacles",  // description
+            "1.0.0",                            // version
+            "Fresh Engine",                     // author
+            true,                               // is2D
+            false,                              // is3D
+            {"2d", "top-down", "overhead"}     // tags
+        };
     }
     
     void generateChunk(Chunk* chunk) override
@@ -164,9 +179,6 @@ public:
     {
         return m_generator->getHeight(x, z);
     }
-    
-    bool is3DGenerator() const override { return false; }
-    bool is2DGenerator() const override { return true; }
 
 private:
     std::unique_ptr<TerrainGenerator> m_generator;
@@ -176,11 +188,18 @@ private:
 class EmptyWorldGenerator : public IWorldGenerator
 {
 public:
-    std::string getName() const override { return "Empty"; }
-    
-    std::string getDescription() const override 
-    { 
-        return "Empty world with no terrain generation (blank canvas)"; 
+    WorldGeneratorMetadata getMetadata() const override
+    {
+        return {
+            "Empty",                            // name
+            "empty",                            // id
+            "Empty world with no terrain generation (blank canvas)",  // description
+            "1.0.0",                            // version
+            "Fresh Engine",                     // author
+            true,                               // is2D
+            true,                               // is3D (works for both)
+            {"empty", "blank"}                 // tags
+        };
     }
     
     void generateChunk(Chunk* chunk) override
@@ -192,9 +211,6 @@ public:
     {
         (void)seed; // Empty generator doesn't use seed
     }
-    
-    bool is3DGenerator() const override { return true; }
-    bool is2DGenerator() const override { return true; } // Works for both
 };
 
 void WorldGeneratorFactory::registerBuiltInGenerators()
