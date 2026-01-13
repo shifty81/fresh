@@ -582,7 +582,7 @@ BiomeProperties BiomeSystem::getBlendedProperties(int worldX, int worldZ, float 
     return blended;
 }
 
-bool BiomeSystem::isInTransitionZone(int worldX, int worldZ, float threshold) const
+bool BiomeSystem::isInTransitionZone(int worldX, int worldZ, [[maybe_unused]] float threshold) const
 {
     // Check if nearby positions have different biomes
     BiomeType center = getBiomeAt(worldX, worldZ);

@@ -114,7 +114,7 @@ public:
      * @brief Set the generation seed
      * @param seed Random seed value
      */
-    void setSeed(int seed) override { /* Heightmap doesn't use seed */ }
+    void setSeed([[maybe_unused]] int seed) override { /* Heightmap doesn't use seed */ }
 
     /**
      * @brief Get the height at a world position
