@@ -928,9 +928,16 @@ void Engine::run()
         // Update input
         processInput();
         
-        // Update game systems (physics, AI, etc.) only if world exists
+        // EDITOR-GAME SEPARATION: Update systems based on mode
         if (m_world) {
-            update(deltaTime);
+            if (m_inGame) {
+                // In play mode: update all game systems (physics, AI, player, etc.)
+                update(deltaTime);
+            } else {
+                // In editor mode: update only editor-relevant systems
+                // Editor camera movement, world editor tools, but not gameplay systems
+                updateEditor(deltaTime);
+            }
         }
         
         // Always render editor and viewport
@@ -1196,6 +1203,9 @@ void Engine::processInput()
 
 void Engine::update(float deltaTime)
 {
+    // GAME MODE UPDATE: Full gameplay simulation with physics, AI, and all game systems
+    // This is called when in play mode (m_inGame == true)
+    
     if (!m_world) {
         return;
     }
@@ -1205,7 +1215,7 @@ void Engine::update(float deltaTime)
     if (m_window && m_editorManager) {
         Win32Window* win32Window = dynamic_cast<Win32Window*>(m_window.get());
         if (win32Window && win32Window->wasFramebufferResized()) {
-            win32Window->resetFramebufferResizedFlag();  // Reset flag immediately to prevent repeated logging
+            win32Window->resetFramebufferResizedFlag();
             
             RECT clientRect;
             HWND hwnd = win32Window->getHandle();
@@ -1213,8 +1223,6 @@ void Engine::update(float deltaTime)
                 int clientWidth = clientRect.right - clientRect.left;
                 int clientHeight = clientRect.bottom - clientRect.top;
                 m_editorManager->onWindowResize(clientWidth, clientHeight);
-                LOG_INFO_C("Window resized, updated panel layouts: " + 
-                          std::to_string(clientWidth) + "x" + std::to_string(clientHeight), "Engine");
             }
         }
     }
@@ -1227,24 +1235,15 @@ void Engine::update(float deltaTime)
             int vpWidth = viewportPanel->getWidth();
             int vpHeight = viewportPanel->getHeight();
             
-            viewportPanel->clearResizedFlag(); // Clear flag first to prevent infinite loops
+            viewportPanel->clearResizedFlag();
             
-            LOG_INFO_C("Viewport resized: " + std::to_string(vpWidth) + "x" + std::to_string(vpHeight), "Engine");
-            
-            // Recreate swap chain with new viewport dimensions
             if (vpWidth > 0 && vpHeight > 0) {
                 if (m_renderer->recreateSwapChain(vpWidth, vpHeight)) {
-                    // Update camera aspect ratio
                     if (m_player) {
                         float aspectRatio = static_cast<float>(vpWidth) / static_cast<float>(vpHeight);
                         m_player->getCamera().setAspectRatio(aspectRatio);
                     }
-                } else {
-                    LOG_ERROR_C("Failed to recreate swap chain during viewport resize", "Engine");
                 }
-            } else {
-                LOG_ERROR_C("Invalid viewport dimensions during resize: " + 
-                           std::to_string(vpWidth) + "x" + std::to_string(vpHeight), "Engine");
             }
         }
     }
@@ -1254,142 +1253,34 @@ void Engine::update(float deltaTime)
     bool guiCapturesMouse = m_editorManager && m_editorManager->wantCaptureMouse();
     bool guiCapturesKeyboard = m_editorManager && m_editorManager->wantCaptureKeyboard();
     
-    // ========================================================================
-    // UNREAL-STYLE MOUSE CONTROL SYSTEM
-    // ========================================================================
-    // In Unreal Engine:
-    // - Right Mouse Button (RMB) held = Camera free look (cursor hidden & captured)
-    // - RMB released = Cursor visible, can interact with UI/menus
-    // - This prevents the cursor from "snapping" to camera control automatically
-    // ========================================================================
-    
-#ifdef _WIN32
-    // VIEWPORT INTEGRATION - Only allow camera control when mouse is within viewport
-    bool mouseInViewport = true; // Default to true if viewport not available
-    if (m_editorManager && m_editorManager->getViewportPanel()) {
-        POINT cursorPos;
-        if (GetCursorPos(&cursorPos)) {
-            mouseInViewport = m_editorManager->getViewportPanel()->isMouseInViewport(cursorPos.x, cursorPos.y);
-        }
-    }
-#else
-    bool mouseInViewport = true;
-#endif
-    
-    if (m_inputManager) {
-        InputMode currentMode = m_inputManager->getInputMode();
-        bool actualCursorCaptured = m_inputManager->isCursorCaptured();
-        
-        // Check if right mouse button is currently held (for Unreal-style camera control)
-        bool rightMousePressed = m_inputManager->isMouseButtonPressed(MOUSE_BUTTON_RIGHT);
-        
-        // Determine if camera control should be active
-        // Requires: right mouse pressed, GUI not capturing, mouse in viewport
-        bool canControlCamera = rightMousePressed && !guiCapturesMouse && mouseInViewport;
-        
-        // Always update m_rightMouseHeldForCamera based on current RMB state
-        // This ensures the flag is properly cleared when button is released
-        bool wasHoldingForCamera = m_rightMouseHeldForCamera;
-        m_rightMouseHeldForCamera = canControlCamera;
-        
-        // Determine if we should capture cursor based on RMB state
-        // Only capture when camera control is active
-        bool shouldCaptureCursor = false;
-        
-        if (currentMode == InputMode::UIMode) {
-            // In UI mode (editor), only capture cursor when:
-            // 1. Right mouse button is held (Unreal-style free look)
-            // 2. GUI is not capturing mouse (not hovering over UI elements)
-            // 3. Mouse is within the viewport panel
-            // 4. User hasn't explicitly toggled cursor with F key
-            if (!m_userToggledCursor) {
-                shouldCaptureCursor = m_rightMouseHeldForCamera;
-            } else {
-                // User explicitly toggled with F key - respect their choice
-                shouldCaptureCursor = actualCursorCaptured;
-                
-                // Clear user toggle if they start using GUI
-                if (guiCapturesMouse) {
-                    m_userToggledCursor = false;
-                }
-            }
-        } else if (currentMode == InputMode::GameMode) {
-            // In game mode, always capture cursor (traditional FPS style)
-            shouldCaptureCursor = true;
-            m_userToggledCursor = false;
-            m_rightMouseHeldForCamera = false;
-        }
-        
-        // Only call setCursorMode if the state actually changed (prevents stuttering)
-        if (shouldCaptureCursor != actualCursorCaptured) {
-            m_inputManager->setCursorMode(shouldCaptureCursor);
-            m_lastCursorCaptured = shouldCaptureCursor;
-            
-            // Log state changes for debugging
-            if (shouldCaptureCursor) {
-                LOG_INFO_C("Camera free look enabled (RMB held)", "Engine");
-            } else {
-                LOG_INFO_C("Cursor released for UI interaction", "Engine");
-            }
-        } else {
-            m_lastCursorCaptured = actualCursorCaptured;
-        }
-        
-        // Log when RMB state changes (for debugging free look issues)
-        if (wasHoldingForCamera != m_rightMouseHeldForCamera) {
-            if (m_rightMouseHeldForCamera) {
-                LOG_INFO_C("Right mouse button pressed - free look active", "Engine");
-            } else {
-                LOG_INFO_C("Right mouse button released - free look inactive", "Engine");
-            }
-        }
-    }
-
-    // In editor-first mode, always allow player input unless GUI captures it
-    // (GUI capture means user is actively using a text field, slider, etc.)
-    
-    // Handle player input (only if GUI doesn't capture input)
+    // In game mode, input manager is in GameMode, so cursor is always captured
+    // Handle player input (game mode typically doesn't check GUI capture as UI is hidden)
     if (m_player && m_inputManager && !guiCapturesMouse && !guiCapturesKeyboard) {
         m_player->handleInput(*m_inputManager, deltaTime);
 
-        // UNREAL-STYLE: Handle mouse movement for camera ONLY when RMB is held
-        // This prevents camera from moving when user is trying to use menus
-        // m_rightMouseHeldForCamera is already updated above based on RMB state and GUI capture
-        if (m_rightMouseHeldForCamera) {
-            glm::vec2 mouseDelta = m_inputManager->getMouseDelta();
-            if (glm::length(mouseDelta) > 0.0f) {
-                LOG_INFO_C("Mouse delta: (" + std::to_string(mouseDelta.x) + ", " + std::to_string(mouseDelta.y) + ")", "Engine");
-                m_player->handleMouseMovement(mouseDelta.x, mouseDelta.y);
-            } else {
-                static int noMovementCount = 0;
-                if (++noMovementCount % 60 == 0) { // Log every 60 frames
-                    LOG_INFO_C("RMB held but no mouse delta detected (count: " + std::to_string(noMovementCount) + ")", "Engine");
-                }
-            }
+        // In game mode, mouse always controls camera
+        glm::vec2 mouseDelta = m_inputManager->getMouseDelta();
+        if (glm::length(mouseDelta) > 0.0f) {
+            m_player->handleMouseMovement(mouseDelta.x, mouseDelta.y);
         }
 
-        // Handle block placement/breaking
-        if (!guiCapturesMouse && m_voxelInteraction) {
-            // Perform raycast to find targeted block
-            RayHit hit =
-                m_voxelInteraction->performRaycast(m_player->getCamera(), MAX_INTERACTION_DISTANCE);
+        // Handle block placement/breaking in game mode
+        if (m_voxelInteraction) {
+            RayHit hit = m_voxelInteraction->performRaycast(m_player->getCamera(), MAX_INTERACTION_DISTANCE);
 
-            // Left click to break block (only when NOT using RMB for camera)
-            if (m_inputManager->isMouseButtonPressed(MOUSE_BUTTON_LEFT) && hit.hit && !m_rightMouseHeldForCamera) {
+            // Left click to break block
+            if (m_inputManager->isMouseButtonPressed(MOUSE_BUTTON_LEFT) && hit.hit) {
                 m_voxelInteraction->breakBlock(hit);
             }
 
-            // Right click to place block (DISABLED during camera free look)
-            // In Unreal style, RMB is reserved for camera control, not block placement
-            // Block placement now requires Left-click with modifier or separate key
-            // Note: Keeping legacy behavior for now, but RMB won't place when held for camera
-            if (m_inputManager->isMouseButtonPressed(MOUSE_BUTTON_RIGHT) && hit.hit && !m_rightMouseHeldForCamera) {
+            // Right click to place block
+            if (m_inputManager->isMouseButtonPressed(MOUSE_BUTTON_RIGHT) && hit.hit) {
                 m_voxelInteraction->placeBlock(hit, m_selectedBlockType);
             }
         }
     }
 
-    // Update player (physics, collision)
+    // Update player (physics, collision, gameplay)
     if (m_player) {
         m_player->update(deltaTime);
     }
@@ -1468,6 +1359,104 @@ void Engine::update(float deltaTime)
     }
 }
 
+void Engine::updateEditor(float deltaTime)
+{
+    // EDITOR MODE UPDATE: Updates only editor-relevant systems
+    // This is called when NOT in play mode (m_inGame == false)
+    // Game systems like physics and AI do NOT update in editor mode
+    
+    if (!m_world) {
+        return;
+    }
+
+#ifdef _WIN32
+    // WINDOW RESIZE HANDLING - Update panel layouts when main window is resized
+    if (m_window && m_editorManager) {
+        Win32Window* win32Window = dynamic_cast<Win32Window*>(m_window.get());
+        if (win32Window && win32Window->wasFramebufferResized()) {
+            win32Window->resetFramebufferResizedFlag();
+            
+            RECT clientRect;
+            HWND hwnd = win32Window->getHandle();
+            if (hwnd && GetClientRect(hwnd, &clientRect)) {
+                int clientWidth = clientRect.right - clientRect.left;
+                int clientHeight = clientRect.bottom - clientRect.top;
+                m_editorManager->onWindowResize(clientWidth, clientHeight);
+                LOG_INFO_C("Window resized, updated panel layouts: " + 
+                          std::to_string(clientWidth) + "x" + std::to_string(clientHeight), "Engine");
+            }
+        }
+    }
+    
+    // VIEWPORT RESIZE HANDLING - Check if viewport was resized and recreate swap chain
+    if (m_editorManager && m_editorManager->getViewportPanel() && m_renderer) {
+        auto* viewportPanel = m_editorManager->getViewportPanel();
+        
+        if (viewportPanel->wasResized()) {
+            int vpWidth = viewportPanel->getWidth();
+            int vpHeight = viewportPanel->getHeight();
+            
+            viewportPanel->clearResizedFlag();
+            
+            LOG_INFO_C("Viewport resized: " + std::to_string(vpWidth) + "x" + std::to_string(vpHeight), "Engine");
+            
+            // Recreate swap chain with new viewport dimensions
+            if (vpWidth > 0 && vpHeight > 0) {
+                if (m_renderer->recreateSwapChain(vpWidth, vpHeight)) {
+                    // Update camera aspect ratio
+                    if (m_player) {
+                        float aspectRatio = static_cast<float>(vpWidth) / static_cast<float>(vpHeight);
+                        m_player->getCamera().setAspectRatio(aspectRatio);
+                    }
+                } else {
+                    LOG_ERROR_C("Failed to recreate swap chain during viewport resize", "Engine");
+                }
+            } else {
+                LOG_ERROR_C("Invalid viewport dimensions during resize: " + 
+                           std::to_string(vpWidth) + "x" + std::to_string(vpHeight), "Engine");
+            }
+        }
+    }
+#endif
+
+    // Check if GUI wants input
+    bool guiCapturesMouse = m_editorManager && m_editorManager->wantCaptureMouse();
+    (void)guiCapturesMouse; // May be unused
+    
+    // Editor camera movement (free-flight)
+    // The player object is used as the editor camera in editor mode
+    if (m_player) {
+        m_player->update(deltaTime);
+    }
+    
+    // Update world streaming around editor camera
+    if (m_player) {
+        glm::vec3 playerPos = m_player->getPosition();
+        m_world->update(WorldPos(static_cast<int>(playerPos.x), static_cast<int>(playerPos.y),
+                                 static_cast<int>(playerPos.z)));
+    } else {
+        m_world->update(WorldPos(0, 64, 0));
+    }
+
+    // Check for script changes (hot-reload works in editor)
+    if (m_scriptingEngine && m_scriptingEngine->isHotReloadEnabled()) {
+        m_scriptingEngine->checkForScriptChanges();
+    }
+
+    // Update world editor (terraforming, selection, etc.)
+    if (m_worldEditor) {
+        m_worldEditor->update(deltaTime);
+    }
+
+    // Update editor manager UI
+    if (m_editorManager) {
+        m_editorManager->update(deltaTime);
+    }
+    
+    // NOTE: Physics, AI, weather, time manager, etc. DO NOT update in editor mode
+    // They only update during play mode (in the regular update() method)
+}
+
 bool Engine::validateViewportState()
 {
 #ifdef _WIN32
@@ -1514,84 +1503,144 @@ void Engine::render()
         return;
     }
 
-    // VIEWPORT INTEGRATION - Viewport size is now controlled by the viewport panel
-    // The swap chain is created for the viewport child window, so we just use its dimensions
+    // EDITOR-GAME SEPARATION: Choose rendering path based on current mode
+    // - In play mode (m_inGame): render game world for gameplay testing
+    // - In editor mode: render editor preview for scene editing
+    if (m_inGame) {
+        renderGame();
+    } else {
+        renderEditor();
+    }
+}
 
-    // Set clear color (sky blue for editor viewport, even when no world exists)
-    // PROJECT-BASED WORKFLOW: Blank projects show empty viewport (sky blue)
-    // This is intentional and correct - worlds are created later via File > New Level
+void Engine::renderGame()
+{
+    // GAME MODE RENDERING: Renders the game world to viewport for play-in-editor testing
+    // This is used when user clicks "Play" button to test their game
+    
+    if (!m_renderer) {
+        return;
+    }
+
+    // Set clear color for game (sky blue)
     m_renderer->clearColor(0.53f, 0.81f, 0.92f, 1.0f);
 
     if (!m_renderer->beginFrame()) {
         // Swap chain not ready yet (viewport not initialized)
-        // This is normal during startup, just skip this frame
         return;
     }
 
-    // Set viewport to match swap chain size (which is now the viewport panel size)
+    // Set viewport to match swap chain size (viewport panel)
     m_renderer->setViewport(0, 0, m_renderer->getSwapchainWidth(),
                             m_renderer->getSwapchainHeight());
 
 #if defined(FRESH_OPENGL_SUPPORT) && defined(FRESH_GLEW_AVAILABLE)
-    // Clear depth buffer
     if (m_renderer->getAPI() == GraphicsAPI::OpenGL) {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        // Render voxel world ONLY if world exists (skip during world generation)
-        // PROJECT-BASED WORKFLOW: Blank projects have no world, viewport shows empty scene
+        // Render game world
         if (m_world && !m_isGeneratingWorld) {
             renderVoxelWorld();
         }
-        // Note: If no world exists, viewport shows clear color (empty scene)
-        // This is correct behavior for blank projects - use File > New Level to add content
-        // TODO: Add grid rendering for empty viewport
 
-        // Render crosshair overlay (only if world exists)
+        // Render crosshair in game mode
         if (m_world) {
             renderCrosshair();
         }
     }
 #endif 
-    // DirectX 11 rendering path
+
 #ifdef _WIN32
+    // DirectX 11 game rendering
     if (m_renderer->getAPI() == GraphicsAPI::DirectX11) {
-        // Render voxel world using DirectX 11 ONLY if world exists (skip during world generation)
         if (m_world && m_player && !m_isGeneratingWorld) {
             auto* dx11Context = dynamic_cast<DirectX11RenderContext*>(m_renderer.get());
             if (dx11Context) {
                 dx11Context->renderVoxelWorld(m_world.get(), m_player.get());
             }
         }
-        // Note: If no world exists, viewport shows clear color (empty scene with DirectX)
-        // The beginFrame() already cleared to sky blue, so empty viewport is visible
-        // TODO: Add grid rendering for empty DirectX viewport
     }
 
-    // DirectX 12 rendering path
+    // DirectX 12 game rendering
     if (m_renderer->getAPI() == GraphicsAPI::DirectX12) {
-        // Render voxel world using DirectX 12 ONLY if world exists (skip during world generation)
         if (m_world && m_player && !m_isGeneratingWorld) {
             auto* dx12Context = dynamic_cast<DirectX12RenderContext*>(m_renderer.get());
             if (dx12Context) {
                 dx12Context->renderVoxelWorld(m_world.get(), m_player.get());
             }
         }
-        // Note: If no world exists, viewport shows clear color (empty scene)
-        // TODO: Add grid rendering for empty DirectX12 viewport
     }
-#endif 
+#endif
+
+    m_renderer->endFrame();
+}
+
+void Engine::renderEditor()
+{
+    // EDITOR MODE RENDERING: Renders editor preview to viewport and editor UI
+    // This is the default mode where users build and edit their game
     
-    // Begin editor frame (ImGui/Win32 UI) before rendering editor UI
+    if (!m_renderer) {
+        return;
+    }
+
+    // Set clear color for editor (sky blue)
+    m_renderer->clearColor(0.53f, 0.81f, 0.92f, 1.0f);
+
+    if (!m_renderer->beginFrame()) {
+        // Swap chain not ready yet (viewport not initialized)
+        return;
+    }
+
+    // Set viewport to match swap chain size (viewport panel)
+    m_renderer->setViewport(0, 0, m_renderer->getSwapchainWidth(),
+                            m_renderer->getSwapchainHeight());
+
+#if defined(FRESH_OPENGL_SUPPORT) && defined(FRESH_GLEW_AVAILABLE)
+    if (m_renderer->getAPI() == GraphicsAPI::OpenGL) {
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        // Render editor preview of world (if exists)
+        if (m_world && !m_isGeneratingWorld) {
+            renderVoxelWorld();
+        }
+        // Note: If no world exists, viewport shows clear color (empty scene)
+        // This is correct for blank projects - use File > New Level to add content
+    }
+#endif
+
+#ifdef _WIN32
+    // DirectX 11 editor preview rendering
+    if (m_renderer->getAPI() == GraphicsAPI::DirectX11) {
+        if (m_world && m_player && !m_isGeneratingWorld) {
+            auto* dx11Context = dynamic_cast<DirectX11RenderContext*>(m_renderer.get());
+            if (dx11Context) {
+                dx11Context->renderVoxelWorld(m_world.get(), m_player.get());
+            }
+        }
+    }
+
+    // DirectX 12 editor preview rendering
+    if (m_renderer->getAPI() == GraphicsAPI::DirectX12) {
+        if (m_world && m_player && !m_isGeneratingWorld) {
+            auto* dx12Context = dynamic_cast<DirectX12RenderContext*>(m_renderer.get());
+            if (dx12Context) {
+                dx12Context->renderVoxelWorld(m_world.get(), m_player.get());
+            }
+        }
+    }
+#endif
+    
+    // Render editor UI (panels, gizmos, selection)
+    // This happens AFTER viewport content is rendered
     if (m_editorManager && m_editorManager->isInitialized()) {
         m_editorManager->beginFrame();
     }
 
-    // Render comprehensive editor UI (always visible, whether world exists or not)
     if (m_editorManager && m_editorManager->isInitialized() && m_editorManager->isVisible()) {
         m_editorManager->render();
     }
 
-    // End editor frame (render ImGui/Win32 UI)
     if (m_editorManager && m_editorManager->isInitialized()) {
         m_editorManager->endFrame();
     }

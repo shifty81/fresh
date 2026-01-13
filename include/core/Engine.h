@@ -104,7 +104,12 @@ public:
 private:
     void processInput();
     void update(float deltaTime);
+    void updateEditor(float deltaTime);  // Updates editor-mode systems only
     void render();
+    
+    // Separate rendering methods for editor and game modes
+    void renderGame();      // Renders game world to viewport (used in play mode)
+    void renderEditor();    // Renders editor preview to viewport (used in editor mode)
 
     // Viewport validation helper
     bool validateViewportState();
