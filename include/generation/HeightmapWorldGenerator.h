@@ -1,6 +1,7 @@
 #pragma once
 
-#include "generation/WorldGenerator.h"
+#include "generation/IWorldGenerator.h"
+#include "voxel/VoxelTypes.h"
 #include <string>
 #include <vector>
 #include <memory>
@@ -77,7 +78,7 @@ struct HeightmapGeneratorParams
  * - Optional heightmap wrapping/tiling
  * - Bilinear interpolation for smooth terrain
  */
-class HeightmapWorldGenerator : public WorldGenerator
+class HeightmapWorldGenerator : public IWorldGenerator
 {
 public:
     HeightmapWorldGenerator();
@@ -97,12 +98,31 @@ public:
      */
     bool loadHeightmap(const std::string& filepath);
 
+    // IWorldGenerator interface implementation
     /**
-     * @brief Generate a chunk based on the heightmap
-     * @param chunk Chunk to generate
-     * @param chunkPos Chunk position
+     * @brief Get plugin metadata
      */
-    void generateChunk(Chunk* chunk, const ChunkPos& chunkPos) override;
+    WorldGeneratorMetadata getMetadata() const override;
+
+    /**
+     * @brief Generate a chunk based on the heightmap (IWorldGenerator interface)
+     * @param chunk Chunk to generate
+     */
+    void generateChunk(Chunk* chunk) override;
+
+    /**
+     * @brief Set the generation seed
+     * @param seed Random seed value
+     */
+    void setSeed(int seed) override { /* Heightmap doesn't use seed */ }
+
+    /**
+     * @brief Get the height at a world position
+     * @param x World X coordinate
+     * @param z World Z coordinate
+     * @return Height value (Y coordinate)
+     */
+    int getHeight(int x, int z) const override;
 
     /**
      * @brief Get the heightmap data
@@ -133,6 +153,13 @@ public:
     bool isHeightmapLoaded() const { return m_heightmapLoaded; }
 
 private:
+    /**
+     * @brief Generate a chunk based on the heightmap (helper method with position parameter)
+     * @param chunk Chunk to generate
+     * @param chunkPos Chunk position
+     */
+    void generateChunkInternal(Chunk* chunk, const ChunkPos& chunkPos);
+
     /**
      * @brief Determine block type based on height and layer configuration
      * @param normalizedHeight Height value (0.0 - 1.0)
