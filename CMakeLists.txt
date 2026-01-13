@@ -422,6 +422,8 @@ set(ENGINE_SOURCES
     src/voxel/ChunkStreamer.cpp
     src/generation/NoiseGenerator.cpp
     src/generation/TerrainGenerator.cpp
+    src/generation/BiomeSystem.cpp
+    src/generation/HeightmapWorldGenerator.cpp
     src/generation/World2DGenerator.cpp
     src/generation/WorldGeneratorFactory.cpp
     src/generation/WorldGenerationTask.cpp
@@ -593,6 +595,8 @@ set(ENGINE_HEADERS
     include/voxel/ChunkStreamer.h
     include/generation/NoiseGenerator.h
     include/generation/TerrainGenerator.h
+    include/generation/BiomeSystem.h
+    include/generation/HeightmapWorldGenerator.h
     include/generation/IWorldGenerator.h
     include/generation/WorldGenerationTask.h
     include/physics/PhysicsSystem.h
