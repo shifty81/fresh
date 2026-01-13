@@ -169,12 +169,12 @@ void HeightmapWorldGenerator::generateChunkInternal(Chunk* chunk, const ChunkPos
         return;
     }
     
-    const int chunkWorldX = chunkPos.x * Chunk::CHUNK_SIZE_X;
-    const int chunkWorldZ = chunkPos.z * Chunk::CHUNK_SIZE_Z;
+    const int chunkWorldX = chunkPos.x * CHUNK_SIZE;
+    const int chunkWorldZ = chunkPos.z * CHUNK_SIZE;
     
     // Generate terrain for each column in the chunk
-    for (int localX = 0; localX < Chunk::CHUNK_SIZE_X; ++localX) {
-        for (int localZ = 0; localZ < Chunk::CHUNK_SIZE_Z; ++localZ) {
+    for (int localX = 0; localX < CHUNK_SIZE; ++localX) {
+        for (int localZ = 0; localZ < CHUNK_SIZE; ++localZ) {
             int worldX = chunkWorldX + localX;
             int worldZ = chunkWorldZ + localZ;
             
@@ -188,7 +188,7 @@ void HeightmapWorldGenerator::generateChunkInternal(Chunk* chunk, const ChunkPos
             normalizedHeight = std::max(0.0f, std::min(1.0f, normalizedHeight));
             
             // Fill column from bottom to terrain height
-            for (int y = 0; y <= maxY && y < Chunk::CHUNK_SIZE_Y; ++y) {
+            for (int y = 0; y <= maxY && y < CHUNK_HEIGHT; ++y) {
                 int depthFromSurface = maxY - y;
                 VoxelType blockType = getBlockTypeForHeight(normalizedHeight, depthFromSurface);
                 
@@ -196,13 +196,13 @@ void HeightmapWorldGenerator::generateChunkInternal(Chunk* chunk, const ChunkPos
             }
             
             // Fill rest with air
-            for (int y = maxY + 1; y < Chunk::CHUNK_SIZE_Y; ++y) {
+            for (int y = maxY + 1; y < CHUNK_HEIGHT; ++y) {
                 chunk->setVoxel(localX, y, localZ, Voxel(VoxelType::Air));
             }
         }
     }
     
-    chunk->setDirty(true);
+    chunk->markDirty();
 }
 
 float HeightmapWorldGenerator::getTerrainHeight(int worldX, int worldZ) const
