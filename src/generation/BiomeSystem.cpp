@@ -212,7 +212,7 @@ void BiomeSystem::setupBiomeProperties()
         desert.roughness = 0.4f;
         desert.surfaceBlock = VoxelType::Sand;
         desert.subSurfaceBlock = VoxelType::Sand;
-        desert.stoneBlock = VoxelType::Sandstone;
+        desert.stoneBlock = VoxelType::SandStone;
         desert.mapColor = glm::vec3(0.9f, 0.8f, 0.5f);  // Sand yellow
         desert.treeDensity = 0.0f;
         desert.grassDensity = 0.05f;
@@ -231,7 +231,7 @@ void BiomeSystem::setupBiomeProperties()
         hotDesert.roughness = 0.5f;
         hotDesert.surfaceBlock = VoxelType::RedSand;
         hotDesert.subSurfaceBlock = VoxelType::RedSand;
-        hotDesert.stoneBlock = VoxelType::RedSandstone;
+        hotDesert.stoneBlock = VoxelType::RedSandStone;
         hotDesert.mapColor = glm::vec3(1.0f, 0.6f, 0.3f);  // Red sand
         hotDesert.treeDensity = 0.0f;
         hotDesert.grassDensity = 0.0f;
@@ -383,13 +383,12 @@ float BiomeSystem::generateTemperature(int worldX, int worldZ) const
     float latitudeTemp = 1.0f - std::min(latitude, 1.0f);  // Warmer at equator
     
     // Add noise for variation
-    float noiseValue = noise.fractalNoise(
+    float noiseValue = noise.fractalNoise2D(
         worldX * m_temperatureScale,
         worldZ * m_temperatureScale,
         static_cast<int>(m_temperatureOctaves),
-        2.0f,  // lacunarity
         0.5f,  // persistence
-        static_cast<int>(m_seed)
+        2.0f   // lacunarity
     );
     
     // Combine latitude and noise (latitude has more weight)
@@ -403,13 +402,12 @@ float BiomeSystem::generateHumidity(int worldX, int worldZ) const
     NoiseGenerator noise;
     
     // Humidity is purely noise-based (no latitude effect)
-    float noiseValue = noise.fractalNoise(
+    float noiseValue = noise.fractalNoise2D(
         worldX * m_humidityScale,
         worldZ * m_humidityScale,
         static_cast<int>(m_humidityOctaves),
-        2.0f,  // lacunarity
         0.5f,  // persistence
-        static_cast<int>(m_seed + 1000)  // Different seed for variety
+        2.0f   // lacunarity
     );
     
     // Normalize from [-1, 1] to [0, 1]
@@ -494,13 +492,12 @@ BiomeType BiomeSystem::getBiomeAt(int worldX, int worldZ) const
     
     // Simple elevation calculation (could be improved with terrain generator)
     NoiseGenerator noise;
-    float elevation = noise.fractalNoise(
+    float elevation = noise.fractalNoise2D(
         worldX * 0.001f,
         worldZ * 0.001f,
         4,
-        2.0f,
-        0.5f,
-        static_cast<int>(m_seed + 2000)
+        0.5f,  // persistence
+        2.0f   // lacunarity
     ) * 0.5f + 0.5f;
     
     return selectBiome(temperature, humidity, elevation);

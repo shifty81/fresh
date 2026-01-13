@@ -134,7 +134,36 @@ bool HeightmapWorldGenerator::loadHeightmap(const std::string& filepath)
     return true;
 }
 
-void HeightmapWorldGenerator::generateChunk(Chunk* chunk, const ChunkPos& chunkPos)
+WorldGeneratorMetadata HeightmapWorldGenerator::getMetadata() const
+{
+    return {
+        "Heightmap World Generator",       // name
+        "heightmap_world_generator",       // id
+        "Generates terrain from heightmap images", // description
+        "1.0.0",                           // version
+        "Fresh Engine",                    // author
+        false,                             // is2D
+        true,                              // is3D
+        {"terrain", "heightmap", "image"}  // tags
+    };
+}
+
+void HeightmapWorldGenerator::generateChunk(Chunk* chunk)
+{
+    if (!chunk) {
+        return;
+    }
+    
+    const ChunkPos& chunkPos = chunk->getPosition();
+    generateChunkInternal(chunk, chunkPos);
+}
+
+int HeightmapWorldGenerator::getHeight(int x, int z) const
+{
+    return static_cast<int>(getTerrainHeight(x, z));
+}
+
+void HeightmapWorldGenerator::generateChunkInternal(Chunk* chunk, const ChunkPos& chunkPos)
 {
     if (!chunk || !m_heightmapLoaded) {
         return;
