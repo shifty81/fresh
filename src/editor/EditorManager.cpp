@@ -1576,8 +1576,11 @@ void EditorManager::newProject()
         if (!folderPath.filename().empty()) {
             projectName = folderPath.filename().string();
         }
+    } catch (const std::filesystem::filesystem_error& e) {
+        LOG_WARNING_C("Failed to extract project name from path (filesystem error), using default: " + 
+                      std::string(e.what()), "EditorManager");
     } catch (const std::exception& e) {
-        LOG_WARNING_C("Failed to extract project name from path, using default: " + 
+        LOG_WARNING_C("Failed to extract project name from path (unexpected error), using default: " + 
                       std::string(e.what()), "EditorManager");
     }
     
