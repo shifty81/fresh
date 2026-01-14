@@ -1546,14 +1546,49 @@ void EditorManager::newProject()
         }
     }
     
-    // TODO: Create a native Win32 dialog for project creation
-    // For now, use a simple input dialog
-    LOG_INFO_C("Creating new project (placeholder implementation)", "EditorManager");
+    // Use FileDialogManager to select a folder for the new project
+    LOG_INFO_C("Creating new project - selecting folder", "EditorManager");
     
-    // Placeholder: Create a blank project in a default location
+    // Check if file dialogs are available
+    if (!FileDialogManager::isAvailable()) {
+        LOG_ERROR_C("File dialogs not available - NFD not compiled in", "EditorManager");
+        m_windowsDialogManager->showMessageBox(
+            "Feature Not Available",
+            "File dialogs are not available. Please rebuild with Native File Dialog Extended (NFD) support.",
+            MessageBoxButtons::OK,
+            MessageBoxIcon::Error
+        );
+        return;
+    }
+    
+    // Select folder where project will be created
+    std::string selectedFolder = FileDialogManager::pickFolder("./Projects");
+    
+    if (selectedFolder.empty()) {
+        LOG_INFO_C("New project cancelled - no folder selected", "EditorManager");
+        return;
+    }
+    
+    // Extract project name from the selected folder path
     std::string projectName = "UntitledProject";
-    std::string projectPath = "./Projects/" + projectName;
+    try {
+        std::filesystem::path folderPath(selectedFolder);
+        if (!folderPath.filename().empty()) {
+            projectName = folderPath.filename().string();
+        }
+    } catch (const std::filesystem::filesystem_error& e) {
+        LOG_WARNING_C("Failed to extract project name from path (filesystem error), using default: " + 
+                      std::string(e.what()), "EditorManager");
+    } catch (const std::exception& e) {
+        LOG_WARNING_C("Failed to extract project name from path (unexpected error), using default: " + 
+                      std::string(e.what()), "EditorManager");
+    }
+    
+    // TODO: In the future, show a dialog to get project name and template type
+    std::string projectPath = selectedFolder;
     std::string templateType = "Blank";
+    
+    LOG_INFO_C("Creating project '" + projectName + "' at: " + projectPath, "EditorManager");
     
     if (m_projectManager->createNewProject(projectName, projectPath, templateType)) {
         LOG_INFO_C("Project created successfully: " + projectName, "EditorManager");
@@ -1600,11 +1635,36 @@ void EditorManager::openProject()
         }
     }
     
-    // TODO: Show file dialog to select .freshproj file
-    LOG_INFO_C("Opening project (placeholder implementation)", "EditorManager");
+    // Use FileDialogManager to select .freshproj file
+    LOG_INFO_C("Opening project - selecting project file", "EditorManager");
     
-    // Placeholder: Try to open a test project
-    std::string projectPath = "./Projects/UntitledProject/UntitledProject.freshproj";
+    // Check if file dialogs are available
+    if (!FileDialogManager::isAvailable()) {
+        LOG_ERROR_C("File dialogs not available - NFD not compiled in", "EditorManager");
+        m_windowsDialogManager->showMessageBox(
+            "Feature Not Available",
+            "File dialogs are not available. Please rebuild with Native File Dialog Extended (NFD) support.",
+            MessageBoxButtons::OK,
+            MessageBoxIcon::Error
+        );
+        return;
+    }
+    
+    // Define filter for .freshproj files
+    std::vector<FileDialogManager::Filter> filters = {
+        { "Fresh Project Files", "freshproj" },
+        { "All Files", "*" }
+    };
+    
+    // Open file dialog to select project file
+    std::string projectPath = FileDialogManager::openFile(filters, "./Projects");
+    
+    if (projectPath.empty()) {
+        LOG_INFO_C("Open project cancelled - no file selected", "EditorManager");
+        return;
+    }
+    
+    LOG_INFO_C("Opening project file: " + projectPath, "EditorManager");
     
     if (m_projectManager->openProject(projectPath)) {
         LOG_INFO_C("Project opened successfully: " + m_projectManager->getProjectName(), "EditorManager");
