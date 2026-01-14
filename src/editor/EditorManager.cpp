@@ -1571,9 +1571,14 @@ void EditorManager::newProject()
     
     // Extract project name from the selected folder path
     std::string projectName = "UntitledProject";
-    size_t lastSlash = selectedFolder.find_last_of("/\\");
-    if (lastSlash != std::string::npos && lastSlash + 1 < selectedFolder.length()) {
-        projectName = selectedFolder.substr(lastSlash + 1);
+    try {
+        std::filesystem::path folderPath(selectedFolder);
+        if (!folderPath.filename().empty()) {
+            projectName = folderPath.filename().string();
+        }
+    } catch (const std::exception& e) {
+        LOG_WARNING_C("Failed to extract project name from path, using default: " + 
+                      std::string(e.what()), "EditorManager");
     }
     
     // TODO: In the future, show a dialog to get project name and template type
