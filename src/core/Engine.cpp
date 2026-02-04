@@ -160,6 +160,12 @@ constexpr float MAX_INTERACTION_DISTANCE = 5.0f;
 constexpr float CROSSHAIR_SIZE = 0.02f;
 constexpr float CROSSHAIR_LINE_WIDTH = 2.0f;
 constexpr int SHADER_INFO_LOG_SIZE = 512;
+
+// Camera and spawn constants
+constexpr float DEFAULT_CAMERA_YAW = -90.0f;    // Look forward (negative X direction)
+constexpr float DEFAULT_CAMERA_PITCH = 0.0f;    // Level horizon
+constexpr glm::vec3 DEFAULT_SPAWN_POSITION(0.0f, 100.0f, 0.0f);  // Center, above terrain
+
 #if defined(FRESH_OPENGL_SUPPORT) && defined(FRESH_GLEW_AVAILABLE)
 [[maybe_unused]] const char* VOXEL_VERTEX_SHADER = "shaders/voxel.vert";
 [[maybe_unused]] const char* VOXEL_FRAGMENT_SHADER = "shaders/voxel.frag";
@@ -2739,11 +2745,11 @@ void Engine::setupNativeToolbar()
     toolbar->addButton(5006, "Camera", cameraIcon, [this]() {
         LOG_INFO_C("Camera reset button clicked", "Engine");
         if (m_player) {
-            // Reset player to spawn position (0, 100, 0)
-            m_player->setPosition(glm::vec3(0.0f, 100.0f, 0.0f));
+            // Reset player to default spawn position
+            m_player->setPosition(DEFAULT_SPAWN_POSITION);
             // Reset camera rotation to default (look forward)
-            m_player->getCamera().setYaw(-90.0f);
-            m_player->getCamera().setPitch(0.0f);
+            m_player->getCamera().setYaw(DEFAULT_CAMERA_YAW);
+            m_player->getCamera().setPitch(DEFAULT_CAMERA_PITCH);
             LOG_INFO_C("Camera reset to default position and rotation", "Engine");
         } else {
             LOG_WARNING_C("Cannot reset camera - Player not initialized", "Engine");
