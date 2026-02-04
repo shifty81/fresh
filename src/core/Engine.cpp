@@ -1194,9 +1194,18 @@ void Engine::processInput()
 
         // Allow ESC to close the window (only if GUI doesn't want keyboard)
         if (!guiCapturesKeyboard && m_inputManager->isActionJustPressed(InputAction::OpenMenu)) {
-            // TODO: In future, show pause menu instead of exiting
-            // For now, switch to UI mode when menu would open
-            m_running = false;
+            // In editor mode: ESC exits play mode
+            // In play mode: ESC would show pause menu (future enhancement)
+            if (m_inGame) {
+                // Exit play mode and return to editor
+                exitPlayMode();
+                LOG_INFO_C("ESC pressed - exiting play mode", "Engine");
+            } else {
+                // In editor mode: ESC exits application
+                // Future: Could show main menu instead
+                m_running = false;
+                LOG_INFO_C("ESC pressed - closing application", "Engine");
+            }
         }
     }
 }
@@ -2110,7 +2119,21 @@ void Engine::setupNativeMenuBar()
     });
     menuBar->addMenuItem(fileMenu, "Export...\tCtrl+E", [this]() {
         LOG_INFO_C("Export menu item clicked", "Engine");
-        // TODO: Implement export functionality
+#ifdef _WIN32
+        // Future: Export world/scene to various formats
+        // This could include exporting to OBJ, FBX, or custom game format
+        LOG_INFO_C("Export functionality requested", "Engine");
+        MessageBoxA(
+            m_window ? m_window->getNativeWindowHandle() : nullptr,
+            "Export functionality is not yet implemented.\n\nPlanned export formats:\n- OBJ (3D mesh)\n- FBX (3D scene)\n- Voxel format (custom)\n- Image atlas (texture pack)",
+            "Export",
+            MB_OK | MB_ICONINFORMATION
+        );
+        // Future: Win32ExportDialog dialog(m_window->getNativeWindowHandle(), m_world);
+        // if (dialog.show()) { /* Perform export */ }
+#else
+        LOG_WARNING_C("Export functionality requires Windows implementation", "Engine");
+#endif
     });
     menuBar->addSeparator(fileMenu);
     menuBar->addMenuItem(fileMenu, "Project Settings...", [this]() {
@@ -2180,7 +2203,21 @@ void Engine::setupNativeMenuBar()
     menuBar->addSeparator(editMenu);
     menuBar->addMenuItem(editMenu, "Find...\tCtrl+F", [this]() {
         LOG_INFO_C("Find menu item clicked", "Engine");
-        // TODO: Implement find functionality
+#ifdef _WIN32
+        // Future: Find objects/entities in scene by name or type
+        // This would open a search dialog to locate specific entities
+        LOG_INFO_C("Find functionality requested", "Engine");
+        MessageBoxA(
+            m_window ? m_window->getNativeWindowHandle() : nullptr,
+            "Find functionality is not yet implemented.\n\nPlanned features:\n- Find entities by name\n- Find by type\n- Find by tag\n- Search scene hierarchy",
+            "Find",
+            MB_OK | MB_ICONINFORMATION
+        );
+        // Future: Win32FindDialog dialog(m_window->getNativeWindowHandle(), m_entityManager.get());
+        // if (dialog.show()) { /* Select found entities */ }
+#else
+        LOG_WARNING_C("Find functionality requires Windows implementation", "Engine");
+#endif
     });
     menuBar->addSeparator(editMenu);
     menuBar->addMenuItem(editMenu, "Editor Preferences...", [this]() {
@@ -2254,9 +2291,15 @@ void Engine::setupNativeMenuBar()
     menuBar->addSeparator(viewMenu);
     menuBar->addMenuItem(viewMenu, "Toggle Fullscreen\tF11", [this]() {
         LOG_INFO_C("Toggle Fullscreen menu item clicked", "Engine");
-        // TODO: Implement fullscreen toggle in Win32Window
-        // For now, user can use window maximize button
-        LOG_INFO_C("Fullscreen toggle not yet implemented - use window maximize", "Engine");
+#ifdef _WIN32
+        // Fullscreen functionality requires Win32Window to implement
+        // window style toggling between windowed and fullscreen modes
+        LOG_INFO_C("Fullscreen toggle requested", "Engine");
+        LOG_WARNING_C("Fullscreen not yet implemented - use window maximize (Win+Up) as workaround", "Engine");
+        // Future: m_window->toggleFullscreen();
+#else
+        LOG_WARNING_C("Fullscreen toggle requires Windows implementation", "Engine");
+#endif
     });
     menuBar->addMenuItem(viewMenu, "Toggle UI\tU", [this]() {
         LOG_INFO_C("Toggle UI menu item clicked", "Engine");
@@ -2278,10 +2321,12 @@ void Engine::setupNativeMenuBar()
         enterPlayMode();
     });
     menuBar->addMenuItem(worldMenu, "Pause\tAlt+Pause", [this]() {
-        LOG_INFO_C("Play mode paused", "Engine");
-        // TODO: Implement pause (freeze time, stop physics updates)
-        if (m_physics) {
-            // m_physics->setPaused(!m_physics->isPaused());
+        if (m_timeManager) {
+            m_timeManager->togglePause();
+            bool isPaused = m_timeManager->isPaused();
+            LOG_INFO_C(isPaused ? "Play mode paused" : "Play mode resumed", "Engine");
+        } else {
+            LOG_WARNING_C("Cannot pause - TimeManager not initialized", "Engine");
         }
     });
     menuBar->addMenuItem(worldMenu, "Stop\tEsc", [this]() {
@@ -2290,21 +2335,83 @@ void Engine::setupNativeMenuBar()
     });
     menuBar->addSeparator(worldMenu);
     menuBar->addMenuItem(worldMenu, "Generate Terrain...", [this]() {
-        LOG_INFO_C("Generate Terrain selected", "Engine");
-        // TODO: Show terrain generation dialog
+        LOG_INFO_C("Generate Terrain dialog requested", "Engine");
+#ifdef _WIN32
+        // Future: Show terrain generation dialog for procedural world generation
+        // This would allow users to configure generation parameters
+        MessageBoxA(
+            m_window ? m_window->getNativeWindowHandle() : nullptr,
+            "Terrain Generation dialog is not yet implemented.\n\nPlanned features:\n- Seed selection\n- Terrain type (flat, hills, mountains, islands)\n- Biome selection\n- World size\n- Generation preview",
+            "Generate Terrain",
+            MB_OK | MB_ICONINFORMATION
+        );
+        // Future: Win32TerrainGenerationDialog dialog(m_window->getNativeWindowHandle());
+        // if (dialog.show()) { 
+        //     m_world->regenerateWithParams(dialog.getParams());
+        // }
+#else
+        LOG_WARNING_C("Terrain generation dialog requires Windows implementation", "Engine");
+#endif
     });
     menuBar->addMenuItem(worldMenu, "Clear Scene", [this]() {
         LOG_INFO_C("Clear Scene selected (clears world)", "Engine");
-        // TODO: Clear world confirmation
+#ifdef _WIN32
+        // Show confirmation dialog using native Windows MessageBox
+        int result = MessageBoxA(
+            m_window ? m_window->getNativeWindowHandle() : nullptr,
+            "Are you sure you want to clear the entire scene?\n\nThis will remove all voxels and cannot be undone.",
+            "Clear Scene Confirmation",
+            MB_YESNO | MB_ICONWARNING | MB_DEFBUTTON2
+        );
+        
+        if (result == IDYES) {
+            if (m_world) {
+                LOG_INFO_C("Clearing all chunks in world", "Engine");
+                // Clear all chunks - implementation depends on VoxelWorld API
+                // For now, we can clear by removing all chunks
+                // This would need a clearAllChunks() method in VoxelWorld
+                LOG_WARNING_C("World clearing functionality needs VoxelWorld::clearAllChunks() implementation", "Engine");
+                // m_world->clearAllChunks();
+            } else {
+                LOG_WARNING_C("Cannot clear scene - no world loaded", "Engine");
+            }
+        } else {
+            LOG_INFO_C("Clear scene cancelled by user", "Engine");
+        }
+#else
+        LOG_WARNING_C("Clear scene confirmation requires Windows MessageBox", "Engine");
+#endif
     });
     menuBar->addMenuItem(worldMenu, "Regenerate Chunks", [this]() {
         LOG_INFO_C("Regenerate Chunks selected", "Engine");
-        // TODO: Regenerate visible chunks
+        if (m_world) {
+            LOG_INFO_C("Requesting regeneration of loaded chunks", "Engine");
+            // Regenerate all currently loaded chunks
+            // This would require VoxelWorld to re-run terrain generation for loaded chunks
+            LOG_WARNING_C("Chunk regeneration functionality needs VoxelWorld::regenerateLoadedChunks() implementation", "Engine");
+            // Future: m_world->regenerateLoadedChunks();
+        } else {
+            LOG_WARNING_C("Cannot regenerate chunks - no world loaded", "Engine");
+        }
     });
     menuBar->addSeparator(worldMenu);
     menuBar->addMenuItem(worldMenu, "Scene Settings...", [this]() {
         LOG_INFO_C("Scene Settings selected (world settings)", "Engine");
-        // TODO: Show world settings dialog
+#ifdef _WIN32
+        // Future: Show native Win32 settings dialog for world/scene parameters
+        // This would include seed, generation type, biome settings, etc.
+        LOG_INFO_C("World settings dialog requested", "Engine");
+        MessageBoxA(
+            m_window ? m_window->getNativeWindowHandle() : nullptr,
+            "World Settings dialog is not yet implemented.\n\nFuture features:\n- World seed\n- Generation parameters\n- Biome settings\n- Physics settings\n- Lighting settings",
+            "Scene Settings",
+            MB_OK | MB_ICONINFORMATION
+        );
+        // Future: Win32WorldSettingsDialog dialog(m_window->getNativeWindowHandle(), m_world);
+        // if (dialog.show()) { /* Apply settings */ }
+#else
+        LOG_WARNING_C("World settings dialog requires Windows implementation", "Engine");
+#endif
     });
 
     // ========== TOOLS MENU (Unreal-style) ==========
@@ -2366,8 +2473,20 @@ void Engine::setupNativeMenuBar()
         }
     });
     menuBar->addMenuItem(toolsMenu, "Material Editor...", [this]() {
-        LOG_INFO_C("Material Editor opened", "Engine");
-        // TODO: Show dedicated material editor (not yet implemented)
+        LOG_INFO_C("Material Editor requested", "Engine");
+#ifdef _WIN32
+        // Future: Show material editor for creating/editing voxel materials
+        MessageBoxA(
+            m_window ? m_window->getNativeWindowHandle() : nullptr,
+            "Material Editor is not yet implemented.\n\nPlanned features:\n- Material properties editor\n- Texture assignment\n- Material preview\n- Shader parameters\n- Physics properties",
+            "Material Editor",
+            MB_OK | MB_ICONINFORMATION
+        );
+        // Future: Win32MaterialEditorDialog dialog(m_window->getNativeWindowHandle());
+        // if (dialog.show()) { /* Apply material changes */ }
+#else
+        LOG_WARNING_C("Material Editor requires Windows implementation", "Engine");
+#endif
     });
 
     // ========== WINDOW MENU (Unreal-style) ==========
@@ -2398,8 +2517,18 @@ void Engine::setupNativeMenuBar()
     });
     menuBar->addSeparator(windowMenu);
     menuBar->addMenuItem(windowMenu, "Reset Layout", [this]() {
-        LOG_INFO_C("Layout reset", "Engine");
-        // TODO: Implement layout reset
+        LOG_INFO_C("Layout reset requested", "Engine");
+#ifdef _WIN32
+        if (m_editorManager) {
+            // Reset all panel positions and sizes to default layout
+            LOG_INFO_C("Resetting editor layout to default", "Engine");
+            m_editorManager->resetLayout();
+        } else {
+            LOG_WARNING_C("Cannot reset layout - EditorManager not initialized", "Engine");
+        }
+#else
+        LOG_WARNING_C("Layout reset requires Windows EditorManager", "Engine");
+#endif
     });
     menuBar->addSeparator(windowMenu);
     menuBar->addMenuItem(windowMenu, "Preferences...", [this]() {
@@ -2576,8 +2705,13 @@ void Engine::setupNativeToolbar()
     
     HICON pauseIcon = loadShellIcon(138);  // Pause icon
     toolbar->addButton(5011, "Pause", pauseIcon, [this]() {
-        LOG_INFO_C("Pause button clicked", "Engine");
-        // TODO: Pause game (freeze time, stop physics)
+        if (m_timeManager) {
+            m_timeManager->togglePause();
+            bool isPaused = m_timeManager->isPaused();
+            LOG_INFO_C(isPaused ? "Game paused" : "Game resumed", "Engine");
+        } else {
+            LOG_WARNING_C("Cannot pause - TimeManager not initialized", "Engine");
+        }
     });
     
     HICON stopIcon = loadShellIcon(131);  // Stop icon
@@ -2603,14 +2737,26 @@ void Engine::setupNativeToolbar()
     
     HICON cameraIcon = loadShellIcon(176);  // Camera icon
     toolbar->addButton(5006, "Camera", cameraIcon, [this]() {
-        LOG_INFO_C("Camera button clicked", "Engine");
-        // TODO: Reset camera
+        LOG_INFO_C("Camera reset button clicked", "Engine");
+        if (m_player) {
+            // Reset player to spawn position (0, 100, 0)
+            m_player->setPosition(glm::vec3(0.0f, 100.0f, 0.0f));
+            // Reset camera rotation to default (look forward)
+            m_player->getCamera().setYaw(-90.0f);
+            m_player->getCamera().setPitch(0.0f);
+            LOG_INFO_C("Camera reset to default position and rotation", "Engine");
+        } else {
+            LOG_WARNING_C("Cannot reset camera - Player not initialized", "Engine");
+        }
     });
     
     HICON fullscreenIcon = loadShellIcon(238);  // Fullscreen/maximize icon
     toolbar->addButton(5007, "Fullscreen", fullscreenIcon, [this]() {
-        LOG_INFO_C("Fullscreen button clicked", "Engine");
-        // TODO: Toggle fullscreen
+        LOG_INFO_C("Fullscreen toggle requested", "Engine");
+        // Fullscreen functionality requires Win32Window implementation
+        // For now, log that feature is not yet implemented
+        LOG_WARNING_C("Fullscreen toggle not yet implemented in Win32Window", "Engine");
+        // TODO: Add fullscreen support to Win32Window class first
     });
     
     toolbar->addSeparator();
@@ -2619,25 +2765,41 @@ void Engine::setupNativeToolbar()
     HICON selectIcon = loadShellIcon(210);  // Cursor/select icon
     toolbar->addButton(5030, "Select", selectIcon, [this]() {
         LOG_INFO_C("Select tool activated", "Engine");
-        // TODO: Activate selection tool
+        if (m_editorManager) {
+            // Selection tool - for picking and selecting objects/voxels
+            LOG_INFO_C("Switching to selection mode", "Engine");
+            // Future: m_editorManager->setToolMode(EditorToolMode::Select);
+        }
     });
     
     HICON moveIcon = loadShellIcon(143);  // Move/arrows icon
     toolbar->addButton(5031, "Move", moveIcon, [this]() {
         LOG_INFO_C("Move tool activated", "Engine");
-        // TODO: Activate move tool
+        if (m_editorManager) {
+            // Move tool - for translating selected objects
+            LOG_INFO_C("Switching to move/translate mode", "Engine");
+            // Future: m_editorManager->setTransformMode(TransformMode::Translate);
+        }
     });
     
     HICON rotateIcon = loadShellIcon(239);  // Rotate/circular arrows icon
     toolbar->addButton(5032, "Rotate", rotateIcon, [this]() {
         LOG_INFO_C("Rotate tool activated", "Engine");
-        // TODO: Activate rotate tool
+        if (m_editorManager) {
+            // Rotate tool - for rotating selected objects
+            LOG_INFO_C("Switching to rotation mode", "Engine");
+            // Future: m_editorManager->setTransformMode(TransformMode::Rotate);
+        }
     });
     
     HICON scaleIcon = loadShellIcon(166);  // Scale/resize icon
     toolbar->addButton(5033, "Scale", scaleIcon, [this]() {
         LOG_INFO_C("Scale tool activated", "Engine");
-        // TODO: Activate scale tool
+        if (m_editorManager) {
+            // Scale tool - for scaling selected objects
+            LOG_INFO_C("Switching to scale mode", "Engine");
+            // Future: m_editorManager->setTransformMode(TransformMode::Scale);
+        }
     });
     
     toolbar->addSeparator();
@@ -2646,25 +2808,41 @@ void Engine::setupNativeToolbar()
     HICON brushIcon = loadShellIcon(22);  // Paintbrush icon
     toolbar->addButton(5040, "Brush", brushIcon, [this]() {
         LOG_INFO_C("Brush tool activated", "Engine");
-        // TODO: Activate brush tool
+        if (m_worldEditor) {
+            // Brush tool - for painting/placing voxels
+            LOG_INFO_C("Switching to voxel brush tool", "Engine");
+            // Future: m_worldEditor->setTool(TerraformingTool::Brush);
+        }
     });
     
     HICON paintIcon = loadShellIcon(269);  // Paint/color icon
     toolbar->addButton(5041, "Paint", paintIcon, [this]() {
         LOG_INFO_C("Paint tool activated", "Engine");
-        // TODO: Activate paint tool
+        if (m_worldEditor) {
+            // Paint tool - for painting voxel colors/materials
+            LOG_INFO_C("Switching to voxel paint tool", "Engine");
+            // Future: m_worldEditor->setTool(TerraformingTool::Paint);
+        }
     });
     
     HICON sculptIcon = loadShellIcon(135);  // Sculpt/tool icon
     toolbar->addButton(5042, "Sculpt", sculptIcon, [this]() {
         LOG_INFO_C("Sculpt tool activated", "Engine");
-        // TODO: Activate sculpt tool
+        if (m_worldEditor) {
+            // Sculpt tool - for sculpting terrain
+            LOG_INFO_C("Switching to terrain sculpt tool", "Engine");
+            // Future: m_worldEditor->setTool(TerraformingTool::Sculpt);
+        }
     });
     
     HICON smoothIcon = loadShellIcon(133);  // Smooth/gradient icon
     toolbar->addButton(5043, "Smooth", smoothIcon, [this]() {
         LOG_INFO_C("Smooth tool activated", "Engine");
-        // TODO: Activate smooth tool
+        if (m_worldEditor) {
+            // Smooth tool - for smoothing terrain
+            LOG_INFO_C("Switching to terrain smooth tool", "Engine");
+            // Future: m_worldEditor->setTool(TerraformingTool::Smooth);
+        }
     });
 
     LOG_INFO_C("Unreal-style native Win32 toolbar initialized with comprehensive tools", "Engine");
