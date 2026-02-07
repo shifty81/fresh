@@ -1122,9 +1122,49 @@ bool EditorManager::updateWorld(VoxelWorld* world, WorldEditor* worldEditor)
 
 bool EditorManager::wantCaptureMouse() const
 {
-    // For Windows native UI, check if any UI element is capturing mouse
-    // For now, return false to allow normal game interaction
+#ifdef _WIN32
+    // Check if the mouse cursor is over any editor UI panel (not the viewport).
+    // If the cursor is over a UI panel, the editor wants to capture mouse input
+    // so that clicks do not leak through to the viewport/scene.
+    if (!m_visible) {
+        return false;
+    }
+
+    POINT pt;
+    if (!GetCursorPos(&pt)) {
+        return false;
+    }
+
+    // If the mouse is inside the viewport, the editor does NOT want to capture it
+    // — let the scene handle it instead.
+    if (m_viewportPanel && m_viewportPanel->isMouseInViewport(pt.x, pt.y)) {
+        return false;
+    }
+
+    // Check each native UI panel; if the cursor is over any of them, capture.
+    auto isCursorOverPanel = [&pt](HWND hwnd) -> bool {
+        if (!hwnd || !IsWindowVisible(hwnd)) {
+            return false;
+        }
+        RECT rc;
+        if (GetWindowRect(hwnd, &rc) && PtInRect(&rc, pt)) {
+            return true;
+        }
+        return false;
+    };
+
+    if (m_nativeInspector && isCursorOverPanel(m_nativeInspector->getHandle())) return true;
+    if (m_nativeSceneHierarchy && isCursorOverPanel(m_nativeSceneHierarchy->getHandle())) return true;
+    if (m_nativeContentBrowser && isCursorOverPanel(m_nativeContentBrowser->getHandle())) return true;
+    if (m_nativeConsole && isCursorOverPanel(m_nativeConsole->getHandle())) return true;
+    if (m_nativeTerraformingPanel && isCursorOverPanel(m_nativeTerraformingPanel->getHandle())) return true;
+    if (m_statusBar && isCursorOverPanel(m_statusBar->getHandle())) return true;
+
     return false;
+#else
+    // For non-Windows platforms, return false to allow normal game interaction
+    return false;
+#endif
 }
 
 bool EditorManager::wantCaptureKeyboard() const
