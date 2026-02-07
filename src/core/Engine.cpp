@@ -1436,10 +1436,31 @@ void Engine::updateEditor(float deltaTime)
 
     // Check if GUI wants input
     bool guiCapturesMouse = m_editorManager && m_editorManager->wantCaptureMouse();
-    (void)guiCapturesMouse; // May be unused
-    
-    // Editor camera movement (free-flight)
-    // The player object is used as the editor camera in editor mode
+
+    // Check if mouse is within the viewport for scene interaction
+    bool mouseInViewport = false;
+#ifdef _WIN32
+    if (m_editorManager && m_editorManager->getViewportPanel()) {
+        POINT pt;
+        if (GetCursorPos(&pt)) {
+            mouseInViewport = m_editorManager->getViewportPanel()->isMouseInViewport(pt.x, pt.y);
+        }
+    }
+#endif
+
+    // Editor camera movement (free-flight) and Unreal-style right-click-drag look
+    // Only process camera mouse input when cursor is in the viewport and GUI doesn't want it
+    if (m_player && m_inputManager && !guiCapturesMouse && mouseInViewport) {
+        // Unreal-style: hold right mouse button to look around
+        if (m_inputManager->isMouseButtonPressed(MOUSE_BUTTON_RIGHT)) {
+            glm::vec2 mouseDelta = m_inputManager->getMouseDelta();
+            if (glm::length(mouseDelta) > 0.0f) {
+                m_player->handleMouseMovement(mouseDelta.x, mouseDelta.y);
+            }
+        }
+    }
+
+    // Always allow keyboard-based editor camera movement (WASD) when not captured by GUI
     if (m_player) {
         m_player->update(deltaTime);
     }

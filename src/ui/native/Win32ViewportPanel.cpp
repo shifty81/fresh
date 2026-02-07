@@ -2,6 +2,7 @@
 
 #include "ui/native/Win32ViewportPanel.h"
 #include "core/Logger.h"
+#include <windowsx.h>
 
 namespace fresh
 {
@@ -228,6 +229,39 @@ LRESULT CALLBACK Win32ViewportPanel::WindowProc(HWND hwnd, UINT msg, WPARAM wPar
             // Don't allow non-client area painting to interfere with DirectX rendering
             // This is important for child window viewport rendering
             return 0;
+
+        // Forward mouse and keyboard messages to the parent window so the
+        // input manager can process them.  In Win32, messages are delivered
+        // to the child window that contains the cursor.  Without forwarding,
+        // clicks and movement inside the viewport are silently consumed by
+        // DefWindowProcW and never reach the engine's input callbacks.
+        case WM_LBUTTONDOWN:
+        case WM_LBUTTONUP:
+        case WM_RBUTTONDOWN:
+        case WM_RBUTTONUP:
+        case WM_MBUTTONDOWN:
+        case WM_MBUTTONUP:
+        case WM_MOUSEMOVE: {
+            if (panel->m_parent) {
+                // Convert viewport-local coordinates to parent-client coordinates
+                POINT pt = { GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam) };
+                MapWindowPoints(hwnd, panel->m_parent, &pt, 1);
+                LPARAM parentLParam = MAKELPARAM(pt.x, pt.y);
+                // Forward to parent with converted coordinates
+                return SendMessage(panel->m_parent, msg, wParam, parentLParam);
+            }
+            break;
+        }
+
+        case WM_KEYDOWN:
+        case WM_KEYUP:
+        case WM_SYSKEYDOWN:
+        case WM_SYSKEYUP: {
+            if (panel->m_parent) {
+                return SendMessage(panel->m_parent, msg, wParam, lParam);
+            }
+            break;
+        }
 
         case WM_DESTROY:
             panel->m_hwnd = nullptr;
