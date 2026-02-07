@@ -1142,7 +1142,7 @@ bool EditorManager::wantCaptureMouse() const
     }
 
     // Check each native UI panel; if the cursor is over any of them, capture.
-    auto isOverPanel = [&pt](HWND hwnd) -> bool {
+    auto isCursorOverPanel = [&pt](HWND hwnd) -> bool {
         if (!hwnd || !IsWindowVisible(hwnd)) {
             return false;
         }
@@ -1153,12 +1153,12 @@ bool EditorManager::wantCaptureMouse() const
         return false;
     };
 
-    if (m_nativeInspector && isOverPanel(m_nativeInspector->getHandle())) return true;
-    if (m_nativeSceneHierarchy && isOverPanel(m_nativeSceneHierarchy->getHandle())) return true;
-    if (m_nativeContentBrowser && isOverPanel(m_nativeContentBrowser->getHandle())) return true;
-    if (m_nativeConsole && isOverPanel(m_nativeConsole->getHandle())) return true;
-    if (m_nativeTerraformingPanel && isOverPanel(m_nativeTerraformingPanel->getHandle())) return true;
-    if (m_statusBar && isOverPanel(m_statusBar->getHandle())) return true;
+    if (m_nativeInspector && isCursorOverPanel(m_nativeInspector->getHandle())) return true;
+    if (m_nativeSceneHierarchy && isCursorOverPanel(m_nativeSceneHierarchy->getHandle())) return true;
+    if (m_nativeContentBrowser && isCursorOverPanel(m_nativeContentBrowser->getHandle())) return true;
+    if (m_nativeConsole && isCursorOverPanel(m_nativeConsole->getHandle())) return true;
+    if (m_nativeTerraformingPanel && isCursorOverPanel(m_nativeTerraformingPanel->getHandle())) return true;
+    if (m_statusBar && isCursorOverPanel(m_statusBar->getHandle())) return true;
 
     return false;
 #else
