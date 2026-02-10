@@ -187,7 +187,7 @@ public:
     bool isFullscreen() const { return m_fullscreen; }
 
     /**
-     * @brief Hide (minimize) the window
+     * @brief Hide the window
      * 
      * Used when entering play mode to completely detach the game preview
      * from the editor window, preventing the game from rendering behind
