@@ -227,11 +227,12 @@ LRESULT CALLBACK GamePlayWindow::WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam,
         }
 
         case WM_PAINT: {
+            // Just validate the window region without GDI drawing.
+            // DirectX manages its own rendering via the swap chain, so any
+            // GDI fill here would overwrite the DirectX output and cause
+            // the game play window to appear blank.
             PAINTSTRUCT ps;
-            HDC hdc = BeginPaint(hwnd, &ps);
-            if (hdc) {
-                FillRect(hdc, &ps.rcPaint, (HBRUSH)GetStockObject(BLACK_BRUSH));
-            }
+            BeginPaint(hwnd, &ps);
             EndPaint(hwnd, &ps);
             return 0;
         }

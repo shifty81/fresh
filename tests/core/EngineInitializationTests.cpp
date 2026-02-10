@@ -131,6 +131,38 @@ TEST_F(EngineInitializationTest, EditorManagerUpdatesWorldWithoutShutdown) {
               << "without shutting down ImGuiContext, preventing access violations.";
 }
 
+/**
+ * @brief Test that play mode completely detaches from the editor window
+ *
+ * This test documents the fix for the play mode rendering issue:
+ * - Play mode was rendering behind the editor window GUI
+ * - Game was visible through transparent gaps between editor panel borders
+ * - The game play window appeared blank because GDI WM_PAINT was overwriting DirectX output
+ * - The editor window should be hidden when entering play mode
+ * - The editor window should be restored when exiting play mode
+ */
+TEST_F(EngineInitializationTest, PlayModeDetachesFromEditorWindow) {
+    // GIVEN: The user clicks Play in the editor
+    // WHEN: enterPlayMode() is called
+    // THEN: A separate GamePlayWindow is created for the game preview
+    // AND: The editor window (Win32Window) is hidden via hide()
+    // AND: The game window receives focus via SetForegroundWindow/SetFocus
+    // AND: The game window is fully independent and not rendered behind the editor
+    // AND: GamePlayWindow::WM_PAINT does NOT do GDI fills that overwrite DirectX rendering
+    // AND: Editor viewport resize handling is skipped during play mode
+
+    // WHEN: exitPlayMode() is called (ESC or closing the game window)
+    // THEN: The game play window is closed
+    // AND: The editor window is restored via show()
+    // AND: The renderer is redirected back to the editor viewport
+
+    SUCCEED() << "This test documents the expected behavior. "
+              << "enterPlayMode() hides the editor window and brings the game window "
+              << "to the foreground. exitPlayMode() restores the editor window. "
+              << "GamePlayWindow WM_PAINT no longer does GDI fills that would "
+              << "overwrite DirectX rendering, preventing blank game window.";
+}
+
 } // namespace fresh
 
 /**

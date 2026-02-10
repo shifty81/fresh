@@ -186,6 +186,23 @@ public:
      */
     bool isFullscreen() const { return m_fullscreen; }
 
+    /**
+     * @brief Hide the window
+     * 
+     * Used when entering play mode to completely detach the game preview
+     * from the editor window, preventing the game from rendering behind
+     * the editor GUI and being visible through panel border gaps.
+     */
+    void hide();
+
+    /**
+     * @brief Show (restore) the window
+     * 
+     * Used when exiting play mode to restore the editor window to its
+     * previous state after the game preview window is closed.
+     */
+    void show();
+
 private:
     static LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
