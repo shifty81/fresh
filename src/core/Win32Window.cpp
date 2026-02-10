@@ -20,7 +20,10 @@ Win32Window::Win32Window(uint32_t width, uint32_t height, const std::string& tit
       m_title(title),
       m_shouldClose(false),
       m_framebufferResized(false),
-      m_useOpenGL(false)
+      m_useOpenGL(false),
+      m_fullscreen(false),
+      m_windowedRect{},
+      m_windowedStyle(0)
 {
 }
 
@@ -238,6 +241,53 @@ Win32Toolbar* Win32Window::getToolbar()
         }
     }
     return m_toolbar.get();
+}
+
+void Win32Window::toggleFullscreen()
+{
+    if (!m_hwnd) {
+        LOG_WARNING_C("Cannot toggle fullscreen - window not created", "Win32Window");
+        return;
+    }
+
+    if (!m_fullscreen) {
+        // Save current window state for restoring later
+        m_windowedStyle = GetWindowLong(m_hwnd, GWL_STYLE);
+        GetWindowRect(m_hwnd, &m_windowedRect);
+
+        // Get the monitor the window is currently on
+        HMONITOR monitor = MonitorFromWindow(m_hwnd, MONITOR_DEFAULTTONEAREST);
+        MONITORINFO monitorInfo = {};
+        monitorInfo.cbSize = sizeof(MONITORINFO);
+        if (!GetMonitorInfo(monitor, &monitorInfo)) {
+            LOG_ERROR_C("Failed to get monitor info for fullscreen", "Win32Window");
+            return;
+        }
+
+        // Switch to fullscreen: remove title bar and borders
+        SetWindowLong(m_hwnd, GWL_STYLE, m_windowedStyle & ~(WS_CAPTION | WS_THICKFRAME));
+        SetWindowPos(m_hwnd, HWND_TOP,
+                     monitorInfo.rcMonitor.left,
+                     monitorInfo.rcMonitor.top,
+                     monitorInfo.rcMonitor.right - monitorInfo.rcMonitor.left,
+                     monitorInfo.rcMonitor.bottom - monitorInfo.rcMonitor.top,
+                     SWP_FRAMECHANGED | SWP_NOOWNERZORDER);
+
+        m_fullscreen = true;
+        LOG_INFO_C("Entered fullscreen mode", "Win32Window");
+    } else {
+        // Restore windowed mode
+        SetWindowLong(m_hwnd, GWL_STYLE, m_windowedStyle);
+        SetWindowPos(m_hwnd, nullptr,
+                     m_windowedRect.left,
+                     m_windowedRect.top,
+                     m_windowedRect.right - m_windowedRect.left,
+                     m_windowedRect.bottom - m_windowedRect.top,
+                     SWP_FRAMECHANGED | SWP_NOOWNERZORDER | SWP_NOZORDER);
+
+        m_fullscreen = false;
+        LOG_INFO_C("Exited fullscreen mode", "Win32Window");
+    }
 }
 
 LRESULT CALLBACK Win32Window::WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)

@@ -105,6 +105,16 @@ public:
      */
     void set2DStyle(int style);
 
+    /**
+     * @brief Clear all loaded chunks from the world
+     */
+    void clearAllChunks();
+
+    /**
+     * @brief Regenerate terrain for all currently loaded chunks
+     */
+    void regenerateLoadedChunks();
+
 private:
     std::unordered_map<ChunkPos, std::unique_ptr<Chunk>> m_chunks;
     std::unique_ptr<TerrainGenerator> m_terrainGenerator;

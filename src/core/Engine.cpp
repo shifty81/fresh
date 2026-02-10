@@ -31,6 +31,7 @@
 
 #ifdef _WIN32
     #include "core/Win32Window.h"
+    #include "core/GamePlayWindow.h"
     #include "input/Win32InputManager.h"
     #include "ui/native/Win32MenuBar.h"
     #include "ui/native/Win32Toolbar.h"
@@ -936,6 +937,25 @@ void Engine::run()
         
         // EDITOR-GAME SEPARATION: Update systems based on mode
         if (m_world) {
+#ifdef _WIN32
+            if (m_inGame && m_gamePlayWindow && m_gamePlayWindow->isOpen()) {
+                // In play mode with separate game window:
+                // Poll game window events and update game systems
+                if (!m_gamePlayWindow->pollEvents()) {
+                    // Game window was closed - return to editor
+                    exitPlayMode();
+                } else {
+                    update(deltaTime);
+                    renderGamePlayWindow();
+                }
+            } else if (m_inGame) {
+                // Play mode but game window gone - exit play mode
+                exitPlayMode();
+            } else {
+                // In editor mode: update only editor-relevant systems
+                updateEditor(deltaTime);
+            }
+#else
             if (m_inGame) {
                 // In play mode: update all game systems (physics, AI, player, etc.)
                 update(deltaTime);
@@ -944,6 +964,7 @@ void Engine::run()
                 // Editor camera movement, world editor tools, but not gameplay systems
                 updateEditor(deltaTime);
             }
+#endif
         }
         
         // Always render editor and viewport
@@ -1544,8 +1565,15 @@ void Engine::render()
     }
 
     // EDITOR-GAME SEPARATION: Choose rendering path based on current mode
-    // - In play mode (m_inGame): render game world for gameplay testing
+    // - In play mode (m_inGame): game renders in separate window via renderGamePlayWindow()
+    //   The editor viewport is not rendered while the game window owns the swap chain.
     // - In editor mode: render editor preview for scene editing
+#ifdef _WIN32
+    if (m_inGame && m_gamePlayWindow && m_gamePlayWindow->isOpen()) {
+        // Game window has the renderer - skip editor viewport rendering
+        return;
+    }
+#endif
     if (m_inGame) {
         renderGame();
     } else {
@@ -2323,11 +2351,9 @@ void Engine::setupNativeMenuBar()
     menuBar->addMenuItem(viewMenu, "Toggle Fullscreen\tF11", [this]() {
         LOG_INFO_C("Toggle Fullscreen menu item clicked", "Engine");
 #ifdef _WIN32
-        // Fullscreen functionality requires Win32Window to implement
-        // window style toggling between windowed and fullscreen modes
-        LOG_INFO_C("Fullscreen toggle requested", "Engine");
-        LOG_WARNING_C("Fullscreen not yet implemented - use window maximize (Win+Up) as workaround", "Engine");
-        // Future: m_window->toggleFullscreen();
+        if (m_window) {
+            m_window->toggleFullscreen();
+        }
 #else
         LOG_WARNING_C("Fullscreen toggle requires Windows implementation", "Engine");
 #endif
@@ -2398,11 +2424,8 @@ void Engine::setupNativeMenuBar()
         if (result == IDYES) {
             if (m_world) {
                 LOG_INFO_C("Clearing all chunks in world", "Engine");
-                // Clear all chunks - implementation depends on VoxelWorld API
-                // For now, we can clear by removing all chunks
-                // This would need a clearAllChunks() method in VoxelWorld
-                LOG_WARNING_C("World clearing functionality needs VoxelWorld::clearAllChunks() implementation", "Engine");
-                // m_world->clearAllChunks();
+                m_world->clearAllChunks();
+                LOG_INFO_C("World cleared successfully", "Engine");
             } else {
                 LOG_WARNING_C("Cannot clear scene - no world loaded", "Engine");
             }
@@ -2416,11 +2439,9 @@ void Engine::setupNativeMenuBar()
     menuBar->addMenuItem(worldMenu, "Regenerate Chunks", [this]() {
         LOG_INFO_C("Regenerate Chunks selected", "Engine");
         if (m_world) {
-            LOG_INFO_C("Requesting regeneration of loaded chunks", "Engine");
-            // Regenerate all currently loaded chunks
-            // This would require VoxelWorld to re-run terrain generation for loaded chunks
-            LOG_WARNING_C("Chunk regeneration functionality needs VoxelWorld::regenerateLoadedChunks() implementation", "Engine");
-            // Future: m_world->regenerateLoadedChunks();
+            LOG_INFO_C("Regenerating all loaded chunks", "Engine");
+            m_world->regenerateLoadedChunks();
+            LOG_INFO_C("Chunk regeneration complete", "Engine");
         } else {
             LOG_WARNING_C("Cannot regenerate chunks - no world loaded", "Engine");
         }
@@ -2757,13 +2778,17 @@ void Engine::setupNativeToolbar()
     HICON perspectiveIcon = loadShellIcon(165);  // 3D perspective icon
     toolbar->addButton(5020, "Perspective", perspectiveIcon, [this]() {
         LOG_INFO_C("Perspective view selected", "Engine");
-        // TODO: Switch to perspective view
+        if (m_editorManager) {
+            m_editorManager->setCameraViewMode("Perspective");
+        }
     });
     
     HICON topIcon = loadShellIcon(24);  // Grid/top view icon
     toolbar->addButton(5021, "Top", topIcon, [this]() {
         LOG_INFO_C("Top view selected", "Engine");
-        // TODO: Switch to top view
+        if (m_editorManager) {
+            m_editorManager->setCameraViewMode("Top");
+        }
     });
     
     HICON cameraIcon = loadShellIcon(176);  // Camera icon
@@ -2784,10 +2809,9 @@ void Engine::setupNativeToolbar()
     HICON fullscreenIcon = loadShellIcon(238);  // Fullscreen/maximize icon
     toolbar->addButton(5007, "Fullscreen", fullscreenIcon, [this]() {
         LOG_INFO_C("Fullscreen toggle requested", "Engine");
-        // Fullscreen functionality requires Win32Window implementation
-        // For now, log that feature is not yet implemented
-        LOG_WARNING_C("Fullscreen toggle not yet implemented in Win32Window", "Engine");
-        // TODO: Add fullscreen support to Win32Window class first
+        if (m_window) {
+            m_window->toggleFullscreen();
+        }
     });
     
     toolbar->addSeparator();
@@ -2796,40 +2820,32 @@ void Engine::setupNativeToolbar()
     HICON selectIcon = loadShellIcon(210);  // Cursor/select icon
     toolbar->addButton(5030, "Select", selectIcon, [this]() {
         LOG_INFO_C("Select tool activated", "Engine");
-        if (m_editorManager) {
-            // Selection tool - for picking and selecting objects/voxels
-            LOG_INFO_C("Switching to selection mode", "Engine");
-            // Future: m_editorManager->setToolMode(EditorToolMode::Select);
+        if (m_worldEditor && m_worldEditor->getTerraformingSystem()) {
+            m_worldEditor->getTerraformingSystem()->setTool(TerraformTool::SingleBlock);
         }
     });
     
     HICON moveIcon = loadShellIcon(143);  // Move/arrows icon
     toolbar->addButton(5031, "Move", moveIcon, [this]() {
         LOG_INFO_C("Move tool activated", "Engine");
-        if (m_editorManager) {
-            // Move tool - for translating selected objects
-            LOG_INFO_C("Switching to move/translate mode", "Engine");
-            // Future: m_editorManager->setTransformMode(TransformMode::Translate);
+        if (m_editorManager && m_editorManager->getTransformGizmo()) {
+            m_editorManager->getTransformGizmo()->setMode(TransformGizmo::Mode::Translate);
         }
     });
     
     HICON rotateIcon = loadShellIcon(239);  // Rotate/circular arrows icon
     toolbar->addButton(5032, "Rotate", rotateIcon, [this]() {
         LOG_INFO_C("Rotate tool activated", "Engine");
-        if (m_editorManager) {
-            // Rotate tool - for rotating selected objects
-            LOG_INFO_C("Switching to rotation mode", "Engine");
-            // Future: m_editorManager->setTransformMode(TransformMode::Rotate);
+        if (m_editorManager && m_editorManager->getTransformGizmo()) {
+            m_editorManager->getTransformGizmo()->setMode(TransformGizmo::Mode::Rotate);
         }
     });
     
     HICON scaleIcon = loadShellIcon(166);  // Scale/resize icon
     toolbar->addButton(5033, "Scale", scaleIcon, [this]() {
         LOG_INFO_C("Scale tool activated", "Engine");
-        if (m_editorManager) {
-            // Scale tool - for scaling selected objects
-            LOG_INFO_C("Switching to scale mode", "Engine");
-            // Future: m_editorManager->setTransformMode(TransformMode::Scale);
+        if (m_editorManager && m_editorManager->getTransformGizmo()) {
+            m_editorManager->getTransformGizmo()->setMode(TransformGizmo::Mode::Scale);
         }
     });
     
@@ -2839,40 +2855,32 @@ void Engine::setupNativeToolbar()
     HICON brushIcon = loadShellIcon(22);  // Paintbrush icon
     toolbar->addButton(5040, "Brush", brushIcon, [this]() {
         LOG_INFO_C("Brush tool activated", "Engine");
-        if (m_worldEditor) {
-            // Brush tool - for painting/placing voxels
-            LOG_INFO_C("Switching to voxel brush tool", "Engine");
-            // Future: m_worldEditor->setTool(TerraformingTool::Brush);
+        if (m_worldEditor && m_worldEditor->getTerraformingSystem()) {
+            m_worldEditor->getTerraformingSystem()->setTool(TerraformTool::Brush);
         }
     });
     
     HICON paintIcon = loadShellIcon(269);  // Paint/color icon
     toolbar->addButton(5041, "Paint", paintIcon, [this]() {
         LOG_INFO_C("Paint tool activated", "Engine");
-        if (m_worldEditor) {
-            // Paint tool - for painting voxel colors/materials
-            LOG_INFO_C("Switching to voxel paint tool", "Engine");
-            // Future: m_worldEditor->setTool(TerraformingTool::Paint);
+        if (m_worldEditor && m_worldEditor->getTerraformingSystem()) {
+            m_worldEditor->getTerraformingSystem()->setTool(TerraformTool::Paint);
         }
     });
     
     HICON sculptIcon = loadShellIcon(135);  // Sculpt/tool icon
     toolbar->addButton(5042, "Sculpt", sculptIcon, [this]() {
         LOG_INFO_C("Sculpt tool activated", "Engine");
-        if (m_worldEditor) {
-            // Sculpt tool - for sculpting terrain
-            LOG_INFO_C("Switching to terrain sculpt tool", "Engine");
-            // Future: m_worldEditor->setTool(TerraformingTool::Sculpt);
+        if (m_worldEditor && m_worldEditor->getTerraformingSystem()) {
+            m_worldEditor->getTerraformingSystem()->setTool(TerraformTool::FilledSphere);
         }
     });
     
     HICON smoothIcon = loadShellIcon(133);  // Smooth/gradient icon
     toolbar->addButton(5043, "Smooth", smoothIcon, [this]() {
         LOG_INFO_C("Smooth tool activated", "Engine");
-        if (m_worldEditor) {
-            // Smooth tool - for smoothing terrain
-            LOG_INFO_C("Switching to terrain smooth tool", "Engine");
-            // Future: m_worldEditor->setTool(TerraformingTool::Smooth);
+        if (m_worldEditor && m_worldEditor->getTerraformingSystem()) {
+            m_worldEditor->getTerraformingSystem()->setTool(TerraformTool::Smooth);
         }
     });
 
@@ -3020,6 +3028,68 @@ void Engine::enterPlayMode()
     }
     
     LOG_INFO_C("Entering play mode", "Engine");
+
+#ifdef _WIN32
+    // Create a separate game window for play testing
+    // This keeps the editor fully visible and functional while the game runs
+    m_gamePlayWindow = std::make_unique<GamePlayWindow>();
+    
+    // Use the editor viewport dimensions for the game window
+    uint32_t gameWidth = 1280;
+    uint32_t gameHeight = 720;
+    if (m_editorManager && m_editorManager->getViewportPanel()) {
+        auto* viewport = m_editorManager->getViewportPanel();
+        if (viewport->getWidth() > 0 && viewport->getHeight() > 0) {
+            gameWidth = static_cast<uint32_t>(viewport->getWidth());
+            gameHeight = static_cast<uint32_t>(viewport->getHeight());
+        }
+    }
+    
+    if (!m_gamePlayWindow->create(gameWidth, gameHeight, "Fresh Voxel Engine - Game Preview")) {
+        LOG_ERROR_C("Failed to create game play window", "Engine");
+        m_gamePlayWindow.reset();
+        return;
+    }
+    
+    // Set up input callbacks for the game window
+    m_gamePlayWindow->setKeyCallback([this](int vkCode, bool isDown) {
+        // ESC in game window closes it and returns to editor
+        if (vkCode == VK_ESCAPE && isDown) {
+            exitPlayMode();
+            return;
+        }
+        // Forward input to the input manager for gameplay
+        if (m_inputManager) {
+            m_inputManager->processKeyEvent(static_cast<WPARAM>(vkCode), isDown);
+        }
+    });
+    
+    m_gamePlayWindow->setMouseMoveCallback([this](int x, int y) {
+        if (m_inputManager) {
+            m_inputManager->processMouseMovement(x, y);
+        }
+    });
+    
+    m_gamePlayWindow->setMouseButtonCallback([this](int button, bool isDown) {
+        if (m_inputManager) {
+            m_inputManager->processMouseButton(button, isDown);
+        }
+    });
+    
+    // Redirect renderer to the game window
+    if (m_renderer) {
+        HWND gameHwnd = m_gamePlayWindow->getHandle();
+        if (gameHwnd) {
+            if (m_renderer->setViewportWindow(gameHwnd)) {
+                m_renderer->recreateSwapChain(static_cast<int>(gameWidth), static_cast<int>(gameHeight));
+                LOG_INFO_C("Renderer redirected to game play window", "Engine");
+            } else {
+                LOG_ERROR_C("Failed to redirect renderer to game play window", "Engine");
+            }
+        }
+    }
+#endif
+
     m_inGame = true;
     
     // Switch to game input mode (capture cursor for FPS controls)
@@ -3027,30 +3097,12 @@ void Engine::enterPlayMode()
         m_inputManager->setInputMode(InputMode::GameMode);
     }
     
-    // Hide editor panels, show game HUD
-    if (m_editorManager) {
-        m_editorManager->setVisible(false);
-        
-#ifdef _WIN32
-        // Show native HUD if available
-        auto* hud = m_editorManager->getHUD();
-        if (hud) {
-            hud->setVisible(true);
-        }
-        
-        auto* hotbar = m_editorManager->getHotbar();
-        if (hotbar) {
-            hotbar->setVisible(true);
-        }
-#endif
-    }
-    
     // Disable free-flight mode for player (enable physics)
     if (m_player) {
         m_player->setFreeFlightMode(false);
     }
     
-    LOG_INFO_C("Play mode started - Press ESC to exit", "Engine");
+    LOG_INFO_C("Play mode started in separate window - close game window or press ESC to return to editor", "Engine");
 }
 
 void Engine::exitPlayMode()
@@ -3062,28 +3114,22 @@ void Engine::exitPlayMode()
     
     LOG_INFO_C("Exiting play mode", "Engine");
     m_inGame = false;
+
+#ifdef _WIN32
+    // Close the game play window
+    if (m_gamePlayWindow) {
+        m_gamePlayWindow->close();
+        m_gamePlayWindow.reset();
+        LOG_INFO_C("Game play window closed", "Engine");
+    }
+    
+    // Restore renderer to the editor viewport
+    restoreEditorViewport();
+#endif
     
     // Switch back to editor UI mode (release cursor for UI interaction)
     if (m_inputManager) {
         m_inputManager->setInputMode(InputMode::UIMode);
-    }
-    
-    // Show editor panels, hide game HUD
-    if (m_editorManager) {
-        m_editorManager->setVisible(true);
-        
-#ifdef _WIN32
-        // Hide native HUD if available
-        auto* hud = m_editorManager->getHUD();
-        if (hud) {
-            hud->setVisible(false);
-        }
-        
-        auto* hotbar = m_editorManager->getHotbar();
-        if (hotbar) {
-            hotbar->setVisible(false);
-        }
-#endif
     }
     
     // Enable free-flight mode for player (disable physics for editor camera)
@@ -3102,5 +3148,61 @@ void Engine::togglePlayMode()
         enterPlayMode();
     }
 }
+
+#ifdef _WIN32
+void Engine::renderGamePlayWindow()
+{
+    if (!m_renderer || !m_gamePlayWindow || !m_gamePlayWindow->isOpen()) {
+        return;
+    }
+    
+    // Handle game window resize
+    if (m_gamePlayWindow->wasResized()) {
+        m_gamePlayWindow->resetResizedFlag();
+        int w = static_cast<int>(m_gamePlayWindow->getWidth());
+        int h = static_cast<int>(m_gamePlayWindow->getHeight());
+        if (w > 0 && h > 0) {
+            m_renderer->recreateSwapChain(w, h);
+        }
+    }
+    
+    // Render game scene to the game window
+    renderGame();
+}
+
+void Engine::restoreEditorViewport()
+{
+    if (!m_renderer || !m_editorManager) {
+        return;
+    }
+    
+    auto* viewportPanel = m_editorManager->getViewportPanel();
+    if (!viewportPanel) {
+        LOG_WARNING_C("Cannot restore editor viewport - viewport panel not available", "Engine");
+        return;
+    }
+    
+    HWND viewportHwnd = viewportPanel->getHandle();
+    if (!viewportHwnd) {
+        LOG_WARNING_C("Cannot restore editor viewport - no viewport HWND", "Engine");
+        return;
+    }
+    
+    int vpWidth = viewportPanel->getWidth();
+    int vpHeight = viewportPanel->getHeight();
+    
+    if (vpWidth <= 0 || vpHeight <= 0) {
+        LOG_WARNING_C("Cannot restore editor viewport - invalid dimensions", "Engine");
+        return;
+    }
+    
+    if (m_renderer->setViewportWindow(viewportHwnd)) {
+        m_renderer->recreateSwapChain(vpWidth, vpHeight);
+        LOG_INFO_C("Renderer restored to editor viewport", "Engine");
+    } else {
+        LOG_ERROR_C("Failed to restore renderer to editor viewport", "Engine");
+    }
+}
+#endif
 
 } // namespace fresh

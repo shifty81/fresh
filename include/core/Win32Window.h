@@ -175,6 +175,17 @@ public:
      */
     Win32Toolbar* getToolbar();
 
+    /**
+     * @brief Toggle between windowed and fullscreen mode
+     */
+    void toggleFullscreen();
+
+    /**
+     * @brief Check if window is in fullscreen mode
+     * @return true if fullscreen
+     */
+    bool isFullscreen() const { return m_fullscreen; }
+
 private:
     static LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
@@ -195,6 +206,9 @@ private:
     bool m_shouldClose;
     bool m_framebufferResized;
     bool m_useOpenGL;
+    bool m_fullscreen;
+    RECT m_windowedRect;       // Saved window rect for restoring from fullscreen
+    DWORD m_windowedStyle;     // Saved window style for restoring from fullscreen
     
     // Input callbacks
     KeyCallback m_keyCallback;

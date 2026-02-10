@@ -19,6 +19,7 @@ struct WorldCreationParams;
 #ifdef _WIN32
 class Win32Window;
 class Win32InputManager;
+class GamePlayWindow;
 using WindowType = Win32Window;
 using InputManagerType = Win32InputManager;
 #else
@@ -137,6 +138,13 @@ private:
     void togglePlayMode();
     bool isInPlayMode() const { return m_inGame; }
 
+#ifdef _WIN32
+    // Separate game window play mode helpers
+    void updateGamePlayWindow(float deltaTime);
+    void renderGamePlayWindow();
+    void restoreEditorViewport();
+#endif
+
 private:
     bool m_running;
     bool m_inGame;
@@ -159,6 +167,9 @@ private:
     std::unique_ptr<Raft> m_raft;
     std::unique_ptr<scripting::LuaScriptingEngine> m_scriptingEngine;
     std::unique_ptr<ProjectManager> m_projectManager;
+#ifdef _WIN32
+    std::unique_ptr<GamePlayWindow> m_gamePlayWindow;
+#endif
     VoxelType m_selectedBlockType;
     // Track world type for camera setup
     bool m_isWorld3D = true;

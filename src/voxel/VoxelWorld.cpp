@@ -111,4 +111,34 @@ void VoxelWorld::set2DStyle(int style)
     }
 }
 
+void VoxelWorld::clearAllChunks()
+{
+    m_chunks.clear();
+}
+
+void VoxelWorld::regenerateLoadedChunks()
+{
+    if (!m_terrainGenerator) {
+        return;
+    }
+
+    // Collect positions of currently loaded chunks
+    std::vector<ChunkPos> positions;
+    positions.reserve(m_chunks.size());
+    for (const auto& pair : m_chunks) {
+        positions.push_back(pair.first);
+    }
+
+    // Regenerate each chunk in place
+    for (const auto& pos : positions) {
+        auto it = m_chunks.find(pos);
+        if (it != m_chunks.end()) {
+            auto chunk = std::make_unique<Chunk>(pos);
+            m_terrainGenerator->generateChunk(chunk.get());
+            chunk->generateMesh();
+            it->second = std::move(chunk);
+        }
+    }
+}
+
 } // namespace fresh
