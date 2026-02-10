@@ -2183,7 +2183,7 @@ void Engine::setupNativeMenuBar()
         // This could include exporting to OBJ, FBX, or custom game format
         LOG_INFO_C("Export functionality requested", "Engine");
         MessageBoxA(
-            m_window ? m_window->getNativeWindowHandle() : nullptr,
+            static_cast<HWND>(m_window ? m_window->getNativeWindowHandle() : nullptr),
             "Export functionality is not yet implemented.\n\nPlanned export formats:\n- OBJ (3D mesh)\n- FBX (3D scene)\n- Voxel format (custom)\n- Image atlas (texture pack)",
             "Export",
             MB_OK | MB_ICONINFORMATION
@@ -2267,7 +2267,7 @@ void Engine::setupNativeMenuBar()
         // This would open a search dialog to locate specific entities
         LOG_INFO_C("Find functionality requested", "Engine");
         MessageBoxA(
-            m_window ? m_window->getNativeWindowHandle() : nullptr,
+            static_cast<HWND>(m_window ? m_window->getNativeWindowHandle() : nullptr),
             "Find functionality is not yet implemented.\n\nPlanned features:\n- Find entities by name\n- Find by type\n- Find by tag\n- Search scene hierarchy",
             "Find",
             MB_OK | MB_ICONINFORMATION
@@ -2397,7 +2397,7 @@ void Engine::setupNativeMenuBar()
         // Future: Show terrain generation dialog for procedural world generation
         // This would allow users to configure generation parameters
         MessageBoxA(
-            m_window ? m_window->getNativeWindowHandle() : nullptr,
+            static_cast<HWND>(m_window ? m_window->getNativeWindowHandle() : nullptr),
             "Terrain Generation dialog is not yet implemented.\n\nPlanned features:\n- Seed selection\n- Terrain type (flat, hills, mountains, islands)\n- Biome selection\n- World size\n- Generation preview",
             "Generate Terrain",
             MB_OK | MB_ICONINFORMATION
@@ -2415,7 +2415,7 @@ void Engine::setupNativeMenuBar()
 #ifdef _WIN32
         // Show confirmation dialog using native Windows MessageBox
         int result = MessageBoxA(
-            m_window ? m_window->getNativeWindowHandle() : nullptr,
+            static_cast<HWND>(m_window ? m_window->getNativeWindowHandle() : nullptr),
             "Are you sure you want to clear the entire scene?\n\nThis will remove all voxels and cannot be undone.",
             "Clear Scene Confirmation",
             MB_YESNO | MB_ICONWARNING | MB_DEFBUTTON2
@@ -2454,7 +2454,7 @@ void Engine::setupNativeMenuBar()
         // This would include seed, generation type, biome settings, etc.
         LOG_INFO_C("World settings dialog requested", "Engine");
         MessageBoxA(
-            m_window ? m_window->getNativeWindowHandle() : nullptr,
+            static_cast<HWND>(m_window ? m_window->getNativeWindowHandle() : nullptr),
             "World Settings dialog is not yet implemented.\n\nFuture features:\n- World seed\n- Generation parameters\n- Biome settings\n- Physics settings\n- Lighting settings",
             "Scene Settings",
             MB_OK | MB_ICONINFORMATION
@@ -2529,7 +2529,7 @@ void Engine::setupNativeMenuBar()
 #ifdef _WIN32
         // Future: Show material editor for creating/editing voxel materials
         MessageBoxA(
-            m_window ? m_window->getNativeWindowHandle() : nullptr,
+            static_cast<HWND>(m_window ? m_window->getNativeWindowHandle() : nullptr),
             "Material Editor is not yet implemented.\n\nPlanned features:\n- Material properties editor\n- Texture assignment\n- Material preview\n- Shader parameters\n- Physics properties",
             "Material Editor",
             MB_OK | MB_ICONINFORMATION

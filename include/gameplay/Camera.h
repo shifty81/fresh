@@ -1,4 +1,5 @@
 #pragma once
+#include <algorithm>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
@@ -117,6 +118,18 @@ public:
     }
 
     // Setters
+    void setPitch(float newPitch)
+    {
+        pitch = std::clamp(newPitch, -89.0f, 89.0f);
+        updateVectors();
+    }
+
+    void setYaw(float newYaw)
+    {
+        yaw = newYaw;
+        updateVectors();
+    }
+
     void setFOV(float newFov)
     {
         fov = newFov;
