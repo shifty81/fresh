@@ -120,3 +120,97 @@ TEST_F(VoxelWorldTest, SetSeed_AfterInitialization_UpdatesGenerator) {
     
     EXPECT_TRUE(hasSolidBlocks) << "Generated chunk should have solid blocks";
 }
+
+/**
+ * Test that clearAllChunks removes all loaded chunks
+ */
+TEST_F(VoxelWorldTest, ClearAllChunks_RemovesAllChunks) {
+    // Arrange - Load some chunks
+    world->loadChunk(ChunkPos(0, 0));
+    world->loadChunk(ChunkPos(1, 0));
+    world->loadChunk(ChunkPos(0, 1));
+    EXPECT_EQ(world->getChunks().size(), 3u);
+    
+    // Act
+    world->clearAllChunks();
+    
+    // Assert
+    EXPECT_EQ(world->getChunks().size(), 0u);
+    EXPECT_EQ(world->getChunk(ChunkPos(0, 0)), nullptr);
+    EXPECT_EQ(world->getChunk(ChunkPos(1, 0)), nullptr);
+    EXPECT_EQ(world->getChunk(ChunkPos(0, 1)), nullptr);
+}
+
+/**
+ * Test that clearAllChunks works on empty world
+ */
+TEST_F(VoxelWorldTest, ClearAllChunks_EmptyWorld_NoEffect) {
+    // Arrange - No chunks loaded
+    EXPECT_EQ(world->getChunks().size(), 0u);
+    
+    // Act - Should not crash
+    world->clearAllChunks();
+    
+    // Assert
+    EXPECT_EQ(world->getChunks().size(), 0u);
+}
+
+/**
+ * Test that regenerateLoadedChunks keeps the same chunk positions
+ */
+TEST_F(VoxelWorldTest, RegenerateLoadedChunks_KeepsSamePositions) {
+    // Arrange - Load chunks
+    world->loadChunk(ChunkPos(0, 0));
+    world->loadChunk(ChunkPos(1, 0));
+    size_t chunkCount = world->getChunks().size();
+    
+    // Act
+    world->regenerateLoadedChunks();
+    
+    // Assert - Same number of chunks at same positions
+    EXPECT_EQ(world->getChunks().size(), chunkCount);
+    EXPECT_NE(world->getChunk(ChunkPos(0, 0)), nullptr);
+    EXPECT_NE(world->getChunk(ChunkPos(1, 0)), nullptr);
+}
+
+/**
+ * Test that regenerateLoadedChunks produces valid terrain
+ */
+TEST_F(VoxelWorldTest, RegenerateLoadedChunks_ProducesValidTerrain) {
+    // Arrange - Load a chunk
+    world->loadChunk(ChunkPos(0, 0));
+    
+    // Act
+    world->regenerateLoadedChunks();
+    
+    // Assert - Regenerated chunk should have solid blocks (terrain)
+    Chunk* chunk = world->getChunk(ChunkPos(0, 0));
+    ASSERT_NE(chunk, nullptr);
+    
+    bool hasSolidBlocks = false;
+    for (int x = 0; x < CHUNK_SIZE && !hasSolidBlocks; x++) {
+        for (int z = 0; z < CHUNK_SIZE && !hasSolidBlocks; z++) {
+            for (int y = 0; y < CHUNK_HEIGHT && !hasSolidBlocks; y++) {
+                if (chunk->getVoxel(x, y, z).type != VoxelType::Air) {
+                    hasSolidBlocks = true;
+                }
+            }
+        }
+    }
+    
+    EXPECT_TRUE(hasSolidBlocks) << "Regenerated chunk should have solid blocks";
+}
+
+/**
+ * Test that regenerateLoadedChunks works on empty world
+ */
+TEST_F(VoxelWorldTest, RegenerateLoadedChunks_EmptyWorld_NoEffect) {
+    // Arrange - No chunks loaded
+    EXPECT_EQ(world->getChunks().size(), 0u);
+    
+    // Act - Should not crash
+    world->regenerateLoadedChunks();
+    
+    // Assert
+    EXPECT_EQ(world->getChunks().size(), 0u);
+}
