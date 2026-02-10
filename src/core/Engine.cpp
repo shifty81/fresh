@@ -1247,6 +1247,9 @@ void Engine::update(float deltaTime)
     }
 
 #ifdef _WIN32
+    // Skip editor window/viewport resize handling during play mode.
+    // The renderer's swap chain targets the game play window, not the editor viewport.
+    if (!m_inGame) {
     // WINDOW RESIZE HANDLING - Update panel layouts when main window is resized
     if (m_window && m_editorManager) {
         Win32Window* win32Window = dynamic_cast<Win32Window*>(m_window.get());
@@ -1283,6 +1286,7 @@ void Engine::update(float deltaTime)
             }
         }
     }
+    } // end if (!m_inGame)
 #endif
 
     // Check if GUI wants input before processing player updates
@@ -3031,7 +3035,7 @@ void Engine::enterPlayMode()
 
 #ifdef _WIN32
     // Create a separate game window for play testing
-    // This keeps the editor fully visible and functional while the game runs
+    // The editor window is hidden to completely detach play mode from the editor
     m_gamePlayWindow = std::make_unique<GamePlayWindow>();
     
     // Use the editor viewport dimensions for the game window
@@ -3088,6 +3092,19 @@ void Engine::enterPlayMode()
             }
         }
     }
+
+    // Hide the editor window so the game play window is completely detached.
+    // This prevents the game from rendering behind the editor GUI and being
+    // visible through transparent gaps between editor panel borders.
+    if (m_window) {
+        m_window->hide();
+    }
+
+    // Bring game window to the foreground with focus
+    if (m_gamePlayWindow && m_gamePlayWindow->getHandle()) {
+        SetForegroundWindow(m_gamePlayWindow->getHandle());
+        SetFocus(m_gamePlayWindow->getHandle());
+    }
 #endif
 
     m_inGame = true;
@@ -3125,6 +3142,11 @@ void Engine::exitPlayMode()
     
     // Restore renderer to the editor viewport
     restoreEditorViewport();
+
+    // Restore the editor window that was hidden during play mode
+    if (m_window) {
+        m_window->show();
+    }
 #endif
     
     // Switch back to editor UI mode (release cursor for UI interaction)

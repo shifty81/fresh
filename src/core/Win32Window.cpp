@@ -290,6 +290,23 @@ void Win32Window::toggleFullscreen()
     }
 }
 
+void Win32Window::hide()
+{
+    if (m_hwnd) {
+        ShowWindow(m_hwnd, SW_HIDE);
+        LOG_INFO_C("Editor window hidden", "Win32Window");
+    }
+}
+
+void Win32Window::show()
+{
+    if (m_hwnd) {
+        ShowWindow(m_hwnd, SW_SHOW);
+        SetForegroundWindow(m_hwnd);
+        LOG_INFO_C("Editor window restored", "Win32Window");
+    }
+}
+
 LRESULT CALLBACK Win32Window::WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
     Win32Window* window = nullptr;
