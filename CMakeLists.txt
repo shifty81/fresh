@@ -529,6 +529,7 @@ if(WIN32)
     list(APPEND ENGINE_SOURCES
         # Core Windows components
         src/core/Win32Window.cpp
+        src/core/GamePlayWindow.cpp
         src/input/Win32InputManager.cpp
         
         # Native Win32 UI panels and controls

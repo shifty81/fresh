@@ -1866,11 +1866,22 @@ void EditorManager::exitPlayMode()
 
 void EditorManager::showSettings()
 {
-    // Removed: m_settingsPanel is commented out in header
-    // if (m_settingsPanel) {
-    //     m_settingsPanel->setVisible(true);
-    //     LOG_INFO_C("Settings panel shown", "EditorManager");
-    // }
+#ifdef _WIN32
+    if (m_nativeSettingsDialog && m_window) {
+        Win32SettingsDialog::Settings currentSettings;
+        // Populate from editor settings if available
+        if (m_editorSettingsDialog) {
+            const auto& editorSettings = m_editorSettingsDialog->getSettings();
+            currentSettings.vsync = editorSettings.vsync;
+            currentSettings.fpsLimit = editorSettings.targetFPS;
+            currentSettings.fov = 75.0f;
+            currentSettings.mouseSensitivity = 0.5f;
+        }
+        HWND hwnd = static_cast<HWND>(m_window->getNativeWindowHandle());
+        m_nativeSettingsDialog->show(hwnd, currentSettings);
+        LOG_INFO_C("Settings dialog shown", "EditorManager");
+    }
+#endif
 }
 
 void EditorManager::showEngineConfig()
