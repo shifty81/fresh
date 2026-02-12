@@ -1250,6 +1250,11 @@ void DirectX12RenderContext::renderVoxelWorld(VoxelWorld* world, Player* player)
         return;
     }
 
+    // Avoid division by zero if swap chain dimensions are invalid
+    if (width <= 0 || height <= 0) {
+        return;
+    }
+
     // Set pipeline state
     commandList->SetPipelineState(voxelPipelineState.Get());
     commandList->SetGraphicsRootSignature(voxelRootSignature.Get());
