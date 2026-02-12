@@ -84,13 +84,16 @@ private:
 class WanderBehavior : public BehaviorNode
 {
 public:
-    WanderBehavior(VoxelWorld* world);
+    WanderBehavior(VoxelWorld* world, float wanderRadius = 10.0f,
+                   float wanderInterval = 3.0f);
     NodeStatus execute(ecs::Entity* entity, float deltaTime) override;
 
 private:
     VoxelWorld* world;
     float wanderTimer;
     glm::vec3 targetPosition;
+    float wanderRadius;
+    float wanderInterval;
 };
 
 /**

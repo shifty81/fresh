@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <cmath>
 #include <fstream>
+#include <numbers>
 #include <unordered_map>
 
 // Use tinyobjloader for OBJ file loading
@@ -371,7 +372,7 @@ std::shared_ptr<Model> ModelLoader::createPlane(float width, float height)
 
 std::shared_ptr<Model> ModelLoader::createSphere(float radius, int segments)
 {
-    const float pi = 3.14159265358979323846f;
+    constexpr float pi = std::numbers::pi_v<float>;
     int rings = segments / 2;
     if (rings < 2) rings = 2;
     if (segments < 3) segments = 3;
@@ -429,7 +430,7 @@ std::shared_ptr<Model> ModelLoader::createSphere(float radius, int segments)
 
 std::shared_ptr<Model> ModelLoader::createCylinder(float radius, float height, int segments)
 {
-    const float pi = 3.14159265358979323846f;
+    constexpr float pi = std::numbers::pi_v<float>;
     if (segments < 3) segments = 3;
     float halfHeight = height * 0.5f;
 
@@ -536,7 +537,7 @@ std::shared_ptr<Model> ModelLoader::createCylinder(float radius, float height, i
 
 std::shared_ptr<Model> ModelLoader::createCone(float radius, float height, int segments)
 {
-    const float pi = 3.14159265358979323846f;
+    constexpr float pi = std::numbers::pi_v<float>;
     if (segments < 3) segments = 3;
     float halfHeight = height * 0.5f;
 

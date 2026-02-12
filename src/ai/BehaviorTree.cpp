@@ -67,7 +67,9 @@ NodeStatus SelectorNode::execute(ecs::Entity* entity, float deltaTime)
 }
 
 // WanderBehavior implementation
-WanderBehavior::WanderBehavior(VoxelWorld* w) : world(w), wanderTimer(0.0f), targetPosition(0.0f) {}
+WanderBehavior::WanderBehavior(VoxelWorld* w, float radius, float interval)
+    : world(w), wanderTimer(0.0f), targetPosition(0.0f),
+      wanderRadius(radius), wanderInterval(interval) {}
 
 NodeStatus WanderBehavior::execute(ecs::Entity* entity, float deltaTime)
 {
@@ -75,19 +77,20 @@ NodeStatus WanderBehavior::execute(ecs::Entity* entity, float deltaTime)
         return NodeStatus::Failure;
     }
 
-    static constexpr float WANDER_INTERVAL = 3.0f;
-    static constexpr float WANDER_RADIUS = 10.0f;
     static constexpr float ARRIVAL_THRESHOLD = 0.5f;
 
     wanderTimer -= deltaTime;
 
     if (wanderTimer <= 0.0f) {
-        // Pick a new random target position within wander radius
+        // Pick a new random target offset within wander radius.
+        // Note: This is relative to the world origin; a movement system
+        // with access to EntityManager would apply this relative to the
+        // entity's current TransformComponent position.
         glm::vec3 offset = glm::linearRand(
-            glm::vec3(-WANDER_RADIUS, 0.0f, -WANDER_RADIUS),
-            glm::vec3(WANDER_RADIUS, 0.0f, WANDER_RADIUS));
+            glm::vec3(-wanderRadius, 0.0f, -wanderRadius),
+            glm::vec3(wanderRadius, 0.0f, wanderRadius));
         targetPosition = offset;
-        wanderTimer = WANDER_INTERVAL;
+        wanderTimer = wanderInterval;
     }
 
     // Check if close enough to target (using targetPosition magnitude as proxy)
