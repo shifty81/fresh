@@ -3,7 +3,9 @@
 #include "core/Logger.h"
 
 #include <algorithm>
+#include <cmath>
 #include <fstream>
+#include <numbers>
 #include <unordered_map>
 
 // Use tinyobjloader for OBJ file loading
@@ -368,25 +370,250 @@ std::shared_ptr<Model> ModelLoader::createPlane(float width, float height)
     return model;
 }
 
-std::shared_ptr<Model> ModelLoader::createSphere(float radius, int /* segments */)
+std::shared_ptr<Model> ModelLoader::createSphere(float radius, int segments)
 {
-    // TODO: Implement sphere generation
-    Logger::getInstance().warning("Sphere primitive not yet implemented", "ModelLoader");
-    return createCube(radius * 2.0f);
+    constexpr float pi = std::numbers::pi_v<float>;
+    int rings = segments / 2;
+    if (rings < 2) rings = 2;
+    if (segments < 3) segments = 3;
+
+    std::vector<Vertex> vertices;
+    std::vector<uint32_t> indices;
+
+    // Generate vertices
+    for (int ring = 0; ring <= rings; ++ring) {
+        float phi = pi * static_cast<float>(ring) / static_cast<float>(rings);
+        float sinPhi = std::sin(phi);
+        float cosPhi = std::cos(phi);
+
+        for (int seg = 0; seg <= segments; ++seg) {
+            float theta = 2.0f * pi * static_cast<float>(seg) / static_cast<float>(segments);
+            float sinTheta = std::sin(theta);
+            float cosTheta = std::cos(theta);
+
+            glm::vec3 normal(sinPhi * cosTheta, cosPhi, sinPhi * sinTheta);
+            glm::vec3 position = normal * radius;
+            glm::vec2 texCoord(static_cast<float>(seg) / static_cast<float>(segments),
+                               static_cast<float>(ring) / static_cast<float>(rings));
+
+            Vertex vertex;
+            vertex.position = position;
+            vertex.normal = normal;
+            vertex.texCoord = texCoord;
+            vertices.push_back(vertex);
+        }
+    }
+
+    // Generate indices
+    for (int ring = 0; ring < rings; ++ring) {
+        for (int seg = 0; seg < segments; ++seg) {
+            uint32_t current = static_cast<uint32_t>(ring * (segments + 1) + seg);
+            uint32_t next = current + static_cast<uint32_t>(segments + 1);
+
+            indices.push_back(current);
+            indices.push_back(next);
+            indices.push_back(current + 1);
+
+            indices.push_back(current + 1);
+            indices.push_back(next);
+            indices.push_back(next + 1);
+        }
+    }
+
+    auto mesh = std::make_shared<Mesh>(vertices, indices);
+    auto model = std::make_shared<Model>();
+    model->addMesh(mesh);
+    model->setPath("primitive:sphere");
+
+    return model;
 }
 
-std::shared_ptr<Model> ModelLoader::createCylinder(float radius, float /* height */, int /* segments */)
+std::shared_ptr<Model> ModelLoader::createCylinder(float radius, float height, int segments)
 {
-    // TODO: Implement cylinder generation
-    Logger::getInstance().warning("Cylinder primitive not yet implemented", "ModelLoader");
-    return createCube(radius * 2.0f);
+    constexpr float pi = std::numbers::pi_v<float>;
+    if (segments < 3) segments = 3;
+    float halfHeight = height * 0.5f;
+
+    std::vector<Vertex> vertices;
+    std::vector<uint32_t> indices;
+
+    // Side vertices (two rings)
+    for (int i = 0; i <= segments; ++i) {
+        float angle = 2.0f * pi * static_cast<float>(i) / static_cast<float>(segments);
+        float cosA = std::cos(angle);
+        float sinA = std::sin(angle);
+        float u = static_cast<float>(i) / static_cast<float>(segments);
+
+        glm::vec3 normal(cosA, 0.0f, sinA);
+
+        Vertex top;
+        top.position = glm::vec3(cosA * radius, halfHeight, sinA * radius);
+        top.normal = normal;
+        top.texCoord = glm::vec2(u, 0.0f);
+        vertices.push_back(top);
+
+        Vertex bottom;
+        bottom.position = glm::vec3(cosA * radius, -halfHeight, sinA * radius);
+        bottom.normal = normal;
+        bottom.texCoord = glm::vec2(u, 1.0f);
+        vertices.push_back(bottom);
+    }
+
+    // Side indices
+    for (int i = 0; i < segments; ++i) {
+        uint32_t topLeft = static_cast<uint32_t>(i * 2);
+        uint32_t bottomLeft = topLeft + 1;
+        uint32_t topRight = topLeft + 2;
+        uint32_t bottomRight = topLeft + 3;
+
+        indices.push_back(topLeft);
+        indices.push_back(bottomLeft);
+        indices.push_back(topRight);
+
+        indices.push_back(topRight);
+        indices.push_back(bottomLeft);
+        indices.push_back(bottomRight);
+    }
+
+    // Top cap
+    uint32_t topCenterIdx = static_cast<uint32_t>(vertices.size());
+    Vertex topCenter;
+    topCenter.position = glm::vec3(0.0f, halfHeight, 0.0f);
+    topCenter.normal = glm::vec3(0.0f, 1.0f, 0.0f);
+    topCenter.texCoord = glm::vec2(0.5f, 0.5f);
+    vertices.push_back(topCenter);
+
+    for (int i = 0; i <= segments; ++i) {
+        float angle = 2.0f * pi * static_cast<float>(i) / static_cast<float>(segments);
+        float cosA = std::cos(angle);
+        float sinA = std::sin(angle);
+
+        Vertex v;
+        v.position = glm::vec3(cosA * radius, halfHeight, sinA * radius);
+        v.normal = glm::vec3(0.0f, 1.0f, 0.0f);
+        v.texCoord = glm::vec2(cosA * 0.5f + 0.5f, sinA * 0.5f + 0.5f);
+        vertices.push_back(v);
+    }
+
+    for (int i = 0; i < segments; ++i) {
+        indices.push_back(topCenterIdx);
+        indices.push_back(topCenterIdx + 1 + static_cast<uint32_t>(i));
+        indices.push_back(topCenterIdx + 2 + static_cast<uint32_t>(i));
+    }
+
+    // Bottom cap
+    uint32_t bottomCenterIdx = static_cast<uint32_t>(vertices.size());
+    Vertex bottomCenter;
+    bottomCenter.position = glm::vec3(0.0f, -halfHeight, 0.0f);
+    bottomCenter.normal = glm::vec3(0.0f, -1.0f, 0.0f);
+    bottomCenter.texCoord = glm::vec2(0.5f, 0.5f);
+    vertices.push_back(bottomCenter);
+
+    for (int i = 0; i <= segments; ++i) {
+        float angle = 2.0f * pi * static_cast<float>(i) / static_cast<float>(segments);
+        float cosA = std::cos(angle);
+        float sinA = std::sin(angle);
+
+        Vertex v;
+        v.position = glm::vec3(cosA * radius, -halfHeight, sinA * radius);
+        v.normal = glm::vec3(0.0f, -1.0f, 0.0f);
+        v.texCoord = glm::vec2(cosA * 0.5f + 0.5f, sinA * 0.5f + 0.5f);
+        vertices.push_back(v);
+    }
+
+    for (int i = 0; i < segments; ++i) {
+        indices.push_back(bottomCenterIdx);
+        indices.push_back(bottomCenterIdx + 2 + static_cast<uint32_t>(i));
+        indices.push_back(bottomCenterIdx + 1 + static_cast<uint32_t>(i));
+    }
+
+    auto mesh = std::make_shared<Mesh>(vertices, indices);
+    auto model = std::make_shared<Model>();
+    model->addMesh(mesh);
+    model->setPath("primitive:cylinder");
+
+    return model;
 }
 
-std::shared_ptr<Model> ModelLoader::createCone(float radius, float /* height */, int /* segments */)
+std::shared_ptr<Model> ModelLoader::createCone(float radius, float height, int segments)
 {
-    // TODO: Implement cone generation
-    Logger::getInstance().warning("Cone primitive not yet implemented", "ModelLoader");
-    return createCube(radius * 2.0f);
+    constexpr float pi = std::numbers::pi_v<float>;
+    if (segments < 3) segments = 3;
+    float halfHeight = height * 0.5f;
+
+    // Compute the side normal slope for a cone
+    float slopeLen = std::sqrt(radius * radius + height * height);
+    float ny = radius / slopeLen;
+    float nr = height / slopeLen;
+
+    std::vector<Vertex> vertices;
+    std::vector<uint32_t> indices;
+
+    // Side triangles (each segment is a triangle from apex to base edge)
+    for (int i = 0; i < segments; ++i) {
+        float angle0 = 2.0f * pi * static_cast<float>(i) / static_cast<float>(segments);
+        float angle1 = 2.0f * pi * static_cast<float>(i + 1) / static_cast<float>(segments);
+        float midAngle = (angle0 + angle1) * 0.5f;
+
+        glm::vec3 normal(nr * std::cos(midAngle), ny, nr * std::sin(midAngle));
+
+        uint32_t base = static_cast<uint32_t>(vertices.size());
+
+        Vertex apex;
+        apex.position = glm::vec3(0.0f, halfHeight, 0.0f);
+        apex.normal = normal;
+        apex.texCoord = glm::vec2(0.5f, 0.0f);
+        vertices.push_back(apex);
+
+        Vertex bl;
+        bl.position = glm::vec3(std::cos(angle0) * radius, -halfHeight, std::sin(angle0) * radius);
+        bl.normal = normal;
+        bl.texCoord = glm::vec2(static_cast<float>(i) / static_cast<float>(segments), 1.0f);
+        vertices.push_back(bl);
+
+        Vertex br;
+        br.position = glm::vec3(std::cos(angle1) * radius, -halfHeight, std::sin(angle1) * radius);
+        br.normal = normal;
+        br.texCoord = glm::vec2(static_cast<float>(i + 1) / static_cast<float>(segments), 1.0f);
+        vertices.push_back(br);
+
+        indices.push_back(base);
+        indices.push_back(base + 1);
+        indices.push_back(base + 2);
+    }
+
+    // Bottom cap
+    uint32_t bottomCenterIdx = static_cast<uint32_t>(vertices.size());
+    Vertex bottomCenter;
+    bottomCenter.position = glm::vec3(0.0f, -halfHeight, 0.0f);
+    bottomCenter.normal = glm::vec3(0.0f, -1.0f, 0.0f);
+    bottomCenter.texCoord = glm::vec2(0.5f, 0.5f);
+    vertices.push_back(bottomCenter);
+
+    for (int i = 0; i <= segments; ++i) {
+        float angle = 2.0f * pi * static_cast<float>(i) / static_cast<float>(segments);
+        float cosA = std::cos(angle);
+        float sinA = std::sin(angle);
+
+        Vertex v;
+        v.position = glm::vec3(cosA * radius, -halfHeight, sinA * radius);
+        v.normal = glm::vec3(0.0f, -1.0f, 0.0f);
+        v.texCoord = glm::vec2(cosA * 0.5f + 0.5f, sinA * 0.5f + 0.5f);
+        vertices.push_back(v);
+    }
+
+    for (int i = 0; i < segments; ++i) {
+        indices.push_back(bottomCenterIdx);
+        indices.push_back(bottomCenterIdx + 2 + static_cast<uint32_t>(i));
+        indices.push_back(bottomCenterIdx + 1 + static_cast<uint32_t>(i));
+    }
+
+    auto mesh = std::make_shared<Mesh>(vertices, indices);
+    auto model = std::make_shared<Model>();
+    model->addMesh(mesh);
+    model->setPath("primitive:cone");
+
+    return model;
 }
 
 } // namespace fresh

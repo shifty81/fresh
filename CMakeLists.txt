@@ -985,6 +985,8 @@ if(BUILD_TESTS)
         tests/ecs/MovementComponentTests.cpp      # Tests for movement component
         tests/ecs/CombatSystemTests.cpp           # Tests for combat system
         tests/voxelship/VoxelBlockStretchTest.cpp # Tests for voxel block stretching
+        tests/renderer/test_model_loader.cpp    # Tests for model loading and primitives
+        tests/ai/BehaviorTreeTests.cpp          # Tests for AI behavior tree
     )
     
     # Engine source files needed for tests (exclude main.cpp)
@@ -1017,6 +1019,7 @@ if(BUILD_TESTS)
         src/editor/TerraformingSystem.cpp
         src/editor/FileDialogManager.cpp
         src/devtools/DebugRenderer.cpp
+        src/ecs/EntityManager.cpp
         src/ecs/Transform2DComponent.cpp
         src/ecs/Sprite2DComponent.cpp
         src/ecs/RigidBody2DComponent.cpp
@@ -1024,6 +1027,8 @@ if(BUILD_TESTS)
         src/ecs/Animation2DComponent.cpp
         src/ecs/Camera2DComponent.cpp
         src/voxelship/VoxelBlock.cpp
+        src/renderer/ModelLoader.cpp
+        src/ai/BehaviorTree.cpp
     )
     
     # Create test executable
