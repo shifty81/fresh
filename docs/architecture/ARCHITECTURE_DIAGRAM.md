@@ -452,4 +452,4 @@ To learn more about each pillar:
 4. **Iteration**: Read [../guides/ITERATIVE_DEVELOPMENT.md](../guides/ITERATIVE_DEVELOPMENT.md)
 5. **Testing**: Read [../guides/TESTING_BEST_PRACTICES.md](../guides/TESTING_BEST_PRACTICES.md)
 
-Or see [ARCHITECTURE_IMPLEMENTATION_SUMMARY.md](../../ARCHITECTURE_IMPLEMENTATION_SUMMARY.md) for complete details.
+Or see [ARCHITECTURE_IMPLEMENTATION_SUMMARY.md](../history/ARCHITECTURE_IMPLEMENTATION_SUMMARY.md) for complete details.

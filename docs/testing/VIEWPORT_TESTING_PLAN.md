@@ -312,6 +312,6 @@ The viewport is considered **fixed** when:
 
 ## See Also
 
-- [VIEWPORT_FIX_IMPLEMENTATION.md](../../VIEWPORT_FIX_IMPLEMENTATION.md) - Previous fixes
-- [VIEWPORT_RENDER_TARGET_FIX.md](../../VIEWPORT_RENDER_TARGET_FIX.md) - Render target issues
+- [VIEWPORT_FIX_IMPLEMENTATION.md](../history/VIEWPORT_FIX_IMPLEMENTATION.md) - Previous fixes
+- [VIEWPORT_RENDER_TARGET_FIX.md](../history/VIEWPORT_RENDER_TARGET_FIX.md) - Render target issues
 - [PROJECT_WORKFLOW.md](../architecture/PROJECT_WORKFLOW.md) - New project workflow

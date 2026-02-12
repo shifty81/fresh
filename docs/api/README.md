@@ -154,7 +154,7 @@ Help us improve the API documentation!
 3. Write tutorials for complex systems
 4. Report unclear or missing documentation
 
-See [CONTRIBUTING.md](../../CONTRIBUTING.md) for more details.
+See [CONTRIBUTING.md](../community/CONTRIBUTING.md) for more details.
 
 ## Resources
 

@@ -186,7 +186,7 @@ The automated script will now warn you if it detects an unstable CMake version.
 ### More Help
 
 For detailed troubleshooting:
-- See [CMAKE_TROUBLESHOOTING.md](../../CMAKE_TROUBLESHOOTING.md) for CMake-specific issues
+- See [CMAKE_TROUBLESHOOTING.md](CMAKE_TROUBLESHOOTING.md) for CMake-specific issues
 - See [BUILD.md](BUILD.md) for manual build instructions
 - Open an issue: https://github.com/shifty81/fresh/issues
 
