@@ -681,36 +681,20 @@ void Engine::initializeGameSystems()
             m_editorManager->setVisible(true);
             std::cout << "Editor manager updated with world" << std::endl;
             
-            // Set up play mode callback to toggle between free-flight editor mode and play mode
+            // Set up play mode callback to toggle between editor mode and separate game window
             auto* toolbar = m_editorManager->getToolbar();
             if (toolbar) {
                 toolbar->setPlayModeCallback([this](EditorToolbar::PlayMode mode) {
-                    if (m_player) {
-                        switch (mode) {
-                            case EditorToolbar::PlayMode::Playing:
-                                // Enter play mode - switch to normal character with physics
-                                m_player->setFreeFlightMode(false);
-                                // In play mode, use game mode (cursor hidden unless Alt held)
-                                m_inputManager->setInputMode(InputMode::GameMode);
-                                // Show hotbar in play mode
-                                if (m_editorManager && m_editorManager->getHotbar()) {
-                                    m_editorManager->getHotbar()->setVisible(true);
-                                }
-                                LOG_INFO_C("Entered Play Mode - normal character gameplay", "Engine");
-                                break;
-                            case EditorToolbar::PlayMode::Stopped:
-                            case EditorToolbar::PlayMode::Paused:
-                                // Enter editor mode - switch to free-flying camera
-                                m_player->setFreeFlightMode(true);
-                                // In editor mode, keep UI mode (cursor visible for editor interaction)
-                                m_inputManager->setInputMode(InputMode::UIMode);
-                                // Hide hotbar in editor mode
-                                if (m_editorManager && m_editorManager->getHotbar()) {
-                                    m_editorManager->getHotbar()->setVisible(false);
-                                }
-                                LOG_INFO_C("Entered Editor Mode - free-flying camera", "Engine");
-                                break;
-                        }
+                    switch (mode) {
+                        case EditorToolbar::PlayMode::Playing:
+                            // Enter play mode - open separate game window
+                            enterPlayMode();
+                            break;
+                        case EditorToolbar::PlayMode::Stopped:
+                        case EditorToolbar::PlayMode::Paused:
+                            // Exit play mode - close game window, return to editor
+                            exitPlayMode();
+                            break;
                     }
                 });
             }
@@ -965,6 +949,9 @@ void Engine::run()
                 updateEditor(deltaTime);
             }
 #endif
+        } else {
+            // No world yet - still update editor for viewport resize handling and UI
+            updateEditor(deltaTime);
         }
         
         // Always render editor and viewport
@@ -1401,16 +1388,14 @@ void Engine::update(float deltaTime)
 
 void Engine::updateEditor(float deltaTime)
 {
-    // EDITOR MODE UPDATE: Updates only editor-relevant systems
+    // EDITOR MODE UPDATE: Updates editor-relevant systems
     // This is called when NOT in play mode (m_inGame == false)
     // Game systems like physics and AI do NOT update in editor mode
-    
-    if (!m_world) {
-        return;
-    }
 
 #ifdef _WIN32
-    // WINDOW RESIZE HANDLING - Update panel layouts when main window is resized
+    // WINDOW RESIZE HANDLING - Update panel layouts when main window is resized.
+    // This MUST run even before a world is created so the viewport swap chain stays
+    // in sync with the actual viewport dimensions.
     if (m_window && m_editorManager) {
         Win32Window* win32Window = dynamic_cast<Win32Window*>(m_window.get());
         if (win32Window && win32Window->wasFramebufferResized()) {
@@ -1428,7 +1413,8 @@ void Engine::updateEditor(float deltaTime)
         }
     }
     
-    // VIEWPORT RESIZE HANDLING - Check if viewport was resized and recreate swap chain
+    // VIEWPORT RESIZE HANDLING - Check if viewport was resized and recreate swap chain.
+    // This MUST run even before a world is created so the viewport renders correctly.
     if (m_editorManager && m_editorManager->getViewportPanel() && m_renderer) {
         auto* viewportPanel = m_editorManager->getViewportPanel();
         
@@ -1458,6 +1444,15 @@ void Engine::updateEditor(float deltaTime)
         }
     }
 #endif
+
+    // Update editor manager UI even without a world (panel state, status bar, etc.)
+    if (m_editorManager) {
+        m_editorManager->update(deltaTime);
+    }
+
+    if (!m_world) {
+        return;
+    }
 
     // Check if GUI wants input
     bool guiCapturesMouse = m_editorManager && m_editorManager->wantCaptureMouse();
@@ -1513,11 +1508,6 @@ void Engine::updateEditor(float deltaTime)
         m_worldEditor->update(deltaTime);
     }
 
-    // Update editor manager UI
-    if (m_editorManager) {
-        m_editorManager->update(deltaTime);
-    }
-    
     // NOTE: Physics, AI, weather, time manager, etc. DO NOT update in editor mode
     // They only update during play mode (in the regular update() method)
 }
