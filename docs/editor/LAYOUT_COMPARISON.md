@@ -2,7 +2,7 @@
 
 ## Reference Image Analysis
 
-The reference image (1.png) shows Unreal Engine 5's interface with the following layout:
+The reference image (../images/1.png) shows Unreal Engine 5's interface with the following layout:
 
 ### Unreal Engine 5 Layout Structure
 ```
@@ -170,7 +170,7 @@ INSPECTOR_HEIGHT_RATIO = 0.60 (new)
 
 ## Visual Alignment with Reference Image
 
-### Matching Unreal Engine 1.png
+### Matching Unreal Engine ../images/1.png
 
 | Feature | Reference Image | Fresh Engine |
 |---------|----------------|--------------|
@@ -223,7 +223,7 @@ INSPECTOR_HEIGHT_RATIO = 0.60 (new)
 ## Testing Recommendations
 
 1. **Visual Comparison**:
-   - Open reference image (1.png)
+   - Open reference image (../images/1.png)
    - Run Fresh Engine
    - Compare side-by-side
 

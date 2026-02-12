@@ -9,7 +9,7 @@ Welcome to the Fresh Voxel Engine documentation!
 If you encounter references to ImGui in documentation:
 - These are **historical references only**
 - The engine now uses **Windows Native Win32 UI exclusively**
-- See [../IMGUI_DEPRECATION_NOTICE.md](../IMGUI_DEPRECATION_NOTICE.md) for details
+- See [IMGUI_DEPRECATION_NOTICE.md](history/IMGUI_DEPRECATION_NOTICE.md) for details
 
 All UI panels are now implemented using native Win32 controls for better Windows integration and performance.
 
@@ -60,8 +60,8 @@ All UI panels are now implemented using native Win32 controls for better Windows
 
 - **Main README**: [../README.md](../README.md)
 - **Documentation Guide**: [../DOCUMENTATION.md](../DOCUMENTATION.md)
-- **Windows Native UI Policy**: [../WINDOWS_NATIVE_ONLY_POLICY.md](../WINDOWS_NATIVE_ONLY_POLICY.md)
-- **ImGui Deprecation Notice**: [../IMGUI_DEPRECATION_NOTICE.md](../IMGUI_DEPRECATION_NOTICE.md)
+- **Windows Native UI Policy**: [WINDOWS_NATIVE_ONLY_POLICY.md](architecture/WINDOWS_NATIVE_ONLY_POLICY.md)
+- **ImGui Deprecation Notice**: [IMGUI_DEPRECATION_NOTICE.md](history/IMGUI_DEPRECATION_NOTICE.md)
 
 ---
 

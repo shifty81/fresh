@@ -40,6 +40,7 @@ Essential guides for new users and developers:
 - [Quick Start - New Features](docs/getting-started/QUICK_START_NEW_FEATURES.md) - Latest features overview
 - [Quick Start - Win32 UI](docs/getting-started/QUICK_START_WIN32_UI.md) - Windows native GUI guide
 - [Roadmap Package](docs/getting-started/ROADMAP_PACKAGE_README.md) - Package overview
+- [CMake Troubleshooting](docs/getting-started/CMAKE_TROUBLESHOOTING.md) - Build troubleshooting
 
 ### 📘 User Guides
 
@@ -151,6 +152,12 @@ Testing guides and instructions:
 
 - [Testing Guide](docs/testing/TESTING.md) - How to test
 - [Testing Instructions](docs/testing/TESTING_INSTRUCTIONS.md) - Detailed instructions
+- [GUI Testing Guide](docs/testing/GUI_TESTING_GUIDE.md) - GUI-specific testing
+- [Testing Checklist](docs/testing/TESTING_CHECKLIST.md) - Pre-release checklist
+- [Viewport Testing Plan](docs/testing/VIEWPORT_TESTING_PLAN.md) - Viewport tests
+- [Viewport Fix Testing](docs/testing/TESTING_GUIDE_VIEWPORT_FIX.md) - Viewport fix verification
+- [Viewport Fixes Testing](docs/testing/TESTING_VIEWPORT_FIXES.md) - Viewport regression tests
+- [Selection Test Results](docs/testing/SELECTION_SYSTEM_TEST_RESULTS.md) - Selection system results
 
 ### 📖 Tutorials
 
@@ -191,19 +198,19 @@ fresh/
 ├── ARCHIVED.md                        # Archived content
 │
 └── docs/
-    ├── getting-started/               # Setup and installation (7 docs)
+    ├── getting-started/               # Setup and installation (8 docs)
     │   ├── GETTING_STARTED.md
     │   ├── BUILD.md
     │   ├── AUTOMATED_BUILD.md
     │   └── ...
     │
-    ├── guides/                        # User guides (18 docs)
+    ├── guides/                        # User guides (19 docs)
     │   ├── CONTROLS.md
     │   ├── WORLD_GENERATION_GUIDE.md
     │   ├── TERRAFORMING.md
     │   └── ...
     │
-    ├── editor/                        # Editor documentation (15 docs)
+    ├── editor/                        # Editor documentation (18 docs)
     │   ├── GUI_GUIDE.md              # Main GUI guide
     │   ├── EDITOR_INTEGRATION.md
     │   ├── TRANSFORM_GIZMO_*.md
@@ -214,7 +221,7 @@ fresh/
     │   ├── UI_ARCHITECTURE.md
     │   └── ...
     │
-    ├── status/                        # Project status (7 docs)
+    ├── status/                        # Project status (9 docs)
     │   ├── PROJECT_STATUS.md
     │   ├── ROADMAP.md
     │   └── ...
@@ -224,11 +231,12 @@ fresh/
     │   ├── CODE_OF_CONDUCT.md
     │   └── ...
     │
-    ├── testing/                       # Testing docs (2 docs)
+    ├── testing/                       # Testing docs (6 docs)
     ├── security/                      # Security docs (1 doc)
     ├── tutorials/                     # Tutorials (1 doc)
     ├── api/                           # API reference (1 doc)
-    ├── history/                       # Historical docs (69 docs)
+    ├── images/                        # Screenshots and reference images
+    ├── history/                       # Historical docs (120+ docs)
     └── WORKFLOWS.md                   # CI/CD workflows
 ```
 
@@ -295,17 +303,19 @@ Essential files kept in root for visibility:
 
 ## 📊 Documentation Statistics
 
-- **Total Documents**: ~130 markdown files
-- **Getting Started**: 7 guides
-- **User Guides**: 18 guides  
-- **Editor Docs**: 15 documents
-- **Architecture**: 8 documents
-- **Status/Planning**: 7 documents
+- **Total Documents**: ~240 markdown files
+- **Getting Started**: 8 guides
+- **User Guides**: 37 guides  
+- **Editor Docs**: 21 documents
+- **Architecture**: 19 documents
+- **Status/Planning**: 10 documents
 - **Community**: 6 documents
-- **Historical Archive**: 69 documents
+- **Testing**: 8 documents
+- **Historical Archive**: 132 documents
+- **Images**: 9 screenshots
 
 ---
 
-**Last Updated**: 2025-11-19  
-**Documentation Version**: 2.0  
+**Last Updated**: 2026-02-12  
+**Documentation Version**: 3.0  
 **Engine Version**: Latest

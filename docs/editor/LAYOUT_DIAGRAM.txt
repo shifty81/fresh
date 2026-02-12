@@ -1,6 +1,6 @@
 ═══════════════════════════════════════════════════════════════════════════════
    FRESH VOXEL ENGINE - UNREAL ENGINE STYLE UI LAYOUT
-   Based on reference image: 1.png
+   Based on reference image: ../images/1.png
 ═══════════════════════════════════════════════════════════════════════════════
 
 LAYOUT DIMENSIONS (Example 1920x1080 window):
