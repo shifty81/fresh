@@ -3090,7 +3090,6 @@ void Engine::enterPlayMode()
     if (m_player && gameWidth > 0 && gameHeight > 0) {
         float aspectRatio = static_cast<float>(gameWidth) / static_cast<float>(gameHeight);
         m_player->getCamera().setAspectRatio(aspectRatio);
-        LOG_INFO_C("Camera aspect ratio updated for game window: " + std::to_string(aspectRatio), "Engine");
     }
 
     // Hide the editor window so the game play window is completely detached.
