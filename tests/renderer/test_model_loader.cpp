@@ -131,3 +131,152 @@ TEST_F(ModelLoaderTest, MeshBoundingBox)
     EXPECT_NEAR(center.y, 0.0f, 0.01f);
     EXPECT_NEAR(center.z, 0.0f, 0.01f);
 }
+
+// ============================================================================
+// Sphere primitive tests
+// ============================================================================
+
+TEST_F(ModelLoaderTest, CreatePrimitiveSphere)
+{
+    auto model = ModelLoader::createSphere(1.0f, 16);
+    
+    ASSERT_NE(model, nullptr);
+    EXPECT_GT(model->getMeshes().size(), 0);
+    
+    auto mesh = model->getMeshes()[0];
+    ASSERT_NE(mesh, nullptr);
+    
+    // UV sphere with 16 segments and 8 rings: (8+1)*(16+1) = 153 vertices
+    EXPECT_GT(mesh->getVertices().size(), 0);
+    EXPECT_GT(mesh->getIndices().size(), 0);
+    
+    // Indices should be divisible by 3 (triangles)
+    EXPECT_EQ(mesh->getIndices().size() % 3, 0);
+    
+    // Path should be set
+    EXPECT_EQ(model->getPath(), "primitive:sphere");
+}
+
+TEST_F(ModelLoaderTest, SphereBoundingBox)
+{
+    float radius = 2.0f;
+    auto model = ModelLoader::createSphere(radius, 32);
+    ASSERT_NE(model, nullptr);
+    
+    auto mesh = model->getMeshes()[0];
+    ASSERT_NE(mesh, nullptr);
+    
+    // Bounding box should approximately match radius
+    glm::vec3 min = mesh->getMin();
+    glm::vec3 max = mesh->getMax();
+    
+    EXPECT_NEAR(min.x, -radius, 0.1f);
+    EXPECT_NEAR(min.y, -radius, 0.1f);
+    EXPECT_NEAR(min.z, -radius, 0.1f);
+    EXPECT_NEAR(max.x, radius, 0.1f);
+    EXPECT_NEAR(max.y, radius, 0.1f);
+    EXPECT_NEAR(max.z, radius, 0.1f);
+}
+
+TEST_F(ModelLoaderTest, SphereNormalsAreUnit)
+{
+    auto model = ModelLoader::createSphere(1.0f, 16);
+    ASSERT_NE(model, nullptr);
+    
+    auto mesh = model->getMeshes()[0];
+    for (const auto& v : mesh->getVertices()) {
+        float len = glm::length(v.normal);
+        EXPECT_NEAR(len, 1.0f, 0.01f);
+    }
+}
+
+// ============================================================================
+// Cylinder primitive tests
+// ============================================================================
+
+TEST_F(ModelLoaderTest, CreatePrimitiveCylinder)
+{
+    auto model = ModelLoader::createCylinder(1.0f, 2.0f, 16);
+    
+    ASSERT_NE(model, nullptr);
+    EXPECT_GT(model->getMeshes().size(), 0);
+    
+    auto mesh = model->getMeshes()[0];
+    ASSERT_NE(mesh, nullptr);
+    
+    EXPECT_GT(mesh->getVertices().size(), 0);
+    EXPECT_GT(mesh->getIndices().size(), 0);
+    EXPECT_EQ(mesh->getIndices().size() % 3, 0);
+    EXPECT_EQ(model->getPath(), "primitive:cylinder");
+}
+
+TEST_F(ModelLoaderTest, CylinderBoundingBox)
+{
+    float radius = 1.0f;
+    float height = 3.0f;
+    auto model = ModelLoader::createCylinder(radius, height, 32);
+    ASSERT_NE(model, nullptr);
+    
+    auto mesh = model->getMeshes()[0];
+    ASSERT_NE(mesh, nullptr);
+    
+    glm::vec3 min = mesh->getMin();
+    glm::vec3 max = mesh->getMax();
+    
+    EXPECT_NEAR(min.y, -height / 2.0f, 0.01f);
+    EXPECT_NEAR(max.y, height / 2.0f, 0.01f);
+    EXPECT_NEAR(min.x, -radius, 0.1f);
+    EXPECT_NEAR(max.x, radius, 0.1f);
+}
+
+// ============================================================================
+// Cone primitive tests
+// ============================================================================
+
+TEST_F(ModelLoaderTest, CreatePrimitiveCone)
+{
+    auto model = ModelLoader::createCone(1.0f, 2.0f, 16);
+    
+    ASSERT_NE(model, nullptr);
+    EXPECT_GT(model->getMeshes().size(), 0);
+    
+    auto mesh = model->getMeshes()[0];
+    ASSERT_NE(mesh, nullptr);
+    
+    EXPECT_GT(mesh->getVertices().size(), 0);
+    EXPECT_GT(mesh->getIndices().size(), 0);
+    EXPECT_EQ(mesh->getIndices().size() % 3, 0);
+    EXPECT_EQ(model->getPath(), "primitive:cone");
+}
+
+TEST_F(ModelLoaderTest, ConeBoundingBox)
+{
+    float radius = 1.5f;
+    float height = 4.0f;
+    auto model = ModelLoader::createCone(radius, height, 32);
+    ASSERT_NE(model, nullptr);
+    
+    auto mesh = model->getMeshes()[0];
+    ASSERT_NE(mesh, nullptr);
+    
+    glm::vec3 min = mesh->getMin();
+    glm::vec3 max = mesh->getMax();
+    
+    // Apex at halfHeight, base at -halfHeight
+    EXPECT_NEAR(max.y, height / 2.0f, 0.01f);
+    EXPECT_NEAR(min.y, -height / 2.0f, 0.01f);
+    EXPECT_NEAR(min.x, -radius, 0.1f);
+    EXPECT_NEAR(max.x, radius, 0.1f);
+}
+
+TEST_F(ModelLoaderTest, SphereMinSegments)
+{
+    // Test with very low segment count - should still produce valid geometry
+    auto model = ModelLoader::createSphere(1.0f, 1);
+    ASSERT_NE(model, nullptr);
+    
+    auto mesh = model->getMeshes()[0];
+    ASSERT_NE(mesh, nullptr);
+    EXPECT_GT(mesh->getVertices().size(), 0);
+    EXPECT_GT(mesh->getIndices().size(), 0);
+}
