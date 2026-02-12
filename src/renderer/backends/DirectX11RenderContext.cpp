@@ -824,8 +824,8 @@ bool DirectX11RenderContext::recreateSwapChain(int newWidth, int newHeight)
     swapchainDesc.SampleDesc.Count = 1;
     swapchainDesc.SampleDesc.Quality = 0;
     swapchainDesc.Windowed = TRUE;
-    // FLIP_SEQUENTIAL provides smoother presentation with better frame pacing (Unreal Engine best practice)
-    swapchainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_SEQUENTIAL;
+    // FLIP_DISCARD provides better performance and wider compatibility than FLIP_SEQUENTIAL
+    swapchainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
     swapchainDesc.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
 
     // Create the new swapchain
@@ -1037,6 +1037,11 @@ void DirectX11RenderContext::shutdownVoxelRendering()
 void DirectX11RenderContext::renderVoxelWorld(VoxelWorld* world, Player* player)
 {
     if (!world || !player || !voxelVertexShader || !voxelPixelShader) {
+        return;
+    }
+
+    // Avoid division by zero if swap chain dimensions are invalid
+    if (width <= 0 || height <= 0) {
         return;
     }
 

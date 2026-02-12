@@ -3083,6 +3083,15 @@ void Engine::enterPlayMode()
         }
     }
 
+    // Update camera aspect ratio for game window dimensions so the scene
+    // renders with the correct projection.  Without this the projection
+    // matrix still targets the editor viewport size and the game window
+    // can appear blank or distorted.
+    if (m_player && gameWidth > 0 && gameHeight > 0) {
+        float aspectRatio = static_cast<float>(gameWidth) / static_cast<float>(gameHeight);
+        m_player->getCamera().setAspectRatio(aspectRatio);
+    }
+
     // Hide the editor window so the game play window is completely detached.
     // This prevents the game from rendering behind the editor GUI and being
     // visible through transparent gaps between editor panel borders.
@@ -3175,6 +3184,11 @@ void Engine::renderGamePlayWindow()
         int h = static_cast<int>(m_gamePlayWindow->getHeight());
         if (w > 0 && h > 0) {
             m_renderer->recreateSwapChain(w, h);
+            // Keep camera aspect ratio in sync with the resized game window
+            if (m_player) {
+                float aspectRatio = static_cast<float>(w) / static_cast<float>(h);
+                m_player->getCamera().setAspectRatio(aspectRatio);
+            }
         }
     }
     
@@ -3210,6 +3224,11 @@ void Engine::restoreEditorViewport()
     
     if (m_renderer->setViewportWindow(viewportHwnd)) {
         m_renderer->recreateSwapChain(vpWidth, vpHeight);
+        // Restore camera aspect ratio for editor viewport dimensions
+        if (m_player) {
+            float aspectRatio = static_cast<float>(vpWidth) / static_cast<float>(vpHeight);
+            m_player->getCamera().setAspectRatio(aspectRatio);
+        }
         LOG_INFO_C("Renderer restored to editor viewport", "Engine");
     } else {
         LOG_ERROR_C("Failed to restore renderer to editor viewport", "Engine");

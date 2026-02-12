@@ -97,7 +97,7 @@ static std::string toNarrowString(const std::wstring& wstr)
 
 // Panel layout constants - Unreal Engine style layout
 namespace {
-    constexpr int PANEL_MARGIN = 5;            // Spacing between panels (tight like Unreal)
+    constexpr int PANEL_MARGIN = 0;            // No spacing between panels (seamless Unreal-style layout)
     constexpr int TOOLBAR_HEIGHT = 80;         // Height reserved for menu/toolbar
     
     // Left side - Asset/Content Browser panel (narrow vertical)

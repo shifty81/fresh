@@ -1,6 +1,10 @@
 #include <cstdlib>
 #include <iostream>
 
+#ifdef _WIN32
+#include <windows.h>
+#endif
+
 #include "core/Engine.h"
 #include "core/Logger.h"
 
@@ -9,6 +13,16 @@ int main(int argc, char* argv[])
     // Suppress unused parameter warnings
     (void)argc;
     (void)argv;
+
+#ifdef _WIN32
+    // Enable per-monitor DPI awareness to prevent Windows from scaling the
+    // application.  Without this, logical and physical pixel coordinates can
+    // diverge which causes panel layout gaps and misaligned rendering.
+    if (!SetProcessDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2)) {
+        // V2 not available (older Windows), try V1
+        SetProcessDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE);
+    }
+#endif
 
     // Initialize logger first
     fresh::Logger::getInstance().initialize();
