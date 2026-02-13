@@ -75,6 +75,7 @@ class Win32TerraformingPanel;
 class Win32MenuBar;
 class Win32ViewportPanel;
 class Win32StatusBar;
+class Win32LLMAssistantPanel;
 #else
 // Forward declarations for non-Windows platforms
 class EditorMenuBar;
