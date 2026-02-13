@@ -225,8 +225,12 @@ LRESULT CALLBACK Win32ViewportPanel::WindowProc(HWND hwnd, UINT msg, WPARAM wPar
                 if (hdc) {
                     // Dark grey background matches editor dark theme
                     HBRUSH darkBrush = CreateSolidBrush(RGB(30, 30, 30));
-                    FillRect(hdc, &ps.rcPaint, darkBrush);
-                    DeleteObject(darkBrush);
+                    if (darkBrush) {
+                        FillRect(hdc, &ps.rcPaint, darkBrush);
+                        DeleteObject(darkBrush);
+                    } else {
+                        FillRect(hdc, &ps.rcPaint, (HBRUSH)GetStockObject(BLACK_BRUSH));
+                    }
                 }
                 EndPaint(hwnd, &ps);
             }

@@ -107,8 +107,8 @@ public:
     {
         if (!system) return false;
         const std::string id = system->getInfo().id;
-        if (m_lookup.count(id)) return false;           // duplicate
-        m_lookup[id] = system.get();
+        auto [it, inserted] = m_lookup.try_emplace(id, system.get());
+        if (!inserted) return false;                     // duplicate id
         m_systems.push_back(std::move(system));
         return true;
     }
