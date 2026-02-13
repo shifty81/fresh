@@ -212,10 +212,24 @@ LRESULT CALLBACK Win32ViewportPanel::WindowProc(HWND hwnd, UINT msg, WPARAM wPar
         }
 
         case WM_PAINT: {
-            // Validate the window to prevent continuous WM_PAINT messages
-            // DirectX handles all rendering, but we need to validate the region
-            // This is critical for proper DirectX rendering in child windows
-            ValidateRect(hwnd, nullptr);
+            // When DirectX is actively rendering to this window, just
+            // validate the region so Windows stops sending WM_PAINT.
+            // When DirectX is NOT rendering (swap chain not ready), fill
+            // with a solid dark background to prevent ghost artifacts
+            // from child windows being dragged across the viewport.
+            if (panel->m_renderingActive) {
+                ValidateRect(hwnd, nullptr);
+            } else {
+                PAINTSTRUCT ps;
+                HDC hdc = BeginPaint(hwnd, &ps);
+                if (hdc) {
+                    // Dark grey background matches editor dark theme
+                    HBRUSH darkBrush = CreateSolidBrush(RGB(30, 30, 30));
+                    FillRect(hdc, &ps.rcPaint, darkBrush);
+                    DeleteObject(darkBrush);
+                }
+                EndPaint(hwnd, &ps);
+            }
             return 0;
         }
 
