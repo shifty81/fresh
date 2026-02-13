@@ -18,11 +18,11 @@ protected:
 // LLMClient configuration tests
 // ============================================================================
 
-TEST_F(LLMClientTest, DefaultNotConfiguredWithEmptyEndpoint)
+TEST_F(LLMClientTest, DefaultConfigHasEndpoint)
 {
-    LLMClient unconfigured;
-    // Default config has a non-empty endpoint, so it is considered configured
-    EXPECT_TRUE(unconfigured.isConfigured());
+    LLMClient defaultClient;
+    // Default LLMConfig has a pre-configured local endpoint (Ollama)
+    EXPECT_TRUE(defaultClient.isConfigured());
 }
 
 TEST_F(LLMClientTest, ConfigureEndpoint)
