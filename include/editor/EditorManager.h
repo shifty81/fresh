@@ -450,6 +450,22 @@ public:
     void toggleToolPalette();
     
     /**
+     * @brief Toggle LLM assistant panel visibility
+     */
+    void toggleLLMAssistant();
+    
+#ifdef _WIN32
+    /**
+     * @brief Get the LLM assistant panel
+     * @return LLM assistant panel pointer (nullptr if not on Windows or panel not created)
+     */
+    Win32LLMAssistantPanel* getLLMAssistantPanel() const
+    {
+        return m_nativeLLMAssistant.get();
+    }
+#endif
+    
+    /**
      * @brief Enter play mode (delegates to Engine via callback)
      */
     void enterPlayMode();
@@ -645,6 +661,7 @@ private:
     std::unique_ptr<Win32TerraformingPanel> m_nativeTerraformingPanel;
     std::unique_ptr<Win32ViewportPanel> m_viewportPanel;
     std::unique_ptr<Win32StatusBar> m_statusBar;
+    std::unique_ptr<Win32LLMAssistantPanel> m_nativeLLMAssistant;
 #endif
 
     // References
@@ -662,6 +679,7 @@ private:
     bool m_showContentBrowser;
     bool m_showConsole;
     bool m_showToolPalette;
+    bool m_showLLMAssistant;
     bool m_showGrid;  // Grid display toggle
     
     // World file path

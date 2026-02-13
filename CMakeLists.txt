@@ -437,6 +437,8 @@ set(ENGINE_SOURCES
     src/interaction/ToolManager.cpp
     src/ai/AISystem.cpp
     src/ai/BehaviorTree.cpp
+    src/ai/LLMClient.cpp
+    src/ai/ProjectContext.cpp
     src/audio/AudioEngine.cpp
     src/scripting/EventSystem.cpp
     src/character/VoxelCharacter.cpp
@@ -548,6 +550,7 @@ if(WIN32)
         src/ui/native/Win32TerraformingPanel.cpp
         src/ui/native/Win32ViewportPanel.cpp
         src/ui/native/Win32StatusBar.cpp
+        src/ui/native/Win32LLMAssistantPanel.cpp
         src/ui/NativeMainMenu.cpp
         
         # Windows integration features (theme detection, dialogs, taskbar, etc.)
@@ -988,6 +991,7 @@ if(BUILD_TESTS)
         tests/voxelship/VoxelBlockStretchTest.cpp # Tests for voxel block stretching
         tests/renderer/test_model_loader.cpp    # Tests for model loading and primitives
         tests/ai/BehaviorTreeTests.cpp          # Tests for AI behavior tree
+        tests/ai/LLMClientTests.cpp             # Tests for LLM client and project context
     )
     
     # Engine source files needed for tests (exclude main.cpp)
@@ -1030,6 +1034,8 @@ if(BUILD_TESTS)
         src/voxelship/VoxelBlock.cpp
         src/renderer/ModelLoader.cpp
         src/ai/BehaviorTree.cpp
+        src/ai/LLMClient.cpp
+        src/ai/ProjectContext.cpp
     )
     
     # Create test executable
