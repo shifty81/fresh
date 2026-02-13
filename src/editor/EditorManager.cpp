@@ -73,6 +73,7 @@
     #include "ui/native/Win32ViewportPanel.h"
     #include "ui/native/Win32StatusBar.h"
     #include "ui/NativeMainMenu.h"
+    #include "ui/native/Win32LLMAssistantPanel.h"
 #endif
 
 namespace fresh
@@ -144,6 +145,7 @@ EditorManager::EditorManager()
       m_showContentBrowser(true),
       m_showConsole(true),
       m_showToolPalette(true),
+      m_showLLMAssistant(false),
       m_showGrid(false)  // Grid display initially disabled
 {
 }
@@ -628,6 +630,14 @@ bool EditorManager::initialize(WindowType* window, IRenderContext* renderContext
             
             // Explicitly show console panel from startup
             showPanelWindow(m_nativeConsole->getHandle());
+        }
+        
+        // Create native LLM Assistant panel (shares bottom-right area, hidden by default)
+        // The assistant panel overlays the console area when shown via toggle
+        m_nativeLLMAssistant = std::make_unique<Win32LLMAssistantPanel>();
+        if (m_nativeLLMAssistant->create(hwnd, consoleX, bottomPanelY, consoleWidth, BOTTOM_PANEL_HEIGHT)) {
+            LOG_INFO_C("Native Win32 LLM Assistant Panel created", "EditorManager");
+            m_nativeLLMAssistant->setVisible(false); // Hidden by default, toggled via menu
         }
         
         // Create native HUD (for play mode)
@@ -1791,6 +1801,18 @@ void EditorManager::toggleToolPalette()
     LOG_INFO_C("Tool Palette toggled: " + std::string(m_showToolPalette ? "shown" : "hidden"), "EditorManager");
 }
 
+void EditorManager::toggleLLMAssistant()
+{
+    m_showLLMAssistant = !m_showLLMAssistant;
+    LOG_INFO_C("LLM Assistant toggled: " + std::string(m_showLLMAssistant ? "shown" : "hidden"), "EditorManager");
+    
+#ifdef FRESH_WIN32_UI
+    if (m_nativeLLMAssistant) {
+        m_nativeLLMAssistant->setVisible(m_showLLMAssistant);
+    }
+#endif
+}
+
 void EditorManager::setVisible(bool visible)
 {
     m_visible = visible;
@@ -1817,6 +1839,10 @@ void EditorManager::setVisible(bool visible)
     
     if (m_nativeConsole) {
         m_nativeConsole->setVisible(visible && m_showConsole);
+    }
+    
+    if (m_nativeLLMAssistant) {
+        m_nativeLLMAssistant->setVisible(visible && m_showLLMAssistant);
     }
     
     if (m_nativeTerraformingPanel) {
@@ -2257,6 +2283,12 @@ void EditorManager::onWindowResize(int clientWidth, int clientHeight)
         m_nativeConsole->setSize(consoleWidth, BOTTOM_PANEL_HEIGHT);
     }
     
+    // LLM Assistant panel shares the same area as console (toggled)
+    if (m_nativeLLMAssistant) {
+        m_nativeLLMAssistant->setPosition(consoleX, bottomPanelY);
+        m_nativeLLMAssistant->setSize(consoleWidth, BOTTOM_PANEL_HEIGHT);
+    }
+    
     // Viewport - center area between left and right panels, above bottom panel
     int viewportX = LEFT_PANEL_WIDTH + PANEL_MARGIN * 2;
     int viewportY = actualToolbarHeight;
@@ -2336,6 +2368,10 @@ void EditorManager::ensurePanelsOnTop()
         SetWindowPos(m_nativeConsole->getHandle(), HWND_TOP, 0, 0, 0, 0, 
                     SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
     }
+    if (m_nativeLLMAssistant && m_nativeLLMAssistant->getHandle()) {
+        SetWindowPos(m_nativeLLMAssistant->getHandle(), HWND_TOP, 0, 0, 0, 0, 
+                    SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
+    }
     if (m_statusBar && m_statusBar->getHandle()) {
         SetWindowPos(m_statusBar->getHandle(), HWND_TOP, 0, 0, 0, 0, 
                     SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
@@ -2395,6 +2431,11 @@ void EditorManager::refreshAllPanels()
     if (m_nativeConsole && m_nativeConsole->getHandle()) {
         InvalidateRect(m_nativeConsole->getHandle(), nullptr, TRUE);
         UpdateWindow(m_nativeConsole->getHandle());
+    }
+    
+    if (m_nativeLLMAssistant && m_nativeLLMAssistant->getHandle()) {
+        InvalidateRect(m_nativeLLMAssistant->getHandle(), nullptr, TRUE);
+        UpdateWindow(m_nativeLLMAssistant->getHandle());
     }
     
     if (m_statusBar && m_statusBar->getHandle()) {
