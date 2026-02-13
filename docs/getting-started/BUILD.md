@@ -55,7 +55,7 @@ Before you begin, ensure you have the following installed:
 **Troubleshooting CMake Version Issues:**
 - If you have CMake 4.x or a pre-release version (e.g., 4.2.0-rc2), uninstall it and install CMake 3.31.x
 - CMake 4.x has breaking changes and may not work correctly with this project
-- See [CMAKE_TROUBLESHOOTING.md](../../CMAKE_TROUBLESHOOTING.md) for detailed guidance
+- See [CMAKE_TROUBLESHOOTING.md](CMAKE_TROUBLESHOOTING.md) for detailed guidance
 
 ### 3. Git for Windows
 - **Download:** https://git-scm.com/download/win

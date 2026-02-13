@@ -282,7 +282,7 @@ For comprehensive Visual Studio troubleshooting, see:
 - **Windows SDK missing**: Install Windows 10/11 SDK via Visual Studio Installer
 - **std::make_unique error**: Update to latest code (fixed) or add `#include <memory>`
 
-**Note**: ImGui has been removed from Fresh Voxel Engine. The engine uses Windows Native Win32 UI exclusively. See [IMGUI_DEPRECATION_NOTICE.md](../../IMGUI_DEPRECATION_NOTICE.md).
+**Note**: ImGui has been removed from Fresh Voxel Engine. The engine uses Windows Native Win32 UI exclusively. See [IMGUI_DEPRECATION_NOTICE.md](../history/IMGUI_DEPRECATION_NOTICE.md).
 
 ### Black screen / nothing renders
 
