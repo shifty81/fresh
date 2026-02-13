@@ -114,6 +114,16 @@ public:
      */
     void screenToViewport(int screenX, int screenY, int& outViewportX, int& outViewportY) const;
 
+    /**
+     * @brief Notify the viewport that DirectX rendering is active
+     *
+     * When true, WM_PAINT simply validates the region (DirectX owns the
+     * surface).  When false, WM_PAINT fills the viewport with a solid
+     * background colour to prevent ghost images from dragged windows.
+     */
+    void setRenderingActive(bool active) { m_renderingActive = active; }
+    bool isRenderingActive() const { return m_renderingActive; }
+
 private:
     static LRESULT CALLBACK WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
     static bool registerWindowClass();
@@ -123,6 +133,7 @@ private:
     int m_width;
     int m_height;
     bool m_wasResized;
+    bool m_renderingActive = false;  ///< True when DirectX swap chain is presenting to this window
 
     static const wchar_t* WINDOW_CLASS_NAME;
     static bool s_classRegistered;

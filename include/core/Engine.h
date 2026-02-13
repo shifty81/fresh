@@ -8,6 +8,7 @@
     #include <GL/glew.h>
 #endif
 
+#include "core/IEngineSystem.h"
 #include "voxel/VoxelTypes.h"
 
 namespace fresh
@@ -102,6 +103,16 @@ public:
      */
     ProjectManager* getProjectManager() const { return m_projectManager.get(); }
 
+    /**
+     * @brief Get the pluggable system registry
+     *
+     * Allows external code (editor UI, scripts) to discover and manage
+     * registered engine systems at runtime.
+     * @return Reference to system registry
+     */
+    EngineSystemRegistry& getSystemRegistry() { return m_systemRegistry; }
+    const EngineSystemRegistry& getSystemRegistry() const { return m_systemRegistry; }
+
 private:
     void processInput();
     void update(float deltaTime);
@@ -167,8 +178,10 @@ private:
     std::unique_ptr<Raft> m_raft;
     std::unique_ptr<scripting::LuaScriptingEngine> m_scriptingEngine;
     std::unique_ptr<ProjectManager> m_projectManager;
+    EngineSystemRegistry m_systemRegistry;
 #ifdef _WIN32
     std::unique_ptr<GamePlayWindow> m_gamePlayWindow;
+    bool m_viewportSwapChainReady = false;  // Tracks whether viewport swap chain was successfully created
 #endif
     VoxelType m_selectedBlockType;
     // Track world type for camera setup

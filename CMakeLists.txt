@@ -967,6 +967,7 @@ if(BUILD_TESTS)
         tests/generation/TerrainGeneratorTests.cpp
         tests/input/InputManagerTests.cpp
         tests/core/EngineInitializationTests.cpp  # Tests for engine initialization sequence
+        tests/core/EngineSystemTests.cpp          # Tests for pluggable engine system registry
         tests/core/ReflectionTests.cpp            # Tests for reflection system
         tests/core/ResourceManagerTests.cpp       # Tests for resource loading system
         # tests/core/MemoryManagerTests.cpp  # Disabled - tests don't match implementation

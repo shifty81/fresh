@@ -439,6 +439,7 @@ bool Engine::initialize()
                     if (m_renderer->recreateSwapChain(vpWidth, vpHeight)) {
                         LOG_INFO_C("✓ Viewport swap chain created successfully: " + 
                                   std::to_string(vpWidth) + "x" + std::to_string(vpHeight), "Engine");
+                        m_viewportSwapChainReady = true;
                         
                         // Update camera aspect ratio if player exists
                         if (m_player) {
@@ -446,20 +447,20 @@ bool Engine::initialize()
                             m_player->getCamera().setAspectRatio(aspectRatio);
                         }
                     } else {
-                        LOG_ERROR_C("✗ Failed to create viewport swap chain", "Engine");
+                        LOG_ERROR_C("✗ Failed to create viewport swap chain - will retry in updateEditor", "Engine");
                     }
                 } else {
-                    LOG_ERROR_C("✗ Failed to set viewport window handle", "Engine");
+                    LOG_ERROR_C("✗ Failed to set viewport window handle - will retry in updateEditor", "Engine");
                 }
             } else {
-                LOG_ERROR_C("✗ Invalid viewport dimensions after retry: " + 
+                LOG_WARNING_C("Invalid viewport dimensions after retry - will retry in updateEditor: " + 
                            std::to_string(vpWidth) + "x" + std::to_string(vpHeight), "Engine");
             }
         } else {
-            LOG_ERROR_C("✗ Viewport has no window handle", "Engine");
+            LOG_WARNING_C("Viewport has no window handle yet - will retry in updateEditor", "Engine");
         }
     } else {
-        LOG_ERROR_C("✗ Viewport panel or renderer not available", "Engine");
+        LOG_WARNING_C("Viewport panel or renderer not available yet - will retry in updateEditor", "Engine");
     }
 #endif
     
@@ -1009,6 +1010,9 @@ void Engine::shutdown()
         m_scriptingEngine.reset();
     }
 
+    // Shutdown all pluggable systems in reverse order
+    m_systemRegistry.shutdownAll();
+
     m_player.reset();
     m_inputManager.reset();
     m_editor.reset();
@@ -1380,6 +1384,9 @@ void Engine::update(float deltaTime)
         m_worldEditor->update(deltaTime);
     }
 
+    // Update all registered pluggable systems (play mode)
+    m_systemRegistry.updateAll(deltaTime, true);
+
     // Update editor manager (for HUD and other UI state)
     if (m_editorManager) {
         m_editorManager->update(deltaTime);
@@ -1418,6 +1425,29 @@ void Engine::updateEditor(float deltaTime)
     if (m_editorManager && m_editorManager->getViewportPanel() && m_renderer) {
         auto* viewportPanel = m_editorManager->getViewportPanel();
         
+        // DEFERRED VIEWPORT INIT: If the swap chain wasn't created during Engine::initialize()
+        // (e.g., because the viewport wasn't fully ready), retry here every frame until it succeeds.
+        // This is the primary fix for the "blank viewport" issue.
+        if (!m_viewportSwapChainReady) {
+            HWND viewportHwnd = viewportPanel->getHandle();
+            int vpWidth = viewportPanel->getWidth();
+            int vpHeight = viewportPanel->getHeight();
+            
+            if (viewportHwnd && IsWindow(viewportHwnd) && vpWidth > 0 && vpHeight > 0) {
+                if (m_renderer->setViewportWindow(viewportHwnd)) {
+                    if (m_renderer->recreateSwapChain(vpWidth, vpHeight)) {
+                        m_viewportSwapChainReady = true;
+                        LOG_INFO_C("✓ Deferred viewport swap chain created: " +
+                                  std::to_string(vpWidth) + "x" + std::to_string(vpHeight), "Engine");
+                        if (m_player) {
+                            float aspectRatio = static_cast<float>(vpWidth) / static_cast<float>(vpHeight);
+                            m_player->getCamera().setAspectRatio(aspectRatio);
+                        }
+                    }
+                }
+            }
+        }
+        
         if (viewportPanel->wasResized()) {
             int vpWidth = viewportPanel->getWidth();
             int vpHeight = viewportPanel->getHeight();
@@ -1429,6 +1459,7 @@ void Engine::updateEditor(float deltaTime)
             // Recreate swap chain with new viewport dimensions
             if (vpWidth > 0 && vpHeight > 0) {
                 if (m_renderer->recreateSwapChain(vpWidth, vpHeight)) {
+                    m_viewportSwapChainReady = true;
                     // Update camera aspect ratio
                     if (m_player) {
                         float aspectRatio = static_cast<float>(vpWidth) / static_cast<float>(vpHeight);
@@ -1507,6 +1538,9 @@ void Engine::updateEditor(float deltaTime)
     if (m_worldEditor) {
         m_worldEditor->update(deltaTime);
     }
+
+    // Update all registered pluggable systems (editor mode)
+    m_systemRegistry.updateAll(deltaTime, false);
 
     // NOTE: Physics, AI, weather, time manager, etc. DO NOT update in editor mode
     // They only update during play mode (in the regular update() method)
@@ -1650,9 +1684,24 @@ void Engine::renderEditor()
     m_renderer->clearColor(0.53f, 0.81f, 0.92f, 1.0f);
 
     if (!m_renderer->beginFrame()) {
-        // Swap chain not ready yet (viewport not initialized)
+        // Swap chain not ready yet (viewport not initialized).
+        // Mark the viewport as not actively rendering so its WM_PAINT
+        // handler paints a solid background instead of leaving artifacts.
+#ifdef _WIN32
+        if (m_editorManager && m_editorManager->getViewportPanel()) {
+            m_editorManager->getViewportPanel()->setRenderingActive(false);
+        }
+#endif
         return;
     }
+
+#ifdef _WIN32
+    // DirectX is presenting to the viewport – tell the panel so WM_PAINT
+    // only validates the region instead of doing GDI painting.
+    if (m_editorManager && m_editorManager->getViewportPanel()) {
+        m_editorManager->getViewportPanel()->setRenderingActive(true);
+    }
+#endif
 
     // Set viewport to match swap chain size (viewport panel)
     m_renderer->setViewport(0, 0, m_renderer->getSwapchainWidth(),
@@ -3074,11 +3123,27 @@ void Engine::enterPlayMode()
     if (m_renderer) {
         HWND gameHwnd = m_gamePlayWindow->getHandle();
         if (gameHwnd) {
+            // Mark viewport as no longer receiving DirectX output
+            if (m_editorManager && m_editorManager->getViewportPanel()) {
+                m_editorManager->getViewportPanel()->setRenderingActive(false);
+            }
+            
             if (m_renderer->setViewportWindow(gameHwnd)) {
-                m_renderer->recreateSwapChain(static_cast<int>(gameWidth), static_cast<int>(gameHeight));
-                LOG_INFO_C("Renderer redirected to game play window", "Engine");
+                if (m_renderer->recreateSwapChain(static_cast<int>(gameWidth), static_cast<int>(gameHeight))) {
+                    LOG_INFO_C("Renderer redirected to game play window", "Engine");
+                } else {
+                    LOG_ERROR_C("Failed to create swap chain for game play window", "Engine");
+                    m_gamePlayWindow->close();
+                    m_gamePlayWindow.reset();
+                    // Restore renderer to editor viewport
+                    restoreEditorViewport();
+                    return;
+                }
             } else {
                 LOG_ERROR_C("Failed to redirect renderer to game play window", "Engine");
+                m_gamePlayWindow->close();
+                m_gamePlayWindow.reset();
+                return;
             }
         }
     }
@@ -3223,14 +3288,23 @@ void Engine::restoreEditorViewport()
     }
     
     if (m_renderer->setViewportWindow(viewportHwnd)) {
-        m_renderer->recreateSwapChain(vpWidth, vpHeight);
-        // Restore camera aspect ratio for editor viewport dimensions
-        if (m_player) {
-            float aspectRatio = static_cast<float>(vpWidth) / static_cast<float>(vpHeight);
-            m_player->getCamera().setAspectRatio(aspectRatio);
+        if (m_renderer->recreateSwapChain(vpWidth, vpHeight)) {
+            m_viewportSwapChainReady = true;
+            viewportPanel->setRenderingActive(true);
+            // Restore camera aspect ratio for editor viewport dimensions
+            if (m_player) {
+                float aspectRatio = static_cast<float>(vpWidth) / static_cast<float>(vpHeight);
+                m_player->getCamera().setAspectRatio(aspectRatio);
+            }
+            LOG_INFO_C("Renderer restored to editor viewport", "Engine");
+        } else {
+            m_viewportSwapChainReady = false;
+            viewportPanel->setRenderingActive(false);
+            LOG_ERROR_C("Failed to recreate swap chain for editor viewport - will retry", "Engine");
         }
-        LOG_INFO_C("Renderer restored to editor viewport", "Engine");
     } else {
+        m_viewportSwapChainReady = false;
+        viewportPanel->setRenderingActive(false);
         LOG_ERROR_C("Failed to restore renderer to editor viewport", "Engine");
     }
 }
